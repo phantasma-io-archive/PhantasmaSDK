@@ -1,2 +1,4 @@
 # PhantasmaSharp
-Official Phantasma SDK for C#
+Official Phantasma SDK
+
+TODO general instructions
