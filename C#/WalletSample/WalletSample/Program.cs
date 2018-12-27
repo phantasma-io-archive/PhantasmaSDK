@@ -34,7 +34,7 @@ namespace WalletSample
             Console.WriteLine("Welcome to Phantasma Wallet sample.");
             Console.WriteLine("Enter your WIF:");
 
-            _phantasmaApiService = new PhantasmaRpcService(new RpcClient(new Uri("http://localhost:7077/rpc")));
+            _phantasmaApiService = new PhantasmaRpcService(new RpcClient(new Uri("http://localhost:7077")));
 
             bool loggedIn = false;
 
