@@ -37,13 +37,13 @@ namespace WalletSample
             _phantasmaApiService = new PhantasmaRpcService(new RpcClient(new Uri("http://localhost:7077/rpc")));
 
             bool loggedIn = false;
-            bool logout = false;
+
             while (!loggedIn)
             {
                 try
                 {
                     string wif = Console.ReadLine();
-                    _key = KeyPair.Generate();;//KeyPair.FromWIF(wif);
+                    _key = KeyPair.FromWIF(wif); //KeyPair.Generate();
                     loggedIn = true;
                 }
                 catch (Exception)
@@ -51,7 +51,23 @@ namespace WalletSample
                     Console.WriteLine("Incorrect wif, enter again:");
                 }
             }
+
             //
+            try
+            {
+                await RunConsole();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occured: {ex.Message}");
+                StartWallet().Wait();
+            }
+
+        }
+
+        private static async Task RunConsole()
+        {
+            bool logout = false;
             while (!logout)
             {
                 Console.WriteLine();

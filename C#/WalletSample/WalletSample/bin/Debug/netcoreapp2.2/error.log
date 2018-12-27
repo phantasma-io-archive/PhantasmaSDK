@@ -1,12 +1,33 @@
 System.AggregateException
-One or more errors occurred. (Value was either too large or too small for a Decimal.)
+One or more errors occurred. (Error occurred when trying to send rpc requests(s))
    at System.Threading.Tasks.Task.Wait(Int32 millisecondsTimeout, CancellationToken cancellationToken)
    at System.Threading.Tasks.Task.Wait()
    at WalletSample.Program.Main(String[] args) in C:\Phantasma\PhantasmaSharp\C#\WalletSample\WalletSample\Program.cs:line 29
 
-System.OverflowException
-Value was either too large or too small for a Decimal.
-   at System.Number.ParseDecimal(ReadOnlySpan`1 value, NumberStyles options, NumberFormatInfo numfmt)
-   at System.Decimal.Parse(String s)
-   at WalletSample.Program.SendTokens() in C:\Phantasma\PhantasmaSharp\C#\WalletSample\WalletSample\Program.cs:line 128
-   at WalletSample.Program.StartWallet() in C:\Phantasma\PhantasmaSharp\C#\WalletSample\WalletSample\Program.cs:line 75
+Phantasma.RpcClient.Client.RpcClientUnknownException
+Error occurred when trying to send rpc requests(s)
+   at Phantasma.RpcClient.Client.RpcClient.SendAsync(RpcRequestMessage request, String route) in C:\Phantasma\PhantasmaRpcClient\Phantasma.RpcClient\Client\RpcClient.cs:line 121
+   at Phantasma.RpcClient.Client.RpcClient.SendInnerRequestAync[T](RpcRequest request, String route) in C:\Phantasma\PhantasmaRpcClient\Phantasma.RpcClient\Client\RpcClient.cs:line 46
+   at Phantasma.RpcClient.Client.ClientBase.SendRequestAsync[T](RpcRequest request, String route) in C:\Phantasma\PhantasmaRpcClient\Phantasma.RpcClient\Client\ClientBase.cs:line 12
+   at WalletSample.Program.ShowBalance() in C:\Phantasma\PhantasmaSharp\C#\WalletSample\WalletSample\Program.cs:line 87
+   at WalletSample.Program.StartWallet() in C:\Phantasma\PhantasmaSharp\C#\WalletSample\WalletSample\Program.cs:line 72
+
+System.Net.Http.HttpRequestException
+Nenhuma ligação pôde ser feita porque o computador de destino
+as recusou ativamente
+   at System.Net.Http.ConnectHelper.ConnectAsync(String host, Int32 port, CancellationToken cancellationToken)
+   at System.Threading.Tasks.ValueTask`1.get_Result()
+   at System.Net.Http.HttpConnectionPool.CreateConnectionAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Threading.Tasks.ValueTask`1.get_Result()
+   at System.Net.Http.HttpConnectionPool.WaitForCreatedConnectionAsync(ValueTask`1 creationTask)
+   at System.Threading.Tasks.ValueTask`1.get_Result()
+   at System.Net.Http.HttpConnectionPool.SendWithRetryAsync(HttpRequestMessage request, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.FinishSendAsyncBuffered(Task`1 sendTask, HttpRequestMessage request, CancellationTokenSource cts, Boolean disposeCts)
+   at Phantasma.RpcClient.Client.RpcClient.SendAsync(RpcRequestMessage request, String route) in C:\Phantasma\PhantasmaRpcClient\Phantasma.RpcClient\Client\RpcClient.cs:line 99
+
+System.Net.Sockets.SocketException
+Nenhuma ligação pôde ser feita porque o computador de destino
+as recusou ativamente
+   at System.Net.Http.ConnectHelper.ConnectAsync(String host, Int32 port, CancellationToken cancellationToken)
