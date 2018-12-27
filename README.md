@@ -41,6 +41,7 @@ Language 		| Core Library	| Smart Compiler | Sample Dapps
 ## Developing
 
 To development Phantasma applications it is recommended to run a Phantasma node locally.
+
 Get either a pre-compiled build of Phantasma-CLI which comes bundled in the official SDK release or compile yourself from the source available in the official [repository](https://github.com/phantasma-io/PhantasmaNode)
 
 To bootstrap your own test net just run a single instance of Phantasma node using the following arguments:
