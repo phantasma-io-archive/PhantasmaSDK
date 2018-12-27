@@ -1,0 +1,12 @@
+System.AggregateException
+One or more errors occurred. (Value was either too large or too small for a Decimal.)
+   at System.Threading.Tasks.Task.Wait(Int32 millisecondsTimeout, CancellationToken cancellationToken)
+   at System.Threading.Tasks.Task.Wait()
+   at WalletSample.Program.Main(String[] args) in C:\Phantasma\PhantasmaSharp\C#\WalletSample\WalletSample\Program.cs:line 29
+
+System.OverflowException
+Value was either too large or too small for a Decimal.
+   at System.Number.ParseDecimal(ReadOnlySpan`1 value, NumberStyles options, NumberFormatInfo numfmt)
+   at System.Decimal.Parse(String s)
+   at WalletSample.Program.SendTokens() in C:\Phantasma\PhantasmaSharp\C#\WalletSample\WalletSample\Program.cs:line 128
+   at WalletSample.Program.StartWallet() in C:\Phantasma\PhantasmaSharp\C#\WalletSample\WalletSample\Program.cs:line 75

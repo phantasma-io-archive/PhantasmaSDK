@@ -1,0 +1,6 @@
+System.IO.FileNotFoundException
+Não foi possível carregar o ficheiro ou assemblagem 'Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed' ou uma das respectivas dependências. O sistema não conseguiu localizar o ficheiro especificado.
+   em WalletSample.Program.<StartWallet>d__4.MoveNext()
+   em System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start[TStateMachine](TStateMachine& stateMachine)
+   em WalletSample.Program.StartWallet()
+   em WalletSample.Program.Main(String[] args) em C:\Phantasma\PhantasmaSharp\C#\WalletSample\WalletSample\Program.cs:line 29
