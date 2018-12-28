@@ -9,3 +9,5 @@
    * See address registered name;
    * Consult address balances;
    * Send transactions;
+   * Register name;
+   * List past transactions;
