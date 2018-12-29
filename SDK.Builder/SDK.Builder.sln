@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.136
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDK.Builder", "SDK.Builder\SDK.Builder.csproj", "{A143EF5E-6B31-4F76-806B-733722969D98}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Core", "..\..\PhantasmaChain\Phantasma.Core\Phantasma.Core.csproj", "{CC44E2FB-304B-4E86-85D1-563EC6210FC9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A143EF5E-6B31-4F76-806B-733722969D98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A143EF5E-6B31-4F76-806B-733722969D98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A143EF5E-6B31-4F76-806B-733722969D98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A143EF5E-6B31-4F76-806B-733722969D98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC44E2FB-304B-4E86-85D1-563EC6210FC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC44E2FB-304B-4E86-85D1-563EC6210FC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC44E2FB-304B-4E86-85D1-563EC6210FC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC44E2FB-304B-4E86-85D1-563EC6210FC9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F1E9422E-2E41-48B2-8759-7BC69C62BF8C}
+	EndGlobalSection
+EndGlobal
