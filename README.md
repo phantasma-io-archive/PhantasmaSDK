@@ -42,11 +42,11 @@ Language 		| Core Library	| Smart Compiler | Sample Dapps
 
 To development Phantasma applications it is recommended to run a Phantasma node locally.
 
-Get either a pre-compiled build of Phantasma-CLI which comes bundled in the official SDK release or compile yourself from the source available in the official [repository](https://github.com/phantasma-io/PhantasmaNode)
+Use either the pre-compiled build of Spook which comes bundled in the official SDK release or compile yourself from the source available in the official [repository](https://github.com/phantasma-io/PhantasmaSpook)
 
 To bootstrap your own test net just run a single instance of Phantasma node using the following arguments:
 ```
-Phantasma.CLI.dll -node.wif=L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25 -nexus.name=simnet
+Spook.dll -node.wif=L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25 -nexus.name=simnet
 ```
 
 Note - For a development purposes you can keep your testnet Phantasma network running with just one node. 
