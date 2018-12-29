@@ -24,16 +24,22 @@ namespace SDK.Builder
             return path;
         }
 
-        static void CopyFolder(string sourceDir, string targetDir)
+        static void CopyFolder(string sourceDir, string targetDir, Func<string, bool> filter = null)
         {
             sourceDir = FixPath(sourceDir);
             targetDir = FixPath(targetDir);
 
-            string[] files = Directory.GetFiles(sourceDir);
-            CopyFiles(files, targetDir);
+            var files = Directory.GetFiles(sourceDir);
+            CopyFiles(files, targetDir, filter);
+
+            var dirs = Directory.GetDirectories(sourceDir);
+            foreach (var dir in dirs)
+            {
+                CopyFolder(dir, dir.Replace(sourceDir, targetDir), filter);
+            }
         }
 
-        static void CopyFiles(IEnumerable<string> files, string targetDir)
+        static void CopyFiles(IEnumerable<string> files, string targetDir, Func<string, bool> filter = null)
         { 
             if (!Directory.Exists(targetDir))
             {
@@ -42,6 +48,11 @@ namespace SDK.Builder
 
             foreach (var fileName in files)
             {
+                if (filter != null && !filter(fileName))
+                {
+                    continue;
+                }
+
                 string targetFile = Path.Combine(targetDir, (new FileInfo(fileName)).Name);
                 Log($"Copying {targetFile}...");
                 File.Copy(fileName, targetFile, true);
@@ -72,6 +83,23 @@ namespace SDK.Builder
             }
         }
 
+        static void RecursiveDelete(DirectoryInfo baseDir)
+        {
+            if (!baseDir.Exists)
+                return;
+
+            foreach (var dir in baseDir.EnumerateDirectories())
+            {
+                RecursiveDelete(dir);
+            }
+            baseDir.Delete(true);
+        }
+
+        static void ZipFile(string inputPath, string outputPath, string version)
+        {
+            RunCommand("7z.exe", $"a {outputPath}/Phantasma_SDK_v{version}.zip {inputPath}/*");
+        }
+
         static void Main(string[] args)
         {
             var arguments = new Arguments(args);
@@ -91,9 +119,26 @@ namespace SDK.Builder
                 return;
             }
 
-            CopyFolder(inputPath + @"PhantasmaSpook\Spook.CLI\Publish", outputPath + @"Tools\Spook");
+            var tempPath = outputPath + @"temp\";
+            Directory.CreateDirectory(tempPath);
 
-            File.WriteAllText(outputPath + "launch_testnet_node.bat", "dotnet %~dp0Tools/Spook/Spook.dll -node.wif=L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25 -rpc.enabled=true");
+            CopyFolder(inputPath + @"PhantasmaSpook\Spook.CLI\Publish", tempPath + @"Tools\Spook");
+            CopyFolder(inputPath + @"PhantasmaWallet\PhantasmaWallet\Publish", tempPath + @"Tools\Wallet");
+            CopyFolder(inputPath + @"PhantasmaExplorer\PhantasmaExplorer\Publish", tempPath + @"Tools\Explorer");
+
+            CopyFolder(inputPath + @"PhantasmaCompiler\Compiler.CLI\Examples", tempPath + @"Contracts\Source", (x) => !x.Contains("_old"));
+
+            foreach (var lang in new[] { "C#", "JS" })
+            {
+                CopyFolder(inputPath + @"PhantasmaSDK\"+lang, tempPath + @"Dapps\"+lang);
+            }
+
+            File.WriteAllText(tempPath + "launch_testnet_node.bat", "dotnet %~dp0Tools/Spook/Spook.dll -node.wif=L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25 -rpc.enabled=true");
+
+            ZipFile(tempPath, outputPath, versionNumber);
+
+            Log("Cleaning up temporary files...");
+            RecursiveDelete(new DirectoryInfo(tempPath));
 
             Log("Success!");
         }
