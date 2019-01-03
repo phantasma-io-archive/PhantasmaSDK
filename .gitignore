@@ -1,7 +1,9 @@
-*.tmp
 .vs/
-TestResults/
-Published/
-*/obj/
-*/bin/
 packages/
+bin/
+obj/
+/C#/UnitySample/Library
+/C#/UnitySample/Packages
+/C#/UnitySample/Temp
+/C#/UnitySample/*.csproj
+/C#/UnitySample/*.sln
