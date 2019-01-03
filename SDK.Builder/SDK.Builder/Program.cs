@@ -1,8 +1,15 @@
 ﻿using Phantasma.Core.Utils;
+using Phantasma.API;
+
 using System;
+using System.Reflection;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using Phantasma.Blockchain;
+using Phantasma.Cryptography;
+using LunarLabs.Templates;
+using System.Text;
 using System.Linq;
 
 namespace SDK.Builder
@@ -27,6 +34,12 @@ namespace SDK.Builder
         static void CopyFolder(string sourceDir, string targetDir, Func<string, bool> filter = null)
         {
             sourceDir = FixPath(sourceDir);
+
+            if (!Directory.Exists(sourceDir))
+            {
+                return;
+            }
+
             targetDir = FixPath(targetDir);
 
             var files = Directory.GetFiles(sourceDir);
@@ -100,6 +113,59 @@ namespace SDK.Builder
             RunCommand("7z.exe", $"a {outputPath}/Phantasma_SDK_v{version}.zip {inputPath}/*");
         }
 
+        static void GenerateBindings(string inputPath, string outputPath)
+        {
+            if (!Directory.Exists(inputPath))
+            {
+                return;
+            }
+
+            var files = Directory.GetFiles(inputPath);
+
+            if (!Directory.Exists(outputPath))
+            {
+                Directory.CreateDirectory(outputPath);
+            }
+
+            var nexus = new Nexus("test", KeyPair.Generate().Address);
+            var api = new NexusAPI(nexus);
+
+            var typeDic = new Dictionary<string, FieldInfo[]>();
+            var apiTypes = api.GetType().Assembly.GetTypes().Where(x => !x.IsInterface && x != typeof(SingleResult) && x != typeof(ArrayResult) && x != typeof(ErrorResult) && typeof(IAPIResult).IsAssignableFrom(x)).ToList();
+            foreach (var entry in apiTypes)
+            {
+                typeDic[entry.Name.Replace("Result", "")] = entry.GetFields();
+            }
+
+            var compiler = new TemplateCompiler();
+
+            var data = new Dictionary<string, object>();
+
+            data["methods"] = api.Methods;
+            data["types"] = typeDic;
+
+            foreach (var file in files)
+            {
+                var filePath = file;
+
+                var content = File.ReadAllText(filePath);
+
+                var template = compiler.CompileTemplate(content);
+                var queue = new Queue<TemplateDocument>();
+
+                var context = new RenderingContext();
+                context.DataRoot = data;
+                context.DataStack = new List<object>();
+                context.DataStack.Add(data);
+                context.queue = queue;
+                context.output = new StringBuilder();
+                template.Execute(context);
+
+                filePath = file.Replace(inputPath, outputPath);
+                File.WriteAllText(filePath, context.output.ToString());
+            }
+        }
+
         static void Main(string[] args)
         {
             var arguments = new Arguments(args);
@@ -122,16 +188,18 @@ namespace SDK.Builder
             var tempPath = outputPath + @"temp\";
             Directory.CreateDirectory(tempPath);
 
+            foreach (var lang in new[] { "C#", "JS" })
+            {
+                CopyFolder(inputPath + @"PhantasmaSDK\" + lang+ @"\Samples\", tempPath + lang + @"\Dapps\");
+                GenerateBindings(inputPath + @"PhantasmaSDK\" + lang + @"\Bindings\", tempPath + lang + @"\Libs\");
+            }
+
+            return;
             CopyFolder(inputPath + @"PhantasmaSpook\Spook.CLI\Publish", tempPath + @"Tools\Spook");
             CopyFolder(inputPath + @"PhantasmaWallet\PhantasmaWallet\Publish", tempPath + @"Tools\Wallet");
             CopyFolder(inputPath + @"PhantasmaExplorer\PhantasmaExplorer\Publish", tempPath + @"Tools\Explorer");
 
             CopyFolder(inputPath + @"PhantasmaCompiler\Compiler.CLI\Examples", tempPath + @"Contracts\Source", (x) => !x.Contains("_old"));
-
-            foreach (var lang in new[] { "C#", "JS" })
-            {
-                CopyFolder(inputPath + @"PhantasmaSDK\"+lang, tempPath + @"Dapps\"+lang);
-            }
 
             File.WriteAllText(tempPath + "launch_testnet_node.bat", "dotnet %~dp0Tools/Spook/Spook.dll -node.wif=L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25 -rpc.enabled=true");
 

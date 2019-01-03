@@ -2,6 +2,7 @@
 packages/
 bin/
 obj/
+Output/
 /C#/UnitySample/Library
 /C#/UnitySample/Packages
 /C#/UnitySample/Temp

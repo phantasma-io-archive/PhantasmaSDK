@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="LunarParser, Version=1.2.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\LunarLabs.Parser.1.2.5\lib\net461\LunarParser.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -48,11 +51,28 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\LunarServer\LunarServer\LunarServer.csproj">
+      <Project>{A9971155-8292-4019-963B-A7CBCB7F628C}</Project>
+      <Name>LunarServer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\PhantasmaChain\Phantasma.API\Phantasma.API.csproj">
+      <Project>{138fa60f-b19e-492c-a002-7ba66078937f}</Project>
+      <Name>Phantasma.API</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\PhantasmaChain\Phantasma.Blockchain\Phantasma.Blockchain.csproj">
+      <Project>{7F954600-7C74-4EF4-B328-3E24086CEF47}</Project>
+      <Name>Phantasma.Blockchain</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\PhantasmaChain\Phantasma.Core\Phantasma.Core.csproj">
       <Project>{CC44E2FB-304B-4E86-85D1-563EC6210FC9}</Project>
       <Name>Phantasma.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\PhantasmaChain\Phantasma.Cryptography\Phantasma.Cryptography.csproj">
+      <Project>{58B3FF4B-3DFC-4893-98D1-61090E9747FC}</Project>
+      <Name>Phantasma.Cryptography</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
