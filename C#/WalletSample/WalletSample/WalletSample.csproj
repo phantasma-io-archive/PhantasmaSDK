@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\PhantasmaChain\Phantasma.Blockchain\Phantasma.Blockchain.csproj" />
+    <ProjectReference Include="..\..\..\..\PhantasmaChain\Phantasma.Cryptography\Phantasma.Cryptography.csproj" />
+    <ProjectReference Include="..\..\..\..\PhantasmaRpcClient\Phantasma.RpcClient\Phantasma.RpcClient.csproj" />
+  </ItemGroup>
+
+</Project>
