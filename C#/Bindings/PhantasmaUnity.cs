@@ -117,7 +117,8 @@ namespace Phantasma.SDK
 		}
 	   
 		{{#each methods}}
-		public static {{Info.ReturnType.Name}} {{Info.Name}}({{#each Info.Parameters}}{{Key.Name}} {{Value}}{{#if !@last}}, {{/if}}{{/each}})  
+		//{{Info.Description}}
+		public {{Info.ReturnType.Name}} {{Info.Name}}({{#each Info.Parameters}}{{Key.Name}} {{Value}}{{#if !@last}}, {{/if}}{{/each}})  
 		{	   
 			var node = _client.SendRequest(Host, "{{#camel-case Info.Name}}"{{#each Info.Parameters}}, {{Value}}{{/each}});		   
 			return {{Info.ReturnType.Name}}.FromNode(node);		   
