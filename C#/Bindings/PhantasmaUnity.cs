@@ -68,22 +68,43 @@ namespace Phantasma.SDK
                 return null;
             }
 
+			if (root.HasNode("error")) {
+				var errorDesc = node.GetString("error");
+				throw new Exception(errorDesc);
+			}
+
             if (root.HasNode("result"))
             {
                 return root["result"];
             }
 
-            return root;
+            throw new Exception("malformed response");
         }		
    }
    
    {{#each types}}
-   public struct {{Key}} 
-   {
-	   {{#each Value}}{{FieldType.Name}} {{Name}};
-	   {{/each}}
-   }
-   {{/each}}
+	public struct {{Key}} 
+	{
+{{#each Value}}		public {{FieldType.Name}} {{Name}};{{#new-line}}{{/each}}	   
+		public static {{Key}} FromNode(DataNode node) 
+		{
+			{{Key}} result;
+{{#each Value}}			{{#if FieldType.IsArray}}
+			var {{Name}}_array = node.GetNode("{{#camel-case Name}}");
+			result.{{Name}} = new {{#array-type FieldType.Name}}[{{Name}}_array.ChildCount];
+			for (int i=0; i < {{Name}}_array.ChildCount; i++) {
+				{{#if FieldType.Name contains 'Result'}}
+				result.{{Name}}[i] = {{#array-type FieldType.Name}}.FromNode({{Name}}_array.GetNodeByIndex(i));
+				{{#else}}
+				result.{{Name}}[i] = {{Name}}_array.GetNodeByIndex(i).As{{#array-type FieldType.Name}}();{{/if}}
+			}
+			{{#else}}			
+			result.{{Name}} = node.Get{{FieldType.Name}}("{{#camel-case Name}}");{{/if}}{{/each}}
+
+			return result;			
+		}
+	}
+	{{/each}}
    
    public class API {	   
 		public readonly	string Host;
@@ -96,11 +117,12 @@ namespace Phantasma.SDK
 		}
 	   
 		{{#each methods}}
-		public static {{ReturnType.Name}} {{Name}}({{#each parameters}}{{type}} {{name}},{{/each}})  
+		public static {{Info.ReturnType.Name}} {{Info.Name}}({{#each Info.Parameters}}{{Key.Name}} {{Value}}{{#if !@last}}, {{/if}}{{/each}})  
 		{	   
-		   var node = _client.SendRequest(Host, "{{name}}"{{#each parameters}},{{name}}{{/each}})
+			var node = _client.SendRequest(Host, "{{#camel-case Info.Name}}"{{#each Info.Parameters}}, {{Value}}{{/each}});		   
+			return {{Info.ReturnType.Name}}.FromNode(node);		   
 		}
 		
 		{{/each}}
-   }
+	}
 }

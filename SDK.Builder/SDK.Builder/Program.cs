@@ -11,9 +11,31 @@ using Phantasma.Cryptography;
 using LunarLabs.Templates;
 using System.Text;
 using System.Linq;
+using LunarLabs.Parser;
 
 namespace SDK.Builder
 {
+    public class ArrayTypeNode : TemplateNode
+    {
+        private RenderingKey key;
+
+        public ArrayTypeNode(Document document, string key) : base(document)
+        {
+            this.key = RenderingKey.Parse(key, RenderingType.String);
+        }
+
+        public override void Execute(RenderingContext context)
+        {
+            var temp = context.EvaluateObject(key);
+
+            if (temp != null)
+            {
+                var result = temp.ToString().Replace("[]", "");
+                context.output.Append(result);
+            }
+        }
+    }
+
     class Program
     {
         static void Log(string text)
@@ -113,6 +135,12 @@ namespace SDK.Builder
             RunCommand("7z.exe", $"a {outputPath}/Phantasma_SDK_v{version}.zip {inputPath}/*");
         }
 
+        public struct MethodEntry
+        {
+            public APIEntry Info;
+            public FieldInfo[] ResultFields;
+        }
+
         static void GenerateBindings(string inputPath, string outputPath)
         {
             if (!Directory.Exists(inputPath))
@@ -134,14 +162,19 @@ namespace SDK.Builder
             var apiTypes = api.GetType().Assembly.GetTypes().Where(x => !x.IsInterface && x != typeof(SingleResult) && x != typeof(ArrayResult) && x != typeof(ErrorResult) && typeof(IAPIResult).IsAssignableFrom(x)).ToList();
             foreach (var entry in apiTypes)
             {
-                typeDic[entry.Name.Replace("Result", "")] = entry.GetFields();
+                typeDic[entry.Name/*.Replace("Result", "")*/] = entry.GetFields();
             }
 
-            var compiler = new TemplateCompiler();
+            DataNode v;
+            //v.HasNode("")
+
+            var compiler = new Compiler();
+            compiler.RegisterCaseTags();
+            compiler.RegisterTag("array-type", (doc, x) => new ArrayTypeNode(doc, x));
 
             var data = new Dictionary<string, object>();
 
-            data["methods"] = api.Methods;
+            data["methods"] = api.Methods.Select(x => new MethodEntry() { Info = x, ResultFields = x.ReturnType.GetFields() });
             data["types"] = typeDic;
 
             foreach (var file in files)
@@ -151,7 +184,7 @@ namespace SDK.Builder
                 var content = File.ReadAllText(filePath);
 
                 var template = compiler.CompileTemplate(content);
-                var queue = new Queue<TemplateDocument>();
+                var queue = new Queue<Document>();
 
                 var context = new RenderingContext();
                 context.DataRoot = data;
