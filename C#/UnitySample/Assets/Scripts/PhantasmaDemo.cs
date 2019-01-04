@@ -5,6 +5,7 @@ using System.Collections;
 using System.Globalization;
 
 using Phantasma.Cryptography;
+using Phantasma.SDK;
 
 /*
  * Phantasma Spook
@@ -42,7 +43,7 @@ public class PhantasmaDemo : MonoBehaviour
 
     private void Start ()
     {
-
+        GetAccount(""); //TEST
     }
 
     private IEnumerator SyncBalance()
@@ -103,7 +104,11 @@ public class PhantasmaDemo : MonoBehaviour
 
     public void GetAccount(string address)
     {
-        StartCoroutine(GetAccountCoroutine(address));
+        //StartCoroutine(GetAccountCoroutine(address));
+
+        var api = new API("http://localhost:7077/rpc");
+        var account = api.GetAccount("P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr");
+        Debug.Log(account.Name);
     }
 
     private IEnumerator GetAccountCoroutine(string address)
