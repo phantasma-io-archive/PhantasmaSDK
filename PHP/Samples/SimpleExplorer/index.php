@@ -46,7 +46,7 @@ if (isset($_GET['address'])) {
 		echo '<tr>';
 		echo "<td><a href='index.php?chain=$balance->Chain'>$balance->Chain</a></td>";
 		echo "<td><a href='index.php?token=$balance->Symbol'>$balance->Symbol</a></td>";
-		echo "<td><a href='index.php?token=$amount'>$amount</a></td>";
+		echo "<td>$amount</td>";
 		echo '</tr>'; 
 	}
 	echo '</table>';	
