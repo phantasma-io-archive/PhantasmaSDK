@@ -36,6 +36,7 @@ More languages will be available later.
 Language 		| Core Library	| Smart Compiler | Sample Dapps
 :---------------------- | :------------| :------------| :------------
 [.NET / C#](/C#) 		| Beta | In Development | Yes
+[PHP](/PHP) 		| Beta | N/A | Yes |
 [Javascript](/JS) 		| Alpha | Planned | In Development |
 
 ## Developing
