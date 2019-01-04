@@ -165,9 +165,6 @@ namespace SDK.Builder
                 typeDic[entry.Name/*.Replace("Result", "")*/] = entry.GetFields();
             }
 
-            DataNode v;
-            //v.HasNode("")
-
             var compiler = new Compiler();
             compiler.RegisterCaseTags();
             compiler.RegisterTag("array-type", (doc, x) => new ArrayTypeNode(doc, x));
