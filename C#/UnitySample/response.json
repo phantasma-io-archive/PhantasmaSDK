@@ -1,0 +1,18 @@
+{
+  "GAS": {
+    "balance": 3.0, 
+    "unspent": [
+      {
+        "index": 0, 
+        "txid": "98d0b683fdf115ef41de0040f11c1d047252de8d8ad41aad298817a264c4004a", 
+        "value": 3.0
+      }
+    ]
+  }, 
+  "NEO": {
+    "balance": 0, 
+    "unspent": []
+  }, 
+  "address": "AH78bx9sfVKR4cPaC527ktaDRjtwKNur8B", 
+  "net": "TestNet"
+}
