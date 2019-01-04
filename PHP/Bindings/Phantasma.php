@@ -6,6 +6,12 @@ class PhantasmaAPI {
 		$this->host = $host;
 	}    
 
+	public function convertDecimals($amount, $decimals) {
+		$mult = pow(10, $decimals);
+		$result = sprintf("%.4f", $amount / $mult);
+		return $result;
+	}
+
 	private function JSONRPC($method, $params) {
 		$message = array();
 		$message['jsonrpc'] = '2.0';
