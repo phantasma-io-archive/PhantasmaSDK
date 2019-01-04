@@ -69,7 +69,7 @@ namespace Phantasma.SDK
             }
 
 			if (root.HasNode("error")) {
-				var errorDesc = node.GetString("error");
+				var errorDesc = root.GetString("error");
 				throw new Exception(errorDesc);
 			}
 
