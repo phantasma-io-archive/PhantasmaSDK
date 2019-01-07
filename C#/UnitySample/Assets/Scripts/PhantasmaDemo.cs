@@ -70,7 +70,6 @@ public class PhantasmaDemo : MonoBehaviour
                 {
                     state = EWALLET_STATE.READY;
                     CanvasManager.Instance.SetBalance(balance.ToString(CultureInfo.InvariantCulture));
-                    CanvasManager.Instance.EnableStartButton();
                     break;
                 }
         }		

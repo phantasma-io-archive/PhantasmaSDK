@@ -5,8 +5,9 @@ using UnityEngine.UI;
 public class CanvasManager : MonoBehaviour {
 
     public Text         addressLabel, balanceLabel, loginError;
-    public GameObject   loginMenu, mainMenu, accountMenu , myAssetsMenu, marketMenu;
-    public Button       startButton;
+    public GameObject   loginMenu, mainMenu, accountMenu , myAssetsMenu;
+    public GameObject   marketMenu, buyMarketTab, sellMarketTab;
+    public Button       buyMarketButton, sellMarketButton;
     public InputField   addressInputField;
     public AssetSlot    assetSlot;
 
@@ -72,12 +73,7 @@ public class CanvasManager : MonoBehaviour {
         loginError.gameObject.SetActive(true);
     }
 
-    public void EnableStartButton()
-    {
-        startButton.interactable = true;
-    }
-
-    #region Button Handlers
+    #region Login/Logout & Account
 
     public void Login()
     {
@@ -86,7 +82,6 @@ public class CanvasManager : MonoBehaviour {
 
     public void OpenAccount()
     {
-        addressLabel.gameObject.SetActive(false);
         mainMenu.SetActive(false);
 
         accountMenu.SetActive(true);
@@ -94,11 +89,19 @@ public class CanvasManager : MonoBehaviour {
 
     public void CloseAccount()
     {
-        addressLabel.gameObject.SetActive(true);
         mainMenu.SetActive(true);
 
         accountMenu.SetActive(false);
     }
+
+    public void Logout()
+    {
+        PhantasmaDemo.Instance.LogOut();
+    }
+
+    #endregion
+
+    #region My Assets
 
     public void OpenMyAsset()
     {
@@ -116,12 +119,36 @@ public class CanvasManager : MonoBehaviour {
         myAssetsMenu.SetActive(false);
     }
 
+    #endregion
+
+    #region Market
+
     public void OpenMarket()
     {
         addressLabel.gameObject.SetActive(false);
         mainMenu.SetActive(false);
 
         marketMenu.SetActive(true);
+
+        SelectMarketBuyTab();
+    }
+
+    public void SelectMarketBuyTab()
+    {
+        buyMarketButton.interactable    = false;
+        sellMarketButton.interactable   = true;
+
+        buyMarketTab.SetActive(true);
+        sellMarketTab.SetActive(false);
+    }
+
+    public void SelectMarketSellTab()
+    {
+        sellMarketButton.interactable   = false;
+        buyMarketButton.interactable    = true;
+
+        sellMarketTab.SetActive(true);
+        buyMarketTab.SetActive(false);
     }
 
     public void CloseMarket()
@@ -132,21 +159,15 @@ public class CanvasManager : MonoBehaviour {
         marketMenu.SetActive(false);
     }
 
+    #endregion
+
     //public void RegisterName()
     //{
     //    PhantasmaDemo.Instance.RegisterName();
     //}
 
-
     //public void ListTransactions()
     //{
     //    PhantasmaDemo.Instance.ListTransactions();
     //}
-
-    public void Logout()
-    {
-        PhantasmaDemo.Instance.LogOut();
-    }
-
-    #endregion
 }
