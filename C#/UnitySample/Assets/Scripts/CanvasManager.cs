@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class CanvasManager : MonoBehaviour {
 
     public Text         addressLabel, balanceLabel, loginError;
-    public GameObject   balanceScroll, login, buttons, market, myAssets;
+    public GameObject   loginMenu, mainMenu, accountMenu , myAssetsMenu, marketMenu;
     public Button       startButton;
     public InputField   addressInputField;
     public AssetSlot    assetSlot;
@@ -19,9 +19,12 @@ public class CanvasManager : MonoBehaviour {
     // Use this for initialization
     void Start () {
 
-        market.SetActive(false);
-        buttons.SetActive(false);
-
+        loginMenu.SetActive(false);
+        mainMenu.SetActive(false);
+        accountMenu.SetActive(false);
+        myAssetsMenu.SetActive(false);
+        marketMenu.SetActive(false);
+        
         ToggleLogin(true);
     }
 	
@@ -35,17 +38,15 @@ public class CanvasManager : MonoBehaviour {
         //Debug.Log("Toggle Login: " + isVisible);
         addressLabel.text = address == null ? string.Empty : address;
         addressLabel.gameObject.SetActive(!isVisible);
-
-        balanceScroll.gameObject.SetActive(!isVisible);
-
+        
         loginError.text = string.Empty;
         loginError.gameObject.SetActive(!isVisible);
 
         addressInputField.text = string.Empty;
 
-        login.SetActive(isVisible);
+        loginMenu.SetActive(isVisible);
 
-        buttons.SetActive(!isVisible);
+        mainMenu.SetActive(!isVisible);
     }
 
     public void SetAddress(string address)
@@ -55,7 +56,14 @@ public class CanvasManager : MonoBehaviour {
 
     public void SetBalance(string balance)
     {
-        balanceLabel.text = balance;
+        balanceLabel.text = balance + "\n";
+        //Debug.Log("set balance: " + balanceLabel.text);
+    }
+
+    public void AddBalanceEntry(string entry)
+    {
+        balanceLabel.text += entry + "\n";
+        //Debug.Log("add entry: " + balanceLabel.text);
     }
 
     public void SetLoginError(string error)
@@ -76,36 +84,52 @@ public class CanvasManager : MonoBehaviour {
         PhantasmaDemo.Instance.Login(addressInputField.text);
     }
 
+    public void OpenAccount()
+    {
+        addressLabel.gameObject.SetActive(false);
+        mainMenu.SetActive(false);
+
+        accountMenu.SetActive(true);
+    }
+
+    public void CloseAccount()
+    {
+        addressLabel.gameObject.SetActive(true);
+        mainMenu.SetActive(true);
+
+        accountMenu.SetActive(false);
+    }
+
     public void OpenMyAsset()
     {
         addressLabel.gameObject.SetActive(false);
-        buttons.SetActive(false);
+        mainMenu.SetActive(false);
 
-        myAssets.SetActive(true);
+        myAssetsMenu.SetActive(true);
     }
 
     public void CloseMyAssets()
     {
         addressLabel.gameObject.SetActive(true);
-        buttons.SetActive(true);
+        mainMenu.SetActive(true);
 
-        myAssets.SetActive(false);
+        myAssetsMenu.SetActive(false);
     }
 
     public void OpenMarket()
     {
         addressLabel.gameObject.SetActive(false);
-        buttons.SetActive(false);
-        
-        market.SetActive(true);
+        mainMenu.SetActive(false);
+
+        marketMenu.SetActive(true);
     }
 
     public void CloseMarket()
     {
         addressLabel.gameObject.SetActive(true);
-        buttons.SetActive(true);
+        mainMenu.SetActive(true);
 
-        market.SetActive(false);
+        marketMenu.SetActive(false);
     }
 
     //public void RegisterName()

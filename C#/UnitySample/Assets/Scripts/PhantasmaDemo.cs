@@ -113,16 +113,15 @@ public class PhantasmaDemo : MonoBehaviour
         var api = new API("http://localhost:7077/rpc");
         StartCoroutine(api.GetAccount(address, result =>
         {
-            CanvasManager.Instance.balanceLabel.text = "Name - " + result.Name + "\n";
+            CanvasManager.Instance.SetBalance("Name: " + result.Name);
 
             foreach (var balanceSheetResult in result.Balances)
             {
-                var amount = Int64.Parse(balanceSheetResult.Amount) / Mathf.Pow(10f, 8);
-                CanvasManager.Instance.balanceLabel.text += balanceSheetResult.Chain + " - " + amount + " " + balanceSheetResult.Symbol + "\n";
+                var amount = long.Parse(balanceSheetResult.Amount) / Mathf.Pow(10f, 8);
+                CanvasManager.Instance.AddBalanceEntry("Chain: " + balanceSheetResult.Chain + " - " + amount + " " + balanceSheetResult.Symbol);
+
                 Debug.Log("balance: " +balanceSheetResult.Chain + " | " + balanceSheetResult.Amount);
             }
-
-            Debug.Log("result: " + result.Name);
 
             LoggedIn(address);
         }));
