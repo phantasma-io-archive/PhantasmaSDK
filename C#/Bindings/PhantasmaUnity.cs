@@ -5,9 +5,23 @@ using LunarLabs.Parser;
 using LunarLabs.Parser.JSON;
 using UnityEngine;
 using UnityEngine.Networking;
+using Phantasma.Cryptography;
 
 namespace Phantasma.SDK
 {
+	public static class APIUtils
+    {
+        public static long GetInt64(this DataNode node, string name)
+        {
+            return node.GetLong(name);
+        }
+
+        public static bool GetBoolean(this DataNode node, string name)
+        {
+            return node.GetBool(name);
+        }
+    }
+
     internal class JSONRPC_Client
     {
         private WebClient client;
@@ -115,6 +129,9 @@ namespace Phantasma.SDK
 					result.{{Name}}[i] = {{Name}}_array.GetNodeByIndex(i).As{{#array-type FieldType.Name}}();{{/if}}
 				}
 			}
+			else {
+				result.{{Name}} = new {{#array-type FieldType.Name}}[0];
+			}
 			{{#else}}			
 			result.{{Name}} = node.Get{{FieldType.Name}}("{{#camel-case Name}}");{{/if}}{{/each}}
 
@@ -135,12 +152,30 @@ namespace Phantasma.SDK
 	   
 		{{#each methods}}
 		//{{Info.Description}}
-		public IEnumerator {{Info.Name}}({{#each Info.Parameters}}{{Key.Name}} {{Value}}, {{/each}}Action<{{Info.ReturnType.Name}}> callback)  
+		public IEnumerator {{Info.Name}}({{#each Info.Parameters}}{{Key.Name}} {{Value}}, {{/each}}Action<{{#fix-type Info.ReturnType.Name}}> callback)  
 		{	   
 			yield return _client.SendRequest(Host, "{{#camel-case Info.Name}}", (node) => {
-					var result = {{Info.ReturnType.Name}}.FromNode(node);
-					callback(result);
-				} {{#each Info.Parameters}}, {{Value}}{{/each}});		   
+{{#if Info.ReturnType.IsPrimitive}}			
+var result = {{#fix-type Info.ReturnType.Name}}.Parse(node.Value);
+{{#else}}
+{{#if Info.ReturnType.Name=='String'}}
+var result = node.Value;
+{{#else}}
+{{#if Info.ReturnType.IsArray}}
+var result = new {{#array-type Info.ReturnType.Name}}[node.ChildCount];
+for (int i=0; i<result.Length; i++) {
+	var child = node.GetNodeByIndex(i);
+	result[i] = {{#array-type Info.ReturnType.Name}}.FromNode(child);
+}
+{{#else}}
+var result = {{Info.ReturnType.Name}}.FromNode(node);
+{{/if}}
+{{/if}}
+{{/if}}
+
+
+				callback(result);
+			} {{#each Info.Parameters}}, {{Value}}{{/each}});		   
 		}
 		
 		{{/each}}
