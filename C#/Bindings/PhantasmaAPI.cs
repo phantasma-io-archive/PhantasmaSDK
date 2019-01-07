@@ -112,25 +112,26 @@ namespace Phantasma.SDK
    }
    
    {{#each types}}
-	public struct {{Key}} 
+	public struct {{#fix-type Key}} 
 	{
-{{#each Value}}		public {{#fix-type FieldType.Name}} {{Name}};{{#new-line}}{{/each}}	   
-		public static {{Key}} FromNode(DataNode node) 
+{{#each Value}}		public {{#fix-type FieldType.Name}}{{#if FieldType.IsArray}}[]{{/if}} {{Name}};
+{{/each}}	   
+		public static {{#fix-type Key}} FromNode(DataNode node) 
 		{
-			{{Key}} result;
+			{{#fix-type Key}} result;
 {{#each Value}}			{{#if FieldType.IsArray}}
 			var {{Name}}_array = node.GetNode("{{#camel-case Name}}");
 			if ({{Name}}_array != null) {
-				result.{{Name}} = new {{#array-type FieldType.Name}}[{{Name}}_array.ChildCount];
+				result.{{Name}} = new {{#fix-type FieldType.Name}}[{{Name}}_array.ChildCount];
 				for (int i=0; i < {{Name}}_array.ChildCount; i++) {
 					{{#if FieldType.Name contains 'Result'}}
-					result.{{Name}}[i] = {{#array-type FieldType.Name}}.FromNode({{Name}}_array.GetNodeByIndex(i));
+					result.{{Name}}[i] = {{#fix-type FieldType.Name}}.FromNode({{Name}}_array.GetNodeByIndex(i));
 					{{#else}}
-					result.{{Name}}[i] = {{Name}}_array.GetNodeByIndex(i).As{{#array-type FieldType.Name}}();{{/if}}
+					result.{{Name}}[i] = {{Name}}_array.GetNodeByIndex(i).As{{#fix-type FieldType.Name}}();{{/if}}
 				}
 			}
 			else {
-				result.{{Name}} = new {{#array-type FieldType.Name}}[0];
+				result.{{Name}} = new {{#fix-type FieldType.Name}}[0];
 			}
 			{{#else}}			
 			result.{{Name}} = node.Get{{FieldType.Name}}("{{#camel-case Name}}");{{/if}}{{/each}}
@@ -152,7 +153,7 @@ namespace Phantasma.SDK
 	   
 		{{#each methods}}
 		//{{Info.Description}}
-		public IEnumerator {{Info.Name}}({{#each Info.Parameters}}{{Key.Name}} {{Value}}, {{/each}}Action<{{#fix-type Info.ReturnType.Name}}> callback)  
+		public IEnumerator {{Info.Name}}({{#each Info.Parameters}}{{#fix-type Key.Name}} {{Value}}, {{/each}}Action<{{#fix-type Info.ReturnType.Name}}{{#if Info.ReturnType.IsArray}}[]{{/if}}> callback)  
 		{	   
 			yield return _client.SendRequest(Host, "{{#camel-case Info.Name}}", (node) => { 
 {{#parse-lines false}}
@@ -163,13 +164,13 @@ namespace Phantasma.SDK
 			var result = node.Value;
 {{#else}}
 {{#if Info.ReturnType.IsArray}}
-			var result = new {{#array-type Info.ReturnType.Name}}[node.ChildCount];{{#new-line}}
+			var result = new {{#fix-type Info.ReturnType.Name}}[node.ChildCount];{{#new-line}}
 			for (int i=0; i<result.Length; i++) { {{#new-line}}
 				var child = node.GetNodeByIndex(i);{{#new-line}}
-				result[i] = {{#array-type Info.ReturnType.Name}}.FromNode(child);{{#new-line}}
+				result[i] = {{#fix-type Info.ReturnType.Name}}.FromNode(child);{{#new-line}}
 			}
 {{#else}}
-			var result = {{Info.ReturnType.Name}}.FromNode(node);
+			var result = {{#fix-type Info.ReturnType.Name}}.FromNode(node);
 {{/if}}
 {{/if}}
 {{/if}}{{#parse-lines true}}
