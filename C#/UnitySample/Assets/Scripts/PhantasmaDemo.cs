@@ -43,7 +43,7 @@ public class PhantasmaDemo : MonoBehaviour
 
     private void Start ()
     {
-        GetAccount(""); //TEST
+        GetAccount("P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr"); //TEST
     }
 
     private IEnumerator SyncBalance()
@@ -104,44 +104,12 @@ public class PhantasmaDemo : MonoBehaviour
 
     public void GetAccount(string address)
     {
-        //StartCoroutine(GetAccountCoroutine(address));
-
+        Debug.Log("get account 0: " + address);
         var api = new API("http://localhost:7077/rpc");
-        var account = api.GetAccount("P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr");
-        Debug.Log(account.Name);
-    }
+        StartCoroutine(api.GetAccount(address, result => Debug.Log("result: " + result.Name)));
 
-    private IEnumerator GetAccountCoroutine(string address)
-    {
-        // Test address = P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr
-        var myData = "{ \"jsonrpc\":\"2.0\",\"method\":\"getAccount\",\"params\":[\"" + address + "\"],\"id\":1}";
-        var www = UnityWebRequest.Post(_SERVER_ADDRESS, myData);
-
-        //CanvasManager.Instance.SetAddress(keys.Address.ToString());
-        //CanvasManager.Instance.SetAddress(address);
-        //CanvasManager.Instance.SetBalance("Please wait, syncing balance...");
-
-        yield return www.SendWebRequest();
-
-        if (www.isNetworkError || www.isHttpError)
-        {
-            Debug.Log(www.error);
-
-            CanvasManager.Instance.SetLoginError(www.error);
-        }
-        else
-        {
-            Debug.Log(www.downloadHandler.text);
-
-            if (www.downloadHandler.text.Contains("invalid address"))
-            {
-                CanvasManager.Instance.SetLoginError("Error - Invalid Address: " + address);
-            }
-            else
-            {
-                LoggedIn(address);
-            }
-        }
+        //Debug.Log("get account 1: " + cd.result);
+        //Debug.Log(account.Name);
     }
 
     public void ShowBalance()
