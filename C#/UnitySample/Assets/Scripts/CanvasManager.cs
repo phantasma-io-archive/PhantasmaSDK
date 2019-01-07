@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class CanvasManager : MonoBehaviour {
 
     public Text         addressLabel, balanceLabel, loginError;
-    public GameObject   balanceScroll, login, buttons, market;
+    public GameObject   balanceScroll, login, buttons, market, myAssets;
     public Button       startButton;
     public InputField   addressInputField;
     public AssetSlot    assetSlot;
@@ -76,7 +76,23 @@ public class CanvasManager : MonoBehaviour {
         PhantasmaDemo.Instance.GetAccount(addressInputField.text);
     }
 
-    public void StartGame()
+    public void OpenMyAsset()
+    {
+        addressLabel.gameObject.SetActive(false);
+        buttons.SetActive(false);
+
+        myAssets.SetActive(true);
+    }
+
+    public void CloseMyAssets()
+    {
+        addressLabel.gameObject.SetActive(true);
+        buttons.SetActive(true);
+
+        myAssets.SetActive(false);
+    }
+
+    public void OpenMarket()
     {
         addressLabel.gameObject.SetActive(false);
         buttons.SetActive(false);
@@ -84,7 +100,7 @@ public class CanvasManager : MonoBehaviour {
         market.SetActive(true);
     }
 
-    public void BackMarket()
+    public void CloseMarket()
     {
         addressLabel.gameObject.SetActive(true);
         buttons.SetActive(true);
@@ -92,20 +108,16 @@ public class CanvasManager : MonoBehaviour {
         market.SetActive(false);
     }
 
-    public void RegisterName()
-    {
-        PhantasmaDemo.Instance.RegisterName();
-    }
+    //public void RegisterName()
+    //{
+    //    PhantasmaDemo.Instance.RegisterName();
+    //}
 
-    public void CrossChainTransfer()
-    {
-        PhantasmaDemo.Instance.CrossChainTransfer();
-    }
 
-    public void ListTransactions()
-    {
-        PhantasmaDemo.Instance.ListTransactions();
-    }
+    //public void ListTransactions()
+    //{
+    //    PhantasmaDemo.Instance.ListTransactions();
+    //}
 
     public void Logout()
     {

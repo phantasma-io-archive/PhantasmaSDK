@@ -43,7 +43,7 @@ public class PhantasmaDemo : MonoBehaviour
 
     private void Start ()
     {
-        GetAccount("P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr"); //TEST
+        //GetAccount("P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr"); //TEST
     }
 
     private IEnumerator SyncBalance()
@@ -106,99 +106,62 @@ public class PhantasmaDemo : MonoBehaviour
     {
         Debug.Log("get account 0: " + address);
         var api = new API("http://localhost:7077/rpc");
-        StartCoroutine(api.GetAccount(address, result => Debug.Log("result: " + result.Name)));
-
-        //Debug.Log("get account 1: " + cd.result);
-        //Debug.Log(account.Name);
-    }
-
-    public void ShowBalance()
-    {
-        StartCoroutine(ShowBallanceCoroutine());
-    }
-
-    private IEnumerator ShowBallanceCoroutine()
-    {
-        var myData = "{ \"jsonrpc\":\"2.0\",\"method\":\"getAccount\",\"params\":[\"P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr\"],\"id\":1}";
-        var www = UnityWebRequest.Post(_SERVER_ADDRESS, myData);
-
-        yield return www.SendWebRequest();
-
-        if (www.isNetworkError || www.isHttpError)
+        StartCoroutine(api.GetAccount(address, result =>
         {
-            Debug.Log(www.error);
-        }
-        else
-        {
-            Debug.Log(www.downloadHandler.text);
-        }
+            foreach (var balanceSheetResult in result.Balances)
+            {
+                Debug.Log("balance: " +balanceSheetResult.Chain + " | " + balanceSheetResult.Amount);
+            }
+
+            Debug.Log("result: " + result.Name);
+
+            LoggedIn(address);
+        }));
     }
 
-    public void RegisterName()
-    {
-        StartCoroutine(RegisterNameCoroutine());
-    }
+    //public void RegisterName()
+    //{
+    //    StartCoroutine(RegisterNameCoroutine());
+    //}
 
-    private IEnumerator RegisterNameCoroutine()
-    {
-        var myData = "{ \"jsonrpc\":\"2.0\",\"method\":\"getAccount\",\"params\":[\"P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr\"],\"id\":1}";
-        var www = UnityWebRequest.Post(_SERVER_ADDRESS, myData);
+    //private IEnumerator RegisterNameCoroutine()
+    //{
+    //    var myData = "{ \"jsonrpc\":\"2.0\",\"method\":\"getAccount\",\"params\":[\"P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr\"],\"id\":1}";
+    //    var www = UnityWebRequest.Post(_SERVER_ADDRESS, myData);
 
-        yield return www.SendWebRequest();
+    //    yield return www.SendWebRequest();
 
-        if (www.isNetworkError || www.isHttpError)
-        {
-            Debug.Log(www.error);
-        }
-        else
-        {
-            Debug.Log(www.downloadHandler.text);
-        }
-    }
+    //    if (www.isNetworkError || www.isHttpError)
+    //    {
+    //        Debug.Log(www.error);
+    //    }
+    //    else
+    //    {
+    //        Debug.Log(www.downloadHandler.text);
+    //    }
+    //}
 
-    public void CrossChainTransfer()
-    {
-        StartCoroutine(CrossChainTransferCoroutine());
-    }
+    //public void ListTransactions()
+    //{
+    //    StartCoroutine(ListTransactionsCoroutine());
+    //}
 
-    private IEnumerator CrossChainTransferCoroutine()
-    {
-        var myData = "{ \"jsonrpc\":\"2.0\",\"method\":\"getAccount\",\"params\":[\"P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr\"],\"id\":1}";
-        var www = UnityWebRequest.Post(_SERVER_ADDRESS, myData);
+    //private IEnumerator ListTransactionsCoroutine()
+    //{
+    //    var myData = "{ \"jsonrpc\":\"2.0\",\"method\":\"getAccount\",\"params\":[\"P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr\"],\"id\":1}";
+    //    var www = UnityWebRequest.Post(_SERVER_ADDRESS, myData);
 
-        yield return www.SendWebRequest();
+    //    yield return www.SendWebRequest();
 
-        if (www.isNetworkError || www.isHttpError)
-        {
-            Debug.Log(www.error);
-        }
-        else
-        {
-            Debug.Log(www.downloadHandler.text);
-        }
-    }
-
-    public void ListTransactions()
-    {
-        StartCoroutine(ListTransactionsCoroutine());
-    }
-
-    private IEnumerator ListTransactionsCoroutine()
-    {
-        var myData = "{ \"jsonrpc\":\"2.0\",\"method\":\"getAccount\",\"params\":[\"P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr\"],\"id\":1}";
-        var www = UnityWebRequest.Post(_SERVER_ADDRESS, myData);
-
-        yield return www.SendWebRequest();
-
-        if (www.isNetworkError || www.isHttpError)
-        {
-            Debug.Log(www.error);
-        }
-        else
-        {
-            Debug.Log(www.downloadHandler.text);
-        }
-    }
+    //    if (www.isNetworkError || www.isHttpError)
+    //    {
+    //        Debug.Log(www.error);
+    //    }
+    //    else
+    //    {
+    //        Debug.Log(www.downloadHandler.text);
+    //    }
+    //}
 
     public void GetMarket()
     {
