@@ -1,7 +1,10 @@
 using System;
 using System.Net;
+using System.Collections;
 using LunarLabs.Parser;
 using LunarLabs.Parser.JSON;
+using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Phantasma.SDK
 {
@@ -14,7 +17,7 @@ namespace Phantasma.SDK
             client = new WebClient() { Encoding = System.Text.Encoding.UTF8 }; 
         }
 
-        internal DataNode SendRequest(string url, string method, params object[] parameters)
+        internal IEnumerator SendRequest(string url, string method, Action<DataNode> callback, params object[] parameters)
         {
             string contents;
 
@@ -43,60 +46,74 @@ namespace Phantasma.SDK
                 jsonRpcData.AddNode(paramData);
             }
 
+            UnityWebRequest www;
+            string json;
+
             try
             {
-                client.Headers.Add("Content-Type", "application/json-rpc");
-				var json = JSONWriter.WriteToString(jsonRpcData);
-				contents = client.UploadString(url, json);
+                //client.Headers.Add("Content-Type", "application/json-rpc");
+				json = JSONWriter.WriteToString(jsonRpcData);
+				//contents = client.UploadString(url, json);
             }
             catch (Exception e)
             {
                 throw e;
             }
-
-            if (string.IsNullOrEmpty(contents))
+            
+            www = UnityWebRequest.Post(url, json);
+            yield return www.SendWebRequest();
+            
+            if (www.isNetworkError || www.isHttpError)
             {
-                return null;
+                Debug.Log(www.error);
+				throw new Exception(www.error);
+            }
+            else
+            {
+                Debug.Log(www.downloadHandler.text);
+				var root = JSONReader.ReadFromString(www.downloadHandler.text);
+				
+				if (root == null)
+				{
+					throw new Exception("failed to parse JSON");
+				}
+				else 
+				if (root.HasNode("error")) {
+					var errorDesc = root.GetString("error");
+					throw new Exception(errorDesc);
+				}
+				else
+				if (root.HasNode("result"))
+				{
+					var result = root["result"];
+					callback(result);
+				}
+				else {					
+					throw new Exception("malformed response");
+				}				
             }
 
-            //File.WriteAllText("response.json", contents);
-
-            var root = JSONReader.ReadFromString(contents);
-
-            if (root == null)
-            {
-                return null;
-            }
-
-			if (root.HasNode("error")) {
-				var errorDesc = node.GetString("error");
-				throw new Exception(errorDesc);
-			}
-
-            if (root.HasNode("result"))
-            {
-                return root["result"];
-            }
-
-            throw new Exception("malformed response");
+			yield break;
         }		
    }
    
    {{#each types}}
 	public struct {{Key}} 
 	{
-{{#each Value}}		public {{FieldType.Name}} {{Name}};{{#new-line}}{{/each}}	   
+{{#each Value}}		public {{#fix-type FieldType.Name}} {{Name}};{{#new-line}}{{/each}}	   
 		public static {{Key}} FromNode(DataNode node) 
 		{
 			{{Key}} result;
 {{#each Value}}			{{#if FieldType.IsArray}}
 			var {{Name}}_array = node.GetNode("{{#camel-case Name}}");
-			result.{{Name}} = new {{#array-type FieldType.Name}}[{{Name}}_array.ChildCount];
-			for (int i=0; i < {{Name}}_array.ChildCount; i++) {
-				{{#if FieldType.Name contains 'Result'}}
-				result.{{Name}}[i] = {{#array-type FieldType.Name}}.FromNode({{Name}}_array.GetNodeByIndex(i));
-				{{#else}}
-				result.{{Name}}[i] = {{Name}}_array.GetNodeByIndex(i).As{{#array-type FieldType.Name}}();{{/if}}
+			if ({{Name}}_array != null) {
+				result.{{Name}} = new {{#array-type FieldType.Name}}[{{Name}}_array.ChildCount];
+				for (int i=0; i < {{Name}}_array.ChildCount; i++) {
+					{{#if FieldType.Name contains 'Result'}}
+					result.{{Name}}[i] = {{#array-type FieldType.Name}}.FromNode({{Name}}_array.GetNodeByIndex(i));
+					{{#else}}
+					result.{{Name}}[i] = {{Name}}_array.GetNodeByIndex(i).As{{#array-type FieldType.Name}}();{{/if}}
+				}
 			}
 			{{#else}}			
 			result.{{Name}} = node.Get{{FieldType.Name}}("{{#camel-case Name}}");{{/if}}{{/each}}
@@ -118,10 +135,12 @@ namespace Phantasma.SDK
 	   
 		{{#each methods}}
 		//{{Info.Description}}
-		public {{Info.ReturnType.Name}} {{Info.Name}}({{#each Info.Parameters}}{{Key.Name}} {{Value}}{{#if !@last}}, {{/if}}{{/each}})  
+		public IEnumerator {{Info.Name}}({{#each Info.Parameters}}{{Key.Name}} {{Value}}, {{/each}}Action<{{Info.ReturnType.Name}}> callback)  
 		{	   
-			var node = _client.SendRequest(Host, "{{#camel-case Info.Name}}"{{#each Info.Parameters}}, {{Value}}{{/each}});		   
-			return {{Info.ReturnType.Name}}.FromNode(node);		   
+			yield return _client.SendRequest(Host, "{{#camel-case Info.Name}}", (node) => {
+					var result = {{Info.ReturnType.Name}}.FromNode(node);
+					callback(result);
+				} {{#each Info.Parameters}}, {{Value}}{{/each}});		   
 		}
 		
 		{{/each}}

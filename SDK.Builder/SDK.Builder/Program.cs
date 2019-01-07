@@ -36,6 +36,30 @@ namespace SDK.Builder
         }
     }
 
+    public class FixTypeNode : TemplateNode
+    {
+        private RenderingKey key;
+        private Dictionary<string, string> replacements;
+
+        public FixTypeNode(Document document, string key, Dictionary<string, string> replacements) : base(document)
+        {
+            this.replacements = replacements;
+            this.key = RenderingKey.Parse(key, RenderingType.String);
+        }
+
+        public override void Execute(RenderingContext context)
+        {
+            var temp = context.EvaluateObject(key);
+
+            if (temp != null)
+            {
+                var key = temp.ToString();
+                string result = replacements.ContainsKey(key) ? replacements[key] : key;
+                context.output.Append(result);
+            }
+        }
+    }
+
     class Program
     {
         static void Log(string text)
@@ -155,6 +179,21 @@ namespace SDK.Builder
                 Directory.CreateDirectory(outputPath);
             }
 
+            string replacementFile = inputPath + "language.ini";
+            var replacements = new Dictionary<string, string>();
+            if (File.Exists(replacementFile))
+            {
+                var lines = File.ReadAllLines(replacementFile);
+                foreach (var line in lines)
+                {
+                    if (line.Contains(","))
+                    {
+                        var temp = line.Split(new[] { ',' }, 2);
+                        replacements[temp[0]] = temp[1];
+                    }
+                }
+            }
+
             var nexus = new Nexus("test", KeyPair.Generate().Address);
             var api = new NexusAPI(nexus);
 
@@ -168,6 +207,7 @@ namespace SDK.Builder
             var compiler = new Compiler();
             compiler.RegisterCaseTags();
             compiler.RegisterTag("array-type", (doc, x) => new ArrayTypeNode(doc, x));
+            compiler.RegisterTag("fix-type", (doc, x) => new FixTypeNode(doc, x, replacements));
 
             var data = new Dictionary<string, object>();
 
@@ -176,6 +216,11 @@ namespace SDK.Builder
 
             foreach (var file in files)
             {
+                if (file == replacementFile)
+                {
+                    continue;
+                }
+
                 var filePath = file;
 
                 var content = File.ReadAllText(filePath);
