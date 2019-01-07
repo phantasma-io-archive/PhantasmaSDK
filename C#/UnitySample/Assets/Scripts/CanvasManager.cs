@@ -73,7 +73,7 @@ public class CanvasManager : MonoBehaviour {
 
     public void Login()
     {
-        PhantasmaDemo.Instance.GetAccount(addressInputField.text);
+        PhantasmaDemo.Instance.Login(addressInputField.text);
     }
 
     public void OpenMyAsset()

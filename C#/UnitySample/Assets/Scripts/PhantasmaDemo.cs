@@ -75,9 +75,9 @@ public class PhantasmaDemo : MonoBehaviour
         }		
 	}
 
-    public void StartGame()
+    public void Login(string address)
     {
-
+        GetAccount(address);
     }
 
     private void LoggedIn(string address)
@@ -87,6 +87,8 @@ public class PhantasmaDemo : MonoBehaviour
         //var address = "L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25";
         //var addressBytes = Encoding.ASCII.GetBytes(address);
         //keys = KeyPair.FromWIF(address);
+
+        CanvasManager.Instance.SetAddress(address);
 
         CanvasManager.Instance.ToggleLogin(false, address);
     }
