@@ -11,7 +11,7 @@ using Phantasma.Cryptography;
 using LunarLabs.Templates;
 using System.Text;
 using System.Linq;
-using LunarLabs.Parser;
+using UnityPacker;
 
 namespace SDK.Builder
 {
@@ -205,6 +205,7 @@ namespace SDK.Builder
             }
 
             var compiler = new Compiler();
+            compiler.ParseNewLines = true;
             compiler.RegisterCaseTags();
             compiler.RegisterTag("array-type", (doc, x) => new ArrayTypeNode(doc, x));
             compiler.RegisterTag("fix-type", (doc, x) => new FixTypeNode(doc, x, replacements));
@@ -241,6 +242,30 @@ namespace SDK.Builder
             }
         }
 
+        private static void GenerateUnityPackage(string dllPath, string bindingPath)
+        {
+            dllPath = FixPath(dllPath);
+            bindingPath = FixPath(bindingPath);
+            var pluginList = new List<string>() { dllPath + "LunarParser.dll", dllPath + "Phantasma.Core.dll", dllPath + "Phantasma.Cryptography.dll", dllPath + "Phantasma.Numerics.dll" };
+
+            var tempPath = @"Phantasma";
+            var pluginPath = tempPath + @"\Plugins";
+            Directory.CreateDirectory(pluginPath);
+            CopyFiles(pluginList, pluginPath);
+
+            CopyFiles(new[] { bindingPath + "PhantasmaAPI.cs" }, tempPath);
+
+            // Create a package object from the given directory
+            var pack = Package.FromDirectory(tempPath, "Phantasma", true, new string[0], new string[0]);
+            pack.GeneratePackage();
+
+            CopyFiles(new[] { "Phantasma.unitypackage" }, bindingPath);
+
+            File.Delete(bindingPath + "PhantasmaAPI.cs");
+
+            RecursiveDelete(new DirectoryInfo(tempPath));
+        }
+
         static void Main(string[] args)
         {
             var arguments = new Arguments(args);
@@ -268,6 +293,8 @@ namespace SDK.Builder
                 CopyFolder(inputPath + @"PhantasmaSDK\" + lang+ @"\Samples\", tempPath + lang + @"\Dapps\");
                 GenerateBindings(inputPath + @"PhantasmaSDK\" + lang + @"\Bindings\", tempPath + lang + @"\Libs\");
             }
+
+            GenerateUnityPackage(inputPath + @"PhantasmaSDK\SDK.Builder\SDK.Builder\bin\Debug", tempPath + @"C#\Libs\");
 
             return;
             CopyFolder(inputPath + @"PhantasmaSpook\Spook.CLI\Publish", tempPath + @"Tools\Spook");

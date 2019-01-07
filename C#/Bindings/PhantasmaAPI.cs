@@ -154,26 +154,25 @@ namespace Phantasma.SDK
 		//{{Info.Description}}
 		public IEnumerator {{Info.Name}}({{#each Info.Parameters}}{{Key.Name}} {{Value}}, {{/each}}Action<{{#fix-type Info.ReturnType.Name}}> callback)  
 		{	   
-			yield return _client.SendRequest(Host, "{{#camel-case Info.Name}}", (node) => {
-{{#if Info.ReturnType.IsPrimitive}}			
-var result = {{#fix-type Info.ReturnType.Name}}.Parse(node.Value);
+			yield return _client.SendRequest(Host, "{{#camel-case Info.Name}}", (node) => { 
+{{#parse-lines false}}
+{{#if Info.ReturnType.IsPrimitive}}
+			var result = {{#fix-type Info.ReturnType.Name}}.Parse(node.Value);
 {{#else}}
 {{#if Info.ReturnType.Name=='String'}}
-var result = node.Value;
+			var result = node.Value;
 {{#else}}
 {{#if Info.ReturnType.IsArray}}
-var result = new {{#array-type Info.ReturnType.Name}}[node.ChildCount];
-for (int i=0; i<result.Length; i++) {
-	var child = node.GetNodeByIndex(i);
-	result[i] = {{#array-type Info.ReturnType.Name}}.FromNode(child);
-}
+			var result = new {{#array-type Info.ReturnType.Name}}[node.ChildCount];{{#new-line}}
+			for (int i=0; i<result.Length; i++) { {{#new-line}}
+				var child = node.GetNodeByIndex(i);{{#new-line}}
+				result[i] = {{#array-type Info.ReturnType.Name}}.FromNode(child);{{#new-line}}
+			}
 {{#else}}
-var result = {{Info.ReturnType.Name}}.FromNode(node);
+			var result = {{Info.ReturnType.Name}}.FromNode(node);
 {{/if}}
 {{/if}}
-{{/if}}
-
-
+{{/if}}{{#parse-lines true}}
 				callback(result);
 			} {{#each Info.Parameters}}, {{Value}}{{/each}});		   
 		}
