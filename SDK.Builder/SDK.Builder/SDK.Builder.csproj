@@ -36,6 +36,9 @@
     <Reference Include="ICSharpCode.SharpZipLib, Version=1.1.0.145, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpZipLib.1.1.0\lib\net45\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
+    <Reference Include="LunarLabs.Server, Version=1.3.10.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\LunarLabs.Server.1.3.10\lib\netstandard2.0\LunarLabs.Server.dll</HintPath>
+    </Reference>
     <Reference Include="LunarParser, Version=1.2.5.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\LunarLabs.Parser.1.2.5\lib\net461\LunarParser.dll</HintPath>
     </Reference>
@@ -61,10 +64,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\LunarServer\LunarServer\LunarServer.csproj">
-      <Project>{a9971155-8292-4019-963b-a7cbcb7f628c}</Project>
-      <Name>LunarServer</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\PhantasmaChain\Phantasma.API\Phantasma.API.csproj">
       <Project>{138fa60f-b19e-492c-a002-7ba66078937f}</Project>
       <Name>Phantasma.API</Name>
