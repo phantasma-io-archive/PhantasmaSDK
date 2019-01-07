@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.Networking;
 
 using System.Collections;
@@ -106,12 +107,18 @@ public class PhantasmaDemo : MonoBehaviour
 
     public void GetAccount(string address)
     {
+        //P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr
+
         Debug.Log("get account 0: " + address);
         var api = new API("http://localhost:7077/rpc");
         StartCoroutine(api.GetAccount(address, result =>
         {
+            CanvasManager.Instance.balanceLabel.text = "Name - " + result.Name + "\n";
+
             foreach (var balanceSheetResult in result.Balances)
             {
+                var amount = Int64.Parse(balanceSheetResult.Amount) / Mathf.Pow(10f, 8);
+                CanvasManager.Instance.balanceLabel.text += balanceSheetResult.Chain + " - " + amount + " " + balanceSheetResult.Symbol + "\n";
                 Debug.Log("balance: " +balanceSheetResult.Chain + " | " + balanceSheetResult.Amount);
             }
 
