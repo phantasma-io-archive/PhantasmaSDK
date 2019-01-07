@@ -3,6 +3,7 @@ packages/
 bin/
 obj/
 Output/
+Go/Workspace/
 /C#/UnitySample/Library
 /C#/UnitySample/Packages
 /C#/UnitySample/Temp

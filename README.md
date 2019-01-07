@@ -38,6 +38,7 @@ Language 		| Core Library	| Smart Compiler | Sample Dapps
 [.NET / C#](/C#) 		| Beta | In Development | Yes
 [PHP](/PHP) 		| Beta | N/A | Yes |
 [Python](/Python) 		| Beta | Planned | In Development |
+[Golang](/Go) 		| Beta | Planned | In Development |
 [Javascript](/JS) 		| Alpha | Planned | In Development |
 
 ## Developing

@@ -15,27 +15,6 @@ using UnityPacker;
 
 namespace SDK.Builder
 {
-    public class ArrayTypeNode : TemplateNode
-    {
-        private RenderingKey key;
-
-        public ArrayTypeNode(Document document, string key) : base(document)
-        {
-            this.key = RenderingKey.Parse(key, RenderingType.String);
-        }
-
-        public override void Execute(RenderingContext context)
-        {
-            var temp = context.EvaluateObject(key);
-
-            if (temp != null)
-            {
-                var result = temp.ToString().Replace("[]", "");
-                context.output.Append(result);
-            }
-        }
-    }
-
     public class FixTypeNode : TemplateNode
     {
         private RenderingKey key;
@@ -54,7 +33,8 @@ namespace SDK.Builder
             if (temp != null)
             {
                 var key = temp.ToString();
-                string result = replacements.ContainsKey(key) ? replacements[key] : key;
+                key = key.Replace("Result", "").Replace("[]", "");
+                string result = replacements.ContainsKey(key) ? replacements[key] : key;                
                 context.output.Append(result);
             }
         }
@@ -207,7 +187,6 @@ namespace SDK.Builder
             var compiler = new Compiler();
             compiler.ParseNewLines = true;
             compiler.RegisterCaseTags();
-            compiler.RegisterTag("array-type", (doc, x) => new ArrayTypeNode(doc, x));
             compiler.RegisterTag("fix-type", (doc, x) => new FixTypeNode(doc, x, replacements));
 
             var data = new Dictionary<string, object>();
@@ -261,7 +240,7 @@ namespace SDK.Builder
 
             CopyFiles(new[] { "Phantasma.unitypackage" }, bindingPath);
 
-            File.Delete(bindingPath + "PhantasmaAPI.cs");
+//            File.Delete(bindingPath + "PhantasmaAPI.cs");
 
             RecursiveDelete(new DirectoryInfo(tempPath));
         }
@@ -288,7 +267,7 @@ namespace SDK.Builder
             var tempPath = outputPath + @"temp\";
             Directory.CreateDirectory(tempPath);
 
-            foreach (var lang in new[] { "C#", "JS", "PHP", "Python" })
+            foreach (var lang in new[] { "C#", "JS", "PHP", "Python", "Go" })
             {
                 CopyFolder(inputPath + @"PhantasmaSDK\" + lang+ @"\Samples\", tempPath + lang + @"\Dapps\");
                 GenerateBindings(inputPath + @"PhantasmaSDK\" + lang + @"\Bindings\", tempPath + lang + @"\Libs\");
