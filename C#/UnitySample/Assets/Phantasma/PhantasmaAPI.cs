@@ -9,6 +9,14 @@ using Phantasma.Cryptography;
 
 namespace Phantasma.SDK
 {
+    public enum EPHANTASMA_SDK_ERROR_TYPE
+    {
+        API_ERROR,
+        WEB_REQUEST_ERROR,
+        FAILED_PARSING_JSON,
+        MALFORMED_RESPONSE
+    }
+
 	public static class APIUtils
     {
         public static long GetInt64(this DataNode node, string name)
@@ -31,7 +39,8 @@ namespace Phantasma.SDK
             client = new WebClient() { Encoding = System.Text.Encoding.UTF8 }; 
         }
 
-        internal IEnumerator SendRequest(string url, string method, Action<DataNode> callback, params object[] parameters)
+        internal IEnumerator SendRequest(string url, string method, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback, 
+                                            Action<DataNode> callback, params object[] parameters)
         {
             string contents;
 
@@ -80,34 +89,41 @@ namespace Phantasma.SDK
             if (www.isNetworkError || www.isHttpError)
             {
                 Debug.Log(www.error);
-				throw new Exception(www.error);
+
+                errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.WEB_REQUEST_ERROR, www.error);
+
+				//throw new Exception(www.error);
             }
             else
             {
                 Debug.Log(www.downloadHandler.text);
-				var root = JSONReader.ReadFromString(www.downloadHandler.text);
-				
-				if (root == null)
-				{
-					throw new Exception("failed to parse JSON");
-				}
-				else 
-				if (root.HasNode("error")) {
-					var errorDesc = root.GetString("error");
-					throw new Exception(errorDesc);
-				}
-				else
-				if (root.HasNode("result"))
-				{
-					var result = root["result"];
-					callback(result);
-				}
-				else {					
-					throw new Exception("malformed response");
-				}				
+                var root = JSONReader.ReadFromString(www.downloadHandler.text);
+
+                if (root == null)
+                {
+                    // TODO FIXE BUG -  qd é invalid address está a entrar aqui quando devia entrar no else if de baixo
+                    //throw new Exception("failed to parse JSON");
+                    errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.FAILED_PARSING_JSON, "failed to parse JSON");
+                }
+                else if (root.HasNode("error"))
+                {
+                    var errorDesc = root.GetString("error");
+                    //throw new Exception(errorDesc);
+                    errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.API_ERROR, errorDesc);
+                }
+                else if (root.HasNode("result"))
+                {
+                    var result = root["result"];
+                    callback(result);
+                }
+                else
+                {
+                    //throw new Exception("malformed response");
+                    errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.MALFORMED_RESPONSE, "malformed response");
+                }
             }
 
-			yield break;
+            yield break;
         }		
    }
    
@@ -608,9 +624,9 @@ public Event[] Events;
 	   
 		
 		//Returns the account name and balance of given address.
-		public IEnumerator GetAccount(string addressText, Action<Account> callback)  
+		public IEnumerator GetAccount(string addressText, Action<Account> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)  
 		{	   
-			yield return _client.SendRequest(Host, "getAccount", (node) => { 
+			yield return _client.SendRequest(Host, "getAccount", errorHandlingCallback,  (node) => { 
 			var result = Account.FromNode(node);
 				callback(result);
 			} , addressText);		   
@@ -618,9 +634,9 @@ public Event[] Events;
 		
 		
 		//Returns the number of transactions of given block hash or error if given hash is invalid or is not found.
-		public IEnumerator GetBlockTransactionCountByHash(string blockHash, Action<int> callback)  
-		{	   
-			yield return _client.SendRequest(Host, "getBlockTransactionCountByHash", (node) => { 
+		public IEnumerator GetBlockTransactionCountByHash(string blockHash, Action<int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
+        {	   
+			yield return _client.SendRequest(Host, "getBlockTransactionCountByHash", errorHandlingCallback, (node) => { 
 			var result = int.Parse(node.Value);
 				callback(result);
 			} , blockHash);		   
@@ -628,9 +644,9 @@ public Event[] Events;
 		
 		
 		//Returns information about a block by hash.
-		public IEnumerator GetBlockByHash(string blockHash, int serialized, Action<Block> callback)  
-		{	   
-			yield return _client.SendRequest(Host, "getBlockByHash", (node) => { 
+		public IEnumerator GetBlockByHash(string blockHash, int serialized, Action<Block> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
+        {	   
+			yield return _client.SendRequest(Host, "getBlockByHash", errorHandlingCallback, (node) => { 
 			var result = Block.FromNode(node);
 				callback(result);
 			} , blockHash, serialized);		   
@@ -638,9 +654,9 @@ public Event[] Events;
 		
 		
 		//Returns information about a block by height and chain.
-		public IEnumerator GetBlockByHeight(Address chainAddress, uint height, int serialized, Action<Block> callback)  
-		{	   
-			yield return _client.SendRequest(Host, "getBlockByHeight", (node) => { 
+		public IEnumerator GetBlockByHeight(Address chainAddress, uint height, int serialized, Action<Block> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
+        {	   
+			yield return _client.SendRequest(Host, "getBlockByHeight", errorHandlingCallback, (node) => { 
 			var result = Block.FromNode(node);
 				callback(result);
 			} , chainAddress, height, serialized);		   
@@ -648,9 +664,9 @@ public Event[] Events;
 		
 		
 		//Returns the information about a transaction requested by a block hash and transaction index.
-		public IEnumerator GetTransactionByBlockHashAndIndex(string blockHash, int index, Action<Transaction> callback)  
-		{	   
-			yield return _client.SendRequest(Host, "getTransactionByBlockHashAndIndex", (node) => { 
+		public IEnumerator GetTransactionByBlockHashAndIndex(string blockHash, int index, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
+        {	   
+			yield return _client.SendRequest(Host, "getTransactionByBlockHashAndIndex", errorHandlingCallback, (node) => { 
 			var result = Transaction.FromNode(node);
 				callback(result);
 			} , blockHash, index);		   
@@ -658,9 +674,9 @@ public Event[] Events;
 		
 		
 		//Returns last X transactions of given address.
-		public IEnumerator GetAddressTransactions(string addressText, int amountTx, Action<AccountTransactions> callback)  
-		{	   
-			yield return _client.SendRequest(Host, "getAddressTransactions", (node) => { 
+		public IEnumerator GetAddressTransactions(string addressText, int amountTx, Action<AccountTransactions> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
+        {	   
+			yield return _client.SendRequest(Host, "getAddressTransactions", errorHandlingCallback, (node) => { 
 			var result = AccountTransactions.FromNode(node);
 				callback(result);
 			} , addressText, amountTx);		   
@@ -668,9 +684,9 @@ public Event[] Events;
 		
 		
 		//TODO document me
-		public IEnumerator GetAddressTransactionCount(string addressText, string chainText, Action<int> callback)  
-		{	   
-			yield return _client.SendRequest(Host, "getAddressTransactionCount", (node) => { 
+		public IEnumerator GetAddressTransactionCount(string addressText, string chainText, Action<int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
+        {	   
+			yield return _client.SendRequest(Host, "getAddressTransactionCount", errorHandlingCallback, (node) => { 
 			var result = int.Parse(node.Value);
 				callback(result);
 			} , addressText, chainText);		   
@@ -678,9 +694,9 @@ public Event[] Events;
 		
 		
 		//Returns the number of confirmations of given transaction hash and other useful info.
-		public IEnumerator GetConfirmations(string hashText, Action<int> callback)  
-		{	   
-			yield return _client.SendRequest(Host, "getConfirmations", (node) => { 
+		public IEnumerator GetConfirmations(string hashText, Action<int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
+        {	   
+			yield return _client.SendRequest(Host, "getConfirmations", errorHandlingCallback, (node) => { 
 			var result = int.Parse(node.Value);
 				callback(result);
 			} , hashText);		   
@@ -688,9 +704,9 @@ public Event[] Events;
 		
 		
 		//Allows to broadcast a signed operation on the network, but it&apos;s required to build it manually.
-		public IEnumerator SendRawTransaction(string txData, Action<string> callback)  
-		{	   
-			yield return _client.SendRequest(Host, "sendRawTransaction", (node) => { 
+		public IEnumerator SendRawTransaction(string txData, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
+        {	   
+			yield return _client.SendRequest(Host, "sendRawTransaction", errorHandlingCallback, (node) => { 
 			var result = node.Value;
 				callback(result);
 			} , txData);		   
@@ -698,9 +714,9 @@ public Event[] Events;
 		
 		
 		//Returns information about a transaction by hash.
-		public IEnumerator GetTransaction(string hashText, Action<Transaction> callback)  
-		{	   
-			yield return _client.SendRequest(Host, "getTransaction", (node) => { 
+		public IEnumerator GetTransaction(string hashText, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
+        {	   
+			yield return _client.SendRequest(Host, "getTransaction", errorHandlingCallback, (node) => { 
 			var result = Transaction.FromNode(node);
 				callback(result);
 			} , hashText);		   
@@ -708,9 +724,9 @@ public Event[] Events;
 		
 		
 		//Returns an array of chains with useful information.
-		public IEnumerator GetChains(Action<Chain[]> callback)  
-		{	   
-			yield return _client.SendRequest(Host, "getChains", (node) => { 
+		public IEnumerator GetChains(Action<Chain[]> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
+        {	   
+			yield return _client.SendRequest(Host, "getChains", errorHandlingCallback, (node) => { 
 			var result = new Chain[node.ChildCount];
 			for (int i=0; i<result.Length; i++) { 
 				var child = node.GetNodeByIndex(i);
@@ -722,9 +738,9 @@ public Event[] Events;
 		
 		
 		//Returns an array of tokens deployed in Phantasma.
-		public IEnumerator GetTokens(Action<Token[]> callback)  
-		{	   
-			yield return _client.SendRequest(Host, "getTokens", (node) => { 
+		public IEnumerator GetTokens(Action<Token[]> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
+        {	   
+			yield return _client.SendRequest(Host, "getTokens", errorHandlingCallback, (node) => { 
 			var result = new Token[node.ChildCount];
 			for (int i=0; i<result.Length; i++) { 
 				var child = node.GetNodeByIndex(i);
@@ -736,9 +752,9 @@ public Event[] Events;
 		
 		
 		//Returns an array of apps deployed in Phantasma.
-		public IEnumerator GetApps(Action<App[]> callback)  
-		{	   
-			yield return _client.SendRequest(Host, "getApps", (node) => { 
+		public IEnumerator GetApps(Action<App[]> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
+        {	   
+			yield return _client.SendRequest(Host, "getApps", errorHandlingCallback, (node) => { 
 			var result = new App[node.ChildCount];
 			for (int i=0; i<result.Length; i++) { 
 				var child = node.GetNodeByIndex(i);
@@ -750,9 +766,9 @@ public Event[] Events;
 		
 		
 		//Returns information about the root chain.
-		public IEnumerator GetRootChain(Action<RootChain> callback)  
-		{	   
-			yield return _client.SendRequest(Host, "getRootChain", (node) => { 
+		public IEnumerator GetRootChain(Action<RootChain> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
+        {	   
+			yield return _client.SendRequest(Host, "getRootChain", errorHandlingCallback, (node) => { 
 			var result = RootChain.FromNode(node);
 				callback(result);
 			} );		   
@@ -760,9 +776,9 @@ public Event[] Events;
 		
 		
 		//Returns last X transactions of given token.
-		public IEnumerator GetTokenTransfers(string tokenSymbol, int amount, Action<Transaction[]> callback)  
-		{	   
-			yield return _client.SendRequest(Host, "getTokenTransfers", (node) => { 
+		public IEnumerator GetTokenTransfers(string tokenSymbol, int amount, Action<Transaction[]> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
+        {	   
+			yield return _client.SendRequest(Host, "getTokenTransfers", errorHandlingCallback, (node) => { 
 			var result = new Transaction[node.ChildCount];
 			for (int i=0; i<result.Length; i++) { 
 				var child = node.GetNodeByIndex(i);
@@ -774,9 +790,9 @@ public Event[] Events;
 		
 		
 		//Returns the number of transaction of a given token.
-		public IEnumerator GetTokenTransferCount(string tokenSymbol, Action<int> callback)  
-		{	   
-			yield return _client.SendRequest(Host, "getTokenTransferCount", (node) => { 
+		public IEnumerator GetTokenTransferCount(string tokenSymbol, Action<int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
+        {	   
+			yield return _client.SendRequest(Host, "getTokenTransferCount", errorHandlingCallback, (node) => { 
 			var result = int.Parse(node.Value);
 				callback(result);
 			} , tokenSymbol);		   
@@ -784,9 +800,9 @@ public Event[] Events;
 		
 		
 		//Returns the balance for a specific token and chain, given an address.
-		public IEnumerator GetTokenBalance(string addressText, string tokenSymbol, string chainInput, Action<Balance> callback)  
-		{	   
-			yield return _client.SendRequest(Host, "getTokenBalance", (node) => { 
+		public IEnumerator GetTokenBalance(string addressText, string tokenSymbol, string chainInput, Action<Balance> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
+        {	   
+			yield return _client.SendRequest(Host, "getTokenBalance", errorHandlingCallback, (node) => { 
 			var result = Balance.FromNode(node);
 				callback(result);
 			} , addressText, tokenSymbol, chainInput);		   

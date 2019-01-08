@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 using System.Collections;
 using System.Collections.Generic;
@@ -115,24 +116,30 @@ public class PhantasmaDemo : MonoBehaviour
 
     public void GetAccount(string address)
     {
+        //TODO fix catching exception when spook client is not available
         //P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr
 
         Debug.Log("get account 0: " + address);
+
         var api = new API("http://localhost:7077/rpc");
         StartCoroutine(api.GetAccount(address, result =>
-        {
-            CanvasManager.Instance.SetBalance("Name: " + result.Name);
-
-            foreach (var balanceSheetResult in result.Balances)
             {
-                var amount = long.Parse(balanceSheetResult.Amount) / Mathf.Pow(10f, 8);
-                CanvasManager.Instance.AddBalanceEntry("Chain: " + balanceSheetResult.Chain + " - " + amount + " " + balanceSheetResult.Symbol);
+                CanvasManager.Instance.SetBalance("Name: " + result.Name);
 
-                Debug.Log("balance: " +balanceSheetResult.Chain + " | " + balanceSheetResult.Amount);
-            }
+                foreach (var balanceSheetResult in result.Balances)
+                {
+                    var amount = long.Parse(balanceSheetResult.Amount) / Mathf.Pow(10f, 8);
+                    CanvasManager.Instance.AddBalanceEntry("Chain: " + balanceSheetResult.Chain + " - " + amount + " " +
+                                                           balanceSheetResult.Symbol);
 
-            LoggedIn(address);
-        }));
+                    Debug.Log("balance: " + balanceSheetResult.Chain + " | " + balanceSheetResult.Amount);
+                }
+
+                LoggedIn(address);
+
+            },
+            (errorType, errorMessage) => { Debug.Log(errorType + " - " + errorMessage); }
+        ));
     }
 
     //public void RegisterName()
@@ -178,20 +185,6 @@ public class PhantasmaDemo : MonoBehaviour
     //        Debug.Log(www.downloadHandler.text);
     //    }
     //}
-
-    public void GetMarket()
-    {
-        // TODO get assets from the blockchain
-
-        var assetsCount = 10;
-
-        for (int i = 0; i < assetsCount; i++)
-        {
-            // Duplicate asset slot template to hold this asset content
-            //var newAsset            
-        }
-
-    }
 
     #endregion
 

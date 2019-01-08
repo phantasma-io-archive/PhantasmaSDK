@@ -27,6 +27,8 @@ public class MarketMenu : MonoBehaviour
 
     public void FillMarket()
     {
+        // TODO get assets from the blockchain
+
         _marketBuyAssets = new List<MyGameAsset>();
 
         foreach (var carImage in PhantasmaDemo.Instance.carImages)
@@ -35,6 +37,7 @@ public class MarketMenu : MonoBehaviour
             newCar.SetAsset(carImage.name, (decimal)Random.Range(0f, 10f), carImage);
 
             var newSlot = Instantiate(assetSlot);
+            newSlot.SetSlot(newCar, EASSET_TYPE.BUY_MARKET_ASSET);
 
             _marketBuyAssets.Add(newCar);
         }
