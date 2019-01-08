@@ -40,9 +40,9 @@ class PhantasmaAPI {
     
 	{{#each methods}}
 	//{{Info.Description}}
-	public function {{#camel-case Info.Name}}({{#each Info.Parameters}}${{Value}}{{#if !@last}}, {{/if}}{{/each}})  
+	public function {{#camel-case Info.Name}}({{#each Info.Parameters}}${{Name}}{{#if !@last}}, {{/if}}{{/each}})  
 	{	   
-		$params = array({{#each Info.Parameters}}${{Value}}{{#if !@last}}, {{/if}}{{/each}});
+		$params = array({{#each Info.Parameters}}${{Name}}{{#if !@last}}, {{/if}}{{/each}});
 		return $this->JSONRPC('{{#camel-case Info.Name}}', $params);	
 	}
 	{{/each}}

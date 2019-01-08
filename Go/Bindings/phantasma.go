@@ -28,9 +28,9 @@ func NewAPI(host string) *phantasma {
 
 {{#each methods}}
 //{{Info.Description}}
-func (api phantasma) {{Info.Name}}({{#each Info.Parameters}}{{Value}} {{#fix-type Key.Name}}{{#if !@last}}, {{/if}}{{/each}}) {{#if Info.ReturnType.IsArray}}[]{{/if}}*{{#fix-type Info.ReturnType.Name}} {
+func (api phantasma) {{Info.Name}}({{#each Info.Parameters}}{{Name}} {{#fix-type Type.Name}}{{#if !@last}}, {{/if}}{{/each}}) {{#if Info.ReturnType.IsArray}}[]{{/if}}*{{#fix-type Info.ReturnType.Name}} {
     var result {{#if Info.ReturnType.IsArray}}[]{{/if}}*{{#fix-type Info.ReturnType.Name}}
-    err := api.rpcClient.CallFor(&result, "{{#camel-case Info.Name}}"{{#each Info.Parameters}}, {{Value}}{{/each}})
+    err := api.rpcClient.CallFor(&result, "{{#camel-case Info.Name}}"{{#each Info.Parameters}}, {{Name}}{{/each}})
     if err != nil {
 		log.Fatal(err)
     }

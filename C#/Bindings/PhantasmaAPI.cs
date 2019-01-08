@@ -151,7 +151,7 @@ namespace Phantasma.SDK
 	   
 		{{#each methods}}
 		//{{Info.Description}}
-		public IEnumerator {{Info.Name}}({{#each Info.Parameters}}{{#fix-type Key.Name}} {{Value}}, {{/each}}Action<{{#fix-type Info.ReturnType.Name}}{{#if Info.ReturnType.IsArray}}[]{{/if}}> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		public IEnumerator {{Info.Name}}({{#each Info.Parameters}}{{#fix-type Type.Name}} {{Name}}, {{/each}}Action<{{#fix-type Info.ReturnType.Name}}{{#if Info.ReturnType.IsArray}}[]{{/if}}> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
 		{	   
 			yield return _client.SendRequest(Host, "{{#camel-case Info.Name}}", errorHandlingCallback, (node) => { 
 {{#parse-lines false}}
@@ -173,7 +173,7 @@ namespace Phantasma.SDK
 {{/if}}
 {{/if}}{{#parse-lines true}}
 				callback(result);
-			} {{#each Info.Parameters}}, {{Value}}{{/each}});		   
+			} {{#each Info.Parameters}}, {{Name}}{{/each}});		   
 		}
 		
 		{{/each}}

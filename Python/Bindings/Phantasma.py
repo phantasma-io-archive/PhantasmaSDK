@@ -21,9 +21,18 @@ class PhantasmaAPI:
 		return response["result"]
 
 {{#each methods}}
-	'''{{Info.Description}}'''
-	def {{#camel-case Info.Name}}(self{{#each Info.Parameters}}, {{Value}}{{/each}}):	
-		params = [{{#each Info.Parameters}}{{Value}}{{#if !@last}}, {{/if}}{{/each}}];
+	def {{#camel-case Info.Name}}(self{{#each Info.Parameters}}, {{Name}}{{/each}}):	
+		"""
+		{{Info.Description}}
+		{{#if Info.Parameters}}
+		Args:{{#each Info.Parameters}}
+			{{Name}}: {{Description}}{{/each}}
+		{{#else}}
+		Args:
+			None
+		{{/if}}
+		"""
+		params = [{{#each Info.Parameters}}{{Name}}{{#if !@last}}, {{/if}}{{/each}}];
 		return __JSON_RPC(self, "{{#camel-case Info.Name}}", params);	
 	{{/each}}
 	
