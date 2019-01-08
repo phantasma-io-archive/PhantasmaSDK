@@ -29,11 +29,13 @@ public class AssetSlot : MonoBehaviour
 		
 	}
 
-    public void SetSlot(MyGameAsset asset, EASSET_TYPE type)
+    public void SetSlot(MyGameAsset gameAsset, EASSET_TYPE type)
     {
-        nameText.text       = asset.Name;
-        priceText.text      = asset.Price.ToString(CultureInfo.InvariantCulture);
-        assetImage.sprite   = asset.Icon;
+        asset = gameAsset;
+
+        nameText.text       = gameAsset.Name;
+        priceText.text      = gameAsset.Price.ToString(CultureInfo.InvariantCulture);
+        assetImage.sprite   = gameAsset.Icon;
 
         switch (type)
         {
@@ -64,7 +66,7 @@ public class AssetSlot : MonoBehaviour
     /// </summary>
     public void BuyAsset()
     {
-
+        PhantasmaDemo.Instance.market.BuyAsset(asset);
     }
 
     /// <summary>
@@ -72,7 +74,7 @@ public class AssetSlot : MonoBehaviour
     /// </summary>
     public void SellAsset()
     {
-
+        PhantasmaDemo.Instance.market.SellAsset(asset);
     }
 
     /// <summary>
@@ -80,6 +82,6 @@ public class AssetSlot : MonoBehaviour
     /// </summary>
     public void RemoveAsset()
     {
-
+        PhantasmaDemo.Instance.market.RemoveAsset(asset);
     }
 }

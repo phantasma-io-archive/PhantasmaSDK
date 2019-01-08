@@ -28,34 +28,44 @@ public class Market : MonoBehaviour
 
             MarketBuyAssets.Add(newCar);
         }
-
-        CanvasManager.Instance.marketMenu.UpdateMarket();
     }
 
     /// <summary>
     /// Buy an asset from the market and add it to my assets
     /// </summary>
     /// <param name="assetSlot"></param>
-    public void BuyAsset(AssetSlot assetSlot)
+    public void BuyAsset(MyGameAsset asset)
     {
+        MarketBuyAssets.Remove(asset);
 
+        PhantasmaDemo.Instance.MyAssets.Add(asset);
+
+        CanvasManager.Instance.marketMenu.UpdateMarket(MarketMenu.EMARKETPLACE_TYPE.BUY);
     }
 
     /// <summary>
     /// Put an asset for sale on the market
     /// </summary>
     /// <param name="assetSlot"></param>
-    public void SellAsset(AssetSlot assetSlot)
+    public void SellAsset(MyGameAsset asset)
     {
+        MarketSellAssets.Add(asset);
 
+        PhantasmaDemo.Instance.MyAssets.Remove(asset);
+
+        CanvasManager.Instance.marketMenu.UpdateMarket(MarketMenu.EMARKETPLACE_TYPE.SELL);
     }
 
     /// <summary>
     /// Remove an asset that is for sale on the market
     /// </summary>
     /// <param name="assetSlot"></param>
-    public void RemoveAsset(AssetSlot assetSlot)
+    public void RemoveAsset(MyGameAsset asset)
     {
+        MarketSellAssets.Remove(asset);
 
+        PhantasmaDemo.Instance.MyAssets.Add(asset);
+
+        CanvasManager.Instance.marketMenu.UpdateMarket(MarketMenu.EMARKETPLACE_TYPE.SELL);
     }
 }

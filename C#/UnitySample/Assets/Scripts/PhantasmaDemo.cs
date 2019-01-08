@@ -34,7 +34,7 @@ public class PhantasmaDemo : MonoBehaviour
     private EWALLET_STATE state = EWALLET_STATE.INIT;
     private decimal balance;
 
-    private List<MyGameAsset> _myAssets;
+    public List<MyGameAsset> MyAssets { get; set; }
 
     private static PhantasmaDemo _instance;
     public static PhantasmaDemo Instance
@@ -44,7 +44,7 @@ public class PhantasmaDemo : MonoBehaviour
 
     private void Awake()
     {
-
+        MyAssets = new List<MyGameAsset>();
     }
 
     private void Start ()
@@ -118,12 +118,12 @@ public class PhantasmaDemo : MonoBehaviour
         var api = new API("http://localhost:7077/rpc");
         StartCoroutine(api.GetAccount(address, result =>
             {
-                CanvasManager.Instance.accountMenu.SetBalance("Name: " + result.Name);
+                CanvasManager.Instance.accountMenu.SetBalance("Name: " + result.name);
 
-                foreach (var balanceSheetResult in result.Balances)
+                foreach (var balanceSheetResult in result.balances)
                 {
-                    var amount = decimal.Parse(balanceSheetResult.Amount) / (decimal) Mathf.Pow(10f, 8);
-                    CanvasManager.Instance.accountMenu.AddBalanceEntry("Chain: " + balanceSheetResult.Chain + " - " + amount + " " + balanceSheetResult.Symbol);
+                    var amount = decimal.Parse(balanceSheetResult.amount) / (decimal) Mathf.Pow(10f, 8);
+                    CanvasManager.Instance.accountMenu.AddBalanceEntry("Chain: " + balanceSheetResult.chain + " - " + amount + " " + balanceSheetResult.symbol);
 
                     //Debug.Log("balance: " + balanceSheetResult.Chain + " | " + balanceSheetResult.Amount);
                 }

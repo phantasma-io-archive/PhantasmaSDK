@@ -1,11 +1,9 @@
 using System;
-using System.Net;
 using System.Collections;
 using LunarLabs.Parser;
 using LunarLabs.Parser.JSON;
 using UnityEngine;
 using UnityEngine.Networking;
-using Phantasma.Cryptography;
 
 namespace Phantasma.SDK
 {
@@ -17,14 +15,14 @@ namespace Phantasma.SDK
         MALFORMED_RESPONSE
     }
 
-	public static class APIUtils
+	internal static class APIUtils
     {
-        public static long GetInt64(this DataNode node, string name)
+        internal static long GetInt64(this DataNode node, string name)
         {
             return node.GetLong(name);
         }
 
-        public static bool GetBoolean(this DataNode node, string name)
+        internal static bool GetBoolean(this DataNode node, string name)
         {
             return node.GetBool(name);
         }
@@ -32,13 +30,6 @@ namespace Phantasma.SDK
 
     internal class JSONRPC_Client
     {
-        private WebClient client;
-
-        internal JSONRPC_Client()
-        {
-            client = new WebClient() { Encoding = System.Text.Encoding.UTF8 }; 
-        }
-
         internal IEnumerator SendRequest(string url, string method, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback, 
                                             Action<DataNode> callback, params object[] parameters)
         {
@@ -74,9 +65,7 @@ namespace Phantasma.SDK
 
             try
             {
-                //client.Headers.Add("Content-Type", "application/json-rpc");
 				json = JSONWriter.WriteToString(jsonRpcData);
-				//contents = client.UploadString(url, json);
             }
             catch (Exception e)
             {
@@ -89,74 +78,62 @@ namespace Phantasma.SDK
             if (www.isNetworkError || www.isHttpError)
             {
                 Debug.Log(www.error);
-
-                errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.WEB_REQUEST_ERROR, www.error);
-
-				//throw new Exception(www.error);
+				if (errorHandlingCallback != null) errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.WEB_REQUEST_ERROR, www.error);			
             }
             else
             {
                 Debug.Log(www.downloadHandler.text);
-                var root = JSONReader.ReadFromString(www.downloadHandler.text);
-
-                if (root == null)
-                {
-                    //throw new Exception("failed to parse JSON");
-                    errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.FAILED_PARSING_JSON, "failed to parse JSON");
-                }
-                else if (root.HasNode("error"))
-                {
-                    // TODO FIX BUG - o root.GetString("error") devolve uma string vazia em vez de devolver por ex: {"code": -32603, "message": "invalid address"}
-                    var errorDesc = root.GetString("error");
-                    //throw new Exception(errorDesc);
-                    errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.API_ERROR, errorDesc);
-                }
-                else if (root.HasNode("result"))
-                {
-                    var result = root["result"];
-                    callback(result);
-                }
-                else
-                {
-                    //throw new Exception("malformed response");
-                    errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.MALFORMED_RESPONSE, "malformed response");
-                }
+				var root = JSONReader.ReadFromString(www.downloadHandler.text);
+				
+				if (root == null)
+				{
+					if (errorHandlingCallback != null) errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.FAILED_PARSING_JSON, "failed to parse JSON");
+				}
+				else 
+				if (root.HasNode("error")) {
+					var errorDesc = root.GetString("error");
+					if (errorHandlingCallback != null) errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.API_ERROR, errorDesc);
+				}
+				else
+				if (root.HasNode("result"))
+				{
+					var result = root["result"];
+					callback(result);
+				}
+				else {					
+					if (errorHandlingCallback != null) errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.MALFORMED_RESPONSE, "malformed response");
+				}				
             }
 
-            yield break;
+			yield break;
         }		
    }
    
    
-	public struct Account 
+	public struct Balance 
 	{
-		
-public string Address;
-
-		
-public string Name;
-
-		
-public Balance[] Balances;
-
+		public string chain;
+		public string amount;
+		public string symbol;
+		public string[] ids;
 	   
-		public static Account FromNode(DataNode node) 
+		public static Balance FromNode(DataNode node) 
 		{
-			Account result;
+			Balance result;
 						
-			result.Address = node.GetString("address");						
-			result.Name = node.GetString("name");			
-			var Balances_array = node.GetNode("balances");
-			if (Balances_array != null) {
-				result.Balances = new Balance[Balances_array.ChildCount];
-				for (int i=0; i < Balances_array.ChildCount; i++) {
-					
-					result.Balances[i] = Balance.FromNode(Balances_array.GetNodeByIndex(i));
-					
+			result.chain = node.GetString("chain");						
+			result.amount = node.GetString("amount");						
+			result.symbol = node.GetString("symbol");			
+			var ids_array = node.GetNode("ids");
+			if (ids_array != null) {
+				result.ids = new string[ids_array.ChildCount];
+				for (int i=0; i < ids_array.ChildCount; i++) {
+											
+					result.ids[i] = ids_array.GetNodeByIndex(i).AsString();
 				}
 			}
 			else {
-				result.Balances = new Balance[0];
+				result.ids = new string[0];
 			}
 			
 
@@ -164,38 +141,29 @@ public Balance[] Balances;
 		}
 	}
 	
-	public struct Balance 
+	public struct Account 
 	{
-		
-public string Chain;
-
-		
-public string Amount;
-
-		
-public string Symbol;
-
-		
-public String[] Ids;
-
+		public string address;
+		public string name;
+		public Balance[] balances;
 	   
-		public static Balance FromNode(DataNode node) 
+		public static Account FromNode(DataNode node) 
 		{
-			Balance result;
+			Account result;
 						
-			result.Chain = node.GetString("chain");						
-			result.Amount = node.GetString("amount");						
-			result.Symbol = node.GetString("symbol");			
-			var Ids_array = node.GetNode("ids");
-			if (Ids_array != null) {
-				result.Ids = new String[Ids_array.ChildCount];
-				for (int i=0; i < Ids_array.ChildCount; i++) {
+			result.address = node.GetString("address");						
+			result.name = node.GetString("name");			
+			var balances_array = node.GetNode("balances");
+			if (balances_array != null) {
+				result.balances = new Balance[balances_array.ChildCount];
+				for (int i=0; i < balances_array.ChildCount; i++) {
 					
-					result.Ids[i] = Ids_array.GetNodeByIndex(i).AsString();
+					result.balances[i] = Balance.FromNode(balances_array.GetNodeByIndex(i));
+					
 				}
 			}
 			else {
-				result.Ids = new String[0];
+				result.balances = new Balance[0];
 			}
 			
 
@@ -205,43 +173,19 @@ public String[] Ids;
 	
 	public struct Chain 
 	{
-		
-public string Name;
-
-		
-public string Address;
-
-		
-public string ParentAddress;
-
-		
-public uint Height;
-
-		
-public Chain[] Children;
-
+		public string name;
+		public string address;
+		public string parentAddress;
+		public uint height;
 	   
 		public static Chain FromNode(DataNode node) 
 		{
 			Chain result;
 						
-			result.Name = node.GetString("name");						
-			result.Address = node.GetString("address");						
-			result.ParentAddress = node.GetString("parentAddress");						
-			result.Height = node.GetUInt32("height");			
-			var Children_array = node.GetNode("children");
-			if (Children_array != null) {
-				result.Children = new Chain[Children_array.ChildCount];
-				for (int i=0; i < Children_array.ChildCount; i++) {
-					
-					result.Children[i] = Chain.FromNode(Children_array.GetNodeByIndex(i));
-					
-				}
-			}
-			else {
-				result.Children = new Chain[0];
-			}
-			
+			result.name = node.GetString("name");						
+			result.address = node.GetString("address");						
+			result.parentAddress = node.GetString("parentAddress");						
+			result.height = node.GetUInt32("height");
 
 			return result;			
 		}
@@ -249,57 +193,73 @@ public Chain[] Children;
 	
 	public struct App 
 	{
-		
-public string Description;
-
-		
-public string Icon;
-
-		
-public string Id;
-
-		
-public string Title;
-
-		
-public string Url;
-
+		public string id;
+		public string title;
+		public string url;
+		public string description;
+		public string icon;
 	   
 		public static App FromNode(DataNode node) 
 		{
 			App result;
 						
-			result.Description = node.GetString("description");						
-			result.Icon = node.GetString("icon");						
-			result.Id = node.GetString("id");						
-			result.Title = node.GetString("title");						
-			result.Url = node.GetString("url");
+			result.id = node.GetString("id");						
+			result.title = node.GetString("title");						
+			result.url = node.GetString("url");						
+			result.description = node.GetString("description");						
+			result.icon = node.GetString("icon");
 
 			return result;			
 		}
 	}
 	
-	public struct AppList 
+	public struct Event 
 	{
-		
-public App[] Apps;
-
+		public string address;
+		public string kind;
+		public string data;
 	   
-		public static AppList FromNode(DataNode node) 
+		public static Event FromNode(DataNode node) 
 		{
-			AppList result;
-			
-			var Apps_array = node.GetNode("apps");
-			if (Apps_array != null) {
-				result.Apps = new App[Apps_array.ChildCount];
-				for (int i=0; i < Apps_array.ChildCount; i++) {
+			Event result;
+						
+			result.address = node.GetString("address");						
+			result.kind = node.GetString("kind");						
+			result.data = node.GetString("data");
+
+			return result;			
+		}
+	}
+	
+	public struct Transaction 
+	{
+		public string hash;
+		public string chainAddress;
+		public uint timestamp;
+		public uint blockHeight;
+		public string script;
+		public Event[] events;
+	   
+		public static Transaction FromNode(DataNode node) 
+		{
+			Transaction result;
+						
+			result.hash = node.GetString("hash");						
+			result.chainAddress = node.GetString("chainAddress");						
+			result.timestamp = node.GetUInt32("timestamp");						
+			result.blockHeight = node.GetUInt32("blockHeight");						
+			result.script = node.GetString("script");			
+			var events_array = node.GetNode("events");
+			if (events_array != null) {
+				result.events = new Event[events_array.ChildCount];
+				for (int i=0; i < events_array.ChildCount; i++) {
 					
-					result.Apps[i] = App.FromNode(Apps_array.GetNodeByIndex(i));
+					result.events[i] = Event.FromNode(events_array.GetNodeByIndex(i));
 					
 				}
 			}
 			else {
-				result.Apps = new App[0];
+				result.events = new Event[0];
 			}
 			
 
@@ -309,33 +269,27 @@ public App[] Apps;
 	
 	public struct AccountTransactions 
 	{
-		
-public string Address;
-
-		
-public long Amount;
-
-		
-public Transaction[] Txs;
-
+		public string address;
+		public uint amount;
+		public Transaction[] txs;
 	   
 		public static AccountTransactions FromNode(DataNode node) 
 		{
 			AccountTransactions result;
 						
-			result.Address = node.GetString("address");						
-			result.Amount = node.GetInt64("amount");			
-			var Txs_array = node.GetNode("txs");
-			if (Txs_array != null) {
-				result.Txs = new Transaction[Txs_array.ChildCount];
-				for (int i=0; i < Txs_array.ChildCount; i++) {
+			result.address = node.GetString("address");						
+			result.amount = node.GetUInt32("amount");			
+			var txs_array = node.GetNode("txs");
+			if (txs_array != null) {
+				result.txs = new Transaction[txs_array.ChildCount];
+				for (int i=0; i < txs_array.ChildCount; i++) {
 					
-					result.Txs[i] = Transaction.FromNode(Txs_array.GetNodeByIndex(i));
+					result.txs[i] = Transaction.FromNode(txs_array.GetNodeByIndex(i));
 					
 				}
 			}
 			else {
-				result.Txs = new Transaction[0];
+				result.txs = new Transaction[0];
 			}
 			
 
@@ -345,87 +299,41 @@ public Transaction[] Txs;
 	
 	public struct Block 
 	{
-		
-public string Hash;
-
-		
-public string PreviousHash;
-
-		
-public long Timestamp;
-
-		
-public long Height;
-
-		
-public string ChainAddress;
-
-		
-public long Nonce;
-
-		
-public string Payload;
-
-		
-public Transaction[] Txs;
-
-		
-public string MinerAddress;
-
-		
-public Decimal Reward;
-
+		public string hash;
+		public string previousHash;
+		public uint timestamp;
+		public uint height;
+		public string chainAddress;
+		public string payload;
+		public Transaction[] txs;
+		public string validatorAddress;
+		public string reward;
 	   
 		public static Block FromNode(DataNode node) 
 		{
 			Block result;
 						
-			result.Hash = node.GetString("hash");						
-			result.PreviousHash = node.GetString("previousHash");						
-			result.Timestamp = node.GetInt64("timestamp");						
-			result.Height = node.GetInt64("height");						
-			result.ChainAddress = node.GetString("chainAddress");						
-			result.Nonce = node.GetInt64("nonce");						
-			result.Payload = node.GetString("payload");			
-			var Txs_array = node.GetNode("txs");
-			if (Txs_array != null) {
-				result.Txs = new Transaction[Txs_array.ChildCount];
-				for (int i=0; i < Txs_array.ChildCount; i++) {
+			result.hash = node.GetString("hash");						
+			result.previousHash = node.GetString("previousHash");						
+			result.timestamp = node.GetUInt32("timestamp");						
+			result.height = node.GetUInt32("height");						
+			result.chainAddress = node.GetString("chainAddress");						
+			result.payload = node.GetString("payload");			
+			var txs_array = node.GetNode("txs");
+			if (txs_array != null) {
+				result.txs = new Transaction[txs_array.ChildCount];
+				for (int i=0; i < txs_array.ChildCount; i++) {
 					
-					result.Txs[i] = Transaction.FromNode(Txs_array.GetNodeByIndex(i));
+					result.txs[i] = Transaction.FromNode(txs_array.GetNodeByIndex(i));
 					
 				}
 			}
 			else {
-				result.Txs = new Transaction[0];
+				result.txs = new Transaction[0];
 			}
 									
-			result.MinerAddress = node.GetString("minerAddress");						
-			result.Reward = node.GetDecimal("reward");
-
-			return result;			
-		}
-	}
-	
-	public struct Event 
-	{
-		
-public string Address;
-
-		
-public string Data;
-
-		
-public string Kind;
-
-	   
-		public static Event FromNode(DataNode node) 
-		{
-			Event result;
-						
-			result.Address = node.GetString("address");						
-			result.Data = node.GetString("data");						
-			result.Kind = node.GetString("kind");
+			result.validatorAddress = node.GetString("validatorAddress");						
+			result.reward = node.GetString("reward");
 
 			return result;			
 		}
@@ -433,23 +341,17 @@ public string Kind;
 	
 	public struct RootChain 
 	{
-		
-public string Name;
-
-		
-public string Address;
-
-		
-public uint Height;
-
+		public string name;
+		public string address;
+		public uint height;
 	   
 		public static RootChain FromNode(DataNode node) 
 		{
 			RootChain result;
 						
-			result.Name = node.GetString("name");						
-			result.Address = node.GetString("address");						
-			result.Height = node.GetUInt32("height");
+			result.name = node.GetString("name");						
+			result.address = node.GetString("address");						
+			result.height = node.GetUInt32("height");
 
 			return result;			
 		}
@@ -457,67 +359,25 @@ public uint Height;
 	
 	public struct Token 
 	{
-		
-public string Symbol;
-
-		
-public string Name;
-
-		
-public int Decimals;
-
-		
-public Boolean IsFungible;
-
-		
-public string CurrentSupply;
-
-		
-public string MaxSupply;
-
-		
-public string Owner;
-
+		public string symbol;
+		public string name;
+		public int decimals;
+		public string currentSupply;
+		public string maxSupply;
+		public string ownerAddress;
+		public Boolean isFungible;
 	   
 		public static Token FromNode(DataNode node) 
 		{
 			Token result;
 						
-			result.Symbol = node.GetString("symbol");						
-			result.Name = node.GetString("name");						
-			result.Decimals = node.GetInt32("decimals");						
-			result.IsFungible = node.GetBoolean("isFungible");						
-			result.CurrentSupply = node.GetString("currentSupply");						
-			result.MaxSupply = node.GetString("maxSupply");						
-			result.Owner = node.GetString("owner");
-
-			return result;			
-		}
-	}
-	
-	public struct TokenList 
-	{
-		
-public Token[] Tokens;
-
-	   
-		public static TokenList FromNode(DataNode node) 
-		{
-			TokenList result;
-			
-			var Tokens_array = node.GetNode("tokens");
-			if (Tokens_array != null) {
-				result.Tokens = new Token[Tokens_array.ChildCount];
-				for (int i=0; i < Tokens_array.ChildCount; i++) {
-					
-					result.Tokens[i] = Token.FromNode(Tokens_array.GetNodeByIndex(i));
-					
-				}
-			}
-			else {
-				result.Tokens = new Token[0];
-			}
-			
+			result.symbol = node.GetString("symbol");						
+			result.name = node.GetString("name");						
+			result.decimals = node.GetInt32("decimals");						
+			result.currentSupply = node.GetString("currentSupply");						
+			result.maxSupply = node.GetString("maxSupply");						
+			result.ownerAddress = node.GetString("ownerAddress");						
+			result.isFungible = node.GetBoolean("isFungible");
 
 			return result;			
 		}
@@ -525,87 +385,19 @@ public Token[] Tokens;
 	
 	public struct TxConfirmation 
 	{
-		
-public string Hash;
-
-		
-public string Chain;
-
-		
-public int Confirmations;
-
-		
-public uint Height;
-
+		public string hash;
+		public string chainAddress;
+		public int confirmations;
+		public uint height;
 	   
 		public static TxConfirmation FromNode(DataNode node) 
 		{
 			TxConfirmation result;
 						
-			result.Hash = node.GetString("hash");						
-			result.Chain = node.GetString("chain");						
-			result.Confirmations = node.GetInt32("confirmations");						
-			result.Height = node.GetUInt32("height");
-
-			return result;			
-		}
-	}
-	
-	public struct Transaction 
-	{
-		
-public string Txid;
-
-		
-public string ChainAddress;
-
-		
-public string ChainName;
-
-		
-public uint Timestamp;
-
-		
-public uint BlockHeight;
-
-		
-public Decimal GasLimit;
-
-		
-public Decimal GasPrice;
-
-		
-public string Script;
-
-		
-public Event[] Events;
-
-	   
-		public static Transaction FromNode(DataNode node) 
-		{
-			Transaction result;
-						
-			result.Txid = node.GetString("txid");						
-			result.ChainAddress = node.GetString("chainAddress");						
-			result.ChainName = node.GetString("chainName");						
-			result.Timestamp = node.GetUInt32("timestamp");						
-			result.BlockHeight = node.GetUInt32("blockHeight");						
-			result.GasLimit = node.GetDecimal("gasLimit");						
-			result.GasPrice = node.GetDecimal("gasPrice");						
-			result.Script = node.GetString("script");			
-			var Events_array = node.GetNode("events");
-			if (Events_array != null) {
-				result.Events = new Event[Events_array.ChildCount];
-				for (int i=0; i < Events_array.ChildCount; i++) {
-					
-					result.Events[i] = Event.FromNode(Events_array.GetNodeByIndex(i));
-					
-				}
-			}
-			else {
-				result.Events = new Event[0];
-			}
-			
+			result.hash = node.GetString("hash");						
+			result.chainAddress = node.GetString("chainAddress");						
+			result.confirmations = node.GetInt32("confirmations");						
+			result.height = node.GetUInt32("height");
 
 			return result;			
 		}
@@ -624,9 +416,9 @@ public Event[] Events;
 	   
 		
 		//Returns the account name and balance of given address.
-		public IEnumerator GetAccount(string addressText, Action<Account> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)  
+		public IEnumerator GetAccount(string addressText, Action<Account> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
 		{	   
-			yield return _client.SendRequest(Host, "getAccount", errorHandlingCallback,  (node) => { 
+			yield return _client.SendRequest(Host, "getAccount", errorHandlingCallback, (node) => { 
 			var result = Account.FromNode(node);
 				callback(result);
 			} , addressText);		   
@@ -634,8 +426,8 @@ public Event[] Events;
 		
 		
 		//Returns the number of transactions of given block hash or error if given hash is invalid or is not found.
-		public IEnumerator GetBlockTransactionCountByHash(string blockHash, Action<int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
-        {	   
+		public IEnumerator GetBlockTransactionCountByHash(string blockHash, Action<int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
 			yield return _client.SendRequest(Host, "getBlockTransactionCountByHash", errorHandlingCallback, (node) => { 
 			var result = int.Parse(node.Value);
 				callback(result);
@@ -644,28 +436,48 @@ public Event[] Events;
 		
 		
 		//Returns information about a block by hash.
-		public IEnumerator GetBlockByHash(string blockHash, int serialized, Action<Block> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
-        {	   
+		public IEnumerator GetBlockByHash(string blockHash, Action<Block> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
 			yield return _client.SendRequest(Host, "getBlockByHash", errorHandlingCallback, (node) => { 
 			var result = Block.FromNode(node);
 				callback(result);
-			} , blockHash, serialized);		   
+			} , blockHash);		   
+		}
+		
+		
+		//Returns information about a block (encoded) by hash.
+		public IEnumerator GetRawBlockByHash(string blockHash, Action<Block> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
+			yield return _client.SendRequest(Host, "getRawBlockByHash", errorHandlingCallback, (node) => { 
+			var result = Block.FromNode(node);
+				callback(result);
+			} , blockHash);		   
 		}
 		
 		
 		//Returns information about a block by height and chain.
-		public IEnumerator GetBlockByHeight(Address chainAddress, uint height, int serialized, Action<Block> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
-        {	   
+		public IEnumerator GetBlockByHeight(string chainInput, uint height, Action<Block> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
 			yield return _client.SendRequest(Host, "getBlockByHeight", errorHandlingCallback, (node) => { 
 			var result = Block.FromNode(node);
 				callback(result);
-			} , chainAddress, height, serialized);		   
+			} , chainInput, height);		   
+		}
+		
+		
+		//Returns information about a block by height and chain.
+		public IEnumerator GetRawBlockByHeight(string chainInput, uint height, Action<Block> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
+			yield return _client.SendRequest(Host, "getRawBlockByHeight", errorHandlingCallback, (node) => { 
+			var result = Block.FromNode(node);
+				callback(result);
+			} , chainInput, height);		   
 		}
 		
 		
 		//Returns the information about a transaction requested by a block hash and transaction index.
-		public IEnumerator GetTransactionByBlockHashAndIndex(string blockHash, int index, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
-        {	   
+		public IEnumerator GetTransactionByBlockHashAndIndex(string blockHash, int index, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
 			yield return _client.SendRequest(Host, "getTransactionByBlockHashAndIndex", errorHandlingCallback, (node) => { 
 			var result = Transaction.FromNode(node);
 				callback(result);
@@ -674,8 +486,8 @@ public Event[] Events;
 		
 		
 		//Returns last X transactions of given address.
-		public IEnumerator GetAddressTransactions(string addressText, int amountTx, Action<AccountTransactions> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
-        {	   
+		public IEnumerator GetAddressTransactions(string addressText, int amountTx, Action<AccountTransactions> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
 			yield return _client.SendRequest(Host, "getAddressTransactions", errorHandlingCallback, (node) => { 
 			var result = AccountTransactions.FromNode(node);
 				callback(result);
@@ -684,8 +496,8 @@ public Event[] Events;
 		
 		
 		//TODO document me
-		public IEnumerator GetAddressTransactionCount(string addressText, string chainText, Action<int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
-        {	   
+		public IEnumerator GetAddressTransactionCount(string addressText, string chainText, Action<int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
 			yield return _client.SendRequest(Host, "getAddressTransactionCount", errorHandlingCallback, (node) => { 
 			var result = int.Parse(node.Value);
 				callback(result);
@@ -694,8 +506,8 @@ public Event[] Events;
 		
 		
 		//Returns the number of confirmations of given transaction hash and other useful info.
-		public IEnumerator GetConfirmations(string hashText, Action<int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
-        {	   
+		public IEnumerator GetConfirmations(string hashText, Action<int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
 			yield return _client.SendRequest(Host, "getConfirmations", errorHandlingCallback, (node) => { 
 			var result = int.Parse(node.Value);
 				callback(result);
@@ -704,8 +516,8 @@ public Event[] Events;
 		
 		
 		//Allows to broadcast a signed operation on the network, but it&apos;s required to build it manually.
-		public IEnumerator SendRawTransaction(string txData, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
-        {	   
+		public IEnumerator SendRawTransaction(string txData, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
 			yield return _client.SendRequest(Host, "sendRawTransaction", errorHandlingCallback, (node) => { 
 			var result = node.Value;
 				callback(result);
@@ -714,8 +526,8 @@ public Event[] Events;
 		
 		
 		//Returns information about a transaction by hash.
-		public IEnumerator GetTransaction(string hashText, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
-        {	   
+		public IEnumerator GetTransaction(string hashText, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
 			yield return _client.SendRequest(Host, "getTransaction", errorHandlingCallback, (node) => { 
 			var result = Transaction.FromNode(node);
 				callback(result);
@@ -724,8 +536,8 @@ public Event[] Events;
 		
 		
 		//Returns an array of chains with useful information.
-		public IEnumerator GetChains(Action<Chain[]> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
-        {	   
+		public IEnumerator GetChains(Action<Chain[]> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
 			yield return _client.SendRequest(Host, "getChains", errorHandlingCallback, (node) => { 
 			var result = new Chain[node.ChildCount];
 			for (int i=0; i<result.Length; i++) { 
@@ -738,8 +550,8 @@ public Event[] Events;
 		
 		
 		//Returns an array of tokens deployed in Phantasma.
-		public IEnumerator GetTokens(Action<Token[]> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
-        {	   
+		public IEnumerator GetTokens(Action<Token[]> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
 			yield return _client.SendRequest(Host, "getTokens", errorHandlingCallback, (node) => { 
 			var result = new Token[node.ChildCount];
 			for (int i=0; i<result.Length; i++) { 
@@ -752,8 +564,8 @@ public Event[] Events;
 		
 		
 		//Returns an array of apps deployed in Phantasma.
-		public IEnumerator GetApps(Action<App[]> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
-        {	   
+		public IEnumerator GetApps(Action<App[]> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
 			yield return _client.SendRequest(Host, "getApps", errorHandlingCallback, (node) => { 
 			var result = new App[node.ChildCount];
 			for (int i=0; i<result.Length; i++) { 
@@ -766,8 +578,8 @@ public Event[] Events;
 		
 		
 		//Returns information about the root chain.
-		public IEnumerator GetRootChain(Action<RootChain> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
-        {	   
+		public IEnumerator GetRootChain(Action<RootChain> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
 			yield return _client.SendRequest(Host, "getRootChain", errorHandlingCallback, (node) => { 
 			var result = RootChain.FromNode(node);
 				callback(result);
@@ -776,8 +588,8 @@ public Event[] Events;
 		
 		
 		//Returns last X transactions of given token.
-		public IEnumerator GetTokenTransfers(string tokenSymbol, int amount, Action<Transaction[]> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
-        {	   
+		public IEnumerator GetTokenTransfers(string tokenSymbol, int amount, Action<Transaction[]> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
 			yield return _client.SendRequest(Host, "getTokenTransfers", errorHandlingCallback, (node) => { 
 			var result = new Transaction[node.ChildCount];
 			for (int i=0; i<result.Length; i++) { 
@@ -790,8 +602,8 @@ public Event[] Events;
 		
 		
 		//Returns the number of transaction of a given token.
-		public IEnumerator GetTokenTransferCount(string tokenSymbol, Action<int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
-        {	   
+		public IEnumerator GetTokenTransferCount(string tokenSymbol, Action<int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
 			yield return _client.SendRequest(Host, "getTokenTransferCount", errorHandlingCallback, (node) => { 
 			var result = int.Parse(node.Value);
 				callback(result);
@@ -800,8 +612,8 @@ public Event[] Events;
 		
 		
 		//Returns the balance for a specific token and chain, given an address.
-		public IEnumerator GetTokenBalance(string addressText, string tokenSymbol, string chainInput, Action<Balance> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback)
-        {	   
+		public IEnumerator GetTokenBalance(string addressText, string tokenSymbol, string chainInput, Action<Balance> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
 			yield return _client.SendRequest(Host, "getTokenBalance", errorHandlingCallback, (node) => { 
 			var result = Balance.FromNode(node);
 				callback(result);

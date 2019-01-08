@@ -1311,7 +1311,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: REMOVE
+  m_Text: SELL
 --- !u!222 &314044572
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2623,8 +2623,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 334228126}
-        m_MethodName: 
+      - m_Target: {fileID: 403489747}
+        m_MethodName: SellAsset
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3658,8 +3658,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 334228126}
-        m_MethodName: 
+      - m_Target: {fileID: 403489747}
+        m_MethodName: BuyAsset
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5133,8 +5133,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 334228126}
-        m_MethodName: 
+      - m_Target: {fileID: 403489747}
+        m_MethodName: RemoveAsset
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -8065,7 +8065,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: REMOVE
+  m_Text: BUY
 --- !u!222 &1878571140
 CanvasRenderer:
   m_ObjectHideFlags: 0
