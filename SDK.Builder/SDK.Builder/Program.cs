@@ -290,6 +290,8 @@ namespace SDK.Builder
             var tempPath = outputPath + @"temp\";
             Directory.CreateDirectory(tempPath);
 
+            GenerateBindings(inputPath + @"PhantasmaSDK\Docs\", tempPath + @"\Docs\");
+
             foreach (var lang in new[] { "C#", "JS", "PHP", "Python", "Go" })
             {
                 CopyFolder(inputPath + @"PhantasmaSDK\" + lang+ @"\Samples\", tempPath + lang + @"\Dapps\");
