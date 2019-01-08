@@ -1,12 +1,12 @@
-﻿using System;
-using UnityEngine;
-using UnityEngine.Networking;
+﻿using UnityEngine;
 
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 
 using Phantasma.Cryptography;
 using Phantasma.SDK;
+using UnityEngine.UI;
 
 /*
  * Phantasma Spook
@@ -25,11 +25,15 @@ public class PhantasmaDemo : MonoBehaviour
         READY
     }
 
+    public List<Sprite> carImages;
+    
     private KeyPair keys;
 
     private EWALLET_STATE state = EWALLET_STATE.INIT;
     private decimal balance;
 
+    private List<MyGameAsset> _myAssets;
+    
     //private PhantasmaRpcService _phantasmaApiService;
     //private AccountDto _account;
     //private KeyPair _key;
@@ -40,6 +44,11 @@ public class PhantasmaDemo : MonoBehaviour
     public static PhantasmaDemo Instance
     {
         get { _instance = _instance == null ? FindObjectOfType(typeof(PhantasmaDemo)) as PhantasmaDemo : _instance; return _instance; }
+    }
+
+    private void Awake()
+    {
+
     }
 
     private void Start ()
@@ -185,4 +194,6 @@ public class PhantasmaDemo : MonoBehaviour
     }
 
     #endregion
+
+
 }

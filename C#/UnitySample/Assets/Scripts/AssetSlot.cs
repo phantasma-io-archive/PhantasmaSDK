@@ -2,11 +2,20 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+public enum EASSET_TYPE
+{
+    MY_ASSET,
+    BUY_MARKET_ASSET,
+    SELL_MARKET_ASSET
+}
+
 public class AssetSlot : MonoBehaviour
 {
-    public Text     nameText, priceText;
-    public Button   buyButton;
-    public Image    assetImage;
+    public Text             nameText, priceText;
+    public Button           buyButton, sellButton, removeButton;
+    public SpriteRenderer   assetImage;
+
+    public MyGameAsset asset;
 
 	// Use this for initialization
 	void Start () {
@@ -18,18 +27,33 @@ public class AssetSlot : MonoBehaviour
 		
 	}
 
-    public void SetName(string name)
+    public void SetSlot(MyGameAsset asset, EASSET_TYPE type)
     {
-        nameText.text = name;
-    }
+        nameText.text       = asset.Name;
+        priceText.text      = asset.Price.ToString(CultureInfo.InvariantCulture);
+        assetImage.sprite   = asset.Icon;
 
-    public void SetPrice(decimal price)
-    {
-        priceText.text = price.ToString(CultureInfo.InvariantCulture);
-    }
+        switch (type)
+        {
+            case EASSET_TYPE.MY_ASSET:
+                sellButton.gameObject.SetActive(true);
 
-    public void ToggleBuyButton(bool isVisible)
-    {
-        buyButton.gameObject.SetActive(isVisible);
+                buyButton.gameObject.SetActive(false);
+                removeButton.gameObject.SetActive(false);
+                break;
+            case EASSET_TYPE.BUY_MARKET_ASSET:
+                buyButton.gameObject.SetActive(true);
+
+                sellButton.gameObject.SetActive(false);
+                removeButton.gameObject.SetActive(false);
+                break;
+            case EASSET_TYPE.SELL_MARKET_ASSET:
+                sellButton.gameObject.SetActive(true);
+
+                buyButton.gameObject.SetActive(false);
+                removeButton.gameObject.SetActive(false);
+                break;
+        }
+
     }
 }
