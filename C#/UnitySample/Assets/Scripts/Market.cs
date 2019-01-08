@@ -53,7 +53,7 @@ public class Market : MonoBehaviour
 
         PhantasmaDemo.Instance.MyAssets.Remove(asset);
 
-        CanvasManager.Instance.marketMenu.UpdateMarket(MarketMenu.EMARKETPLACE_TYPE.SELL);
+        CanvasManager.Instance.myAssetsMenu.UpdateMyAssets();
     }
 
     /// <summary>

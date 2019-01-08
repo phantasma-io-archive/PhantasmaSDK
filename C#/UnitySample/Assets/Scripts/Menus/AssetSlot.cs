@@ -52,10 +52,10 @@ public class AssetSlot : MonoBehaviour
                 removeButton.gameObject.SetActive(false);
                 break;
             case EASSET_TYPE.SELL_MARKET_ASSET:
-                sellButton.gameObject.SetActive(true);
+                removeButton.gameObject.SetActive(true);
 
                 buyButton.gameObject.SetActive(false);
-                removeButton.gameObject.SetActive(false);
+                sellButton.gameObject.SetActive(false);
                 break;
         }
 

@@ -30,6 +30,11 @@ public class MarketMenu : MonoBehaviour
             UpdateMarket(EMARKETPLACE_TYPE.BUY);
         }
 
+        if (_sellSlots.Count != PhantasmaDemo.Instance.market.MarketSellAssets.Count)
+        {
+            UpdateMarket(EMARKETPLACE_TYPE.SELL);
+        }
+
         SelectMarketBuyTab();
     }
 
@@ -77,7 +82,7 @@ public class MarketMenu : MonoBehaviour
 
                     var newSlot                     = Instantiate(assetSlot, sellMarketContent.transform, false);
                     newSlot.transform.localPosition += Vector3.down * AssetSlot.SLOT_HEIGHT * i;
-                    newSlot.SetSlot(marketAsset, EASSET_TYPE.BUY_MARKET_ASSET);
+                    newSlot.SetSlot(marketAsset, EASSET_TYPE.SELL_MARKET_ASSET);
                     newSlot.gameObject.SetActive(true);
 
                     _sellSlots.Add(newSlot);
@@ -103,33 +108,6 @@ public class MarketMenu : MonoBehaviour
 
         sellTab.SetActive(true);
         buyTab.SetActive(false);
-    }
-
-    /// <summary>
-    /// Buy an asset from the market and add it to my assets
-    /// </summary>
-    /// <param name="assetSlot"></param>
-    public void BuyAsset(AssetSlot assetSlot)
-    {
-
-    }
-
-    /// <summary>
-    /// Put an asset for sale on the market
-    /// </summary>
-    /// <param name="assetSlot"></param>
-    public void SellAsset(AssetSlot assetSlot)
-    {
-
-    }
-
-    /// <summary>
-    /// Remove an asset that is for sale on the market
-    /// </summary>
-    /// <param name="assetSlot"></param>
-    public void RemoveAsset(AssetSlot assetSlot)
-    {
-
     }
 
     public void BackClicked()
