@@ -116,7 +116,6 @@ public class PhantasmaDemo : MonoBehaviour
 
     public void GetAccount(string address)
     {
-        //TODO fix catching exception when spook client is not available
         //P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr
 
         Debug.Log("get account 0: " + address);
@@ -128,7 +127,7 @@ public class PhantasmaDemo : MonoBehaviour
 
                 foreach (var balanceSheetResult in result.Balances)
                 {
-                    var amount = long.Parse(balanceSheetResult.Amount) / Mathf.Pow(10f, 8);
+                    var amount = decimal.Parse(balanceSheetResult.Amount) / (decimal) Mathf.Pow(10f, 8);
                     CanvasManager.Instance.AddBalanceEntry("Chain: " + balanceSheetResult.Chain + " - " + amount + " " +
                                                            balanceSheetResult.Symbol);
 
@@ -138,7 +137,7 @@ public class PhantasmaDemo : MonoBehaviour
                 LoggedIn(address);
 
             },
-            (errorType, errorMessage) => { Debug.Log(errorType + " - " + errorMessage); }
+            (errorType, errorMessage) => { CanvasManager.Instance.SetLoginError(errorType + " - " + errorMessage); }
         ));
     }
 

@@ -11,9 +11,11 @@ public enum EASSET_TYPE
 
 public class AssetSlot : MonoBehaviour
 {
-    public Text             nameText, priceText;
-    public Button           buyButton, sellButton, removeButton;
-    public SpriteRenderer   assetImage;
+    public const float SLOT_HEIGHT = 250f;
+
+    public Text     nameText, priceText;
+    public Button   buyButton, sellButton, removeButton;
+    public Image    assetImage;
 
     public MyGameAsset asset;
 

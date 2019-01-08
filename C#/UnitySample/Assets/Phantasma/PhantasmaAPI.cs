@@ -101,12 +101,12 @@ namespace Phantasma.SDK
 
                 if (root == null)
                 {
-                    // TODO FIXE BUG -  qd é invalid address está a entrar aqui quando devia entrar no else if de baixo
                     //throw new Exception("failed to parse JSON");
                     errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.FAILED_PARSING_JSON, "failed to parse JSON");
                 }
                 else if (root.HasNode("error"))
                 {
+                    // TODO FIX BUG - o root.GetString("error") devolve uma string vazia em vez de devolver por ex: {"code": -32603, "message": "invalid address"}
                     var errorDesc = root.GetString("error");
                     //throw new Exception(errorDesc);
                     errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.API_ERROR, errorDesc);

@@ -4,7 +4,8 @@ using UnityEngine;
 public class MarketMenu : MonoBehaviour
 {
     public AssetSlot assetSlot;
-
+    public GameObject buyMarketContent, sellMarketContent;
+    
     private List<MyGameAsset> _marketBuyAssets, _marketSellAssets;
 
     private void Awake()
@@ -31,13 +32,18 @@ public class MarketMenu : MonoBehaviour
 
         _marketBuyAssets = new List<MyGameAsset>();
 
-        foreach (var carImage in PhantasmaDemo.Instance.carImages)
+        for (var i = 0; i < PhantasmaDemo.Instance.carImages.Count; i++)
         {
+            var carImage = PhantasmaDemo.Instance.carImages[i];
+
             var newCar = new MyGameAsset();
             newCar.SetAsset(carImage.name, (decimal)Random.Range(0f, 10f), carImage);
 
-            var newSlot = Instantiate(assetSlot);
+            var newSlot = Instantiate(assetSlot, buyMarketContent.transform, false);
             newSlot.SetSlot(newCar, EASSET_TYPE.BUY_MARKET_ASSET);
+            newSlot.gameObject.SetActive(true);
+
+            newSlot.transform.localPosition += Vector3.down * AssetSlot.SLOT_HEIGHT * i;
 
             _marketBuyAssets.Add(newCar);
         }
