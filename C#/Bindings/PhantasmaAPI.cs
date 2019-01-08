@@ -1,22 +1,28 @@
 using System;
-using System.Net;
 using System.Collections;
 using LunarLabs.Parser;
 using LunarLabs.Parser.JSON;
 using UnityEngine;
 using UnityEngine.Networking;
-using Phantasma.Cryptography;
 
 namespace Phantasma.SDK
 {
-	public static class APIUtils
+    public enum EPHANTASMA_SDK_ERROR_TYPE
     {
-        public static long GetInt64(this DataNode node, string name)
+        API_ERROR,
+        WEB_REQUEST_ERROR,
+        FAILED_PARSING_JSON,
+        MALFORMED_RESPONSE
+    }
+
+	internal static class APIUtils
+    {
+        internal static long GetInt64(this DataNode node, string name)
         {
             return node.GetLong(name);
         }
 
-        public static bool GetBoolean(this DataNode node, string name)
+        internal static bool GetBoolean(this DataNode node, string name)
         {
             return node.GetBool(name);
         }
@@ -24,14 +30,8 @@ namespace Phantasma.SDK
 
     internal class JSONRPC_Client
     {
-        private WebClient client;
-
-        internal JSONRPC_Client()
-        {
-            client = new WebClient() { Encoding = System.Text.Encoding.UTF8 }; 
-        }
-
-        internal IEnumerator SendRequest(string url, string method, Action<DataNode> callback, params object[] parameters)
+        internal IEnumerator SendRequest(string url, string method, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback, 
+                                            Action<DataNode> callback, params object[] parameters)
         {
             string contents;
 
@@ -65,9 +65,7 @@ namespace Phantasma.SDK
 
             try
             {
-                //client.Headers.Add("Content-Type", "application/json-rpc");
 				json = JSONWriter.WriteToString(jsonRpcData);
-				//contents = client.UploadString(url, json);
             }
             catch (Exception e)
             {
@@ -80,7 +78,7 @@ namespace Phantasma.SDK
             if (www.isNetworkError || www.isHttpError)
             {
                 Debug.Log(www.error);
-				throw new Exception(www.error);
+				if (errorHandlingCallback != null) errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.WEB_REQUEST_ERROR, www.error);			
             }
             else
             {
@@ -89,12 +87,12 @@ namespace Phantasma.SDK
 				
 				if (root == null)
 				{
-					throw new Exception("failed to parse JSON");
+					if (errorHandlingCallback != null) errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.FAILED_PARSING_JSON, "failed to parse JSON");
 				}
 				else 
 				if (root.HasNode("error")) {
 					var errorDesc = root.GetString("error");
-					throw new Exception(errorDesc);
+					if (errorHandlingCallback != null) errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.API_ERROR, errorDesc);
 				}
 				else
 				if (root.HasNode("result"))
@@ -103,7 +101,7 @@ namespace Phantasma.SDK
 					callback(result);
 				}
 				else {					
-					throw new Exception("malformed response");
+					if (errorHandlingCallback != null) errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.MALFORMED_RESPONSE, "malformed response");
 				}				
             }
 
@@ -126,8 +124,8 @@ namespace Phantasma.SDK
 				for (int i=0; i < {{Name}}_array.ChildCount; i++) {
 					{{#if FieldType.Name contains 'Result'}}
 					result.{{Name}}[i] = {{#fix-type FieldType.Name}}.FromNode({{Name}}_array.GetNodeByIndex(i));
-					{{#else}}
-					result.{{Name}}[i] = {{Name}}_array.GetNodeByIndex(i).As{{#fix-type FieldType.Name}}();{{/if}}
+					{{#else}}						
+					result.{{Name}}[i] = {{Name}}_array.GetNodeByIndex(i).As{{#fix-array FieldType.Name}}();{{/if}}
 				}
 			}
 			else {
@@ -153,9 +151,9 @@ namespace Phantasma.SDK
 	   
 		{{#each methods}}
 		//{{Info.Description}}
-		public IEnumerator {{Info.Name}}({{#each Info.Parameters}}{{#fix-type Key.Name}} {{Value}}, {{/each}}Action<{{#fix-type Info.ReturnType.Name}}{{#if Info.ReturnType.IsArray}}[]{{/if}}> callback)  
+		public IEnumerator {{Info.Name}}({{#each Info.Parameters}}{{#fix-type Key.Name}} {{Value}}, {{/each}}Action<{{#fix-type Info.ReturnType.Name}}{{#if Info.ReturnType.IsArray}}[]{{/if}}> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
 		{	   
-			yield return _client.SendRequest(Host, "{{#camel-case Info.Name}}", (node) => { 
+			yield return _client.SendRequest(Host, "{{#camel-case Info.Name}}", errorHandlingCallback, (node) => { 
 {{#parse-lines false}}
 {{#if Info.ReturnType.IsPrimitive}}
 			var result = {{#fix-type Info.ReturnType.Name}}.Parse(node.Value);

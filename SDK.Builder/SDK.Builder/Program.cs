@@ -34,7 +34,29 @@ namespace SDK.Builder
             {
                 var key = temp.ToString();
                 key = key.Replace("Result", "").Replace("[]", "");
-                string result = replacements.ContainsKey(key) ? replacements[key] : key;                
+                string result = replacements.ContainsKey(key) ? replacements[key] : key;
+                context.output.Append(result);
+            }
+        }
+    }
+
+    public class FixArrayNode : TemplateNode
+    {
+        private RenderingKey key;
+
+        public FixArrayNode(Document document, string key) : base(document)
+        {
+            this.key = RenderingKey.Parse(key, RenderingType.String);
+        }
+
+        public override void Execute(RenderingContext context)
+        {
+            var temp = context.EvaluateObject(key);
+
+            if (temp != null)
+            {
+                var result = temp.ToString();
+                result = result.Replace("Result", "").Replace("[]", "");
                 context.output.Append(result);
             }
         }
@@ -188,6 +210,7 @@ namespace SDK.Builder
             compiler.ParseNewLines = true;
             compiler.RegisterCaseTags();
             compiler.RegisterTag("fix-type", (doc, x) => new FixTypeNode(doc, x, replacements));
+            compiler.RegisterTag("fix-array", (doc, x) => new FixArrayNode(doc, x));
 
             var data = new Dictionary<string, object>();
 
