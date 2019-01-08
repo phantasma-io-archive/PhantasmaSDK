@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-
+using System.Text;
 using Phantasma.Cryptography;
 using Phantasma.SDK;
 using UnityEngine.UI;
@@ -26,20 +26,15 @@ public class PhantasmaDemo : MonoBehaviour
         READY
     }
 
+    public Market       market;
     public List<Sprite> carImages;
-    
+
     private KeyPair keys;
 
     private EWALLET_STATE state = EWALLET_STATE.INIT;
     private decimal balance;
 
     private List<MyGameAsset> _myAssets;
-    
-    //private PhantasmaRpcService _phantasmaApiService;
-    //private AccountDto _account;
-    //private KeyPair _key;
-    //private List<ChainDto> _chains;
-    //private TokenList _tokens;
 
     private static PhantasmaDemo _instance;
     public static PhantasmaDemo Instance
@@ -79,7 +74,7 @@ public class PhantasmaDemo : MonoBehaviour
             case EWALLET_STATE.UPDATE:
                 {
                     state = EWALLET_STATE.READY;
-                    CanvasManager.Instance.SetBalance(balance.ToString(CultureInfo.InvariantCulture));
+                    CanvasManager.Instance.accountMenu.SetBalance(balance.ToString(CultureInfo.InvariantCulture));
                     break;
                 }
         }		
@@ -99,17 +94,17 @@ public class PhantasmaDemo : MonoBehaviour
         //keys = KeyPair.FromWIF(address);
 
         CanvasManager.Instance.SetAddress(address);
-
-        CanvasManager.Instance.ToggleLogin(false, address);
+        CanvasManager.Instance.CloseLogin();
     }
 
     public void LogOut()
     {
         //Debug.Log("logged out");
 
-        // TODO something here ?
+        // TODO something else here ?
 
-        CanvasManager.Instance.ToggleLogin(true);
+        CanvasManager.Instance.ClearAddress();
+        CanvasManager.Instance.OpenLogin();
     }
 
     #region Blockchain calls
@@ -118,26 +113,25 @@ public class PhantasmaDemo : MonoBehaviour
     {
         //P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr
 
-        Debug.Log("get account 0: " + address);
+        Debug.Log("Get account: " + address);
 
         var api = new API("http://localhost:7077/rpc");
         StartCoroutine(api.GetAccount(address, result =>
             {
-                CanvasManager.Instance.SetBalance("Name: " + result.Name);
+                CanvasManager.Instance.accountMenu.SetBalance("Name: " + result.Name);
 
                 foreach (var balanceSheetResult in result.Balances)
                 {
                     var amount = decimal.Parse(balanceSheetResult.Amount) / (decimal) Mathf.Pow(10f, 8);
-                    CanvasManager.Instance.AddBalanceEntry("Chain: " + balanceSheetResult.Chain + " - " + amount + " " +
-                                                           balanceSheetResult.Symbol);
+                    CanvasManager.Instance.accountMenu.AddBalanceEntry("Chain: " + balanceSheetResult.Chain + " - " + amount + " " + balanceSheetResult.Symbol);
 
-                    Debug.Log("balance: " + balanceSheetResult.Chain + " | " + balanceSheetResult.Amount);
+                    //Debug.Log("balance: " + balanceSheetResult.Chain + " | " + balanceSheetResult.Amount);
                 }
 
                 LoggedIn(address);
 
             },
-            (errorType, errorMessage) => { CanvasManager.Instance.SetLoginError(errorType + " - " + errorMessage); }
+            (errorType, errorMessage) => { CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage); }
         ));
     }
 

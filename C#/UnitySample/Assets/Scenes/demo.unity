@@ -291,7 +291,7 @@ GameObject:
   - component: {fileID: 67849911}
   - component: {fileID: 67849910}
   m_Layer: 5
-  m_Name: Buy Market Button
+  m_Name: Buy Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -377,7 +377,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 334228126}
+      - m_Target: {fileID: 288087691}
         m_MethodName: SelectMarketBuyTab
         m_Mode: 1
         m_Arguments:
@@ -528,8 +528,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 334228126}
-        m_MethodName: CloseAccount
+      - m_Target: {fileID: 2140044739}
+        m_MethodName: BackClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1062,12 +1062,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_GeneratorAsset: {fileID: 0}
-  m_Script: {fileID: 11500000, guid: 89c88df1487acb942987b2710250fe66, type: 3}
+  m_Script: {fileID: 11500000, guid: 109d5ecc47d57a34ca49c9a7e1d60a0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   assetSlot: {fileID: 403489747}
   buyMarketContent: {fileID: 156897538}
   sellMarketContent: {fileID: 928790319}
+  buyButton: {fileID: 67849911}
+  sellButton: {fileID: 422745142}
+  buyTab: {fileID: 2077985040}
+  sellTab: {fileID: 818214679}
 --- !u!1 &302888968
 GameObject:
   m_ObjectHideFlags: 0
@@ -1168,8 +1172,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 334228126}
-        m_MethodName: OpenMyAsset
+      - m_Target: {fileID: 792766420}
+        m_MethodName: MyAssetsClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1348,7 +1352,8 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_Children:
   - {fileID: 1639115432}
-  - {fileID: 660624858}
+  - {fileID: 1032102933}
+  - {fileID: 1817918605}
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1433,19 +1438,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   addressLabel: {fileID: 357523010}
-  balanceLabel: {fileID: 355259941}
-  loginError: {fileID: 1103071470}
-  loginMenu: {fileID: 1980652941}
-  mainMenu: {fileID: 792766418}
-  accountMenu: {fileID: 2140044737}
-  myAssetsMenu: {fileID: 1222232906}
-  marketMenu: {fileID: 288087689}
-  buyMarketTab: {fileID: 2077985040}
-  sellMarketTab: {fileID: 818214679}
-  buyMarketButton: {fileID: 67849911}
-  sellMarketButton: {fileID: 422745142}
-  addressInputField: {fileID: 1549410277}
-  assetSlot: {fileID: 0}
+  myAssetsMenu: {fileID: 1222232908}
+  loginMenu: {fileID: 1980652943}
+  mainMenu: {fileID: 792766420}
+  accountMenu: {fileID: 2140044739}
+  marketMenu: {fileID: 288087691}
 --- !u!1 &355259938
 GameObject:
   m_ObjectHideFlags: 0
@@ -1563,7 +1560,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &357523008
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1634,7 +1631,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: dooiqwdjqwpjdpqwjqwdqwd
+  m_Text: <private key>
 --- !u!222 &357523011
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1673,6 +1670,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737a73d1b79fca44dbf25855900d1d7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  market: {fileID: 2137951936}
   carImages:
   - {fileID: 21300000, guid: 9022f4747f0c1824f96338aa0250f40c, type: 3}
   - {fileID: 21300000, guid: c2bd2b83d2c3fc04e84d6144d0ed249f, type: 3}
@@ -1692,7 +1690,8 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 551.3005, y: 291.20526, z: -1.625}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 2137951935}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1944,7 +1943,7 @@ GameObject:
   - component: {fileID: 422745142}
   - component: {fileID: 422745141}
   m_Layer: 5
-  m_Name: Sell Market Button
+  m_Name: Sell Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2030,7 +2029,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 334228126}
+      - m_Target: {fileID: 288087691}
         m_MethodName: SelectMarketSellTab
         m_Mode: 1
         m_Arguments:
@@ -3090,83 +3089,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 612902385}
   m_CullTransparentMesh: 0
---- !u!1 &660624857
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 660624858}
-  - component: {fileID: 660624860}
-  - component: {fileID: 660624859}
-  m_Layer: 5
-  m_Name: start_panel
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &660624858
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 660624857}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 1032102933}
-  - {fileID: 1817918605}
-  m_Father: {fileID: 334228122}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 100}
-  m_SizeDelta: {x: 1000, y: 900}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &660624859
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 660624857}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_GeneratorAsset: {fileID: 0}
-  m_Script: {fileID: -765806418, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
-  m_RaycastTarget: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 21300000, guid: 7528b4d6d7563644eae8d75fd6eb5153, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
---- !u!222 &660624860
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 660624857}
-  m_CullTransparentMesh: 0
 --- !u!1 &661211077
 GameObject:
   m_ObjectHideFlags: 0
@@ -3592,6 +3514,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 792766419}
+  - component: {fileID: 792766420}
   m_Layer: 5
   m_Name: Main Menu
   m_TagString: Untagged
@@ -3622,6 +3545,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &792766420
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 792766418}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_GeneratorAsset: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: 07fba89a0ae3a974187dcb08509a2558, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &815937303
 GameObject:
   m_ObjectHideFlags: 0
@@ -4060,8 +3996,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 334228126}
-        m_MethodName: CloseMyAssets
+      - m_Target: {fileID: 1222232908}
+        m_MethodName: BackClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4573,7 +4509,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1032102932}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -4583,12 +4519,12 @@ RectTransform:
   - {fileID: 2140044738}
   - {fileID: 1222232907}
   - {fileID: 288087690}
-  m_Father: {fileID: 660624858}
-  m_RootOrder: 0
+  m_Father: {fileID: 334228122}
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0, y: -197}
+  m_AnchoredPosition: {x: 0, y: 53}
   m_SizeDelta: {x: 1250, y: 801.9}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &1032102934
@@ -5257,6 +5193,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1222232907}
+  - component: {fileID: 1222232908}
   m_Layer: 5
   m_Name: My Assets Menu
   m_TagString: Untagged
@@ -5287,6 +5224,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1222232908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1222232906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_GeneratorAsset: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: a5c6ed09828e1fc44861686cacafeb45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1223510647
 GameObject:
   m_ObjectHideFlags: 0
@@ -5645,8 +5595,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 334228126}
-        m_MethodName: OpenMarket
+      - m_Target: {fileID: 792766420}
+        m_MethodName: MarketClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5986,8 +5936,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 334228126}
-        m_MethodName: OpenAccount
+      - m_Target: {fileID: 792766420}
+        m_MethodName: AccountClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -6197,8 +6147,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 334228126}
-        m_MethodName: Logout
+      - m_Target: {fileID: 792766420}
+        m_MethodName: LogoutClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -7703,7 +7653,7 @@ GameObject:
   - component: {fileID: 1817918607}
   - component: {fileID: 1817918606}
   m_Layer: 5
-  m_Name: start_top
+  m_Name: Header
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7721,12 +7671,12 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 2001749840}
-  m_Father: {fileID: 660624858}
-  m_RootOrder: 1
+  m_Father: {fileID: 334228122}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -50}
   m_SizeDelta: {x: 1500, y: 397.90002}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1817918606
@@ -8397,7 +8347,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 334228126}
+      - m_Target: {fileID: 1980652943}
         m_MethodName: Login
         m_Mode: 1
         m_Arguments:
@@ -8620,6 +8570,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1980652942}
+  - component: {fileID: 1980652943}
   m_Layer: 5
   m_Name: Login Menu
   m_TagString: Untagged
@@ -8649,6 +8600,21 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1980652943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1980652941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_GeneratorAsset: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: 3bfc4b176158bc04a862f1ff488940b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  addressInputField: {fileID: 1549410277}
+  loginError: {fileID: 1103071470}
 --- !u!1 &1998231087
 GameObject:
   m_ObjectHideFlags: 0
@@ -9196,6 +9162,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2115964841}
   m_CullTransparentMesh: 0
+--- !u!1 &2137951934
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2137951935}
+  - component: {fileID: 2137951936}
+  m_Layer: 0
+  m_Name: Market
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2137951935
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2137951934}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 358156657}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2137951936
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2137951934}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_GeneratorAsset: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: 89c88df1487acb942987b2710250fe66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2140044737
 GameObject:
   m_ObjectHideFlags: 0
@@ -9205,6 +9215,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2140044738}
+  - component: {fileID: 2140044739}
   m_Layer: 5
   m_Name: Account Menu
   m_TagString: Untagged
@@ -9233,3 +9244,17 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2140044739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2140044737}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_GeneratorAsset: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: bcfa5adbe94e58f4ca4f571c167cc7b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  balanceLabel: {fileID: 355259941}

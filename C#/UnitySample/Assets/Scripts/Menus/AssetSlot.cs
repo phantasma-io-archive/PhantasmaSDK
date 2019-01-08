@@ -58,4 +58,28 @@ public class AssetSlot : MonoBehaviour
         }
 
     }
+
+    /// <summary>
+    /// Buy this asset from the market
+    /// </summary>
+    public void BuyAsset()
+    {
+
+    }
+
+    /// <summary>
+    /// Put this asset for sale on the market
+    /// </summary>
+    public void SellAsset()
+    {
+
+    }
+
+    /// <summary>
+    /// Remove an asset that is for sale on the market
+    /// </summary>
+    public void RemoveAsset()
+    {
+
+    }
 }
