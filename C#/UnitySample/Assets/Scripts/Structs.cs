@@ -30,6 +30,7 @@ public enum TransactionType
     Received_Car        = 9,
     Transfer            = 10,
     Trophy_Received     = 11,
+    Created_Car         = 12
 }
 
 public enum RaceMode
@@ -72,7 +73,7 @@ public struct NachoTransaction
     public byte[]           content;
 }
 
-public struct CarInfo
+public struct CarData
 {
     public Address      owner;
     public byte         power;

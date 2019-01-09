@@ -17,7 +17,7 @@ public class PhantasmaDemo : MonoBehaviour
 {
     private const string _SERVER_ADDRESS = "http://localhost:7077/rpc";
 
-    private static KeyPair _key;
+    public KeyPair Key { get; private set; }
 
     private enum EWALLET_STATE
     {
@@ -93,6 +93,8 @@ public class PhantasmaDemo : MonoBehaviour
         //var address = "L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25";
         //var addressBytes = Encoding.ASCII.GetBytes(address);
         //keys = KeyPair.FromWIF(address);
+
+        Key = KeyPair.FromWIF(address);
 
         CanvasManager.Instance.SetAddress(address);
         CanvasManager.Instance.CloseLogin();
@@ -185,9 +187,9 @@ public class PhantasmaDemo : MonoBehaviour
     private void CreateToken()
     {
         var script = ScriptUtils.BeginScript()
-            .AllowGas(_key.Address, 1, 9999)
-            .CallContract("nexus", "CreateToken", _key.Address, "CAR", "Car Demo Token", 10000, 0, TokenFlags.Transferable | TokenFlags.Finite)
-            .SpendGas(_key.Address)
+            .AllowGas(Key.Address, 1, 9999)
+            .CallContract("nexus", "CreateToken", Key.Address, "CAR", "Car Demo Token", 10000, 0, TokenFlags.Transferable | TokenFlags.Finite)
+            .SpendGas(Key.Address)
             .EndScript();
     }
 }

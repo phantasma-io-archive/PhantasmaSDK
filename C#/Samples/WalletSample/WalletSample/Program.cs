@@ -4,12 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Phantasma.Blockchain;
+using Phantasma.Blockchain.Contracts;
 using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
 using Phantasma.Numerics;
 using Phantasma.RpcClient;
 using Phantasma.RpcClient.Client;
 using Phantasma.RpcClient.DTOs;
+using Phantasma.VM.Utils;
 using WalletSample.Utils;
 
 namespace WalletSample
