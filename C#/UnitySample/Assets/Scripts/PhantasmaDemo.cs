@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Text;
 using Phantasma.Cryptography;
 using Phantasma.SDK;
+using Phantasma.VM.Utils;
 using UnityEngine.UI;
 
 /*
@@ -181,5 +182,12 @@ public class PhantasmaDemo : MonoBehaviour
 
     #endregion
 
-
+    //private void CreateToken()
+    //{
+    //    var script = ScriptUtils.BeginScript()
+    //        .AllowGas(_key.Address, 1, 9999)
+    //        .CallContractAddress("nexus", "CreateToken", address, "CAR", "Car Demo Token", 10000, 0, TokenFlags.Transferable | TokenFlags.Finite)
+    //        .SpendGas(_key.Address)
+    //        .EndScript();
+    //}
 }
