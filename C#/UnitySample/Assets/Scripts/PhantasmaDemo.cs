@@ -1,14 +1,12 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using Phantasma.Cryptography;
 using Phantasma.SDK;
 using Phantasma.VM.Utils;
-using UnityEngine.UI;
+using Phantasma.RpcClient.DTOs;
 
 /*
  * Phantasma Spook
@@ -18,6 +16,8 @@ using UnityEngine.UI;
 public class PhantasmaDemo : MonoBehaviour
 {
     private const string _SERVER_ADDRESS = "http://localhost:7077/rpc";
+
+    private static KeyPair _key;
 
     private enum EWALLET_STATE
     {
@@ -182,12 +182,12 @@ public class PhantasmaDemo : MonoBehaviour
 
     #endregion
 
-    //private void CreateToken()
-    //{
-    //    var script = ScriptUtils.BeginScript()
-    //        .AllowGas(_key.Address, 1, 9999)
-    //        .CallContractAddress("nexus", "CreateToken", address, "CAR", "Car Demo Token", 10000, 0, TokenFlags.Transferable | TokenFlags.Finite)
-    //        .SpendGas(_key.Address)
-    //        .EndScript();
-    //}
+    private void CreateToken()
+    {
+        var script = ScriptUtils.BeginScript()
+            .AllowGas(_key.Address, 1, 9999)
+            .CallContract("nexus", "CreateToken", _key.Address, "CAR", "Car Demo Token", 10000, 0, TokenFlags.Transferable | TokenFlags.Finite)
+            .SpendGas(_key.Address)
+            .EndScript();
+    }
 }
