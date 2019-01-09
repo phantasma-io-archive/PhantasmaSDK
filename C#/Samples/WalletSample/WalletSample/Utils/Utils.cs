@@ -48,17 +48,29 @@ namespace WalletSample.Utils
         {
             var vertices = new List<string>();
             var edges = new List<Tuple<string, string>>();
+
+            var children = new Dictionary<string, List<ChainDto>>();
             foreach (var chain in phantasmaChains)
             {
-                vertices.Add(chain.Name);
-                if (chain.Children != null)
+                var childs = phantasmaChains.Where(p => p.ParentAddress.Equals(chain.Address));
+                if (childs.Any())
                 {
-                    foreach (var child in chain.Children)
+                    children[chain.Name] = childs.ToList();
+                }
+            }
+
+            foreach (var chain in children.Keys)
+            {
+                vertices.Add(chain);
+                if (children[chain] != null)
+                {
+                    foreach (var child in children[chain])
                     {
-                        edges.Add(new Tuple<string, string>(chain.Name, child.Name));
+                        edges.Add(new Tuple<string, string>(chain, child.Name));
                     }
                 }
             }
+
             var graph = new Graph<string>(vertices, edges);
 
             var shortestPath = Algorithms.ShortestPathFunction(graph, from);

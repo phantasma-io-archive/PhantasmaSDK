@@ -20,7 +20,7 @@ namespace WalletSample
         private static AccountDto _account;
         private static KeyPair _key;
         private static List<ChainDto> _chains;
-        private static TokenList _tokens;
+        private static List<TokenDto> _tokens;
 
         private static void Main(string[] args)
         {
@@ -117,7 +117,7 @@ namespace WalletSample
             var txs = await _phantasmaApiService.GetAddressTxs.SendRequestAsync(_key.Address.ToString(), 10);
             foreach (var tx in txs.Txs)
             {
-                Console.WriteLine(Utils.Helper.GetTxDescription(tx, _chains, _tokens.Tokens));
+                Console.WriteLine(Utils.Helper.GetTxDescription(tx, _chains, _tokens));
             }
         }
 
@@ -140,7 +140,7 @@ namespace WalletSample
                     Console.WriteLine("********************");
                     Console.WriteLine($"Token: {balanceSheetDto.Symbol}");
                     Console.WriteLine($"Chain: {balanceSheetDto.ChainName}");
-                    Console.WriteLine($"Amount: {TokenUtils.ToDecimal(BigInteger.Parse(balanceSheetDto.Amount), Helper.GetTokenDecimals(balanceSheetDto.Symbol, _tokens.Tokens))}");
+                    Console.WriteLine($"Amount: {TokenUtils.ToDecimal(BigInteger.Parse(balanceSheetDto.Amount), Helper.GetTokenDecimals(balanceSheetDto.Symbol, _tokens))}");
                     Console.WriteLine();
                 }
             }
@@ -181,7 +181,7 @@ namespace WalletSample
             var destinationChain = _chains[selectedChainOption - 1];
 
 
-            Console.WriteLine($"Enter amount: (max {TokenUtils.ToDecimal(BigInteger.Parse(token.Amount), Helper.GetTokenDecimals(token.Symbol, _tokens.Tokens))}");
+            Console.WriteLine($"Enter amount: (max {TokenUtils.ToDecimal(BigInteger.Parse(token.Amount), Helper.GetTokenDecimals(token.Symbol, _tokens))}");
             var amount = Console.ReadLine();
 
             Console.WriteLine("Enter destination address: ");
@@ -222,7 +222,7 @@ namespace WalletSample
         private static async Task SameChainTransfer(string addressTo, string amount, string tokenSymbol, string chain)
         {
             var destinationAddress = Address.FromText(addressTo);
-            int decimals = Helper.GetTokenDecimals(tokenSymbol, _tokens.Tokens);
+            int decimals = Helper.GetTokenDecimals(tokenSymbol, _tokens);
             var bigIntAmount = TokenUtils.ToBigInteger(decimal.Parse(amount), decimals);
 
             var script = ScriptUtils.BeginScript()
@@ -254,7 +254,7 @@ namespace WalletSample
         {
             var toChain = _chains.Find(p => p.Name == destinationChain);
             var destinationAddress = Address.FromText(addressTo);
-            int decimals = Helper.GetTokenDecimals(symbol, _tokens.Tokens);
+            int decimals = Helper.GetTokenDecimals(symbol, _tokens);
             var bigIntAmount = TokenUtils.ToBigInteger(decimal.Parse(amount), decimals);
             var fee = TokenUtils.ToBigInteger(0.0001m, 8);
 

@@ -6,9 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\PhantasmaChain\Phantasma.Blockchain\Phantasma.Blockchain.csproj" />
-    <ProjectReference Include="..\..\..\..\PhantasmaChain\Phantasma.Cryptography\Phantasma.Cryptography.csproj" />
-    <ProjectReference Include="..\..\..\..\PhantasmaRpcClient\Phantasma.RpcClient\Phantasma.RpcClient.csproj" />
+    <ProjectReference Include="..\..\..\..\..\PhantasmaChain\Phantasma.Blockchain\Phantasma.Blockchain.csproj" />
+    <ProjectReference Include="..\..\..\..\..\PhantasmaChain\Phantasma.Cryptography\Phantasma.Cryptography.csproj" />
+    <ProjectReference Include="..\..\..\..\..\PhantasmaRpcClient\Phantasma.RpcClient\Phantasma.RpcClient.csproj" />
   </ItemGroup>
 
 </Project>
