@@ -59,14 +59,14 @@ namespace WalletSample.Utils
                 }
             }
 
-            foreach (var chain in children.Keys)
+            foreach (var chain in phantasmaChains)
             {
-                vertices.Add(chain);
-                if (children[chain] != null)
+                vertices.Add(chain.Name);
+                if (children.ContainsKey(chain.Name))
                 {
-                    foreach (var child in children[chain])
+                    foreach (var child in children[chain.Name])
                     {
-                        edges.Add(new Tuple<string, string>(chain, child.Name));
+                        edges.Add(new Tuple<string, string>(chain.Name, child.Name));
                     }
                 }
             }
