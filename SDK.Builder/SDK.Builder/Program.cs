@@ -11,15 +11,40 @@ using Phantasma.Cryptography;
 using LunarLabs.Templates;
 using System.Text;
 using System.Linq;
-using LunarLabs.Parser;
+using UnityPacker;
 
 namespace SDK.Builder
 {
-    public class ArrayTypeNode : TemplateNode
+    public class FixTypeNode : TemplateNode
+    {
+        private RenderingKey key;
+        private Dictionary<string, string> replacements;
+
+        public FixTypeNode(Document document, string key, Dictionary<string, string> replacements) : base(document)
+        {
+            this.replacements = replacements;
+            this.key = RenderingKey.Parse(key, RenderingType.String);
+        }
+
+        public override void Execute(RenderingContext context)
+        {
+            var temp = context.EvaluateObject(key);
+
+            if (temp != null)
+            {
+                var key = temp.ToString();
+                key = key.Replace("Result", "").Replace("[]", "");
+                string result = replacements.ContainsKey(key) ? replacements[key] : key;
+                context.output.Append(result);
+            }
+        }
+    }
+
+    public class FixArrayNode : TemplateNode
     {
         private RenderingKey key;
 
-        public ArrayTypeNode(Document document, string key) : base(document)
+        public FixArrayNode(Document document, string key) : base(document)
         {
             this.key = RenderingKey.Parse(key, RenderingType.String);
         }
@@ -30,7 +55,8 @@ namespace SDK.Builder
 
             if (temp != null)
             {
-                var result = temp.ToString().Replace("[]", "");
+                var result = temp.ToString();
+                result = result.Replace("Result", "").Replace("[]", "");
                 context.output.Append(result);
             }
         }
@@ -155,6 +181,21 @@ namespace SDK.Builder
                 Directory.CreateDirectory(outputPath);
             }
 
+            string replacementFile = inputPath + "language.ini";
+            var replacements = new Dictionary<string, string>();
+            if (File.Exists(replacementFile))
+            {
+                var lines = File.ReadAllLines(replacementFile);
+                foreach (var line in lines)
+                {
+                    if (line.Contains(","))
+                    {
+                        var temp = line.Split(new[] { ',' }, 2);
+                        replacements[temp[0]] = temp[1];
+                    }
+                }
+            }
+
             var nexus = new Nexus("test", KeyPair.Generate().Address);
             var api = new NexusAPI(nexus);
 
@@ -165,12 +206,11 @@ namespace SDK.Builder
                 typeDic[entry.Name/*.Replace("Result", "")*/] = entry.GetFields();
             }
 
-            DataNode v;
-            //v.HasNode("")
-
             var compiler = new Compiler();
+            compiler.ParseNewLines = true;
             compiler.RegisterCaseTags();
-            compiler.RegisterTag("array-type", (doc, x) => new ArrayTypeNode(doc, x));
+            compiler.RegisterTag("fix-type", (doc, x) => new FixTypeNode(doc, x, replacements));
+            compiler.RegisterTag("fix-array", (doc, x) => new FixArrayNode(doc, x));
 
             var data = new Dictionary<string, object>();
 
@@ -179,6 +219,11 @@ namespace SDK.Builder
 
             foreach (var file in files)
             {
+                if (file == replacementFile)
+                {
+                    continue;
+                }
+
                 var filePath = file;
 
                 var content = File.ReadAllText(filePath);
@@ -197,6 +242,30 @@ namespace SDK.Builder
                 filePath = file.Replace(inputPath, outputPath);
                 File.WriteAllText(filePath, context.output.ToString());
             }
+        }
+
+        private static void GenerateUnityPackage(string dllPath, string bindingPath)
+        {
+            dllPath = FixPath(dllPath);
+            bindingPath = FixPath(bindingPath);
+            var pluginList = new List<string>() { dllPath + "LunarParser.dll", dllPath + "Phantasma.Core.dll", dllPath + "Phantasma.Cryptography.dll", dllPath + "Phantasma.Numerics.dll" };
+
+            var tempPath = @"Phantasma";
+            var pluginPath = tempPath + @"\Plugins";
+            Directory.CreateDirectory(pluginPath);
+            CopyFiles(pluginList, pluginPath);
+
+            CopyFiles(new[] { bindingPath + "PhantasmaAPI.cs" }, tempPath);
+
+            // Create a package object from the given directory
+            var pack = Package.FromDirectory(tempPath, "Phantasma", true, new string[0], new string[0]);
+            pack.GeneratePackage();
+
+            CopyFiles(new[] { "Phantasma.unitypackage" }, bindingPath);
+
+//            File.Delete(bindingPath + "PhantasmaAPI.cs");
+
+            RecursiveDelete(new DirectoryInfo(tempPath));
         }
 
         static void Main(string[] args)
@@ -221,11 +290,15 @@ namespace SDK.Builder
             var tempPath = outputPath + @"temp\";
             Directory.CreateDirectory(tempPath);
 
-            foreach (var lang in new[] { "C#", "JS", "PHP" })
+            GenerateBindings(inputPath + @"PhantasmaSDK\Docs\", tempPath + @"\Docs\");
+
+            foreach (var lang in new[] { "C#", "JS", "PHP", "Python", "Go" })
             {
                 CopyFolder(inputPath + @"PhantasmaSDK\" + lang+ @"\Samples\", tempPath + lang + @"\Dapps\");
                 GenerateBindings(inputPath + @"PhantasmaSDK\" + lang + @"\Bindings\", tempPath + lang + @"\Libs\");
             }
+
+            GenerateUnityPackage(inputPath + @"PhantasmaSDK\SDK.Builder\SDK.Builder\bin\Debug", tempPath + @"C#\Libs\");
 
             return;
             CopyFolder(inputPath + @"PhantasmaSpook\Spook.CLI\Publish", tempPath + @"Tools\Spook");
