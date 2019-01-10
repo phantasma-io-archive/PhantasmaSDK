@@ -292,16 +292,22 @@ namespace WalletSample
 
         private static async Task<string> SignAndSendTx(byte[] script, string chain)
         {
-            Console.WriteLine("Sending transaction...");
-            var tx = new Transaction("simnet", chain, script,
-                DateTime.UtcNow + TimeSpan.FromHours(1), 0);
-            tx.Sign(_key);
-            var txResult = await _phantasmaApiService.SendRawTx.SendRequestAsync(tx.ToByteArray(true).Encode());
+            try
+            {
+                Console.WriteLine("Sending transaction...");
+                var tx = new Transaction("simnet", chain, script,
+                    DateTime.UtcNow + TimeSpan.FromHours(1), 0);
+                tx.Sign(_key);
+                var txResult = await _phantasmaApiService.SendRawTx.SendRequestAsync(tx.ToByteArray(true).Encode());
 
-            Console.WriteLine(!txResult.HasError
-                ? $"Transaction sent. Tx hash: {txResult.Hash}"
-                : $"Something happened. Error: {txResult.Error}");
-            return txResult.Hash;
+                Console.WriteLine($"Transaction sent. Tx hash: {txResult}");
+                return txResult;
+            }
+            catch (RpcResponseException ex)
+            {
+                Console.WriteLine($"Something happened. Error: {ex.RpcError}");
+                return null;
+            }
         }
 
         #region Console
