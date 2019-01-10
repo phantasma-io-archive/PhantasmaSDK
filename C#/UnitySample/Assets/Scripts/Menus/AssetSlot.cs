@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using Phantasma.Numerics;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,11 +14,12 @@ public class AssetSlot : MonoBehaviour
 {
     public const float SLOT_HEIGHT = 250f;
 
-    public Text     nameText, priceText;
-    public Button   buyButton, sellButton, removeButton;
-    public Image    assetImage;
+    public Text         nameText, priceText;
+    public Button       buyButton, sellButton, removeButton;
+    public Image        assetImage;
+    public BigInteger   auctionID;
 
-    public MyGameAsset asset;
+    private Car _asset;
 
 	// Use this for initialization
 	void Start () {
@@ -29,13 +31,16 @@ public class AssetSlot : MonoBehaviour
 		
 	}
 
-    public void SetSlot(MyGameAsset gameAsset, EASSET_TYPE type)
+    public void SetSlot(Car car, EASSET_TYPE type)
     {
-        asset = gameAsset;
+        _asset = car;
 
-        nameText.text       = gameAsset.Name;
-        priceText.text      = gameAsset.Price.ToString(CultureInfo.InvariantCulture);
-        assetImage.sprite   = gameAsset.Icon;
+        auctionID = car.Data.auctionID;
+
+        nameText.text       = car.Data.name;
+        
+        priceText.text      = PhantasmaDemo.Instance.market.Auctions[car.Data.carID].startPrice.ToString();
+        assetImage.sprite   = car.Icon;
 
         switch (type)
         {
@@ -66,7 +71,7 @@ public class AssetSlot : MonoBehaviour
     /// </summary>
     public void BuyAsset()
     {
-        PhantasmaDemo.Instance.market.BuyAsset(asset);
+        PhantasmaDemo.Instance.market.BuyAsset(_asset);
     }
 
     /// <summary>
@@ -74,7 +79,7 @@ public class AssetSlot : MonoBehaviour
     /// </summary>
     public void SellAsset()
     {
-        PhantasmaDemo.Instance.market.SellAsset(asset);
+        PhantasmaDemo.Instance.market.SellAsset(_asset);
     }
 
     /// <summary>
@@ -82,6 +87,6 @@ public class AssetSlot : MonoBehaviour
     /// </summary>
     public void RemoveAsset()
     {
-        PhantasmaDemo.Instance.market.RemoveAsset(asset);
+        PhantasmaDemo.Instance.market.RemoveAsset(_asset);
     }
 }

@@ -17,8 +17,8 @@ public class MyAssetsMenu : MonoBehaviour
 
     void OnEnable()
     {
-        Debug.Log("my: " + PhantasmaDemo.Instance.MyAssets.Count + " | slots: " + _assetSlots.Count);
-        if (_assetSlots.Count != PhantasmaDemo.Instance.MyAssets.Count)
+        Debug.Log("my: " + PhantasmaDemo.Instance.MyCars.Count + " | slots: " + _assetSlots.Count);
+        if (_assetSlots.Count != PhantasmaDemo.Instance.MyCars.Count)
         {
             UpdateMyAssets();
         }
@@ -34,9 +34,9 @@ public class MyAssetsMenu : MonoBehaviour
 
         _assetSlots.Clear();
 
-        for (var i = 0; i < PhantasmaDemo.Instance.MyAssets.Count; i++)
+        for (var i = 0; i < PhantasmaDemo.Instance.MyCars.Count; i++)
         {
-            var marketAsset = PhantasmaDemo.Instance.MyAssets[i];
+            var marketAsset = PhantasmaDemo.Instance.MyCars[i];
 
             var newSlot                     = Instantiate(assetSlot, galleryContent.transform, false);
             newSlot.transform.localPosition += Vector3.down * AssetSlot.SLOT_HEIGHT * i;

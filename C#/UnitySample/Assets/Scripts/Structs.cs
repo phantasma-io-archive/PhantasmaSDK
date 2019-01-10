@@ -76,6 +76,7 @@ public struct NachoTransaction
 public struct CarData
 {
     public Address      owner;
+    public string       name;
     public byte         power;
     public byte         speed;
     public CarLocation  location;
@@ -86,13 +87,13 @@ public struct CarData
 
 public struct Auction
 {
-    public uint         startTime;
-    public uint         endTime;
-    public BigInteger   contentID;
-    public BigInteger   startPrice;
-    public BigInteger   endPrice;
-    public Address      creator;
-    public AuctionCurrency currency;
+    public uint             startTime;
+    public uint             endTime;
+    public BigInteger       contentID;
+    public BigInteger       startPrice;
+    public BigInteger       endPrice;
+    public Address          creator;
+    public AuctionCurrency  currency;
 }
 
 public struct Sale

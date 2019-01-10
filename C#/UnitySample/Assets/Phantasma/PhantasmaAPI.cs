@@ -2,6 +2,9 @@ using System;
 using System.Collections;
 using LunarLabs.Parser;
 using LunarLabs.Parser.JSON;
+using Phantasma.Cryptography;
+using Phantasma.IO;
+using Phantasma.Numerics;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -407,8 +410,12 @@ namespace Phantasma.SDK
    public class API {	   
 		public readonly	string Host;
 		private static JSONRPC_Client _client;
-	   
-		public API(string host) 
+
+       public bool debugMode = false;
+
+       //public Transaction Transaction;
+
+        public API(string host) 
 		{
 			this.Host = host;
 			_client = new JSONRPC_Client();
@@ -619,7 +626,43 @@ namespace Phantasma.SDK
 				callback(result);
 			} , addressText, tokenSymbol, chainInput);		   
 		}
-		
-		
-	}
+
+        public IEnumerator SignAndSendTransaction(byte[] script, string chain, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
+        {
+            Debug.Log("Sending transaction...");
+
+            var tx = new Blockchain.Transaction("nexus", "main", script, DateTime.UtcNow + TimeSpan.FromHours(1), 0);
+            tx.Sign(PhantasmaDemo.Instance.Key);
+
+            yield return SendRawTransaction(tx.ToByteArray(true).ToString(), callback, errorHandlingCallback);
+        }
+
+       //private uint GetCurrentTime()
+       //{
+       //    //return Transaction != null ? (Transaction.Time + timeSkip) : DateTime.UtcNow.ToTimestamp();
+       //}
+
+        public void LogTransaction<T>(Address address, BigInteger amount, TransactionType type, T content)
+        {
+           ImportantLog("-------------- LOG TRANSACTION: " + type + " | " + amount);
+
+            var bytes = content.Serialize();
+            LogTransaction(address, amount, type, bytes);
+        }
+
+       public void ImportantLog(string s)
+       {
+           if (debugMode)
+           {
+               Debug.Log(s);
+           }
+           else
+           {
+               // todo for unity console
+               Console.ForegroundColor = ConsoleColor.Magenta;
+               Console.WriteLine(s);
+               Console.ForegroundColor = ConsoleColor.Gray;
+           }
+       }
+   }
 }

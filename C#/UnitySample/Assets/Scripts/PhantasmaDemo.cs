@@ -35,8 +35,8 @@ public class PhantasmaDemo : MonoBehaviour
     private List<ChainDto>  _chains;
     private List<TokenDto>  _tokens;
 
-    public API                  PhantasmaApi    { get; private set; }
-    public List<MyGameAsset>    MyAssets        { get; set; }
+    public API          PhantasmaApi    { get; private set; }
+    public List<Car>    MyCars          { get; set; }
 
     private static PhantasmaDemo _instance;
     public static PhantasmaDemo Instance
@@ -46,24 +46,14 @@ public class PhantasmaDemo : MonoBehaviour
 
     private void Awake()
     {
-        MyAssets = new List<MyGameAsset>();
+        MyCars = new List<Car>();
     }
 
     private void Start ()
     {
         //GetAccount("P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr"); //TEST
 
-        StartWallet();
-
-    }
-
-    private void StartWallet()
-    {
         PhantasmaApi = new API("http://localhost:7077/rpc");
-
-        // TODO
-        //_tokens = PhantasmaApi.GetTokens()
-        //_chains = PhantasmaApi.GetChains()
     }
 
     private IEnumerator SyncBalance()
