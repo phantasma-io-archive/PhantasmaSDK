@@ -30,12 +30,13 @@ public class PhantasmaDemo : MonoBehaviour
     public Market       market;
     public List<Sprite> carImages;
 
-    private KeyPair keys;
+    private EWALLET_STATE   _state = EWALLET_STATE.INIT;
+    private decimal         _balance;
+    private List<ChainDto>  _chains;
+    private List<TokenDto>  _tokens;
 
-    private EWALLET_STATE state = EWALLET_STATE.INIT;
-    private decimal balance;
-
-    public List<MyGameAsset> MyAssets { get; set; }
+    public API                  PhantasmaApi    { get; private set; }
+    public List<MyGameAsset>    MyAssets        { get; set; }
 
     private static PhantasmaDemo _instance;
     public static PhantasmaDemo Instance
@@ -51,6 +52,18 @@ public class PhantasmaDemo : MonoBehaviour
     private void Start ()
     {
         //GetAccount("P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr"); //TEST
+
+        StartWallet();
+
+    }
+
+    private void StartWallet()
+    {
+        PhantasmaApi = new API("http://localhost:7077/rpc");
+
+        // TODO
+        //_tokens = PhantasmaApi.GetTokens()
+        //_chains = PhantasmaApi.GetChains()
     }
 
     private IEnumerator SyncBalance()
@@ -58,24 +71,24 @@ public class PhantasmaDemo : MonoBehaviour
         yield return new WaitForSeconds(2);
         //var balances = api.GetAssetBalancesOf(this.keys);
         //balance = balances.ContainsKey(assetSymbol) ? balances[assetSymbol] : 0;
-        state = EWALLET_STATE.UPDATE;
+        _state = EWALLET_STATE.UPDATE;
     }
 
     private void Update () {
 
-        switch (state)
+        switch (_state)
         {
             case EWALLET_STATE.INIT:
                 {
-                    state = EWALLET_STATE.SYNC;
+                    _state = EWALLET_STATE.SYNC;
                     StartCoroutine(SyncBalance());
                     break;
                 }
 
             case EWALLET_STATE.UPDATE:
                 {
-                    state = EWALLET_STATE.READY;
-                    CanvasManager.Instance.accountMenu.SetBalance(balance.ToString(CultureInfo.InvariantCulture));
+                    _state = EWALLET_STATE.READY;
+                    CanvasManager.Instance.accountMenu.SetBalance(_balance.ToString(CultureInfo.InvariantCulture));
                     break;
                 }
         }		
@@ -92,7 +105,6 @@ public class PhantasmaDemo : MonoBehaviour
 
         //var address = "L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25";
         //var addressBytes = Encoding.ASCII.GetBytes(address);
-        //keys = KeyPair.FromWIF(address);
 
         Key = KeyPair.FromWIF(address);
 
@@ -118,8 +130,7 @@ public class PhantasmaDemo : MonoBehaviour
 
         Debug.Log("Get account: " + address);
 
-        var api = new API("http://localhost:7077/rpc");
-        StartCoroutine(api.GetAccount(address, result =>
+        StartCoroutine(PhantasmaApi.GetAccount(address, result =>
             {
                 CanvasManager.Instance.accountMenu.SetBalance("Name: " + result.name);
 

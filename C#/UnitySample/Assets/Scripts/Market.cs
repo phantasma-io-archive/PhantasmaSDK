@@ -4,6 +4,8 @@ using Phantasma.Cryptography;
 using Phantasma.Numerics;
 using Phantasma.RpcClient.DTOs;
 using Phantasma.VM.Utils;
+using Phantasma.IO;
+using Phantasma.SDK;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -32,19 +34,18 @@ public class Market : MonoBehaviour
     
     public void FillMarket()
     {
-        // TODO get assets from the blockchain
-
-
         foreach (var carImage in PhantasmaDemo.Instance.carImages)
-        {           
+        {
+            var newCarId = CreateCar();
+
             var newCar = new MyGameAsset();
-            newCar.SetAsset(carImage.name, (decimal)Random.Range(0f, 10f), carImage);
+            newCar.SetAsset(newCarId, carImage.name, (decimal)Random.Range(0f, 10f), carImage);
 
             MarketBuyAssets.Add(newCar);
         }
     }
 
-    private void CreateCar()
+    private BigInteger CreateCar()
     {
         //Create tx that calls 'MintToken' from 'Token' contract, passing as arguments (address, symbol, data)
         //  address = any address, the new minted token will appear in this address
@@ -70,14 +71,46 @@ public class Market : MonoBehaviour
         // save car
         cars.Add(carID, car);
         
-        LogTransaction(PhantasmaDemo.Instance.Key.Address, 0, TransactionType.Created_Car, carID);
+        var txData = car.Serialize();
 
-        //var script = ScriptUtils.BeginScript()
-        //    .AllowGas(PhantasmaDemo.Instance.Key.Address, 1, 9999)
-        //    .CallContract("nexus", "MintToken", PhantasmaDemo.Instance.Key.Address, "CAR", Phantasma.Serialization.Serializate(car))
-        //    .SpendGas(PhantasmaDemo.Instance.Key.Address)
-        //    .EndScript();
+        var script = ScriptUtils.BeginScript()
+            .AllowGas(PhantasmaDemo.Instance.Key.Address, 1, 9999)
+            .CallContract("nexus", "MintToken", PhantasmaDemo.Instance.Key.Address, "CAR", txData)
+            .SpendGas(PhantasmaDemo.Instance.Key.Address)
+            .EndScript();
 
+        //var newTx = new TransactionDto {Script = script.ToString()};
+        
+
+        var tx = new Transaction
+        {
+            //hash          = TODO
+            chainAddress    = "main",
+            timestamp       = Convert.ToUInt32(DateTime.UtcNow),
+            //blockheight   = TODO
+            script          = script.ToString(),
+            //events        = TODO
+        };
+
+        //tx.Sign(); // TODO Transaction não tem Sign()
+
+        StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.SendRawTransaction(txData.ToString(), result =>
+            {
+                //_cars.Add((BigInteger)result); o que vem do MintToken() é um BigInteger com o id do novo token
+
+                LogTransaction(PhantasmaDemo.Instance.Key.Address, 0, TransactionType.Created_Car, carID);
+
+                //return result); TODO
+
+            },
+            (errorType, errorMessage) =>
+            {
+                // TODO
+                CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
+            }
+        ));
+
+        return 0; //todo remove
     }
 
     /// <summary>
