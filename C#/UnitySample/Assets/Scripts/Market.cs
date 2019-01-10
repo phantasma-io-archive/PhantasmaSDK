@@ -82,19 +82,22 @@ public class Market : MonoBehaviour
         //var newTx = new TransactionDto {Script = script.ToString()};
         
 
-        var tx = new Transaction
-        {
-            //hash          = TODO
-            chainAddress    = "main",
-            timestamp       = Convert.ToUInt32(DateTime.UtcNow),
-            //blockheight   = TODO
-            script          = script.ToString(),
-            //events        = TODO
-        };
+        //var tx = new Transaction
+        //{
+        //    //hash          = TODO
+        //    chainAddress    = "main",
+        //    timestamp       = Convert.ToUInt32(DateTime.UtcNow),
+        //    //blockheight   = TODO
+        //    script          = script.ToString(),
+        //    //events        = TODO
+        //};
 
-        //tx.Sign(); // TODO Transaction não tem Sign()
+        ////tx.Sign(); // TODO Transaction não tem Sign()
 
-        StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.SendRawTransaction(txData.ToString(), result =>
+        var tx = new Phantasma.Blockchain.Transaction("nexus", "main", script, DateTime.UtcNow + TimeSpan.FromHours(1), 0);
+        tx.Sign(PhantasmaDemo.Instance.Key);
+
+        StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.SendRawTransaction(tx.ToByteArray(true).ToString(), result =>
             {
                 //_cars.Add((BigInteger)result); o que vem do MintToken() é um BigInteger com o id do novo token
 
