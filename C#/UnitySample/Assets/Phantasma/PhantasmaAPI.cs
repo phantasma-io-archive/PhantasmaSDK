@@ -615,12 +615,13 @@ namespace Phantasma.SDK
 		
 		
 		//Returns data of a non-fungible token, in hexadecimal format.
-		public IEnumerator GetTokenData(string symbol, string IDtext, Action<TokenData> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
-		{	   
-			yield return _client.SendRequest(Host, "getTokenData", errorHandlingCallback, (node) => { 
-			var result = TokenData.FromNode(node);
-				callback(result);
-			} , symbol, IDtext);		   
+		public IEnumerator GetTokenData(string symbol, string IDtext, Action<TokenData> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
+		{
+		    yield return _client.SendRequest(Host, "getTokenData", errorHandlingCallback, (node) =>
+		    {
+		        var result = TokenData.FromNode(node);
+		        callback(result);
+		    }, symbol, IDtext);
 		}
 		
 		
@@ -685,7 +686,7 @@ namespace Phantasma.SDK
        {
            Debug.Log("Sending transaction...");
 
-           var tx = new Blockchain.Transaction("nexus", "main", script, DateTime.UtcNow + TimeSpan.FromHours(1), 0);
+           var tx = new Blockchain.Transaction("nexus", chain, script, DateTime.UtcNow + TimeSpan.FromHours(1), 0);
            tx.Sign(PhantasmaDemo.Instance.Key);
 
            yield return SendRawTransaction(tx.ToByteArray(true).ToString(), callback, errorHandlingCallback);

@@ -603,8 +603,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_MethodName: Login
+      - m_Target: {fileID: 730529364}
+        m_MethodName: Cancel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2416,8 +2416,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_MethodName: Login
+      - m_Target: {fileID: 431712255}
+        m_MethodName: Cancel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2793,7 +2793,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &431712254
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2834,10 +2834,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aaa8b50beb2fa6844889b21530edcbdb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  carName: {fileID: 0}
-  speedStats: {fileID: 0}
-  powerStats: {fileID: 0}
-  priceInput: {fileID: 0}
+  carName: {fileID: 349054431}
+  speedStats: {fileID: 912542732}
+  powerStats: {fileID: 1468295162}
+  priceInput: {fileID: 432997272}
+  sprite: {fileID: 869266879}
 --- !u!1 &432997271
 GameObject:
   m_ObjectHideFlags: 0
@@ -4356,6 +4357,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 730529363}
+  - component: {fileID: 730529364}
   m_Layer: 5
   m_Name: Buy Popup
   m_TagString: Untagged
@@ -4389,6 +4391,24 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -475}
   m_SizeDelta: {x: 892.96, y: 617}
   m_Pivot: {x: 0.5, y: 0}
+--- !u!114 &730529364
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 730529362}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_GeneratorAsset: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: db66cb3565cab5544969257378376d2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  carName: {fileID: 1191199622}
+  cost: {fileID: 1522616063}
+  speedStats: {fileID: 634186144}
+  powerStats: {fileID: 1512703467}
+  sprite: {fileID: 1406971018}
 --- !u!1 &762018287
 GameObject:
   m_ObjectHideFlags: 0
@@ -5111,7 +5131,7 @@ GameObject:
   - component: {fileID: 869266880}
   - component: {fileID: 869266879}
   m_Layer: 5
-  m_Name: Asset
+  m_Name: Sprite Asset
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6641,8 +6661,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_MethodName: Login
+      - m_Target: {fileID: 730529364}
+        m_MethodName: Buy
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -7180,8 +7200,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_MethodName: Login
+      - m_Target: {fileID: 431712255}
+        m_MethodName: Sell
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -7585,7 +7605,7 @@ GameObject:
   - component: {fileID: 1406971019}
   - component: {fileID: 1406971018}
   m_Layer: 5
-  m_Name: Asset
+  m_Name: Asset Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

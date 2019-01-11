@@ -3,9 +3,9 @@ using UnityEngine.UI;
 
 public class BuyPopup : MonoBehaviour
 {
-    public Text carName;
-    public Text speedStats, powerStats;
-    public Text cost;
+    public Text     carName, cost;
+    public Text     speedStats, powerStats;
+    public Image    sprite;
 
     private Car _car;
 
@@ -30,9 +30,11 @@ public class BuyPopup : MonoBehaviour
         speedStats.text = "Speed: " + car.Data.speed;
         powerStats.text = "Power: " + car.Data.power;
 
-        var auction = PhantasmaDemo.Instance.market.GetAuction(car.Data.auctionID);
+        var auction = PhantasmaDemo.Instance.market.GetAuction(car.AuctionID);
 
         cost.text = "Cost: " + auction.startPrice;
+
+        sprite.sprite = car.Icon;
     }
 
     public void Cancel()
@@ -42,6 +44,6 @@ public class BuyPopup : MonoBehaviour
 
     public void Buy()
     {
-        PhantasmaDemo.Instance.market.BuyAsset(_car, PhantasmaDemo.Instance.Key.Address, price, price);
+        PhantasmaDemo.Instance.market.BuyAsset(_car);
     }
 }

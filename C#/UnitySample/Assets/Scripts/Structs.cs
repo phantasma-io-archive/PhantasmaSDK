@@ -80,8 +80,6 @@ public struct CarData
     public byte         power;
     public byte         speed;
     public CarLocation  location;
-    public BigInteger   carID;
-    public BigInteger   auctionID;
     public CarFlags     flags;
 }
 

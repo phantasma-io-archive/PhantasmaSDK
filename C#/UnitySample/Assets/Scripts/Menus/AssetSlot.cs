@@ -35,11 +35,11 @@ public class AssetSlot : MonoBehaviour
     {
         _asset = car;
 
-        auctionID = car.Data.auctionID;
+        auctionID = car.AuctionID;
 
         nameText.text       = car.Data.name;
         
-        priceText.text      = PhantasmaDemo.Instance.market.Auctions[car.Data.carID].startPrice.ToString();
+        priceText.text      = PhantasmaDemo.Instance.market.Auctions[car.CarID].startPrice.ToString();
         assetImage.sprite   = car.Icon;
 
         switch (type)

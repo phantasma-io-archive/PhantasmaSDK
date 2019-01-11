@@ -6,6 +6,7 @@ public class SellPopup : MonoBehaviour
     public Text         carName;
     public Text         speedStats, powerStats;
     public InputField   priceInput;
+    public Image        sprite;
 
     private Car _car;
 
@@ -28,6 +29,8 @@ public class SellPopup : MonoBehaviour
         carName.text    = car.Data.name;
         speedStats.text = "Speed: " + car.Data.speed;
         powerStats.text = "Power: " + car.Data.power;
+
+        sprite.sprite = car.Icon;
     }
 
     public void Cancel()

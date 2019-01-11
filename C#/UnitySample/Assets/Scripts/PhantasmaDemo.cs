@@ -27,6 +27,24 @@ public class PhantasmaDemo : MonoBehaviour
         READY
     }
 
+    /*
+    public enum EventKind
+    {
+        ChainCreate,
+        TokenCreate,
+        TokenSend,
+        TokenReceive,
+        TokenMint,
+        TokenBurn,
+        TokenEscrow,
+        AddressRegister,
+        FriendAdd,
+        FriendRemove,
+        GasEscrow,
+        GasPayment,
+    }
+     */
+
     public Market       market;
     public List<Sprite> carImages;
 
@@ -95,6 +113,8 @@ public class PhantasmaDemo : MonoBehaviour
         //var addressBytes = Encoding.ASCII.GetBytes(address);
 
         Key = KeyPair.FromWIF(address);
+
+        market.FillMarket();
 
         CanvasManager.Instance.SetAddress(address);
         CanvasManager.Instance.CloseLogin();
