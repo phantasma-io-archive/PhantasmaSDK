@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Phantasma.Cryptography;
 using Phantasma.Numerics;
 using Phantasma.VM.Utils;
 using Phantasma.IO;
@@ -80,6 +81,8 @@ public class Market : MonoBehaviour
         StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.SignAndSendTransaction(script, "nexus", 
             (result) =>
             {
+                //PhantasmaDemo.Instance.PhantasmaApi.GetTokenData("CAR", result);
+                
                 //_cars.Add((BigInteger)result, car); TODO o que vem do MintToken() é um BigInteger com o id do novo token
 
                 PhantasmaDemo.Instance.PhantasmaApi.LogTransaction(PhantasmaDemo.Instance.Key.Address, 0, TransactionType.Created_Car, carID);
@@ -146,7 +149,7 @@ public class Market : MonoBehaviour
     /// <summary>
     /// Put an asset for sale on the market
     /// </summary>
-    public void SellAsset(Car car) // TODO Address from, BigInteger wrestlerID, BigInteger startPrice, BigInteger endPrice, AuctionCurrency currency, uint duration)
+    public void SellAsset(Car car, Address from, BigInteger startPrice, BigInteger endPrice, AuctionCurrency currency = AuctionCurrency.Game_Coin, uint duration = 30)
     {
         _cars.Add(car.Data.carID, car.Data);
 

@@ -79,7 +79,8 @@ public class AssetSlot : MonoBehaviour
     /// </summary>
     public void SellAsset()
     {
-        PhantasmaDemo.Instance.market.SellAsset(_asset);
+        CanvasManager.Instance.ShowSellPopup();
+        //PhantasmaDemo.Instance.market.SellAsset(_asset);
     }
 
     /// <summary>
