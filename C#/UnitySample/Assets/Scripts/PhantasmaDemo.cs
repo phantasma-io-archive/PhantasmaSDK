@@ -1,11 +1,16 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using Phantasma.Blockchain.Contracts;
+using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
+using Phantasma.IO;
+using Phantasma.Numerics;
 using Phantasma.SDK;
 using Phantasma.VM.Utils;
 
@@ -205,14 +210,60 @@ public class PhantasmaDemo : MonoBehaviour
 
     #endregion
 
-    private void CreateToken()
+    //TODO if is admin address => can call this method once
+    public void CreateToken()
     {
-        //TODO 
-
+        //TODO antes de criar este token, verifica se ele já existe GetToken()
+        
         var script = ScriptUtils.BeginScript()
             .AllowGas(Key.Address, 1, 9999)
             .CallContract("nexus", "CreateToken", Key.Address, "CAR", "Car Demo Token", 10000, 0, TokenFlags.Transferable | TokenFlags.Finite)
             .SpendGas(Key.Address)
             .EndScript();
+        
+        StartCoroutine(PhantasmaApi.SignAndSendTransaction(script, "main",
+            (result) =>
+            {
+                Debug.Log("sign result: " + result);
+
+                StartCoroutine(PhantasmaApi.GetTransaction(result, (tx) =>
+                {
+                    foreach (var evt in tx.events)
+                    {
+                        Debug.Log("has event: " + evt.kind + " - " + evt.data);
+
+                        if (Enum.TryParse(evt.kind, out EventKind eKind))
+                        {
+                            if (eKind == EventKind.TokenCreate)
+                            {
+                                var bytes = Base16.Decode(evt.data);
+                                var data = Serialization.Unserialize<TokenEventData>(bytes);
+
+                                //PhantasmaApi.LogTransaction(Key.Address, 0, TransactionType.Created_Token, "CAR");
+
+                                break;
+                            }
+                            else
+                            {
+                                // TODO aconteceu algum erro...
+                            }
+                        }
+                        else
+                        {
+                            // TODO aconteceu algum erro..
+                        }
+                    }
+
+
+
+                }));
+
+            },
+            (errorType, errorMessage) =>
+            {
+                // TODO
+                CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
+            }
+        ));
     }
 }

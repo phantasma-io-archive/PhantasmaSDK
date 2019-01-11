@@ -689,7 +689,7 @@ namespace Phantasma.SDK
            var tx = new Blockchain.Transaction("nexus", chain, script, DateTime.UtcNow + TimeSpan.FromHours(1), 0);
            tx.Sign(PhantasmaDemo.Instance.Key);
 
-           yield return SendRawTransaction(tx.ToByteArray(true).ToString(), callback, errorHandlingCallback);
+           yield return SendRawTransaction(Base16.Encode(tx.ToByteArray(true)), callback, errorHandlingCallback);
        }
 
        //private uint GetCurrentTime()

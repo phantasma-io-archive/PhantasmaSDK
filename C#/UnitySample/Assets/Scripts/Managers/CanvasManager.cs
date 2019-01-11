@@ -10,6 +10,7 @@ public class CanvasManager : MonoBehaviour {
     public MainMenu     mainMenu;
     public AccountMenu  accountMenu;
     public MarketMenu   marketMenu;
+    public AdminMenu    adminMenu;
     public GameObject   buyPopup, sellPopup;
 
     private static CanvasManager _instance;
@@ -26,6 +27,7 @@ public class CanvasManager : MonoBehaviour {
         accountMenu.gameObject.SetActive(false);
         myAssetsMenu.gameObject.SetActive(false);
         marketMenu.gameObject.SetActive(false);
+        adminMenu.gameObject.SetActive(false);
         
         OpenLogin();
     }
@@ -112,6 +114,24 @@ public class CanvasManager : MonoBehaviour {
         mainMenu.gameObject.SetActive(true);
 
         marketMenu.gameObject.SetActive(false);
+    }
+
+    #endregion
+
+    #region Admin Menu
+
+    public void OpenAdmin()
+    {
+        mainMenu.gameObject.SetActive(false);
+
+        adminMenu.gameObject.SetActive(true);
+    }
+
+    public void CloseAdmin()
+    {
+        mainMenu.gameObject.SetActive(true);
+
+        adminMenu.gameObject.SetActive(false);
     }
 
     #endregion

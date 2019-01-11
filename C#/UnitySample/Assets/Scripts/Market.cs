@@ -127,15 +127,6 @@ public class Market : MonoBehaviour
                         }
                     }
 
-                    if (carID == null)
-                    {
-
-                    }
-                    else
-                    {
-                        return;
-                    }
-
                 }));
 
             },
