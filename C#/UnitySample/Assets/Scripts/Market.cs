@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Phantasma.Cryptography;
 using Phantasma.Numerics;
-using Phantasma.RpcClient.DTOs;
 using Phantasma.VM.Utils;
 using Phantasma.IO;
 using Phantasma.SDK;

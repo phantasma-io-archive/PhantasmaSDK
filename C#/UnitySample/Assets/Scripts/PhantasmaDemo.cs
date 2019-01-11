@@ -3,10 +3,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
 using Phantasma.SDK;
 using Phantasma.VM.Utils;
-using Phantasma.RpcClient.DTOs;
 
 /*
  * Phantasma Spook
@@ -32,8 +32,6 @@ public class PhantasmaDemo : MonoBehaviour
 
     private EWALLET_STATE   _state = EWALLET_STATE.INIT;
     private decimal         _balance;
-    private List<ChainDto>  _chains;
-    private List<TokenDto>  _tokens;
 
     public API          PhantasmaApi    { get; private set; }
     public List<Car>    MyCars          { get; set; }
