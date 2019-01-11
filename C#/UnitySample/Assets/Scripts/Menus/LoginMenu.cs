@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Phantasma.Cryptography;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class LoginMenu : MonoBehaviour

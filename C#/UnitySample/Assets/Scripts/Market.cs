@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Phantasma.Blockchain.Contracts;
 using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Cryptography;
 using Phantasma.Numerics;
 using Phantasma.VM.Utils;
 using Phantasma.IO;
-using Phantasma.SDK;
 using UnityEngine;
-using Event = Phantasma.SDK.Event;
 using Random = UnityEngine.Random;
 
 public class Market : MonoBehaviour
@@ -28,8 +25,8 @@ public class Market : MonoBehaviour
     private Dictionary<BigInteger, CarData> _cars;
 
     public Dictionary<BigInteger, Auction>  Auctions            { get; private set; }
-    public List<Car>                        MarketBuyAssets    { get; private set; }
-    public List<Car>                        MarketSellAssets   { get; private set; }
+    public List<Car>                        MarketBuyAssets     { get; private set; }
+    public List<Car>                        MarketSellAssets    { get; private set; }
     
     private void Awake()
     {
@@ -71,19 +68,22 @@ public class Market : MonoBehaviour
     {
         var cars = _cars; //Storage.FindMapForContract<BigInteger, CarData>(GLOBAL_CARS_LIST); //TODO
 
-        var carData = new CarData()
+        var carData = new CarData
         {
             owner       = PhantasmaDemo.Instance.Key.Address,
+            name        = "Super Cadillac", 
             power       = (byte)Random.Range(1, 10),
             speed       = (byte)Random.Range(1, 10),
             location    = CarLocation.Market,
             flags       = CarFlags.Locked
         };
       
-        var txData = carData.Serialize();
+        var txData = Serialization.Serialize(carData);
+        //var txData = carData.Serialize();
+
         var script = ScriptUtils.BeginScript()
                         .AllowGas(PhantasmaDemo.Instance.Key.Address, 1, 9999)
-                        .CallContract("nexus", "MintToken", PhantasmaDemo.Instance.Key.Address, "CAR", txData)
+                        .CallContract("token", "MintToken", PhantasmaDemo.Instance.Key.Address, "CAR", txData)
                         .SpendGas(PhantasmaDemo.Instance.Key.Address)
                         .EndScript();
 

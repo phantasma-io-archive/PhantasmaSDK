@@ -3,6 +3,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
 using Phantasma.SDK;
@@ -100,21 +101,21 @@ public class PhantasmaDemo : MonoBehaviour
         }		
 	}
 
-    public void Login(string address)
+    public void Login(string privateKey)
     {
-        GetAccount(address);
+        Key = KeyPair.FromWIF(privateKey);
+
+        GetAccount(Key.Address.ToString());
     }
 
     private void LoggedIn(string address)
     {
-        //Debug.Log("logged in");
+        Debug.Log("logged in: " + address);
 
         //var address = "L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25";
-        //var addressBytes = Encoding.ASCII.GetBytes(address);
-
-        Key = KeyPair.FromWIF(address);
-
-        market.FillMarket();
+        var addressBytes = Encoding.ASCII.GetBytes(address);
+        
+        //market.FillMarket();
 
         CanvasManager.Instance.SetAddress(address);
         CanvasManager.Instance.CloseLogin();
@@ -134,7 +135,8 @@ public class PhantasmaDemo : MonoBehaviour
 
     public void GetAccount(string address)
     {
-        //P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr
+        // Private key: L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25
+        // Public key:  P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr
 
         Debug.Log("Get account: " + address);
 
@@ -205,6 +207,8 @@ public class PhantasmaDemo : MonoBehaviour
 
     private void CreateToken()
     {
+        //TODO 
+
         var script = ScriptUtils.BeginScript()
             .AllowGas(Key.Address, 1, 9999)
             .CallContract("nexus", "CreateToken", Key.Address, "CAR", "Car Demo Token", 10000, 0, TokenFlags.Transferable | TokenFlags.Finite)
