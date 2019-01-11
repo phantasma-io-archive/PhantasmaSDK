@@ -3,8 +3,8 @@ using System.Collections;
 using LunarLabs.Parser;
 using LunarLabs.Parser.JSON;
 using Phantasma.Cryptography;
-using Phantasma.IO;
 using Phantasma.Numerics;
+using Phantasma.IO;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -386,6 +386,26 @@ namespace Phantasma.SDK
 		}
 	}
 	
+	public struct TokenData 
+	{
+		public string ID;
+		public string chainAddress;
+		public string ram;
+		public string rom;
+	   
+		public static TokenData FromNode(DataNode node) 
+		{
+			TokenData result;
+						
+			result.ID = node.GetString("iD");						
+			result.chainAddress = node.GetString("chainAddress");						
+			result.ram = node.GetString("ram");						
+			result.rom = node.GetString("rom");
+
+			return result;			
+		}
+	}
+	
 	public struct TxConfirmation 
 	{
 		public string hash;
@@ -406,14 +426,28 @@ namespace Phantasma.SDK
 		}
 	}
 	
+	public struct SendRawTx 
+	{
+		public string hash;
+		public string error;
+	   
+		public static SendRawTx FromNode(DataNode node) 
+		{
+			SendRawTx result;
+						
+			result.hash = node.GetString("hash");						
+			result.error = node.GetString("error");
+
+			return result;			
+		}
+	}
+	
    
    public class API {	   
 		public readonly	string Host;
 		private static JSONRPC_Client _client;
 
        public bool debugMode = false;
-
-       //public Transaction Transaction;
 
         public API(string host) 
 		{
@@ -429,6 +463,16 @@ namespace Phantasma.SDK
 			var result = Account.FromNode(node);
 				callback(result);
 			} , addressText);		   
+		}
+		
+		
+		//Returns the height of a chain.
+		public IEnumerator GetBlockHeightFromChain(string chainInput, Action<int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
+			yield return _client.SendRequest(Host, "getBlockHeightFromChain", errorHandlingCallback, (node) => { 
+			var result = int.Parse(node.Value);
+				callback(result);
+			} , chainInput);		   
 		}
 		
 		
@@ -502,13 +546,13 @@ namespace Phantasma.SDK
 		}
 		
 		
-		//TODO document me
-		public IEnumerator GetAddressTransactionCount(string addressText, string chainText, Action<int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		//Get number of transactions in a specific address and chain
+		public IEnumerator GetAddressTransactionCount(string addressText, string chainInput, Action<int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
 		{	   
 			yield return _client.SendRequest(Host, "getAddressTransactionCount", errorHandlingCallback, (node) => { 
 			var result = int.Parse(node.Value);
 				callback(result);
-			} , addressText, chainText);		   
+			} , addressText, chainInput);		   
 		}
 		
 		
@@ -542,7 +586,7 @@ namespace Phantasma.SDK
 		}
 		
 		
-		//Returns an array of chains with useful information.
+		//Returns an array of all chains deployed in Phantasma.
 		public IEnumerator GetChains(Action<Chain[]> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
 		{	   
 			yield return _client.SendRequest(Host, "getChains", errorHandlingCallback, (node) => { 
@@ -567,6 +611,16 @@ namespace Phantasma.SDK
 			}
 				callback(result);
 			} );		   
+		}
+		
+		
+		//Returns data of a non-fungible token, in hexadecimal format.
+		public IEnumerator GetTokenData(string symbol, string IDtext, Action<TokenData> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
+			yield return _client.SendRequest(Host, "getTokenData", errorHandlingCallback, (node) => { 
+			var result = TokenData.FromNode(node);
+				callback(result);
+			} , symbol, IDtext);		   
 		}
 		
 		
@@ -627,28 +681,28 @@ namespace Phantasma.SDK
 			} , addressText, tokenSymbol, chainInput);		   
 		}
 
-        public IEnumerator SignAndSendTransaction(byte[] script, string chain, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
-        {
-            Debug.Log("Sending transaction...");
+       public IEnumerator SignAndSendTransaction(byte[] script, string chain, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
+       {
+           Debug.Log("Sending transaction...");
 
-            var tx = new Blockchain.Transaction("nexus", "main", script, DateTime.UtcNow + TimeSpan.FromHours(1), 0);
-            tx.Sign(PhantasmaDemo.Instance.Key);
+           var tx = new Blockchain.Transaction("nexus", "main", script, DateTime.UtcNow + TimeSpan.FromHours(1), 0);
+           tx.Sign(PhantasmaDemo.Instance.Key);
 
-            yield return SendRawTransaction(tx.ToByteArray(true).ToString(), callback, errorHandlingCallback);
-        }
+           yield return SendRawTransaction(tx.ToByteArray(true).ToString(), callback, errorHandlingCallback);
+       }
 
        //private uint GetCurrentTime()
        //{
        //    //return Transaction != null ? (Transaction.Time + timeSkip) : DateTime.UtcNow.ToTimestamp();
        //}
 
-        public void LogTransaction<T>(Address address, BigInteger amount, TransactionType type, T content)
-        {
+       public void LogTransaction<T>(Address address, BigInteger amount, TransactionType type, T content)
+       {
            ImportantLog("-------------- LOG TRANSACTION: " + type + " | " + amount);
 
-            var bytes = content.Serialize();
-            LogTransaction(address, amount, type, bytes);
-        }
+           var bytes = content.Serialize();
+           LogTransaction(address, amount, type, bytes);
+       }
 
        public void ImportantLog(string s)
        {
@@ -665,4 +719,6 @@ namespace Phantasma.SDK
            }
        }
    }
+
+
 }
