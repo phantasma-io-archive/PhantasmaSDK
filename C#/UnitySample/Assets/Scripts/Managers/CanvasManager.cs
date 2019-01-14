@@ -13,6 +13,7 @@ public class CanvasManager : MonoBehaviour {
     public AdminMenu    adminMenu;
     public BuyPopup     buyPopup;
     public SellPopup    sellPopup;
+    public GameObject   fetchingDataPopup;
 
     private static CanvasManager _instance;
     public static CanvasManager Instance
@@ -139,6 +140,17 @@ public class CanvasManager : MonoBehaviour {
 
     #region Popups
 
+    public void ShowFetchingDataPopup()
+    {
+        fetchingDataPopup.SetActive(true);
+    }
+
+    public void HideFetchingDataPopup()
+    {
+        // TODo este popup deve ficar visivel pelo menos 1 seg para se conseguir ler e não ser um flash
+        fetchingDataPopup.SetActive(false);
+    }
+
     public void ShowSellPopup(Car car)
     {
         sellPopup.SetPopup(car);
@@ -172,4 +184,5 @@ public class CanvasManager : MonoBehaviour {
     //{
     //    PhantasmaDemo.Instance.ListTransactions();
     //}
+
 }

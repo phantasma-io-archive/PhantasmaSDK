@@ -8,7 +8,18 @@ public class MainMenu : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        adminButton.gameObject.SetActive(true); //PhantasmaDemo.Instance.IsTokenOwner());
+        CanvasManager.Instance.ShowFetchingDataPopup();
+
+        PhantasmaDemo.Instance.OwnsToken(() =>
+        {
+            CanvasManager.Instance.mainMenu.SetAdminButton();
+            CanvasManager.Instance.HideFetchingDataPopup();
+        });
+    }
+
+    public void SetAdminButton()
+    {
+        adminButton.gameObject.SetActive(PhantasmaDemo.Instance.IsTokenOwner);
     }
 
     public void AccountClicked()

@@ -58,7 +58,9 @@ public class PhantasmaDemo : MonoBehaviour
     private decimal         _balance;
 
     public API          PhantasmaApi    { get; private set; }
+    public bool         IsTokenOwner    { get; private set; }
     public List<Car>    MyCars          { get; set; }
+    
 
     private static PhantasmaDemo _instance;
     public static PhantasmaDemo Instance
@@ -283,9 +285,9 @@ public class PhantasmaDemo : MonoBehaviour
         return createdToken;
     }
 
-    public bool IsTokenOwner()
+    public bool OwnsToken(Action callback = null)
     {
-        var isOwner = false;
+        IsTokenOwner = false;
 
         StartCoroutine(PhantasmaApi.GetTokens(
             (result) =>
@@ -299,9 +301,14 @@ public class PhantasmaDemo : MonoBehaviour
                     if (token.ownerAddress.Equals(Key.Address.ToString()))
                     {
                         Debug.Log("SAME ADD: " + token.symbol);
-                        isOwner = true;
+                        IsTokenOwner = true;
                         break;
                     }
+                }
+
+                if (callback != null)
+                {
+                    callback();
                 }
             },
             (errorType, errorMessage) =>
@@ -311,6 +318,6 @@ public class PhantasmaDemo : MonoBehaviour
             }
         ));
 
-        return isOwner;
+        return IsTokenOwner;
     }
 }
