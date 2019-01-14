@@ -153,45 +153,74 @@ public class Market : MonoBehaviour
     /// </summary>
     public void BuyAsset(Car car)
     {
-        _cars.Remove(car.CarID);
-        MarketBuyAssets.Remove(car);
+        var script = ScriptUtils.BeginScript()
+            .AllowGas(car.Data.owner, 1, 9999)
+            .CallContract("token", "BuyToken", car.Data.owner, car.AuctionID)
+            .SpendGas(car.Data.owner)
+            .EndScript();
 
-        PhantasmaDemo.Instance.MyCars.Add(car);
+        StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.SignAndSendTransaction(script, "main",
+            (result) =>
+            {
+                Debug.Log("sign result: " + result);
 
-        var carData = car.Data;
+                StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetTransaction(result, (tx) =>
+                {
+                    var carData = car.Data;
+                    
+                    _cars.Remove(car.CarID);
+                    MarketBuyAssets.Remove(car);
 
-        var auction = GetAuction(car.AuctionID);
-        
-        var activeAuctionsList = new List<BigInteger>(); //Storage.FindCollectionForContract<BigInteger>(ACTIVE_AUCTIONS_LIST);
-        //Expect(activeList.Contains(auctionID), "auction finished");
+                    PhantasmaDemo.Instance.MyCars.Add(car);
 
-        //var car = GetCar(carID);
+                    var auction = GetAuction(car.AuctionID);
 
-        if (car.Data.owner != PhantasmaDemo.Instance.Key.Address) //TODO to)
-        {
-            //ProcessAuctionSale(to, auctionID, ref auction);
+                    // TODO confirmar que foi removido um leilão na blockchain e remover tb da lista local
+                    // var auctionIDs = (BigInteger[])simulator.Nexus.RootChain.InvokeContract("market", "GetAuctionIDs");
+                    Auctions = new Dictionary<BigInteger, Auction>(); //Storage.FindMapForContract<BigInteger, NachoAuction>(GLOBAL_AUCTIONS_LIST);
+                    Auctions.Remove(car.AuctionID);
 
-            var oldTeam = new List<BigInteger>(); //Storage.FindCollectionForAddress<BigInteger>(ACCOUNT_CARS, auction.creator); // TODO
-            oldTeam.Remove(car.CarID);
 
-            var newTeam = new List<BigInteger>(); //Storage.FindCollectionForAddress<BigInteger>(ACCOUNT_CARS, to);
-            newTeam.Add(car.CarID);
+                    var activeAuctionsList = new List<BigInteger>(); //Storage.FindCollectionForContract<BigInteger>(ACTIVE_AUCTIONS_LIST);
+                    //Expect(activeList.Contains(auctionID), "auction finished");
 
-            // update car owner
-            carData.owner = PhantasmaDemo.Instance.Key.Address; // TODO to;
-        }
+                    //var car = GetCar(carID);
 
-        carData.location = CarLocation.None;
-        //SetCar(carData.carID, car);
+                    if (car.Data.owner != PhantasmaDemo.Instance.Key.Address) //TODO to)
+                    {
+                        //ProcessAuctionSale(to, auctionID, ref auction);
 
-        car.AuctionID = 0;
+                        var oldTeam = new List<BigInteger>(); //Storage.FindCollectionForAddress<BigInteger>(ACCOUNT_CARS, auction.creator); // TODO
+                        oldTeam.Remove(car.CarID);
 
-        // delete this auction from active list
-        activeAuctionsList.Remove(car.AuctionID);
+                        var newTeam = new List<BigInteger>(); //Storage.FindCollectionForAddress<BigInteger>(ACCOUNT_CARS, to);
+                        newTeam.Add(car.CarID);
 
-        //Notify(to, NachoEvent.Purchase);
-        
-        CanvasManager.Instance.marketMenu.UpdateMarket(MarketMenu.EMARKETPLACE_TYPE.BUY);
+                        // update car owner
+                        carData.owner = PhantasmaDemo.Instance.Key.Address; // TODO to;
+                    }
+
+                    carData.location = CarLocation.None;
+                    //SetCar(carData.carID, car);
+
+                    car.AuctionID = 0;
+
+                    // delete this auction from active list
+                    activeAuctionsList.Remove(car.AuctionID);
+
+                    //Notify(to, NachoEvent.Purchase);
+
+                    CanvasManager.Instance.marketMenu.UpdateMarket(MarketMenu.EMARKETPLACE_TYPE.BUY);
+
+                }));
+
+            },
+            (errorType, errorMessage) =>
+            {
+                // TODO
+                CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
+            }
+        ));
     }
 
     /// <summary>
@@ -211,28 +240,64 @@ public class Market : MonoBehaviour
         var currentTime = DateTime.UtcNow; //GetCurrentTime();
         var auction = new Auction()
         {
-            //startTime   = currentTime,
-            //endTime     = currentTime + duration,
-            //startPrice = startPrice,
-            //endPrice = endPrice,
-            //currency = currency,
-            //contentID = wrestlerID,
-            //creator = from,
+            startTime   = Convert.ToUInt32(currentTime),
+            endTime     = Convert.ToUInt32(currentTime) + duration,
+            startPrice  = startPrice,
+            endPrice    = endPrice,
+            currency    = currency,
+            contentID   = car.CarID,
+            creator     = from,
         };
 
-        Auctions = new Dictionary<BigInteger, Auction>(); //Storage.FindMapForContract<BigInteger, NachoAuction>(GLOBAL_AUCTIONS_LIST);
-        var auctionID = Auctions.Keys.Count + 1;
-        Auctions.Add(auctionID, auction);
+        // TODO // Não se deviar usar esta transaction data no script? chega só o cardID e o preço como args do SellToken?
+        var txData = Serialization.Serialize(auction); 
+        
+        //var script = ScriptUtils.BeginScript()
+        //                .AllowGas(from, 1, 9999)
+        //                .CallContract("token", "SellToken", from, "CAR", txData)
+        //                .SpendGas(from)
+        //                .EndScript();
 
-        var activeList = new List<BigInteger>(); //Storage.FindCollectionForContract<BigInteger>(ACTIVE_AUCTIONS_LIST);
-        activeList.Add(auctionID);
+        var script = ScriptUtils.BeginScript()
+            .AllowGas(from, 1, 9999)
+            .CallContract("token", "SellToken", from, "CAR", car.CarID, startPrice)
+            .SpendGas(from)
+            .EndScript();
+
+        StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.SignAndSendTransaction(script, "main",
+            (result) =>
+            {
+                Debug.Log("sign result: " + result);
+
+                StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetTransaction(result, (tx) =>
+                {
+                    // TODO confirmar que foi criado mais um leilão na blockchain e adicionar na lista local
+                    // var auctionIDs = (BigInteger[])simulator.Nexus.RootChain.InvokeContract("market", "GetAuctionIDs");
+                    Auctions = new Dictionary<BigInteger, Auction>(); //Storage.FindMapForContract<BigInteger, NachoAuction>(GLOBAL_AUCTIONS_LIST);
+                    var auctionID = Auctions.Keys.Count + 1;
+                    Auctions.Add(auctionID, auction);
+
+                    var activeList = new List<BigInteger>(); //Storage.FindCollectionForContract<BigInteger>(ACTIVE_AUCTIONS_LIST);
+                    activeList.Add(auctionID);
 
 
-        car.AuctionID       = auctionID;
-        carData.location    = CarLocation.Market;
-        //SetCar(carID, car);
+                    car.AuctionID = auctionID;
+                    carData.location = CarLocation.Market;
+                    //SetCar(carID, car);
 
-        CanvasManager.Instance.myAssetsMenu.UpdateMyAssets();
+                    CanvasManager.Instance.myAssetsMenu.UpdateMyAssets();
+
+                }));
+
+            },
+            (errorType, errorMessage) =>
+            {
+                // TODO
+                CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
+            }
+        ));
+
+
     }
 
     /// <summary>
