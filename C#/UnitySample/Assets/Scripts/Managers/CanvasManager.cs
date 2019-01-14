@@ -4,16 +4,16 @@ using UnityEngine.UI;
 
 public class CanvasManager : MonoBehaviour {
 
-    public Text         addressLabel;
-    public MyAssetsMenu myAssetsMenu;
-    public LoginMenu    loginMenu;
-    public MainMenu     mainMenu;
-    public AccountMenu  accountMenu;
-    public MarketMenu   marketMenu;
-    public AdminMenu    adminMenu;
-    public BuyPopup     buyPopup;
-    public SellPopup    sellPopup;
-    public GameObject   fetchingDataPopup;
+    public Text                 addressLabel;
+    public MyAssetsMenu         myAssetsMenu;
+    public LoginMenu            loginMenu;
+    public MainMenu             mainMenu;
+    public AccountMenu          accountMenu;
+    public MarketMenu           marketMenu;
+    public AdminMenu            adminMenu;
+    public BuyPopup             buyPopup;
+    public SellPopup            sellPopup;
+    public FetchingDataPopup    fetchingDataPopup;
 
     private static CanvasManager _instance;
     public static CanvasManager Instance
@@ -140,15 +140,14 @@ public class CanvasManager : MonoBehaviour {
 
     #region Popups
 
-    public void ShowFetchingDataPopup()
+    public void ShowFetchingDataPopup(string message = null)
     {
-        fetchingDataPopup.SetActive(true);
+        fetchingDataPopup.ShowPopup(message);
     }
 
     public void HideFetchingDataPopup()
     {
-        // TODo este popup deve ficar visivel pelo menos 1 seg para se conseguir ler e não ser um flash
-        fetchingDataPopup.SetActive(false);
+        fetchingDataPopup.HidePopup();
     }
 
     public void ShowSellPopup(Car car)

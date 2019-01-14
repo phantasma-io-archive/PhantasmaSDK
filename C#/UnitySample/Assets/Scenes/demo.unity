@@ -2161,7 +2161,7 @@ MonoBehaviour:
   adminMenu: {fileID: 1797053504}
   buyPopup: {fileID: 730529364}
   sellPopup: {fileID: 431712255}
-  fetchingDataPopup: {fileID: 857575082}
+  fetchingDataPopup: {fileID: 857575084}
 --- !u!1 &349054429
 GameObject:
   m_ObjectHideFlags: 0
@@ -5576,14 +5576,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_GeneratorAsset: {fileID: 0}
-  m_Script: {fileID: 11500000, guid: db66cb3565cab5544969257378376d2e, type: 3}
+  m_Script: {fileID: 11500000, guid: 4bfabbbc805c70f46932dc9b4cb7eabf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  carName: {fileID: 0}
-  cost: {fileID: 1915146688}
-  speedStats: {fileID: 0}
-  powerStats: {fileID: 0}
-  sprite: {fileID: 0}
+  message: {fileID: 1915146688}
 --- !u!1 &869266877
 GameObject:
   m_ObjectHideFlags: 0
@@ -11693,7 +11689,7 @@ GameObject:
   - component: {fileID: 1915146688}
   - component: {fileID: 1915146687}
   m_Layer: 5
-  m_Name: label
+  m_Name: message
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

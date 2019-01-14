@@ -61,7 +61,6 @@ public class PhantasmaDemo : MonoBehaviour
     public bool         IsTokenOwner    { get; private set; }
     public List<Car>    MyCars          { get; set; }
     
-
     private static PhantasmaDemo _instance;
     public static PhantasmaDemo Instance
     {
@@ -145,7 +144,7 @@ public class PhantasmaDemo : MonoBehaviour
 
         Debug.Log("Get account: " + address);
 
-        CanvasManager.Instance.ShowFetchingDataPopup();
+        CanvasManager.Instance.ShowFetchingDataPopup("Fetching account data from the blockchain...");
 
         StartCoroutine(PhantasmaApi.GetAccount(address, result =>
             {
@@ -196,7 +195,7 @@ public class PhantasmaDemo : MonoBehaviour
     {
         if(IsTokenCreated()) return;
 
-        CanvasManager.Instance.ShowFetchingDataPopup();
+        CanvasManager.Instance.ShowFetchingDataPopup("Creating a new token on the blockchain...");
 
         var script = ScriptUtils.BeginScript()
             .AllowGas(Key.Address, 1, 9999)
@@ -247,7 +246,7 @@ public class PhantasmaDemo : MonoBehaviour
             (errorType, errorMessage) =>
             {
                 // TODO
-                CanvasManager.Instance.ShowFetchingDataPopup();
+                CanvasManager.Instance.HideFetchingDataPopup();
                 CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
             }
         ));
@@ -264,7 +263,7 @@ public class PhantasmaDemo : MonoBehaviour
     {
         var createdToken = false;
 
-        CanvasManager.Instance.ShowFetchingDataPopup();
+        CanvasManager.Instance.ShowFetchingDataPopup("Fetching tokens from the blockchain...");
 
         var script = ScriptUtils.BeginScript()
             .AllowGas(Key.Address, 1, 9999)
@@ -303,7 +302,7 @@ public class PhantasmaDemo : MonoBehaviour
     {
         IsTokenOwner = false;
 
-        CanvasManager.Instance.ShowFetchingDataPopup();
+        CanvasManager.Instance.ShowFetchingDataPopup("Fetching tokens from the blockchain...");
 
         StartCoroutine(PhantasmaApi.GetTokens(
             (result) =>
