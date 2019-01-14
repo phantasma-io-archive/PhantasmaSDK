@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Globalization;
 using LunarLabs.Parser;
 using LunarLabs.Parser.JSON;
 using Phantasma.Cryptography;
@@ -689,12 +690,18 @@ namespace Phantasma.SDK
        //    //return Transaction != null ? (Transaction.Time + timeSkip) : DateTime.UtcNow.ToTimestamp();
        //}
 
-       public void LogTransaction<T>(Address address, BigInteger amount, TransactionType type, T content)
-       {
-           Debug.Log("-------------- LOG TRANSACTION: " + type + " | " + amount);
+       //public void LogTransaction<T>(Address address, BigInteger amount, TransactionType type, T content)
+       //{
+       //    Debug.Log("-------------- LOG TRANSACTION: " + type + " | " + amount);
 
-           var bytes = content.Serialize();
-           LogTransaction(address, amount, type, bytes);
+       //    var bytes = content.Serialize();
+       //    LogTransaction(address, amount, type, bytes);
+       //}
+
+       public bool IsValidPrivateKey(string address)
+       {
+           return (address.StartsWith("L", false, CultureInfo.InvariantCulture) || 
+                   address.StartsWith("K", false, CultureInfo.InvariantCulture)) && address.Length == 52;
        }
    }
 }

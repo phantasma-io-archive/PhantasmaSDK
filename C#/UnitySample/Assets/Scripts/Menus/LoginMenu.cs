@@ -32,12 +32,11 @@ public class LoginMenu : MonoBehaviour
             return;
         }
 
-        // TODO esta validação só funciona para chaves públicas. Como confirmo se é um endereço válido de uma chave privada?
-        //if (!Address.IsValidAddress(addressInputField.text))
-        //{
-        //    SetLoginError("The typed address is not a valid address.");
-        //    return;
-        //}
+        if (!PhantasmaDemo.Instance.PhantasmaApi.IsValidPrivateKey(addressInputField.text))
+        {
+            SetLoginError("The typed address is not a valid address.\nThe private key must start with an 'L' or a 'K' and have 52 characaters.");
+            return;
+        }
 
         PhantasmaDemo.Instance.Login(addressInputField.text);
     }

@@ -112,7 +112,7 @@ public class Market : MonoBehaviour
                                 // save car
                                 cars.Add(carID, carData);
 
-                                PhantasmaDemo.Instance.PhantasmaApi.LogTransaction(PhantasmaDemo.Instance.Key.Address, 0, TransactionType.Created_Car, carID);
+                                //PhantasmaDemo.Instance.PhantasmaApi.LogTransaction(PhantasmaDemo.Instance.Key.Address, 0, TransactionType.Created_Car, carID);
                                 
                                 break;
                             }
