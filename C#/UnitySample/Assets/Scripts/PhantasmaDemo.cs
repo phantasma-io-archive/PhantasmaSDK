@@ -211,7 +211,6 @@ public class PhantasmaDemo : MonoBehaviour
 
     #endregion
 
-    //TODO if is admin address => can call this method once
     public void CreateToken()
     {
         if(IsTokenCreated()) return;

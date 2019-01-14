@@ -8,7 +8,7 @@ public class MainMenu : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        adminButton.gameObject.SetActive(PhantasmaDemo.Instance.IsTokenOwner());
+        adminButton.gameObject.SetActive(true); //PhantasmaDemo.Instance.IsTokenOwner());
     }
 
     // Update is called once per frame
