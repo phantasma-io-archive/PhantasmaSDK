@@ -26,11 +26,25 @@ public class LoginMenu : MonoBehaviour
 
     public void Login()
     {
+        if (string.IsNullOrEmpty(addressInputField.text))
+        {
+            SetLoginError("Address cannot be empty.");
+            return;
+        }
+
+        // TODO esta validação só funciona para chaves públicas. Como confirmo se é um endereço válido de uma chave privada?
+        //if (!Address.IsValidAddress(addressInputField.text))
+        //{
+        //    SetLoginError("The typed address is not a valid address.");
+        //    return;
+        //}
+
         PhantasmaDemo.Instance.Login(addressInputField.text);
     }
 
     public void SetLoginError(string error)
     {
+        loginError.gameObject.SetActive(true);
         loginError.text = error;
     }
 
