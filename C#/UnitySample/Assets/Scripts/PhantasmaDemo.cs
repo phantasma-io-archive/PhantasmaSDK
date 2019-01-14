@@ -282,12 +282,15 @@ public class PhantasmaDemo : MonoBehaviour
             (result) =>
             {
                 Debug.Log("sign result: " + result);
-                
-                // TODO
-                //if (result.Contains("CAR"))
-                //{
-                //    createdToken = true;
-                //}
+
+                foreach (var token in result)
+                {
+                    if (token.name.Equals("CAR"))
+                    {
+                        createdToken = true;
+                        break;
+                    }
+                }
             },
             (errorType, errorMessage) =>
             {
@@ -297,5 +300,33 @@ public class PhantasmaDemo : MonoBehaviour
         ));
 
         return createdToken;
+    }
+
+    public bool IsTokenOwner()
+    {
+        var isOwner = false;
+
+        StartCoroutine(PhantasmaApi.GetTokens(
+            (result) =>
+            {
+                Debug.Log("sign result: " + result);
+
+                foreach (var token in result)
+                {
+                    if (token.ownerAddress.Equals(Key.Address))
+                    {
+                        isOwner = true;
+                        break;
+                    }
+                }
+            },
+            (errorType, errorMessage) =>
+            {
+                // TODO
+                CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
+            }
+        ));
+
+        return isOwner;
     }
 }

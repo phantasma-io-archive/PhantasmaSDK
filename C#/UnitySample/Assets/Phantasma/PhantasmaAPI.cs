@@ -446,9 +446,7 @@ namespace Phantasma.SDK
    public class API {	   
 		public readonly	string Host;
 		private static JSONRPC_Client _client;
-
-       public bool debugMode = false;
-
+        
         public API(string host) 
 		{
 			this.Host = host;
@@ -692,6 +690,7 @@ namespace Phantasma.SDK
            yield return SendRawTransaction(Base16.Encode(tx.ToByteArray(true)), callback, errorHandlingCallback);
        }
 
+       // TODO
        //private uint GetCurrentTime()
        //{
        //    //return Transaction != null ? (Transaction.Time + timeSkip) : DateTime.UtcNow.ToTimestamp();
@@ -699,27 +698,10 @@ namespace Phantasma.SDK
 
        public void LogTransaction<T>(Address address, BigInteger amount, TransactionType type, T content)
        {
-           ImportantLog("-------------- LOG TRANSACTION: " + type + " | " + amount);
+           Debug.Log("-------------- LOG TRANSACTION: " + type + " | " + amount);
 
            var bytes = content.Serialize();
            LogTransaction(address, amount, type, bytes);
        }
-
-       public void ImportantLog(string s)
-       {
-           if (debugMode)
-           {
-               Debug.Log(s);
-           }
-           else
-           {
-               // todo for unity console
-               Console.ForegroundColor = ConsoleColor.Magenta;
-               Console.WriteLine(s);
-               Console.ForegroundColor = ConsoleColor.Gray;
-           }
-       }
    }
-
-
 }

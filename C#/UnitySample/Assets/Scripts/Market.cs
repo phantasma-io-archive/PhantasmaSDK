@@ -237,7 +237,7 @@ public class Market : MonoBehaviour
         var carData = car.Data;
 
         // store info for the auction
-        var currentTime = DateTime.UtcNow; //GetCurrentTime();
+        var currentTime = DateTime.UtcNow; //PhantasmaDemo.Instance.PhantasmaApi.GetCurrentTime();
         var auction = new Auction()
         {
             startTime   = Convert.ToUInt32(currentTime),

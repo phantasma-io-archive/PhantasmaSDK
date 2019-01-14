@@ -8,10 +8,7 @@ public class MainMenu : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // TODO check if the address logged in is the owner of the token
-        var isAdminAdress = true;
-
-        adminButton.gameObject.SetActive(isAdminAdress);
+        adminButton.gameObject.SetActive(PhantasmaDemo.Instance.IsTokenOwner());
     }
 
     // Update is called once per frame
