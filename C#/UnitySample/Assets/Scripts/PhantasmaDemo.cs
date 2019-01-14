@@ -294,8 +294,11 @@ public class PhantasmaDemo : MonoBehaviour
 
                 foreach (var token in result)
                 {
-                    if (token.ownerAddress.Equals(Key.Address))
+                    Debug.Log("token add: " + token.ownerAddress + " | MY: " + Key.Address);
+
+                    if (token.ownerAddress.Equals(Key.Address.ToString()))
                     {
+                        Debug.Log("SAME ADD: " + token.symbol);
                         isOwner = true;
                         break;
                     }
