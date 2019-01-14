@@ -1,13 +1,14 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class AdminMenu : MonoBehaviour
 {
+    public Button createTokenButton;
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        createTokenButton.interactable = !PhantasmaDemo.Instance.IsTokenCreated();
     }
 
     // Update is called once per frame

@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using Phantasma.Blockchain.Contracts;
 using Phantasma.Blockchain.Contracts.Native;
@@ -213,7 +214,7 @@ public class PhantasmaDemo : MonoBehaviour
     //TODO if is admin address => can call this method once
     public void CreateToken()
     {
-        //TODO antes de criar este token, verifica se ele já existe GetToken()
+        if(IsTokenCreated()) return;
         
         var script = ScriptUtils.BeginScript()
             .AllowGas(Key.Address, 1, 9999)
@@ -265,5 +266,36 @@ public class PhantasmaDemo : MonoBehaviour
                 CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
             }
         ));
+    }
+
+    public bool IsTokenCreated()
+    {
+        var createdToken = false;
+
+        var script = ScriptUtils.BeginScript()
+            .AllowGas(Key.Address, 1, 9999)
+            .CallContract("nexus", "GetToken", Key.Address, "CAR")
+            .SpendGas(Key.Address)
+            .EndScript();
+        
+        StartCoroutine(PhantasmaApi.GetTokens(
+            (result) =>
+            {
+                Debug.Log("sign result: " + result);
+                
+                // TODO
+                //if (result.Contains("CAR"))
+                //{
+                //    createdToken = true;
+                //}
+            },
+            (errorType, errorMessage) =>
+            {
+                // TODO
+                CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
+            }
+        ));
+
+        return createdToken;
     }
 }
