@@ -9,18 +9,6 @@ public class BuyPopup : MonoBehaviour
 
     private Car _car;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     public void SetPopup(Car car)
     {
         _car = car;

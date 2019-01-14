@@ -60,7 +60,16 @@ public class Market : MonoBehaviour
     /// </summary>
     public void GetMarket()
     {
+        // TODO o método GetAuctionIDs não existe no Spook
+
         //PhantasmaDemo.Instance.PhantasmaApi.GetTokenData("CAR", result);
+        //var script = ScriptUtils.BeginScript()
+        //    .AllowGas(PhantasmaDemo.Instance.Key.Address, 1, 9999)
+        //    .CallContract("token", "GetAuctionsIDs", PhantasmaDemo.Instance.Key.Address, car.AuctionID)
+        //    .SpendGas(PhantasmaDemo.Instance.Key.Address)
+        //    .EndScript();
+
+        //Storage.FindMapForContract<BigInteger, Auction>(GLOBAL_AUCTIONS_LIST);
 
     }
 
@@ -79,8 +88,7 @@ public class Market : MonoBehaviour
         };
       
         var txData = Serialization.Serialize(carData);
-        //var txData = carData.Serialize();
-
+        
         var script = ScriptUtils.BeginScript()
                         .AllowGas(PhantasmaDemo.Instance.Key.Address, 1, 9999)
                         .CallContract("token", "MintToken", PhantasmaDemo.Instance.Key.Address, "CAR", txData)
@@ -179,14 +187,13 @@ public class Market : MonoBehaviour
                     // var auctionIDs = (BigInteger[])simulator.Nexus.RootChain.InvokeContract("market", "GetAuctionIDs");
                     Auctions = new Dictionary<BigInteger, Auction>(); //Storage.FindMapForContract<BigInteger, NachoAuction>(GLOBAL_AUCTIONS_LIST);
                     Auctions.Remove(car.AuctionID);
-
-
+                    
                     var activeAuctionsList = new List<BigInteger>(); //Storage.FindCollectionForContract<BigInteger>(ACTIVE_AUCTIONS_LIST);
                     //Expect(activeList.Contains(auctionID), "auction finished");
 
                     //var car = GetCar(carID);
 
-                    if (car.Data.owner != PhantasmaDemo.Instance.Key.Address) //TODO to)
+                    if (car.Data.owner != PhantasmaDemo.Instance.Key.Address)
                     {
                         //ProcessAuctionSale(to, auctionID, ref auction);
 
@@ -197,13 +204,13 @@ public class Market : MonoBehaviour
                         newTeam.Add(car.CarID);
 
                         // update car owner
-                        carData.owner = PhantasmaDemo.Instance.Key.Address; // TODO to;
+                        carData.owner = PhantasmaDemo.Instance.Key.Address;
                     }
 
                     carData.location = CarLocation.None;
-                    //SetCar(carData.carID, car);
 
-                    car.AuctionID = 0;
+                    car.Data        = carData;
+                    car.AuctionID   = 0;
 
                     // delete this auction from active list
                     activeAuctionsList.Remove(car.AuctionID);
@@ -321,7 +328,7 @@ public class Market : MonoBehaviour
 
     public Auction GetAuction(BigInteger auctionID)
     {
-        var auctions = Auctions; //TODO Storage.FindMapForContract<BigInteger, Auction>(GLOBAL_AUCTIONS_LIST);
+        var auctions = Auctions;
         var auction = auctions[auctionID];
 
         return auction;

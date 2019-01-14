@@ -1,23 +1,10 @@
-﻿using Phantasma.Cryptography;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class LoginMenu : MonoBehaviour
 {
     public InputField   addressInputField;
     public Text         loginError;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     void OnEnable()
     {
@@ -34,7 +21,7 @@ public class LoginMenu : MonoBehaviour
 
         if (!PhantasmaDemo.Instance.PhantasmaApi.IsValidPrivateKey(addressInputField.text))
         {
-            SetLoginError("The typed address is not a valid address.\nThe private key must start with an 'L' or a 'K' and have 52 characaters.");
+            SetLoginError("Error: The entered address is not valid.\nThe private key must start with an 'L' or a 'K' and have 52 characaters.");
             return;
         }
 

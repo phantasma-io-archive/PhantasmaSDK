@@ -16,7 +16,7 @@ public enum CarLocation
     Market  = 2
 }
 
-public enum TransactionType
+public enum TransactionKind
 {
     Other               = 0,
     Deposit             = 1,
@@ -68,7 +68,7 @@ public enum AuctionCurrency
 public struct NachoTransaction
 {
     public uint             timestamp;
-    public TransactionType  type;
+    public TransactionKind  kind;
     public BigInteger       amount;
     public byte[]           content;
 }

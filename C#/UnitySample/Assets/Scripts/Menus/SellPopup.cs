@@ -1,5 +1,4 @@
-﻿using System;
-using Phantasma.Numerics;
+﻿using Phantasma.Numerics;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,16 +12,9 @@ public class SellPopup : MonoBehaviour
 
     private Car _car;
 
-    // Start is called before the first frame update
-    void Start()
+    void OnEnable()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        ClearContent();
     }
 
     public void SetPopup(Car car)
@@ -43,6 +35,12 @@ public class SellPopup : MonoBehaviour
 
     public void Sell()
     {
+        if (string.IsNullOrEmpty(priceInput.text))
+        {
+            SetSellError("Price field cannot be empty.");
+            return;
+        }
+
         if (priceInput.characterValidation == InputField.CharacterValidation.Decimal)
         {
             //var price = decimal.Parse(priceInput.text);
@@ -52,14 +50,24 @@ public class SellPopup : MonoBehaviour
             }
             else
             {
-                inputError.text = "1 - Price must be a decimal positive value.";
+                SetSellError("Error: Price must be a decimal positive value.");
             }
         }
         else
         {
-            inputError.text = "2 - Price must be a decimal positive value.";
+            SetSellError("Error: Price must be a decimal positive value.");
         }
+    }
 
+    public void SetSellError(string error)
+    {
+        inputError.gameObject.SetActive(true);
+        inputError.text = error;
+    }
 
+    private void ClearContent()
+    {
+        priceInput.text = string.Empty;
+        inputError.text = string.Empty;
     }
 }

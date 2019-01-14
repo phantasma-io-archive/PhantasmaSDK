@@ -1,11 +1,10 @@
 ﻿using System;
-using UnityEngine;
-
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
+
+using UnityEngine;
+
 using Phantasma.Blockchain.Contracts;
 using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Blockchain.Tokens;
@@ -119,10 +118,8 @@ public class PhantasmaDemo : MonoBehaviour
         Debug.Log("logged in: " + address);
 
         //var address = "L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25";
-        var addressBytes = Encoding.ASCII.GetBytes(address);
+        //var addressBytes = Encoding.ASCII.GetBytes(address);
         
-        //market.FillMarket();
-
         CanvasManager.Instance.SetAddress(address);
         CanvasManager.Instance.CloseLogin();
     }
@@ -164,28 +161,6 @@ public class PhantasmaDemo : MonoBehaviour
             (errorType, errorMessage) => { CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage); }
         ));
     }
-
-    //public void RegisterName()
-    //{
-    //    StartCoroutine(RegisterNameCoroutine());
-    //}
-
-    //private IEnumerator RegisterNameCoroutine()
-    //{
-    //    var myData = "{ \"jsonrpc\":\"2.0\",\"method\":\"getAccount\",\"params\":[\"P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr\"],\"id\":1}";
-    //    var www = UnityWebRequest.Post(_SERVER_ADDRESS, myData);
-
-    //    yield return www.SendWebRequest();
-
-    //    if (www.isNetworkError || www.isHttpError)
-    //    {
-    //        Debug.Log(www.error);
-    //    }
-    //    else
-    //    {
-    //        Debug.Log(www.downloadHandler.text);
-    //    }
-    //}
 
     //public void ListTransactions()
     //{
@@ -267,6 +242,13 @@ public class PhantasmaDemo : MonoBehaviour
         ));
     }
 
+    public IEnumerator TestGetT()
+    {
+        yield return new WaitForSecondsRealtime(15f);
+
+
+    }
+
     public bool IsTokenCreated()
     {
         var createdToken = false;
@@ -284,7 +266,7 @@ public class PhantasmaDemo : MonoBehaviour
 
                 foreach (var token in result)
                 {
-                    if (token.name.Equals("CAR"))
+                    if (token.name.Equals("SOUL")) // TODO "CAR"))
                     {
                         createdToken = true;
                         break;

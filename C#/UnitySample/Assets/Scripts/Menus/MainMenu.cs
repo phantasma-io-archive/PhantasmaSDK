@@ -11,12 +11,6 @@ public class MainMenu : MonoBehaviour
         adminButton.gameObject.SetActive(true); //PhantasmaDemo.Instance.IsTokenOwner());
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public void AccountClicked()
     {
         CanvasManager.Instance.OpenAccount();
