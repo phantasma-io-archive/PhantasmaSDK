@@ -287,11 +287,11 @@ public class Market : MonoBehaviour
                     var activeList = new List<BigInteger>(); //Storage.FindCollectionForContract<BigInteger>(ACTIVE_AUCTIONS_LIST);
                     activeList.Add(auctionID);
 
-
-                    car.AuctionID = auctionID;
                     carData.location = CarLocation.Market;
-                    //SetCar(carID, car);
 
+                    car.Data        = carData;
+                    car.AuctionID   = auctionID;
+                    
                     CanvasManager.Instance.myAssetsMenu.UpdateMyAssets();
 
                 }));
@@ -303,8 +303,6 @@ public class Market : MonoBehaviour
                 CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
             }
         ));
-
-
     }
 
     /// <summary>

@@ -11,7 +11,8 @@ public class CanvasManager : MonoBehaviour {
     public AccountMenu  accountMenu;
     public MarketMenu   marketMenu;
     public AdminMenu    adminMenu;
-    public GameObject   buyPopup, sellPopup;
+    public BuyPopup     buyPopup;
+    public SellPopup    sellPopup;
 
     private static CanvasManager _instance;
     public static CanvasManager Instance
@@ -138,8 +139,9 @@ public class CanvasManager : MonoBehaviour {
 
     #region Popups
 
-    public void ShowSellPopup()
+    public void ShowSellPopup(Car car)
     {
+        sellPopup.SetPopup(car);
         sellPopup.gameObject.SetActive(true);
     }
 
@@ -148,8 +150,9 @@ public class CanvasManager : MonoBehaviour {
         sellPopup.gameObject.SetActive(false);
     }
 
-    public void ShowBuyPopup()
+    public void ShowBuyPopup(Car car)
     {
+        buyPopup.SetPopup(car);
         buyPopup.gameObject.SetActive(true);
     }
 

@@ -11,12 +11,6 @@ public class AdminMenu : MonoBehaviour
         createTokenButton.interactable = !PhantasmaDemo.Instance.IsTokenCreated();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public void CreateTokenClicked()
     {
         PhantasmaDemo.Instance.CreateToken();
@@ -31,6 +25,4 @@ public class AdminMenu : MonoBehaviour
     {
         CanvasManager.Instance.CloseAdmin();
     }
-
-
 }
