@@ -1,10 +1,13 @@
-﻿using UnityEngine;
+﻿using System;
+using Phantasma.Numerics;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class SellPopup : MonoBehaviour
 {
     public Text         carName;
     public Text         speedStats, powerStats;
+    public Text         inputError;
     public InputField   priceInput;
     public Image        sprite;
 
@@ -40,10 +43,23 @@ public class SellPopup : MonoBehaviour
 
     public void Sell()
     {
-        //TODO validate price input field
+        if (priceInput.characterValidation == InputField.CharacterValidation.Decimal)
+        {
+            //var price = decimal.Parse(priceInput.text);
+            if (BigInteger.TryParse(priceInput.text, out BigInteger price))
+            {
+                PhantasmaDemo.Instance.market.SellAsset(_car, PhantasmaDemo.Instance.Key.Address, price, price);
+            }
+            else
+            {
+                inputError.text = "1 - Price must be a decimal positive value.";
+            }
+        }
+        else
+        {
+            inputError.text = "2 - Price must be a decimal positive value.";
+        }
 
-        var price = 2; // TODO priceInput.text to BigInteger
 
-        PhantasmaDemo.Instance.market.SellAsset(_car, PhantasmaDemo.Instance.Key.Address, price, price);
     }
 }
