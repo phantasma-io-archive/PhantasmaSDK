@@ -8,12 +8,9 @@ public class MainMenu : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        CanvasManager.Instance.ShowFetchingDataPopup();
-
         PhantasmaDemo.Instance.OwnsToken(() =>
         {
             CanvasManager.Instance.mainMenu.SetAdminButton();
-            CanvasManager.Instance.HideFetchingDataPopup();
         });
     }
 

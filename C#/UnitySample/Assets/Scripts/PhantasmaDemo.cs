@@ -145,6 +145,8 @@ public class PhantasmaDemo : MonoBehaviour
 
         Debug.Log("Get account: " + address);
 
+        CanvasManager.Instance.ShowFetchingDataPopup();
+
         StartCoroutine(PhantasmaApi.GetAccount(address, result =>
             {
                 CanvasManager.Instance.accountMenu.SetBalance("Name: " + result.name);
@@ -156,6 +158,8 @@ public class PhantasmaDemo : MonoBehaviour
 
                     //Debug.Log("balance: " + balanceSheetResult.Chain + " | " + balanceSheetResult.Amount);
                 }
+
+                CanvasManager.Instance.HideFetchingDataPopup();
 
                 LoggedIn(address);
 
@@ -191,7 +195,9 @@ public class PhantasmaDemo : MonoBehaviour
     public void CreateToken()
     {
         if(IsTokenCreated()) return;
-        
+
+        CanvasManager.Instance.ShowFetchingDataPopup();
+
         var script = ScriptUtils.BeginScript()
             .AllowGas(Key.Address, 1, 9999)
             .CallContract("nexus", "CreateToken", Key.Address, "CAR", "Car Demo Token", 10000, 0, TokenFlags.Transferable | TokenFlags.Finite)
@@ -235,10 +241,13 @@ public class PhantasmaDemo : MonoBehaviour
 
                 }));
 
+                CanvasManager.Instance.HideFetchingDataPopup();
+
             },
             (errorType, errorMessage) =>
             {
                 // TODO
+                CanvasManager.Instance.ShowFetchingDataPopup();
                 CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
             }
         ));
@@ -255,6 +264,8 @@ public class PhantasmaDemo : MonoBehaviour
     {
         var createdToken = false;
 
+        CanvasManager.Instance.ShowFetchingDataPopup();
+
         var script = ScriptUtils.BeginScript()
             .AllowGas(Key.Address, 1, 9999)
             .CallContract("nexus", "GetToken", Key.Address, "CAR")
@@ -268,16 +279,19 @@ public class PhantasmaDemo : MonoBehaviour
 
                 foreach (var token in result)
                 {
-                    if (token.name.Equals("SOUL")) // TODO "CAR"))
+                    if (token.name.Equals("SOUL")) // TODO "CAR")) Por o novo token dps da criação dos tokens não ter bugs
                     {
                         createdToken = true;
                         break;
                     }
                 }
+
+                CanvasManager.Instance.HideFetchingDataPopup();
             },
             (errorType, errorMessage) =>
             {
                 // TODO
+                CanvasManager.Instance.HideFetchingDataPopup();
                 CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
             }
         ));
@@ -288,6 +302,8 @@ public class PhantasmaDemo : MonoBehaviour
     public bool OwnsToken(Action callback = null)
     {
         IsTokenOwner = false;
+
+        CanvasManager.Instance.ShowFetchingDataPopup();
 
         StartCoroutine(PhantasmaApi.GetTokens(
             (result) =>
@@ -306,6 +322,8 @@ public class PhantasmaDemo : MonoBehaviour
                     }
                 }
 
+                CanvasManager.Instance.HideFetchingDataPopup();
+
                 if (callback != null)
                 {
                     callback();
@@ -314,6 +332,7 @@ public class PhantasmaDemo : MonoBehaviour
             (errorType, errorMessage) =>
             {
                 // TODO
+                CanvasManager.Instance.HideFetchingDataPopup();
                 CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
             }
         ));
