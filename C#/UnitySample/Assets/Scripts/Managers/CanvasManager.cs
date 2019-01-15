@@ -55,6 +55,7 @@ public class CanvasManager : MonoBehaviour {
 
     public void CloseLogin()
     {
+        addressLabel.gameObject.SetActive(true);
         mainMenu.gameObject.SetActive(true);
 
         loginMenu.gameObject.SetActive(false);
@@ -125,12 +126,14 @@ public class CanvasManager : MonoBehaviour {
     public void OpenAdmin()
     {
         mainMenu.gameObject.SetActive(false);
+        addressLabel.gameObject.SetActive(false);
 
         adminMenu.gameObject.SetActive(true);
     }
 
     public void CloseAdmin()
     {
+        addressLabel.gameObject.SetActive(true);
         mainMenu.gameObject.SetActive(true);
 
         adminMenu.gameObject.SetActive(false);
