@@ -441,7 +441,7 @@ namespace Phantasma.SDK
    public class API {	   
 		public readonly	string Host;
 		private static JSONRPC_Client _client;
-        
+
         public API(string host) 
 		{
 			this.Host = host;
@@ -679,7 +679,7 @@ namespace Phantasma.SDK
        {
            Debug.Log("Sending transaction...");
 
-           var tx = new Blockchain.Transaction("nexus", chain, script, DateTime.UtcNow + TimeSpan.FromHours(1), 0);
+           var tx = new Blockchain.Transaction("nexus", chain, script, DateTime.UtcNow.AddHours(1), 0);
            tx.Sign(PhantasmaDemo.Instance.Key);
 
            yield return SendRawTransaction(Base16.Encode(tx.ToByteArray(true)), callback, errorHandlingCallback);
