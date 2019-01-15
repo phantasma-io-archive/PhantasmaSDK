@@ -140,6 +140,8 @@ public class PhantasmaDemo : MonoBehaviour
 
     public void GetAccount(string address)
     {
+        //TODO handle do lado do unity disto: Cannot connect to destination hostUnityEngine.Debug:Log(Object)
+
         // Private key: L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25
         // Public key:  P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr
 
