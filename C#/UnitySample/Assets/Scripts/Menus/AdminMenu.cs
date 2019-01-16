@@ -8,12 +8,17 @@ public class AdminMenu : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        PhantasmaDemo.Instance.CheckTokenCreation(() =>
+
+    }
+
+    void OnEnable()
+    {
+        PhantasmaDemo.Instance.CheckTokens(() =>
         {
             CanvasManager.Instance.adminMenu.SetTokenButton();
         });
     }
-    
+
     public void SetTokenButton()
     {
         Debug.Log("set token: " + PhantasmaDemo.Instance.IsTokenCreated);

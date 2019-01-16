@@ -6,13 +6,13 @@ using System.Globalization;
 using UnityEngine;
 
 using Phantasma.Blockchain.Contracts;
-using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
 using Phantasma.IO;
 using Phantasma.Numerics;
 using Phantasma.SDK;
 using Phantasma.VM.Utils;
+using Token = Phantasma.SDK.Token;
 
 /*
  * Phantasma Spook
@@ -60,10 +60,11 @@ public class PhantasmaDemo : MonoBehaviour
     private EWALLET_STATE   _state = EWALLET_STATE.INIT;
     private decimal         _balance;
 
-    public API          PhantasmaApi    { get; private set; }
-    public bool         IsTokenCreated  { get; private set; }
-    public bool         IsTokenOwner    { get; private set; }
-    public List<Car>    MyCars          { get; set; }
+    public API                          PhantasmaApi    { get; private set; }
+    public Dictionary<string, Token>    PhantasmaTokens { get; private set; }
+    public bool                         IsTokenCreated  { get; private set; }
+    public bool                         IsTokenOwner    { get; private set; }
+    public List<Car>                    MyCars          { get; set; }
     
     private static PhantasmaDemo _instance;
     public static PhantasmaDemo Instance
@@ -73,7 +74,9 @@ public class PhantasmaDemo : MonoBehaviour
 
     private void Awake()
     {
-        MyCars = new List<Car>();
+        PhantasmaTokens = new Dictionary<string, Token>();
+        MyCars          = new List<Car>();
+
     }
 
     private void Start ()
@@ -81,6 +84,16 @@ public class PhantasmaDemo : MonoBehaviour
         //GetAccount("P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr"); //TEST
 
         PhantasmaApi = new API("http://localhost:7077/rpc");
+        
+        Invoke("LoadPhantasmaData", 2f);
+    }
+
+    private void LoadPhantasmaData()
+    {
+        CheckTokens(() =>
+        {
+            CanvasManager.Instance.OpenLogin();
+        });
     }
 
     private IEnumerator SyncBalance()
@@ -156,10 +169,14 @@ public class PhantasmaDemo : MonoBehaviour
             {
                 CanvasManager.Instance.accountMenu.SetBalance("Name: " + result.name);
 
-                foreach (var balanceSheetResult in result.balances)
+                foreach (var balance in result.balances)
                 {
-                    var amount = decimal.Parse(balanceSheetResult.amount) / (decimal) Mathf.Pow(10f, 8);
-                    CanvasManager.Instance.accountMenu.AddBalanceEntry("Chain: " + balanceSheetResult.chain + " - " + amount + " " + balanceSheetResult.symbol);
+                    // TODO tokens non fungible sem as casas decimais
+
+                    var isFungible = PhantasmaTokens[balance.symbol].isFungible;
+
+                    var amount = isFungible ? decimal.Parse(balance.amount) / (decimal) Mathf.Pow(10f, 8) : decimal.Parse(balance.amount);
+                    CanvasManager.Instance.accountMenu.AddBalanceEntry("Chain: " + balance.chain + " - " + amount + " " + balance.symbol);
 
                     //Debug.Log("balance: " + balanceSheetResult.Chain + " | " + balanceSheetResult.Amount);
                 }
@@ -199,7 +216,7 @@ public class PhantasmaDemo : MonoBehaviour
 
     public void CreateToken()
     {
-        CheckTokenCreation(() =>
+        CheckTokens(() =>
         {
             CanvasManager.Instance.ShowFetchingDataPopup("Creating a new token on the blockchain...");
 
@@ -267,18 +284,14 @@ public class PhantasmaDemo : MonoBehaviour
         });
     }
 
-    public void CheckTokenCreation(Action callback = null)
+    public void CheckTokens(Action callback = null)
     {
         IsTokenCreated = false;
 
-        CanvasManager.Instance.ShowFetchingDataPopup("Fetching tokens from the blockchain...");
-
-        var script = ScriptUtils.BeginScript()
-            .AllowGas(Key.Address, 1, 9999)
-            .CallContract("nexus", "GetToken", Key.Address, TOKEN_SYMBOL)
-            .SpendGas(Key.Address)
-            .EndScript();
+        CanvasManager.Instance.ShowFetchingDataPopup("Fetching Phantasma tokens...");
         
+        PhantasmaTokens.Clear();
+
         StartCoroutine(PhantasmaApi.GetTokens(
             (result) =>
             {
@@ -286,7 +299,8 @@ public class PhantasmaDemo : MonoBehaviour
 
                 foreach (var token in result)
                 {
-                    //Debug.Log("token: " + token.symbol);
+                    PhantasmaTokens.Add(token.symbol, token);
+                    Debug.Log("ADD token: " + token.symbol);
 
                     if (token.symbol.Equals(TOKEN_SYMBOL))
                     {
