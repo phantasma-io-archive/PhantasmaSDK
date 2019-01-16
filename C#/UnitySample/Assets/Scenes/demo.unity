@@ -54,7 +54,7 @@ LightmapSettings:
     m_EnableBakedLightmaps: 0
     m_EnableRealtimeLightmaps: 0
   m_LightmapEditorSettings:
-    serializedVersion: 12
+    serializedVersion: 11
     m_Resolution: 2
     m_BakeResolution: 40
     m_AtlasSize: 1024
@@ -77,8 +77,6 @@ LightmapSettings:
     m_PVRDirectSampleCount: 32
     m_PVRSampleCount: 500
     m_PVRBounces: 2
-    m_PVREnvironmentSampleCount: 500
-    m_PVREnvironmentReferencePointCount: 2048
     m_PVRFilteringMode: 0
     m_PVRDenoiserTypeDirect: 0
     m_PVRDenoiserTypeIndirect: 0
@@ -86,7 +84,6 @@ LightmapSettings:
     m_PVRFilterTypeDirect: 0
     m_PVRFilterTypeIndirect: 0
     m_PVRFilterTypeAO: 0
-    m_PVREnvironmentMIS: 0
     m_PVRCulling: 1
     m_PVRFilteringGaussRadiusDirect: 1
     m_PVRFilteringGaussRadiusIndirect: 5
@@ -120,6 +117,44 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &4071084
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4071085}
+  m_Layer: 5
+  m_Name: Popups
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &4071085
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4071084}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 857575083}
+  - {fileID: 431712254}
+  - {fileID: 730529363}
+  m_Father: {fileID: 334228122}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &6283469
 GameObject:
   m_ObjectHideFlags: 0
@@ -2068,9 +2103,7 @@ RectTransform:
   m_Children:
   - {fileID: 1639115432}
   - {fileID: 1032102933}
-  - {fileID: 857575083}
-  - {fileID: 431712254}
-  - {fileID: 730529363}
+  - {fileID: 4071085}
   - {fileID: 1817918605}
   m_Father: {fileID: 0}
   m_RootOrder: 2
@@ -3070,8 +3103,8 @@ RectTransform:
   - {fileID: 1913436595}
   - {fileID: 392386036}
   - {fileID: 1242588159}
-  m_Father: {fileID: 334228122}
-  m_RootOrder: 3
+  m_Father: {fileID: 4071085}
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -4641,8 +4674,8 @@ RectTransform:
   - {fileID: 1522616061}
   - {fileID: 96670791}
   - {fileID: 1204622033}
-  m_Father: {fileID: 334228122}
-  m_RootOrder: 4
+  m_Father: {fileID: 4071085}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -5561,8 +5594,8 @@ RectTransform:
   - {fileID: 1250878081}
   - {fileID: 2021390280}
   - {fileID: 1915146686}
-  m_Father: {fileID: 334228122}
-  m_RootOrder: 2
+  m_Father: {fileID: 4071085}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -6732,7 +6765,7 @@ GameObject:
   - component: {fileID: 1032102935}
   - component: {fileID: 1032102934}
   m_Layer: 5
-  m_Name: Panel
+  m_Name: Menus
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10790,6 +10823,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   createTokenButton: {fileID: 1023552834}
+  populateMarketButton: {fileID: 817484430}
 --- !u!1 &1798927153
 GameObject:
   m_ObjectHideFlags: 0
@@ -11105,7 +11139,7 @@ RectTransform:
   m_Children:
   - {fileID: 2001749840}
   m_Father: {fileID: 334228122}
-  m_RootOrder: 5
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}

@@ -20,7 +20,7 @@ public class Market : MonoBehaviour
     public static readonly string GLOBAL_AUCTIONS_LIST  = "allAuctions";
     public static readonly string GLOBAL_SALES_LIST     = "sales";
 
-    private const int _MARKET_CARS_COUNT = 20;
+    public const int MARKET_CARS_COUNT = 20;
 
     private Dictionary<BigInteger, CarData> _cars;
 
@@ -47,7 +47,7 @@ public class Market : MonoBehaviour
     {
         _cars = new Dictionary<BigInteger, CarData>();
 
-        for (var i = 0; i < _MARKET_CARS_COUNT; i++)
+        for (var i = PhantasmaDemo.Instance.TokenCurrentSupply; i <= MARKET_CARS_COUNT; i++)
         {
             CreateCar();
         }
@@ -144,7 +144,6 @@ public class Market : MonoBehaviour
             },
             (errorType, errorMessage) =>
             {
-                // TODO
                 CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
             }
         ));
@@ -251,13 +250,15 @@ public class Market : MonoBehaviour
         };
 
         // TODO // Não se deviar usar esta transaction data no script? chega só o cardID e o preço como args do SellToken?
-        var txData = Serialization.Serialize(auction); 
-        
+        var txData = Serialization.Serialize(auction);
+
         //var script = ScriptUtils.BeginScript()
         //                .AllowGas(from, 1, 9999)
         //                .CallContract("token", "SellToken", from, "CAR", txData)
         //                .SpendGas(from)
         //                .EndScript();
+
+        //Market Contract -> SellToken(Address from, string symbol, BigInteger tokenID, BigInteger price)
 
         var script = ScriptUtils.BeginScript()
             .AllowGas(from, 1, 9999)

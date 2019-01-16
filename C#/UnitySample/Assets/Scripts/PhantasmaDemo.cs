@@ -60,11 +60,12 @@ public class PhantasmaDemo : MonoBehaviour
     private EWALLET_STATE   _state = EWALLET_STATE.INIT;
     private decimal         _balance;
 
-    public API                          PhantasmaApi    { get; private set; }
-    public Dictionary<string, Token>    PhantasmaTokens { get; private set; }
-    public bool                         IsTokenCreated  { get; private set; }
-    public bool                         IsTokenOwner    { get; private set; }
-    public List<Car>                    MyCars          { get; set; }
+    public API                          PhantasmaApi        { get; private set; }
+    public Dictionary<string, Token>    PhantasmaTokens     { get; private set; }
+    public bool                         IsTokenCreated      { get; private set; }
+    public bool                         IsTokenOwner        { get; private set; }
+    public decimal                      TokenCurrentSupply  { get; private set; }
+    public List<Car>                    MyCars              { get; set; }
     
     private static PhantasmaDemo _instance;
     public static PhantasmaDemo Instance
@@ -171,14 +172,15 @@ public class PhantasmaDemo : MonoBehaviour
 
                 foreach (var balance in result.balances)
                 {
-                    // TODO tokens non fungible sem as casas decimais
-
                     var isFungible = PhantasmaTokens[balance.symbol].isFungible;
 
                     var amount = isFungible ? decimal.Parse(balance.amount) / (decimal) Mathf.Pow(10f, 8) : decimal.Parse(balance.amount);
                     CanvasManager.Instance.accountMenu.AddBalanceEntry("Chain: " + balance.chain + " - " + amount + " " + balance.symbol);
 
-                    //Debug.Log("balance: " + balanceSheetResult.Chain + " | " + balanceSheetResult.Amount);
+                    if (balance.symbol.Equals(TOKEN_SYMBOL))
+                    {
+                        TokenCurrentSupply = amount;
+                    }
                 }
 
                 CanvasManager.Instance.HideFetchingDataPopup();
@@ -230,13 +232,12 @@ public class PhantasmaDemo : MonoBehaviour
             StartCoroutine(PhantasmaApi.SignAndSendTransaction(script, "main",
                 (result) =>
                 {
-                    Debug.Log("sign result: " + result);
+                    Debug.Log("create token result: " + result);
 
                     StartCoroutine(TokenCreated(result));
                 },
                 (errorType, errorMessage) =>
                 {
-                    // TODO
                     CanvasManager.Instance.HideFetchingDataPopup();
                     CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
                 }
@@ -254,14 +255,12 @@ public class PhantasmaDemo : MonoBehaviour
         {
             foreach (var evt in tx.events)
             {
-                Debug.Log("has event: " + evt.kind);
-
                 if (Enum.TryParse(evt.kind, out EventKind eKind))
                 {
                     if (eKind == EventKind.TokenCreate)
                     {
-                        var bytes = Base16.Decode(evt.data);
-                        var data = Serialization.Unserialize<string>(bytes);
+                        var bytes   = Base16.Decode(evt.data);
+                        var data    = Serialization.Unserialize<string>(bytes);
 
                         Debug.Log(evt.kind + " - " + data);
 
@@ -320,7 +319,6 @@ public class PhantasmaDemo : MonoBehaviour
             },
             (errorType, errorMessage) =>
             {
-                // TODO
                 CanvasManager.Instance.HideFetchingDataPopup();
                 CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
             }
@@ -357,7 +355,6 @@ public class PhantasmaDemo : MonoBehaviour
             },
             (errorType, errorMessage) =>
             {
-                // TODO
                 CanvasManager.Instance.HideFetchingDataPopup();
                 CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
             }

@@ -3,7 +3,14 @@ using UnityEngine.UI;
 
 public class AdminMenu : MonoBehaviour
 {
-    public Button createTokenButton;
+    public Button createTokenButton, populateMarketButton;
+
+    private Color _defaultColor;
+
+    void Awake()
+    {
+        _defaultColor = createTokenButton.targetGraphic.color;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -15,20 +22,39 @@ public class AdminMenu : MonoBehaviour
     {
         PhantasmaDemo.Instance.CheckTokens(() =>
         {
-            CanvasManager.Instance.adminMenu.SetTokenButton();
+            CanvasManager.Instance.adminMenu.SetButtons();
         });
     }
 
-    public void SetTokenButton()
+    public void SetButtons()
     {
         Debug.Log("set token: " + PhantasmaDemo.Instance.IsTokenCreated);
-        createTokenButton.interactable = !PhantasmaDemo.Instance.IsTokenCreated;
 
-        if (!createTokenButton.IsInteractable())
+        if (PhantasmaDemo.Instance.IsTokenCreated)
         {
-            var color = createTokenButton.targetGraphic.color;
-            createTokenButton.targetGraphic.color = new Color(color.r, color.g, color.b, 0.5f);
+            createTokenButton.interactable          = false;
+            createTokenButton.targetGraphic.color   = Color.gray;
+
+            if (PhantasmaDemo.Instance.TokenCurrentSupply == Market.MARKET_CARS_COUNT)
+            {
+                populateMarketButton.interactable           = false;
+                populateMarketButton.targetGraphic.color    = Color.gray;
+            }
+            else
+            {
+                populateMarketButton.interactable = true;
+                populateMarketButton.targetGraphic.color = _defaultColor;
+            }
         }
+        else
+        {
+            createTokenButton.interactable          = true;
+            createTokenButton.targetGraphic.color   = _defaultColor;
+
+            populateMarketButton.interactable           = true;
+            populateMarketButton.targetGraphic.color    = _defaultColor;
+        }
+
     }
 
     public void CreateTokenClicked()
