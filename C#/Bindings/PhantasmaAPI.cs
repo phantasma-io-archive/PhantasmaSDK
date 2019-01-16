@@ -2,6 +2,9 @@ using System;
 using System.Collections;
 using LunarLabs.Parser;
 using LunarLabs.Parser.JSON;
+using Phantasma.Cryptography;
+using Phantasma.Numerics;
+using Phantasma.IO;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -35,31 +38,22 @@ namespace Phantasma.SDK
         {
             string contents;
 
-            DataNode paramData;
-
+            var paramData = DataNode.CreateArray("params");
+            
             if (parameters!=null && parameters.Length > 0)
             {
-                paramData = DataNode.CreateArray("params");
                 foreach (var obj in parameters)
                 {
                     paramData.AddField(null, obj);
                 }
-            }
-            else
-            {
-                paramData = null;
             }
 
             var jsonRpcData = DataNode.CreateObject(null);
             jsonRpcData.AddField("jsonrpc", "2.0");
             jsonRpcData.AddField("method", method);
             jsonRpcData.AddField("id", "1");
-
-            if (paramData != null)
-            {
-                jsonRpcData.AddNode(paramData);
-            }
-
+            jsonRpcData.AddNode(paramData);
+            
             UnityWebRequest www;
             string json;
 
@@ -72,6 +66,8 @@ namespace Phantasma.SDK
                 throw e;
             }
             
+            Debug.Log("www request json: " + json);
+
             www = UnityWebRequest.Post(url, json);
             yield return www.SendWebRequest();
             
@@ -177,5 +173,16 @@ namespace Phantasma.SDK
 		}
 		
 		{{/each}}
+		
+       public IEnumerator SignAndSendTransaction(byte[] script, string chain, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
+       {
+           Debug.Log("Sending transaction...");
+
+           var tx = new Blockchain.Transaction("nexus", chain, script, DateTime.UtcNow + TimeSpan.FromHours(1), 0);
+           tx.Sign(PhantasmaDemo.Instance.Key);
+
+           yield return SendRawTransaction(Base16.Encode(tx.ToByteArray(true)), callback, errorHandlingCallback);
+       }
+		
 	}
 }

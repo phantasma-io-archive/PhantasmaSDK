@@ -295,8 +295,7 @@ namespace WalletSample
             try
             {
                 Console.WriteLine("Sending transaction...");
-                var tx = new Transaction("simnet", chain, script,
-                    DateTime.UtcNow + TimeSpan.FromHours(1), 0);
+                var tx = new Transaction("simnet", chain, script, DateTime.UtcNow + TimeSpan.FromHours(1));
                 tx.Sign(_key);
                 var txResult = await _phantasmaApiService.SendRawTx.SendRequestAsync(tx.ToByteArray(true).Encode());
 
