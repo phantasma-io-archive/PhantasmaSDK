@@ -207,6 +207,7 @@ public class PhantasmaDemo : MonoBehaviour
             var script = ScriptUtils.BeginScript()
                 .AllowGas(Key.Address, 1, 9999)
                 .CallContract("nexus", "CreateToken", Key.Address, TOKEN_SYMBOL, TOKEN_NAME, 10000, 0, TokenFlags.Transferable | TokenFlags.Finite | TokenFlags.Fungible)
+                //.CallContract("nexus", "CreateToken", Key.Address, TOKEN_SYMBOL, TOKEN_NAME, 10000, 0, TokenFlags.Transferable | TokenFlags.Finite)
                 .SpendGas(Key.Address)
                 .EndScript();
 
@@ -237,14 +238,16 @@ public class PhantasmaDemo : MonoBehaviour
         {
             foreach (var evt in tx.events)
             {
-                Debug.Log("has event: " + evt.kind + " - " + evt.data);
+                Debug.Log("has event: " + evt.kind);
 
                 if (Enum.TryParse(evt.kind, out EventKind eKind))
                 {
                     if (eKind == EventKind.TokenCreate)
                     {
                         var bytes = Base16.Decode(evt.data);
-                        var data = Serialization.Unserialize<TokenEventData>(bytes);
+                        var data = Serialization.Unserialize<string>(bytes);
+
+                        Debug.Log(evt.kind + " - " + data);
 
                         //PhantasmaApi.LogTransaction(Key.Address, 0, TransactionType.Created_Token, "CAR");
 
@@ -286,7 +289,7 @@ public class PhantasmaDemo : MonoBehaviour
                 {
                     //Debug.Log("token: " + token.symbol);
 
-                    if (token.symbol.Equals(TOKEN_SYMBOL)) // TODO "CAR")) Por o novo token dps da criação dos tokens não ter bugs
+                    if (token.symbol.Equals(TOKEN_SYMBOL))
                     {
                         Debug.Log("CREATED TRUE: " + token.symbol);
                         IsTokenCreated = true;
