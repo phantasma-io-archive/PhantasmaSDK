@@ -47,11 +47,9 @@ public class Market : MonoBehaviour
     {
         _cars = new Dictionary<BigInteger, CarData>();
 
-        while (_cars.Keys.Count < _MARKET_CARS_COUNT)
+        for (var i = 0; i < _MARKET_CARS_COUNT; i++)
         {
-            CreateCar(out var car);
-            
-            MarketBuyAssets.Add(car);
+            CreateCar();
         }
     }
 
@@ -73,7 +71,7 @@ public class Market : MonoBehaviour
 
     }
 
-    private void CreateCar(out Car car)
+    private void CreateCar()
     {
         var cars = _cars; //Storage.FindMapForContract<BigInteger, CarData>(GLOBAL_CARS_LIST); //TODO
 
@@ -88,14 +86,15 @@ public class Market : MonoBehaviour
         };
       
         var txData = Serialization.Serialize(carData);
-        
+        var mintData = Base16.Encode(txData);
+
+        Debug.Log("mint data: " + mintData);
+
         var script = ScriptUtils.BeginScript()
                         .AllowGas(PhantasmaDemo.Instance.Key.Address, 1, 9999)
-                        .CallContract("token", "MintToken", PhantasmaDemo.Instance.Key.Address, "CAR", txData)
+                        .CallContract("token", "MintToken", PhantasmaDemo.Instance.Key.Address, PhantasmaDemo.TOKEN_SYMBOL, txData, new byte[0])
                         .SpendGas(PhantasmaDemo.Instance.Key.Address)
                         .EndScript();
-
-        var carID = new BigInteger(-1);
 
         StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.SignAndSendTransaction(script, "main", 
             (result) =>
@@ -115,13 +114,18 @@ public class Market : MonoBehaviour
                                 var bytes   = Base16.Decode(evt.data);
                                 var data    = Serialization.Unserialize<TokenEventData>(bytes);
 
-                                carID   = data.value;
+                                var carID   = data.value;
 
                                 // save car
                                 cars.Add(carID, carData);
 
+                                var newCar = new Car();
+                                newCar.SetCar(carID, 0, carData, PhantasmaDemo.Instance.carImages[Random.Range(0, PhantasmaDemo.Instance.carImages.Count)]);
+
+                                MarketBuyAssets.Add(newCar);
+
                                 //PhantasmaDemo.Instance.PhantasmaApi.LogTransaction(PhantasmaDemo.Instance.Key.Address, 0, TransactionType.Created_Car, carID);
-                                
+
                                 break;
                             }
                             else
@@ -144,16 +148,6 @@ public class Market : MonoBehaviour
                 CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
             }
         ));
-
-        if (carID > 0)
-        {
-            car = new Car();
-            car.SetCar(carID, 0, carData, PhantasmaDemo.Instance.carImages[Random.Range(0, PhantasmaDemo.Instance.carImages.Count)]);
-        }
-        else
-        {
-            car = null;
-        }
     }
 
     /// <summary>
@@ -267,7 +261,7 @@ public class Market : MonoBehaviour
 
         var script = ScriptUtils.BeginScript()
             .AllowGas(from, 1, 9999)
-            .CallContract("token", "SellToken", from, "CAR", car.CarID, startPrice)
+            .CallContract("token", "SellToken", from, PhantasmaDemo.TOKEN_SYMBOL, car.CarID, startPrice)
             .SpendGas(from)
             .EndScript();
 

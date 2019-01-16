@@ -19,13 +19,16 @@ public class LoginMenu : MonoBehaviour
             return;
         }
 
-        if (!PhantasmaDemo.Instance.PhantasmaApi.IsValidPrivateKey(addressInputField.text))
+        if (PhantasmaDemo.Instance != null)
         {
-            SetLoginError("Error: The entered address is not valid.\nThe private key must start with an 'L' or a 'K' and have 52 characaters.");
-            return;
-        }
+            if (PhantasmaDemo.Instance.PhantasmaApi != null && !PhantasmaDemo.Instance.PhantasmaApi.IsValidPrivateKey(addressInputField.text))
+            {
+                SetLoginError("Error: The entered address is not valid.\nThe private key must start with an 'L' or a 'K' and have 52 characaters.");
+                return;
+            }
 
-        PhantasmaDemo.Instance.Login(addressInputField.text);
+            PhantasmaDemo.Instance.Login(addressInputField.text);
+        }
     }
 
     public void SetLoginError(string error)

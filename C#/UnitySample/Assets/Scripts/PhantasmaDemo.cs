@@ -203,11 +203,10 @@ public class PhantasmaDemo : MonoBehaviour
         {
             CanvasManager.Instance.ShowFetchingDataPopup("Creating a new token on the blockchain...");
 
-            // TODO non-fungible tokens are not working
             var script = ScriptUtils.BeginScript()
                 .AllowGas(Key.Address, 1, 9999)
-                .CallContract("nexus", "CreateToken", Key.Address, TOKEN_SYMBOL, TOKEN_NAME, 10000, 0, TokenFlags.Transferable | TokenFlags.Finite | TokenFlags.Fungible)
-                //.CallContract("nexus", "CreateToken", Key.Address, TOKEN_SYMBOL, TOKEN_NAME, 10000, 0, TokenFlags.Transferable | TokenFlags.Finite)
+                //.CallContract("nexus", "CreateToken", Key.Address, TOKEN_SYMBOL, TOKEN_NAME, 0, 0, TokenFlags.Transferable)
+                .CallContract("nexus", "CreateToken", Key.Address, TOKEN_SYMBOL, TOKEN_NAME, 10000, 0, TokenFlags.Transferable | TokenFlags.Finite)
                 .SpendGas(Key.Address)
                 .EndScript();
 
@@ -232,7 +231,7 @@ public class PhantasmaDemo : MonoBehaviour
     {
         CanvasManager.Instance.ShowFetchingDataPopup("Checkin token creation...");
 
-        yield return new WaitForSecondsRealtime(15f);
+        yield return new WaitForSecondsRealtime(10f);
         
         yield return PhantasmaApi.GetTransaction(result, (tx) =>
         {
@@ -263,9 +262,9 @@ public class PhantasmaDemo : MonoBehaviour
                     // TODO aconteceu algum erro..
                 }
             }
-        });
 
-        CanvasManager.Instance.HideFetchingDataPopup();
+            CanvasManager.Instance.HideFetchingDataPopup();
+        });
     }
 
     public void CheckTokenCreation(Action callback = null)
