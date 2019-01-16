@@ -8,7 +8,7 @@ public class MainMenu : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        PhantasmaDemo.Instance.OwnsToken(() =>
+        PhantasmaDemo.Instance.OwnsToken(PhantasmaDemo.TOKEN_SYMBOL, () =>
         {
             CanvasManager.Instance.mainMenu.SetAdminButton();
         });
@@ -16,7 +16,7 @@ public class MainMenu : MonoBehaviour
 
     public void SetAdminButton()
     {
-        adminButton.gameObject.SetActive(PhantasmaDemo.Instance.IsTokenOwner);
+        adminButton.gameObject.SetActive(!PhantasmaDemo.Instance.IsTokenCreated || PhantasmaDemo.Instance.IsTokenCreated && PhantasmaDemo.Instance.IsTokenOwner);
     }
 
     public void AccountClicked()

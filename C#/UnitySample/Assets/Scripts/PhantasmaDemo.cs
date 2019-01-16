@@ -21,6 +21,9 @@ using Phantasma.VM.Utils;
 
 public class PhantasmaDemo : MonoBehaviour
 {
+    public const string TOKEN_SYMBOL    = "CAR";
+    public const string TOKEN_NAME      = "Car Demo Token";
+
     private const string _SERVER_ADDRESS = "http://localhost:7077/rpc";
 
     public KeyPair Key { get; private set; }
@@ -200,9 +203,10 @@ public class PhantasmaDemo : MonoBehaviour
         {
             CanvasManager.Instance.ShowFetchingDataPopup("Creating a new token on the blockchain...");
 
+            // TODO non-fungible tokens are not working
             var script = ScriptUtils.BeginScript()
                 .AllowGas(Key.Address, 1, 9999)
-                .CallContract("nexus", "CreateToken", Key.Address, "CAR", "Car Demo Token", 10000, 0, TokenFlags.Transferable | TokenFlags.Finite)
+                .CallContract("nexus", "CreateToken", Key.Address, TOKEN_SYMBOL, TOKEN_NAME, 10000, 0, TokenFlags.Transferable | TokenFlags.Finite | TokenFlags.Fungible)
                 .SpendGas(Key.Address)
                 .EndScript();
 
@@ -211,10 +215,7 @@ public class PhantasmaDemo : MonoBehaviour
                 {
                     Debug.Log("sign result: " + result);
 
-                    StartCoroutine(TestGetT(result));
-
-                    CanvasManager.Instance.HideFetchingDataPopup();
-
+                    StartCoroutine(TokenCreated(result));
                 },
                 (errorType, errorMessage) =>
                 {
@@ -226,18 +227,12 @@ public class PhantasmaDemo : MonoBehaviour
         });
     }
 
-    public IEnumerator TestGetT(string result)
+    public IEnumerator TokenCreated(string result)
     {
-        Debug.Log("1");
-        yield return new WaitForSecondsRealtime(5f);
+        CanvasManager.Instance.ShowFetchingDataPopup("Checkin token creation...");
 
-        Debug.Log("2");
-        yield return new WaitForSecondsRealtime(5f);
-
-        Debug.Log("3");
-        yield return new WaitForSecondsRealtime(5f);
-
-
+        yield return new WaitForSecondsRealtime(15f);
+        
         yield return PhantasmaApi.GetTransaction(result, (tx) =>
         {
             foreach (var evt in tx.events)
@@ -265,10 +260,9 @@ public class PhantasmaDemo : MonoBehaviour
                     // TODO aconteceu algum erro..
                 }
             }
-
-
-
         });
+
+        CanvasManager.Instance.HideFetchingDataPopup();
     }
 
     public void CheckTokenCreation(Action callback = null)
@@ -279,22 +273,22 @@ public class PhantasmaDemo : MonoBehaviour
 
         var script = ScriptUtils.BeginScript()
             .AllowGas(Key.Address, 1, 9999)
-            .CallContract("nexus", "GetToken", Key.Address, "CAR")
+            .CallContract("nexus", "GetToken", Key.Address, TOKEN_SYMBOL)
             .SpendGas(Key.Address)
             .EndScript();
         
         StartCoroutine(PhantasmaApi.GetTokens(
             (result) =>
             {
-                Debug.Log("sign result tokens: " + result.Length);
+                //Debug.Log("sign result tokens: " + result.Length);
 
                 foreach (var token in result)
                 {
-                    Debug.Log("token: " + token.symbol);
+                    //Debug.Log("token: " + token.symbol);
 
-                    if (token.symbol.Equals("CAR")) // TODO "CAR")) Por o novo token dps da criação dos tokens não ter bugs
+                    if (token.symbol.Equals(TOKEN_SYMBOL)) // TODO "CAR")) Por o novo token dps da criação dos tokens não ter bugs
                     {
-                        Debug.Log("CREATED TRUE");
+                        Debug.Log("CREATED TRUE: " + token.symbol);
                         IsTokenCreated = true;
                         break;
                     }
@@ -317,7 +311,7 @@ public class PhantasmaDemo : MonoBehaviour
         ));
     }
 
-    public bool OwnsToken(Action callback = null)
+    public bool OwnsToken(string tokenSymbol, Action callback = null)
     {
         IsTokenOwner = false;
 
@@ -326,15 +320,13 @@ public class PhantasmaDemo : MonoBehaviour
         StartCoroutine(PhantasmaApi.GetTokens(
             (result) =>
             {
-                Debug.Log("sign result: " + result);
-
                 foreach (var token in result)
                 {
-                    Debug.Log("token add: " + token.ownerAddress + " | MY: " + Key.Address);
+                    Debug.Log("check token: " + token.symbol + " | owner: " + token.ownerAddress + " | MY: " + Key.Address);
 
-                    if (token.ownerAddress.Equals(Key.Address.ToString()))
+                    if (token.symbol.Equals(TOKEN_SYMBOL) && token.ownerAddress.Equals(Key.Address.ToString()))
                     {
-                        Debug.Log("SAME ADD: " + token.symbol);
+                        Debug.Log("IS TOKEN OWNER: " + token.symbol);
                         IsTokenOwner = true;
                         break;
                     }

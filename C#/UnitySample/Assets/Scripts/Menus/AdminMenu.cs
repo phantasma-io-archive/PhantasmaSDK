@@ -21,17 +21,11 @@ public class AdminMenu : MonoBehaviour
 
         if (!createTokenButton.IsInteractable())
         {
-            Debug.Log("a");
             var color = createTokenButton.targetGraphic.color;
             createTokenButton.targetGraphic.color = new Color(color.r, color.g, color.b, 0.5f);
         }
-        else
-        {
-            Debug.Log("b");
-        }
-
-
     }
+
     public void CreateTokenClicked()
     {
         PhantasmaDemo.Instance.CreateToken();
