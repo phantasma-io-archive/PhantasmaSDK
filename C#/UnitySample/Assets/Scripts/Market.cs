@@ -11,18 +11,9 @@ using Random = UnityEngine.Random;
 
 public class Market : MonoBehaviour
 {
-    // TODO move this constants to another file related to the API
-    public static readonly string ACCOUNT_CARS          = "teamCars";
-    public static readonly string ACCOUNT_HISTORY       = "history";
-
-    public static readonly string GLOBAL_CARS_LIST      = "allCars";
-    public static readonly string ACTIVE_AUCTIONS_LIST  = "activeAuctions";
-    public static readonly string GLOBAL_AUCTIONS_LIST  = "allAuctions";
-    public static readonly string GLOBAL_SALES_LIST     = "sales";
-
     public const int MARKET_CARS_COUNT = 20;
 
-    private Dictionary<BigInteger, CarData> _cars;
+    //private Dictionary<BigInteger, CarData> _cars;
 
     public Dictionary<BigInteger, Auction>  Auctions            { get; private set; }
     public List<Car>                        MarketBuyAssets     { get; private set; }
@@ -45,7 +36,9 @@ public class Market : MonoBehaviour
     /// </summary>
     public void FillMarket()
     {
-        _cars = new Dictionary<BigInteger, CarData>();
+        //TODO isto é um generate tokens no admin, passar para o pahnatasma Demo.cs
+        // Qd se criam os novos tokens (mint) ficam na wallet do admin que dps vai pelo menu MyAssets e mete à venda no mercado
+        //_cars = new Dictionary<BigInteger, CarData>();
 
         for (var i = PhantasmaDemo.Instance.TokenCurrentSupply; i <= MARKET_CARS_COUNT; i++)
         {
@@ -73,7 +66,7 @@ public class Market : MonoBehaviour
 
     private void CreateCar()
     {
-        var cars = _cars; //Storage.FindMapForContract<BigInteger, CarData>(GLOBAL_CARS_LIST); //TODO
+        //var cars = _cars; //Storage.FindMapForContract<BigInteger, CarData>(GLOBAL_CARS_LIST); //TODO
 
         var carData = new CarData
         {
@@ -117,7 +110,7 @@ public class Market : MonoBehaviour
                                 var carID   = data.value;
 
                                 // save car
-                                cars.Add(carID, carData);
+                                //cars.Add(carID, carData);
 
                                 var newCar = new Car();
                                 newCar.SetCar(carID, 0, carData, PhantasmaDemo.Instance.carImages[Random.Range(0, PhantasmaDemo.Instance.carImages.Count)]);
@@ -125,6 +118,8 @@ public class Market : MonoBehaviour
                                 MarketBuyAssets.Add(newCar);
 
                                 //PhantasmaDemo.Instance.PhantasmaApi.LogTransaction(PhantasmaDemo.Instance.Key.Address, 0, TransactionType.Created_Car, carID);
+
+                                // TODO por o novo token à venda no mercado
 
                                 break;
                             }
@@ -169,7 +164,7 @@ public class Market : MonoBehaviour
                 {
                     var carData = car.Data;
                     
-                    _cars.Remove(car.CarID);
+                    //_cars.Remove(car.CarID);
                     MarketBuyAssets.Remove(car);
 
                     PhantasmaDemo.Instance.MyCars.Add(car);
@@ -228,37 +223,13 @@ public class Market : MonoBehaviour
     /// </summary>
     public void SellAsset(Car car, Address from, BigInteger startPrice, BigInteger endPrice, AuctionCurrency currency = AuctionCurrency.Game_Coin, uint duration = 30)
     {
-        _cars.Add(car.CarID, car.Data);
+        //_cars.Add(car.CarID, car.Data);
 
         MarketSellAssets.Add(car);
 
         PhantasmaDemo.Instance.MyCars.Remove(car);
 
         var carData = car.Data;
-
-        // store info for the auction
-        var currentTime = DateTime.UtcNow; //PhantasmaDemo.Instance.PhantasmaApi.GetCurrentTime();
-        var auction = new Auction()
-        {
-            startTime   = Convert.ToUInt32(currentTime),
-            endTime     = Convert.ToUInt32(currentTime) + duration,
-            startPrice  = startPrice,
-            endPrice    = endPrice,
-            currency    = currency,
-            contentID   = car.CarID,
-            creator     = from,
-        };
-
-        // TODO // Não se deviar usar esta transaction data no script? chega só o cardID e o preço como args do SellToken?
-        var txData = Serialization.Serialize(auction);
-
-        //var script = ScriptUtils.BeginScript()
-        //                .AllowGas(from, 1, 9999)
-        //                .CallContract("token", "SellToken", from, "CAR", txData)
-        //                .SpendGas(from)
-        //                .EndScript();
-
-        //Market Contract -> SellToken(Address from, string symbol, BigInteger tokenID, BigInteger price)
 
         var script = ScriptUtils.BeginScript()
             .AllowGas(from, 1, 9999)
@@ -277,7 +248,7 @@ public class Market : MonoBehaviour
                     // var auctionIDs = (BigInteger[])simulator.Nexus.RootChain.InvokeContract("market", "GetAuctionIDs");
                     Auctions = new Dictionary<BigInteger, Auction>(); //Storage.FindMapForContract<BigInteger, NachoAuction>(GLOBAL_AUCTIONS_LIST);
                     var auctionID = Auctions.Keys.Count + 1;
-                    Auctions.Add(auctionID, auction);
+                    //Auctions.Add(auctionID, auction);
 
                     var activeList = new List<BigInteger>(); //Storage.FindCollectionForContract<BigInteger>(ACTIVE_AUCTIONS_LIST);
                     activeList.Add(auctionID);
@@ -305,7 +276,7 @@ public class Market : MonoBehaviour
     /// </summary>
     public void RemoveAsset(Car car)
     {
-        _cars.Remove(car.CarID);
+        //_cars.Remove(car.CarID);
         MarketSellAssets.Remove(car);
 
         PhantasmaDemo.Instance.MyCars.Add(car);

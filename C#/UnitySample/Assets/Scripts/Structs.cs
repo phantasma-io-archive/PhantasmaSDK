@@ -1,16 +1,19 @@
 ﻿using System;
+using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Cryptography;
 using Phantasma.Numerics;
 
 public enum CarRarity
 {
-    Common      = 0,
+    //TODO estes dados não podem ser mudados por isso vao numa struct no ram[] -> Car Data
+    Common = 0,
     Rare        = 1,
     Legendary   = 2
 }
 
 public enum CarLocation
 {
+    //TODO estes dados podem ser mudados por isso vao numa struct no rom[]
     None    = 0,
     Race    = 1,
     Market  = 2
@@ -64,15 +67,6 @@ public enum AuctionCurrency
     Soul
 }
 
-
-public struct NachoTransaction
-{
-    public uint             timestamp;
-    public TransactionKind  kind;
-    public BigInteger       amount;
-    public byte[]           content;
-}
-
 public struct CarData
 {
     public Address      owner;
@@ -85,35 +79,14 @@ public struct CarData
 
 public struct Auction
 {
-    public uint             startTime;
-    public uint             endTime;
-    public BigInteger       contentID;
-    public BigInteger       startPrice;
-    public BigInteger       endPrice;
-    public Address          creator;
-    public AuctionCurrency  currency;
+    public BigInteger       auctionID;
+    public MarketAuction    marketAuction;
 }
 
-public struct Sale
-{
-    public uint         time;
-    public BigInteger   auctionID;
-    public BigInteger   price;
-    public Address      buyer;
-}
-
-public struct Account
-{
-    public uint         creationTime;
-    public BigInteger   balanceGameCoin;
-    public BigInteger   raceID;
-    public string       unused;
-    public string       address;
-    public AccountFlags flags;
-    public int          ELO;
-    public RaceMode     queueMode;
-    public uint         queueJoinTime;
-    public uint         queueUpdateTime;
-    public Address      queueVersus;
-    public BigInteger[] queueIDs;
-}
+//public struct Sale
+//{
+//    public uint         time;
+//    public BigInteger   auctionID;
+//    public BigInteger   price;
+//    public Address      buyer;
+//}

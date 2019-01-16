@@ -237,6 +237,7 @@ namespace Phantasma.SDK
 		public uint blockHeight;
 		public string script;
 		public Event[] events;
+	    public string result;
 	   
 		public static Transaction FromNode(DataNode node) 
 		{
@@ -247,6 +248,7 @@ namespace Phantasma.SDK
 			result.timestamp = node.GetUInt32("timestamp");						
 			result.blockHeight = node.GetUInt32("blockHeight");						
 			result.script = node.GetString("script");			
+			result.result = node.GetString("result");			
 			var events_array = node.GetNode("events");
 			if (events_array != null) {
 				result.events = new Event[events_array.ChildCount];
