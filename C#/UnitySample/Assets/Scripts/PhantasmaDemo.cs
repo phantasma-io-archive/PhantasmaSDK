@@ -380,7 +380,7 @@ public class PhantasmaDemo : MonoBehaviour
             {
                 foreach (var token in result)
                 {
-                    Debug.Log("check token: " + token.symbol + " | owner: " + token.ownerAddress + " | MY: " + Key.Address);
+                    //Debug.Log("check token: " + token.symbol + " | owner: " + token.ownerAddress + " | MY: " + Key.Address);
 
                     if (token.symbol.Equals(TOKEN_SYMBOL) && token.ownerAddress.Equals(Key.Address.ToString()))
                     {

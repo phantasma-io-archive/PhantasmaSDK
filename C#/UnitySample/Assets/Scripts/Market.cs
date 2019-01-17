@@ -50,7 +50,7 @@ public class Market : MonoBehaviour
     {
         var script = ScriptUtils.BeginScript()
             .AllowGas(car.OwnerAddress, 1, 9999)
-            .CallContract("token", "BuyToken", car.OwnerAddress, car.AuctionID)
+            .CallContract("market", "BuyToken", car.OwnerAddress, car.AuctionID)
             .SpendGas(car.OwnerAddress)
             .EndScript();
 
@@ -121,7 +121,7 @@ public class Market : MonoBehaviour
     /// <summary>
     /// Put an asset for sale on the market
     /// </summary>
-    public void SellAsset(Car car, Address from, BigInteger startPrice, BigInteger endPrice, AuctionCurrency currency = AuctionCurrency.Game_Coin, uint duration = 30)
+    public void SellAsset(Car car, Address from, BigInteger price, AuctionCurrency currency = AuctionCurrency.Game_Coin, uint duration = 30)
     {
         //_cars.Add(car.CarID, car.Data);
 
@@ -134,7 +134,7 @@ public class Market : MonoBehaviour
 
         var script = ScriptUtils.BeginScript()
             .AllowGas(from, 1, 9999)
-            .CallContract("token", "SellToken", from, PhantasmaDemo.TOKEN_SYMBOL, car.CarID, startPrice)
+            .CallContract("market", "SellToken", from, PhantasmaDemo.TOKEN_SYMBOL, car.CarID, price)
             .SpendGas(from)
             .EndScript();
 

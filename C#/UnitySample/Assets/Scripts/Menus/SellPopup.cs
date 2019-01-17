@@ -41,22 +41,24 @@ public class SellPopup : MonoBehaviour
             return;
         }
 
-        if (priceInput.characterValidation == InputField.CharacterValidation.Decimal)
+        Debug.Log("Sell Price:" + priceInput.text);
+
+        //var price = decimal.Parse(priceInput.text);
+        if (BigInteger.TryParse(priceInput.text, out BigInteger price))
         {
-            //var price = decimal.Parse(priceInput.text);
-            if (BigInteger.TryParse(priceInput.text, out BigInteger price))
-            {
-                PhantasmaDemo.Instance.market.SellAsset(_car, PhantasmaDemo.Instance.Key.Address, price, price);
-            }
-            else
+            if (price < 0)
             {
                 SetSellError("Error: Price must be a decimal positive value.");
+                return;
             }
+
+            PhantasmaDemo.Instance.market.SellAsset(_car, PhantasmaDemo.Instance.Key.Address, price);
         }
         else
         {
             SetSellError("Error: Price must be a decimal positive value.");
         }
+
     }
 
     public void SetSellError(string error)
