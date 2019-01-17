@@ -3,9 +3,9 @@ using UnityEngine.UI;
 
 public class AdminMenu : MonoBehaviour
 {
-    public Button createTokenButton, mintTokenButton;
-    public Text tokenSymbol, tokenName, myWalletTokens, currentSupplyTokens;
-
+    public Button       createTokenButton, mintTokenButton;
+    public Text         tokenSymbol, tokenName, myWalletTokens, currentSupplyTokens;
+    public GameObject   tokenContent, supplyContent;
 
     private Color _defaultColor;
 
@@ -37,16 +37,12 @@ public class AdminMenu : MonoBehaviour
             createTokenButton.interactable          = false;
             createTokenButton.targetGraphic.color   = Color.gray;
 
-            //if (PhantasmaDemo.Instance.TokenCurrentSupply == PhantasmaDemo.MAX_TOKEN_SUPPLY)
-            //{
-            //    mintTokenButton.interactable           = false;
-            //    mintTokenButton.targetGraphic.color    = Color.gray;
-            //}
-            //else
-            //{
-            //    mintTokenButton.interactable = true;
-            //    mintTokenButton.targetGraphic.color = _defaultColor;
-            //}
+            tokenContent.SetActive(true);
+
+            mintTokenButton.interactable        = true;
+            mintTokenButton.targetGraphic.color = _defaultColor;
+
+            supplyContent.SetActive(true);
 
             if (PhantasmaDemo.Instance.PhantasmaTokens.ContainsKey(PhantasmaDemo.TOKEN_SYMBOL))
             {
@@ -64,8 +60,12 @@ public class AdminMenu : MonoBehaviour
             createTokenButton.interactable          = true;
             createTokenButton.targetGraphic.color   = _defaultColor;
 
-            //mintTokenButton.interactable           = true;
-            //mintTokenButton.targetGraphic.color    = _defaultColor;
+            tokenContent.SetActive(false);
+
+            mintTokenButton.interactable        = false;
+            mintTokenButton.targetGraphic.color = Color.gray;
+
+            supplyContent.SetActive(false);
 
             tokenSymbol.text    = string.Empty;
             tokenName.text      = string.Empty;

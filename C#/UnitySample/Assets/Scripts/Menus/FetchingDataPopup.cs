@@ -29,6 +29,9 @@ public class FetchingDataPopup : MonoBehaviour
 
     public void ShowPopup(string msg = null)
     {
+        _isClosing = false;
+        _timeVisible = 0;
+
         message.text = msg == null ? _DEFAULT_MESSAGE : msg;
 
         gameObject.SetActive(true);

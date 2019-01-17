@@ -236,7 +236,7 @@ public class PhantasmaDemo : MonoBehaviour
                 {
                     Debug.Log("create token result: " + result);
 
-                    StartCoroutine(TokenCreated(result));
+                    StartCoroutine(CheckTokenCreation(result));
                 },
                 (errorType, errorMessage) =>
                 {
@@ -247,9 +247,9 @@ public class PhantasmaDemo : MonoBehaviour
         });
     }
 
-    public IEnumerator TokenCreated(string result)
+    public IEnumerator CheckTokenCreation(string result)
     {
-        CanvasManager.Instance.ShowFetchingDataPopup("Checkin token creation...");
+        CanvasManager.Instance.ShowFetchingDataPopup("Checking token creation...");
 
         yield return new WaitForSecondsRealtime(10f);
         
@@ -261,27 +261,37 @@ public class PhantasmaDemo : MonoBehaviour
                 {
                     if (eKind == EventKind.TokenCreate)
                     {
-                        var bytes   = Base16.Decode(evt.data);
-                        var data    = Serialization.Unserialize<string>(bytes);
+                        var bytes       = Base16.Decode(evt.data);
+                        var tokenSymbol = Serialization.Unserialize<string>(bytes);
 
-                        Debug.Log(evt.kind + " - " + data);
+                        Debug.Log(evt.kind + " - " + tokenSymbol);
 
-                        //PhantasmaApi.LogTransaction(Key.Address, 0, TransactionType.Created_Token, "CAR");
+                        if (tokenSymbol.Equals(TOKEN_SYMBOL))
+                        {
+                            IsTokenCreated  = true;
+                            IsTokenOwner    = true;
+
+                            CheckTokens(() =>
+                            {
+                                CanvasManager.Instance.adminMenu.SetContent();
+                                //PhantasmaApi.LogTransaction(Key.Address, 0, TransactionType.Created_Token, "CAR");
+                            });
+                        }
 
                         break;
                     }
                     else
                     {
+                        CanvasManager.Instance.HideFetchingDataPopup();
                         // TODO aconteceu algum erro...
                     }
                 }
                 else
                 {
+                    CanvasManager.Instance.HideFetchingDataPopup();
                     // TODO aconteceu algum erro..
                 }
             }
-
-            CanvasManager.Instance.HideFetchingDataPopup();
         });
     }
 
@@ -327,6 +337,7 @@ public class PhantasmaDemo : MonoBehaviour
         ));
     }
 
+    // TODO merge this method with the GetTOkens
     public bool OwnsToken(string tokenSymbol, Action callback = null)
     {
         IsTokenOwner = false;

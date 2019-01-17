@@ -151,13 +151,11 @@ public class CanvasManager : MonoBehaviour {
 
     public void ShowFetchingDataPopup(string message = null)
     {
-        Debug.Log("show - " + Time.frameCount);
         fetchingDataPopup.ShowPopup(message);
     }
 
     public void HideFetchingDataPopup()
     {
-        Debug.Log("hide - " + Time.frameCount);
         fetchingDataPopup.HidePopup();
     }
 
