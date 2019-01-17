@@ -6,12 +6,14 @@ using System.Globalization;
 using UnityEngine;
 
 using Phantasma.Blockchain.Contracts;
+using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
 using Phantasma.IO;
 using Phantasma.Numerics;
 using Phantasma.SDK;
 using Phantasma.VM.Utils;
+using Random = UnityEngine.Random;
 using Token = Phantasma.SDK.Token;
 
 /*
@@ -361,5 +363,85 @@ public class PhantasmaDemo : MonoBehaviour
         ));
 
         return IsTokenOwner;
+    }
+
+    public void MintToken()
+    {
+        //var cars = _cars; //Storage.FindMapForContract<BigInteger, CarData>(GLOBAL_CARS_LIST); //TODO
+
+        var carData = new CarData
+        {
+            owner = PhantasmaDemo.Instance.Key.Address,
+            name = "Super Cadillac",
+            power = (byte)Random.Range(1, 10),
+            speed = (byte)Random.Range(1, 10),
+            location = CarLocation.Market,
+            flags = CarFlags.Locked
+        };
+
+        var txData = Serialization.Serialize(carData);
+        var mintData = Base16.Encode(txData);
+
+        Debug.Log("mint data: " + mintData);
+
+        var script = ScriptUtils.BeginScript()
+                        .AllowGas(PhantasmaDemo.Instance.Key.Address, 1, 9999)
+                        .CallContract("token", "MintToken", PhantasmaDemo.Instance.Key.Address, PhantasmaDemo.TOKEN_SYMBOL, txData, new byte[0])
+                        .SpendGas(PhantasmaDemo.Instance.Key.Address)
+                        .EndScript();
+
+        StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.SignAndSendTransaction(script, "main",
+            (result) =>
+            {
+                Debug.Log("sign result: " + result);
+
+                StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetTransaction(result, (tx) =>
+                {
+                    foreach (var evt in tx.events)
+                    {
+                        Debug.Log("has event: " + evt.kind + " - " + evt.data);
+
+                        if (Enum.TryParse(evt.kind, out EventKind eKind))
+                        {
+                            if (eKind == EventKind.TokenMint)
+                            {
+                                var bytes = Base16.Decode(evt.data);
+                                var data = Serialization.Unserialize<TokenEventData>(bytes);
+
+                                var carID = data.value;
+
+                                // save car
+                                //cars.Add(carID, carData);
+
+                                var newCar = new Car();
+                                newCar.SetCar(carID, 0, carData, PhantasmaDemo.Instance.carImages[Random.Range(0, PhantasmaDemo.Instance.carImages.Count)]);
+
+                                //MarketBuyAssets.Add(newCar);
+
+                                //PhantasmaDemo.Instance.PhantasmaApi.LogTransaction(PhantasmaDemo.Instance.Key.Address, 0, TransactionType.Created_Car, carID);
+
+                                // TODO por o novo token à venda no mercado
+
+                                break;
+                            }
+                            else
+                            {
+                                // TODO aconteceu algum erro...
+                            }
+                        }
+                        else
+                        {
+                            // TODO aconteceu algum erro..
+                        }
+                    }
+
+                }));
+
+            },
+            (errorType, errorMessage) =>
+            {
+                CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
+            }
+        ));
     }
 }

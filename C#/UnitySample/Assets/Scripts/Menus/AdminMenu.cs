@@ -3,7 +3,9 @@ using UnityEngine.UI;
 
 public class AdminMenu : MonoBehaviour
 {
-    public Button createTokenButton, populateMarketButton;
+    public Button createTokenButton, mintTokenButton;
+    public Text tokenSymbol, tokenName, myWalletTokens, currentSupplyTokens;
+
 
     private Color _defaultColor;
 
@@ -22,11 +24,11 @@ public class AdminMenu : MonoBehaviour
     {
         PhantasmaDemo.Instance.CheckTokens(() =>
         {
-            CanvasManager.Instance.adminMenu.SetButtons();
+            CanvasManager.Instance.adminMenu.SetContent();
         });
     }
 
-    public void SetButtons()
+    public void SetContent()
     {
         Debug.Log("set token: " + PhantasmaDemo.Instance.IsTokenCreated);
 
@@ -35,15 +37,26 @@ public class AdminMenu : MonoBehaviour
             createTokenButton.interactable          = false;
             createTokenButton.targetGraphic.color   = Color.gray;
 
-            if (PhantasmaDemo.Instance.TokenCurrentSupply == Market.MARKET_CARS_COUNT)
+            //if (PhantasmaDemo.Instance.TokenCurrentSupply == PhantasmaDemo.MAX_TOKEN_SUPPLY)
+            //{
+            //    mintTokenButton.interactable           = false;
+            //    mintTokenButton.targetGraphic.color    = Color.gray;
+            //}
+            //else
+            //{
+            //    mintTokenButton.interactable = true;
+            //    mintTokenButton.targetGraphic.color = _defaultColor;
+            //}
+
+            if (PhantasmaDemo.Instance.PhantasmaTokens.ContainsKey(PhantasmaDemo.TOKEN_SYMBOL))
             {
-                populateMarketButton.interactable           = false;
-                populateMarketButton.targetGraphic.color    = Color.gray;
-            }
-            else
-            {
-                populateMarketButton.interactable = true;
-                populateMarketButton.targetGraphic.color = _defaultColor;
+                var token = PhantasmaDemo.Instance.PhantasmaTokens[PhantasmaDemo.TOKEN_SYMBOL];
+
+                tokenSymbol.text    = token.symbol;
+                tokenName.text      = token.name;
+
+                myWalletTokens.text         = PhantasmaDemo.Instance.MyCars.Count.ToString();
+                currentSupplyTokens.text    = token.currentSupply;
             }
         }
         else
@@ -51,10 +64,15 @@ public class AdminMenu : MonoBehaviour
             createTokenButton.interactable          = true;
             createTokenButton.targetGraphic.color   = _defaultColor;
 
-            populateMarketButton.interactable           = true;
-            populateMarketButton.targetGraphic.color    = _defaultColor;
-        }
+            //mintTokenButton.interactable           = true;
+            //mintTokenButton.targetGraphic.color    = _defaultColor;
 
+            tokenSymbol.text    = string.Empty;
+            tokenName.text      = string.Empty;
+
+            myWalletTokens.text         = "0";
+            currentSupplyTokens.text    = "0";
+        }
     }
 
     public void CreateTokenClicked()
@@ -62,9 +80,9 @@ public class AdminMenu : MonoBehaviour
         PhantasmaDemo.Instance.CreateToken();
     }
 
-    public void PopulateMarketClicked()
+    public void MintTokenClicked()
     {
-        PhantasmaDemo.Instance.market.FillMarket();
+        PhantasmaDemo.Instance.MintToken();
     }
 
     public void BackClicked()

@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using Phantasma.Blockchain.Contracts;
-using Phantasma.Blockchain.Contracts.Native;
+﻿using System.Collections.Generic;
+
+using UnityEngine;
+
 using Phantasma.Cryptography;
 using Phantasma.Numerics;
 using Phantasma.VM.Utils;
-using Phantasma.IO;
-using UnityEngine;
-using Random = UnityEngine.Random;
 
 public class Market : MonoBehaviour
 {
-    public const int MARKET_CARS_COUNT = 20;
-
     //private Dictionary<BigInteger, CarData> _cars;
 
     public Dictionary<BigInteger, Auction>  Auctions            { get; private set; }
@@ -32,21 +27,6 @@ public class Market : MonoBehaviour
     }
     
     /// <summary>
-    /// Fill the market with new assets
-    /// </summary>
-    public void FillMarket()
-    {
-        //TODO isto é um generate tokens no admin, passar para o pahnatasma Demo.cs
-        // Qd se criam os novos tokens (mint) ficam na wallet do admin que dps vai pelo menu MyAssets e mete à venda no mercado
-        //_cars = new Dictionary<BigInteger, CarData>();
-
-        for (var i = PhantasmaDemo.Instance.TokenCurrentSupply; i <= MARKET_CARS_COUNT; i++)
-        {
-            CreateCar();
-        }
-    }
-
-    /// <summary>
     /// Get the market with the current assets
     /// </summary>
     public void GetMarket()
@@ -61,87 +41,6 @@ public class Market : MonoBehaviour
         //    .EndScript();
 
         //Storage.FindMapForContract<BigInteger, Auction>(GLOBAL_AUCTIONS_LIST);
-
-    }
-
-    private void CreateCar()
-    {
-        //var cars = _cars; //Storage.FindMapForContract<BigInteger, CarData>(GLOBAL_CARS_LIST); //TODO
-
-        var carData = new CarData
-        {
-            owner       = PhantasmaDemo.Instance.Key.Address,
-            name        = "Super Cadillac", 
-            power       = (byte)Random.Range(1, 10),
-            speed       = (byte)Random.Range(1, 10),
-            location    = CarLocation.Market,
-            flags       = CarFlags.Locked
-        };
-      
-        var txData = Serialization.Serialize(carData);
-        var mintData = Base16.Encode(txData);
-
-        Debug.Log("mint data: " + mintData);
-
-        var script = ScriptUtils.BeginScript()
-                        .AllowGas(PhantasmaDemo.Instance.Key.Address, 1, 9999)
-                        .CallContract("token", "MintToken", PhantasmaDemo.Instance.Key.Address, PhantasmaDemo.TOKEN_SYMBOL, txData, new byte[0])
-                        .SpendGas(PhantasmaDemo.Instance.Key.Address)
-                        .EndScript();
-
-        StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.SignAndSendTransaction(script, "main", 
-            (result) =>
-            {
-                Debug.Log("sign result: " + result);
-
-                StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetTransaction(result, (tx) =>
-                {
-                    foreach (var evt in tx.events)
-                    {
-                        Debug.Log("has event: " + evt.kind + " - " + evt.data);
-
-                        if (Enum.TryParse(evt.kind, out EventKind eKind))
-                        {
-                            if (eKind == EventKind.TokenMint)
-                            {
-                                var bytes   = Base16.Decode(evt.data);
-                                var data    = Serialization.Unserialize<TokenEventData>(bytes);
-
-                                var carID   = data.value;
-
-                                // save car
-                                //cars.Add(carID, carData);
-
-                                var newCar = new Car();
-                                newCar.SetCar(carID, 0, carData, PhantasmaDemo.Instance.carImages[Random.Range(0, PhantasmaDemo.Instance.carImages.Count)]);
-
-                                MarketBuyAssets.Add(newCar);
-
-                                //PhantasmaDemo.Instance.PhantasmaApi.LogTransaction(PhantasmaDemo.Instance.Key.Address, 0, TransactionType.Created_Car, carID);
-
-                                // TODO por o novo token à venda no mercado
-
-                                break;
-                            }
-                            else
-                            {
-                                // TODO aconteceu algum erro...
-                            }
-                        }
-                        else
-                        {
-                            // TODO aconteceu algum erro..
-                        }
-                    }
-
-                }));
-
-            },
-            (errorType, errorMessage) =>
-            {
-                CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
-            }
-        ));
     }
 
     /// <summary>
