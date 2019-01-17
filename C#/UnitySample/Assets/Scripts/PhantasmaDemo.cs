@@ -165,7 +165,8 @@ public class PhantasmaDemo : MonoBehaviour
 
         CanvasManager.Instance.ShowFetchingDataPopup("Fetching account data from the blockchain...");
 
-        StartCoroutine(PhantasmaApi.GetAccount(address, result =>
+        StartCoroutine(PhantasmaApi.GetAccount(address, 
+            result =>
             {
                 CanvasManager.Instance.accountMenu.SetBalance("Name: " + result.name);
 
@@ -209,7 +210,10 @@ public class PhantasmaDemo : MonoBehaviour
                 LoggedIn(address);
 
             },
-            (errorType, errorMessage) => { CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage); }
+            (errorType, errorMessage) =>
+            {
+                CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
+            }
         ));
     }
 
@@ -349,7 +353,15 @@ public class PhantasmaDemo : MonoBehaviour
             (errorType, errorMessage) =>
             {
                 CanvasManager.Instance.HideFetchingDataPopup();
-                CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
+
+                if (CanvasManager.Instance.loginMenu.gameObject.activeInHierarchy)
+                {
+                    CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
+                }
+                else
+                {
+                    CanvasManager.Instance.SetErrorMessage(errorType + " - "  + errorMessage);
+                }
             }
         ));
     }
