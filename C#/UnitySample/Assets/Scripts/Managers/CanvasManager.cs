@@ -4,7 +4,9 @@ using UnityEngine.UI;
 
 public class CanvasManager : MonoBehaviour {
 
-    public Text                 addressLabel, errorMessage;
+    public Text                 addressLabel;
+    public Text                 errorMessage;
+    public Button               retryConnectionButton;
     public MyAssetsMenu         myAssetsMenu;
     public LoginMenu            loginMenu;
     public MainMenu             mainMenu;
@@ -23,6 +25,9 @@ public class CanvasManager : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+
+        errorMessage.gameObject.SetActive(false);
+        retryConnectionButton.gameObject.SetActive(false);
 
         loginMenu.gameObject.SetActive(false);
         mainMenu.gameObject.SetActive(false);
@@ -46,8 +51,18 @@ public class CanvasManager : MonoBehaviour {
 
     public void SetErrorMessage(string error)
     {
-        errorMessage.gameObject.SetActive(true);
         errorMessage.text = error;
+        errorMessage.gameObject.SetActive(true);
+
+        retryConnectionButton.gameObject.SetActive(true);
+    }
+
+    public void RetryConnectionClicked()
+    {
+        errorMessage.gameObject.SetActive(false);
+        retryConnectionButton.gameObject.SetActive(false);
+
+        PhantasmaDemo.Instance.LoadPhantasmaData();
     }
 
     #region Login Menu

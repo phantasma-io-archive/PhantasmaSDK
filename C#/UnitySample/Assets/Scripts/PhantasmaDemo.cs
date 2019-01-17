@@ -90,7 +90,7 @@ public class PhantasmaDemo : MonoBehaviour
         Invoke("LoadPhantasmaData", 2f);
     }
 
-    private void LoadPhantasmaData()
+    public void LoadPhantasmaData()
     {
         CheckTokens(() =>
         {
