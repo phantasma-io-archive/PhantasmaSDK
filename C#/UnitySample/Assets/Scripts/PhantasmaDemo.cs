@@ -67,7 +67,7 @@ public class PhantasmaDemo : MonoBehaviour
     public bool                         IsTokenCreated      { get; private set; }
     public bool                         IsTokenOwner        { get; private set; }
     public decimal                      TokenCurrentSupply  { get; private set; }
-    public List<Car>                    MyCars              { get; set; }
+    public Dictionary<BigInteger, Car>  MyCars              { get; set; }
     
     private static PhantasmaDemo _instance;
     public static PhantasmaDemo Instance
@@ -78,8 +78,7 @@ public class PhantasmaDemo : MonoBehaviour
     private void Awake()
     {
         PhantasmaTokens = new Dictionary<string, Token>();
-        MyCars          = new List<Car>();
-
+        MyCars          = new Dictionary<BigInteger, Car>();
     }
 
     private void Start ()
@@ -382,12 +381,17 @@ public class PhantasmaDemo : MonoBehaviour
 
         var carData = new CarData
         {
-            owner = PhantasmaDemo.Instance.Key.Address,
-            name = "Super Cadillac",
-            power = (byte)Random.Range(1, 10),
-            speed = (byte)Random.Range(1, 10),
-            location = CarLocation.Market,
-            flags = CarFlags.Locked
+            owner   = PhantasmaDemo.Instance.Key.Address,
+            flags   = CarFlags.Locked,
+            rarity  = CarRarity.Common,
+        };
+
+        var carMutableData = new CarMutableData
+        {
+            name        = "Super Cadillac",
+            power       = (byte)Random.Range(1, 10),
+            speed       = (byte)Random.Range(1, 10),
+            location    = CarLocation.None,
         };
 
         var txData = Serialization.Serialize(carData);
@@ -396,17 +400,20 @@ public class PhantasmaDemo : MonoBehaviour
         Debug.Log("mint data: " + mintData);
 
         var script = ScriptUtils.BeginScript()
-                        .AllowGas(PhantasmaDemo.Instance.Key.Address, 1, 9999)
-                        .CallContract("token", "MintToken", PhantasmaDemo.Instance.Key.Address, PhantasmaDemo.TOKEN_SYMBOL, txData, new byte[0])
-                        .SpendGas(PhantasmaDemo.Instance.Key.Address)
+                        .AllowGas(Key.Address, 1, 9999)
+                        .CallContract("token", "MintToken", Key.Address, TOKEN_SYMBOL, txData, new byte[0])
+                        .SpendGas(Key.Address)
                         .EndScript();
 
-        StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.SignAndSendTransaction(script, "main",
+
+        CanvasManager.Instance.ShowFetchingDataPopup("Minting a new token...");
+
+        StartCoroutine(PhantasmaApi.SignAndSendTransaction(script, "main",
             (result) =>
             {
                 Debug.Log("sign result: " + result);
 
-                StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetTransaction(result, (tx) =>
+                StartCoroutine(PhantasmaApi.GetTransaction(result, (tx) =>
                 {
                     foreach (var evt in tx.events)
                     {
@@ -416,22 +423,20 @@ public class PhantasmaDemo : MonoBehaviour
                         {
                             if (eKind == EventKind.TokenMint)
                             {
-                                var bytes = Base16.Decode(evt.data);
-                                var data = Serialization.Unserialize<TokenEventData>(bytes);
+                                var bytes       = Base16.Decode(evt.data);
+                                var tokenData   = Serialization.Unserialize<TokenEventData>(bytes);
 
-                                var carID = data.value;
-
-                                // save car
-                                //cars.Add(carID, carData);
+                                var carID = tokenData.value;
 
                                 var newCar = new Car();
-                                newCar.SetCar(carID, 0, carData, PhantasmaDemo.Instance.carImages[Random.Range(0, PhantasmaDemo.Instance.carImages.Count)]);
+                                newCar.SetCar(carID, 0, carData, carMutableData, carImages[Random.Range(0, carImages.Count)]);
 
-                                //MarketBuyAssets.Add(newCar);
+                                // Add new car to admin assets
+                                MyCars.Add(carID, newCar);
 
-                                //PhantasmaDemo.Instance.PhantasmaApi.LogTransaction(PhantasmaDemo.Instance.Key.Address, 0, TransactionType.Created_Car, carID);
+                                //PhantasmaApi.LogTransaction(PhantasmaDemo.Instance.Key.Address, 0, TransactionType.Created_Car, carID);
 
-                                // TODO por o novo token à venda no mercado
+                                CanvasManager.Instance.HideFetchingDataPopup();
 
                                 break;
                             }

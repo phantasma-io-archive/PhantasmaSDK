@@ -13,10 +13,10 @@ public class BuyPopup : MonoBehaviour
     {
         _car = car;
 
-        carName.text = car.Data.name;
+        carName.text = car.MutableData.name;
 
-        speedStats.text = "Speed: " + car.Data.speed;
-        powerStats.text = "Power: " + car.Data.power;
+        speedStats.text = "Speed: " + car.MutableData.speed;
+        powerStats.text = "Power: " + car.MutableData.power;
 
         var auction = PhantasmaDemo.Instance.market.GetAuction(car.AuctionID);
 

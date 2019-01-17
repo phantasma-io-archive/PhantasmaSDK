@@ -30,7 +30,7 @@ public class AdminMenu : MonoBehaviour
 
     public void SetContent()
     {
-        Debug.Log("set token: " + PhantasmaDemo.Instance.IsTokenCreated);
+        //Debug.Log("set token: " + PhantasmaDemo.Instance.IsTokenCreated);
 
         if (PhantasmaDemo.Instance.IsTokenCreated)
         {

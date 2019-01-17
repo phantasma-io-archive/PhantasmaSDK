@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using Phantasma.Numerics;
+﻿using Phantasma.Numerics;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -37,7 +36,7 @@ public class AssetSlot : MonoBehaviour
 
         auctionID = car.AuctionID;
 
-        nameText.text       = car.Data.name;
+        nameText.text       = car.MutableData.name;
         
         priceText.text      = PhantasmaDemo.Instance.market.Auctions[car.CarID].marketAuction.Price.ToString();
         assetImage.sprite   = car.Icon;

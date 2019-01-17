@@ -14,9 +14,10 @@ public enum CarRarity
 public enum CarLocation
 {
     //TODO estes dados podem ser mudados por isso vao numa struct no rom[]
-    None    = 0,
-    Race    = 1,
-    Market  = 2
+    None        = 0,
+    Race        = 1,
+    Market      = 2,
+    Repair_Shop = 3,
 }
 
 public enum TransactionKind
@@ -70,11 +71,16 @@ public enum AuctionCurrency
 public struct CarData
 {
     public Address      owner;
+    public CarFlags     flags;
+    public CarRarity    rarity;
+}
+
+public struct CarMutableData
+{
     public string       name;
     public byte         power;
     public byte         speed;
     public CarLocation  location;
-    public CarFlags     flags;
 }
 
 public struct Auction

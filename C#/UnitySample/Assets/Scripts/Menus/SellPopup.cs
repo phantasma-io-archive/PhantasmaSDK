@@ -21,9 +21,9 @@ public class SellPopup : MonoBehaviour
     {
         _car = car;
 
-        carName.text    = car.Data.name;
-        speedStats.text = "Speed: " + car.Data.speed;
-        powerStats.text = "Power: " + car.Data.power;
+        carName.text    = car.MutableData.name;
+        speedStats.text = "Speed: " + car.MutableData.speed;
+        powerStats.text = "Power: " + car.MutableData.power;
 
         sprite.sprite = car.Icon;
     }

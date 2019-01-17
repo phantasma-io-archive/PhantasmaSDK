@@ -61,12 +61,13 @@ public class Market : MonoBehaviour
 
                 StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetTransaction(result, (tx) =>
                 {
-                    var carData = car.Data;
+                    var carData         = car.Data;
+                    var mutableCarData  = car.MutableData;
                     
                     //_cars.Remove(car.CarID);
                     MarketBuyAssets.Remove(car);
 
-                    PhantasmaDemo.Instance.MyCars.Add(car);
+                    PhantasmaDemo.Instance.MyCars.Add(car.CarID, car);
 
                     var auction = GetAuction(car.AuctionID);
 
@@ -94,7 +95,7 @@ public class Market : MonoBehaviour
                         carData.owner = PhantasmaDemo.Instance.Key.Address;
                     }
 
-                    carData.location = CarLocation.None;
+                    mutableCarData.location = CarLocation.None;
 
                     car.Data        = carData;
                     car.AuctionID   = 0;
@@ -126,9 +127,10 @@ public class Market : MonoBehaviour
 
         MarketSellAssets.Add(car);
 
-        PhantasmaDemo.Instance.MyCars.Remove(car);
+        PhantasmaDemo.Instance.MyCars.Remove(car.CarID);
 
-        var carData = car.Data;
+        var carData         = car.Data;
+        var carMutableData  = car.MutableData;
 
         var script = ScriptUtils.BeginScript()
             .AllowGas(from, 1, 9999)
@@ -152,7 +154,7 @@ public class Market : MonoBehaviour
                     var activeList = new List<BigInteger>(); //Storage.FindCollectionForContract<BigInteger>(ACTIVE_AUCTIONS_LIST);
                     activeList.Add(auctionID);
 
-                    carData.location = CarLocation.Market;
+                    carMutableData.location = CarLocation.Market;
 
                     car.Data        = carData;
                     car.AuctionID   = auctionID;
@@ -178,7 +180,7 @@ public class Market : MonoBehaviour
         //_cars.Remove(car.CarID);
         MarketSellAssets.Remove(car);
 
-        PhantasmaDemo.Instance.MyCars.Add(car);
+        PhantasmaDemo.Instance.MyCars.Add(car.CarID, car);
 
         CanvasManager.Instance.marketMenu.UpdateMarket(MarketMenu.EMARKETPLACE_TYPE.SELL);
     }
