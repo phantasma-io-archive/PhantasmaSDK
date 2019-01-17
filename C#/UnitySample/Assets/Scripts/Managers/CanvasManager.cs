@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class CanvasManager : MonoBehaviour {
 
-    public Text                 addressLabel;
+    public Text                 addressLabel, errorMessage;
     public MyAssetsMenu         myAssetsMenu;
     public LoginMenu            loginMenu;
     public MainMenu             mainMenu;
@@ -42,6 +42,12 @@ public class CanvasManager : MonoBehaviour {
     public void ClearAddress()
     {
         addressLabel.text = string.Empty;
+    }
+
+    public void SetErrorMessage(string error)
+    {
+        errorMessage.gameObject.SetActive(true);
+        errorMessage.text = error;
     }
 
     #region Login Menu

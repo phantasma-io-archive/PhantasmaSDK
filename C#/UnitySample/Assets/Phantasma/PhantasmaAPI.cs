@@ -76,6 +76,7 @@ namespace Phantasma.SDK
             if (www.isNetworkError || www.isHttpError)
             {
                 Debug.Log(www.error);
+                CanvasManager.Instance.SetErrorMessage("Error: " + www.error);
 				if (errorHandlingCallback != null) errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.WEB_REQUEST_ERROR, www.error);			
             }
             else
