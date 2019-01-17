@@ -158,8 +158,6 @@ public class PhantasmaDemo : MonoBehaviour
 
     public void GetAccount(string address)
     {
-        //TODO handle do lado do unity disto: Cannot connect to destination hostUnityEngine.Debug:Log(Object)
-
         // Private key: L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25
         // Public key:  P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr
 
@@ -214,8 +212,6 @@ public class PhantasmaDemo : MonoBehaviour
     //        Debug.Log(www.downloadHandler.text);
     //    }
     //}
-
-    #endregion
 
     public void CreateToken()
     {
@@ -377,8 +373,6 @@ public class PhantasmaDemo : MonoBehaviour
 
     public void MintToken()
     {
-        //var cars = _cars; //Storage.FindMapForContract<BigInteger, CarData>(GLOBAL_CARS_LIST); //TODO
-
         var carData = new CarData
         {
             owner   = PhantasmaDemo.Instance.Key.Address,
@@ -394,14 +388,16 @@ public class PhantasmaDemo : MonoBehaviour
             location    = CarLocation.None,
         };
 
-        var txData = Serialization.Serialize(carData);
+        var txData          = Serialization.Serialize(carData);
+        var txMutableData   = Serialization.Serialize(carMutableData);
+
         var mintData = Base16.Encode(txData);
 
         Debug.Log("mint data: " + mintData);
 
         var script = ScriptUtils.BeginScript()
                         .AllowGas(Key.Address, 1, 9999)
-                        .CallContract("token", "MintToken", Key.Address, TOKEN_SYMBOL, txData, new byte[0])
+                        .CallContract("token", "MintToken", Key.Address, TOKEN_SYMBOL, txData, txMutableData)
                         .SpendGas(Key.Address)
                         .EndScript();
 
@@ -417,8 +413,6 @@ public class PhantasmaDemo : MonoBehaviour
                 {
                     foreach (var evt in tx.events)
                     {
-                        Debug.Log("has event: " + evt.kind + " - " + evt.data);
-
                         if (Enum.TryParse(evt.kind, out EventKind eKind))
                         {
                             if (eKind == EventKind.TokenMint)
@@ -428,6 +422,8 @@ public class PhantasmaDemo : MonoBehaviour
 
                                 var carID = tokenData.value;
 
+                                Debug.Log("has event: " + evt.kind + " - car token id:" + carID);
+
                                 var newCar = new Car();
                                 newCar.SetCar(carID, 0, carData, carMutableData, carImages[Random.Range(0, carImages.Count)]);
 
@@ -436,7 +432,13 @@ public class PhantasmaDemo : MonoBehaviour
 
                                 //PhantasmaApi.LogTransaction(PhantasmaDemo.Instance.Key.Address, 0, TransactionType.Created_Car, carID);
 
-                                CanvasManager.Instance.HideFetchingDataPopup();
+                                CheckTokens(() =>
+                                {
+                                    CanvasManager.Instance.adminMenu.SetContent();
+                                });
+
+                                //CanvasManager.Instance.adminMenu.SetContent();
+                                //CanvasManager.Instance.HideFetchingDataPopup();
 
                                 break;
                             }
@@ -460,4 +462,6 @@ public class PhantasmaDemo : MonoBehaviour
             }
         ));
     }
+
+    #endregion
 }

@@ -34,11 +34,7 @@ public class AssetSlot : MonoBehaviour
     {
         _asset = car;
 
-        auctionID = car.AuctionID;
-
         nameText.text       = car.MutableData.name;
-        
-        priceText.text      = PhantasmaDemo.Instance.market.Auctions[car.CarID].marketAuction.Price.ToString();
         assetImage.sprite   = car.Icon;
 
         switch (type)
@@ -50,12 +46,18 @@ public class AssetSlot : MonoBehaviour
                 removeButton.gameObject.SetActive(false);
                 break;
             case EASSET_TYPE.BUY_MARKET_ASSET:
+                auctionID       = car.AuctionID;
+                priceText.text  = PhantasmaDemo.Instance.market.Auctions[car.CarID].marketAuction.Price.ToString();
+
                 buyButton.gameObject.SetActive(true);
 
                 sellButton.gameObject.SetActive(false);
                 removeButton.gameObject.SetActive(false);
                 break;
             case EASSET_TYPE.SELL_MARKET_ASSET:
+                auctionID       = car.AuctionID;
+                priceText.text  = PhantasmaDemo.Instance.market.Auctions[car.CarID].marketAuction.Price.ToString();
+
                 removeButton.gameObject.SetActive(true);
 
                 buyButton.gameObject.SetActive(false);

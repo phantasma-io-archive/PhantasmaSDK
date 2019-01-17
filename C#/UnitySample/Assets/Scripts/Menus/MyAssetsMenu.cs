@@ -1,7 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Phantasma.Numerics;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class MyAssetsMenu : MonoBehaviour
 {
@@ -17,7 +16,7 @@ public class MyAssetsMenu : MonoBehaviour
 
     void OnEnable()
     {
-        Debug.Log("my: " + PhantasmaDemo.Instance.MyCars.Count + " | slots: " + _assetSlots.Count);
+        //Debug.Log("my: " + PhantasmaDemo.Instance.MyCars.Count + " | slots: " + _assetSlots.Count);
         if (_assetSlots.Count != PhantasmaDemo.Instance.MyCars.Count)
         {
             UpdateMyAssets();
@@ -34,13 +33,16 @@ public class MyAssetsMenu : MonoBehaviour
 
         _assetSlots.Clear();
 
-        for (var i = 0; i < PhantasmaDemo.Instance.MyCars.Count; i++)
+        //Debug.Log("my assets: " + PhantasmaDemo.Instance.MyCars.Keys.Count);
+        var carIds = new List<BigInteger>(PhantasmaDemo.Instance.MyCars.Keys);
+
+        for (var i = 0; i < carIds.Count; i++)
         {
-            var marketAsset = PhantasmaDemo.Instance.MyCars[i];
+            var asset = PhantasmaDemo.Instance.MyCars[carIds[i]];
 
             var newSlot                     = Instantiate(assetSlot, galleryContent.transform, false);
             newSlot.transform.localPosition += Vector3.down * AssetSlot.SLOT_HEIGHT * i;
-            newSlot.SetSlot(marketAsset, EASSET_TYPE.MY_ASSET);
+            newSlot.SetSlot(asset, EASSET_TYPE.MY_ASSET);
             newSlot.gameObject.SetActive(true);
 
             _assetSlots.Add(newSlot);
