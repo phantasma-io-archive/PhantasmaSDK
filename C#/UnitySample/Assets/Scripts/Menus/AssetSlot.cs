@@ -13,10 +13,10 @@ public class AssetSlot : MonoBehaviour
 {
     public const float SLOT_HEIGHT = 250f;
 
-    public Text         nameText, priceText;
+    public Text         nameText, priceText, powerText, speedText;
     public Button       buyButton, sellButton, removeButton;
     public Image        assetImage;
-    public BigInteger   auctionID;
+    //public BigInteger   auctionID;
 
     private Car _asset;
 
@@ -34,20 +34,27 @@ public class AssetSlot : MonoBehaviour
     {
         _asset = car;
 
-        nameText.text       = car.MutableData.name;
+        nameText.text   = car.MutableData.name;
+        powerText.text  = "Power: " + car.MutableData.power;
+        speedText.text  = "Speed: " + car.MutableData.speed;
+
         assetImage.sprite   = car.Image;
 
         switch (type)
         {
             case EASSET_TYPE.MY_ASSET:
+                priceText.gameObject.SetActive(false);
+
                 sellButton.gameObject.SetActive(true);
 
                 buyButton.gameObject.SetActive(false);
                 removeButton.gameObject.SetActive(false);
                 break;
             case EASSET_TYPE.BUY_MARKET_ASSET:
-                auctionID       = car.AuctionID;
+                //auctionID       = car.AuctionID;
+
                 priceText.text  = PhantasmaDemo.Instance.market.Auctions[car.CarID].marketAuction.Price.ToString();
+                priceText.gameObject.SetActive(true);
 
                 buyButton.gameObject.SetActive(true);
 
@@ -55,8 +62,10 @@ public class AssetSlot : MonoBehaviour
                 removeButton.gameObject.SetActive(false);
                 break;
             case EASSET_TYPE.SELL_MARKET_ASSET:
-                auctionID       = car.AuctionID;
+                //auctionID       = car.AuctionID;
+
                 priceText.text  = PhantasmaDemo.Instance.market.Auctions[car.CarID].marketAuction.Price.ToString();
+                priceText.gameObject.SetActive(true);
 
                 removeButton.gameObject.SetActive(true);
 

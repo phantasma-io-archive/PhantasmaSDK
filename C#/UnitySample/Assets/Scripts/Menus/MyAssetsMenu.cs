@@ -17,10 +17,10 @@ public class MyAssetsMenu : MonoBehaviour
     void OnEnable()
     {
         //Debug.Log("my: " + PhantasmaDemo.Instance.MyCars.Count + " | slots: " + _assetSlots.Count);
-        if (_assetSlots.Count != PhantasmaDemo.Instance.MyCars.Count)
-        {
+        //if (_assetSlots.Count != PhantasmaDemo.Instance.MyCars.Keys.Count)
+        //{
             UpdateMyAssets();
-        }
+        //}
     }
 
     public void UpdateMyAssets()

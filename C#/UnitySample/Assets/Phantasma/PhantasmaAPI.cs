@@ -68,7 +68,7 @@ namespace Phantasma.SDK
                 throw e;
             }
             
-            Debug.Log("SEND www request json: " + json);
+            //Debug.Log("SEND www request json: " + json);
 
             www = UnityWebRequest.Post(url, json);
             yield return www.SendWebRequest();
@@ -80,7 +80,7 @@ namespace Phantasma.SDK
             }
             else
             {
-                Debug.Log("RECEIVED json: " + www.downloadHandler.text);
+                //Debug.Log("RECEIVED json: " + www.downloadHandler.text);
 
                 var root = JSONReader.ReadFromString(www.downloadHandler.text);
 				

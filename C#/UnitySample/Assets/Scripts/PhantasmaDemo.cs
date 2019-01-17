@@ -188,14 +188,16 @@ public class PhantasmaDemo : MonoBehaviour
                             StartCoroutine(PhantasmaApi.GetTokenData(TOKEN_SYMBOL, tokenID.ToString(), 
                                 (data =>
                                 {
-                                    var ramBytes = Base16.Decode(data.ram);
-                                    var carData = Serialization.Unserialize<CarData>(ramBytes);
+                                    var ramBytes        = Base16.Decode(data.ram);
+                                    var carMutableData  = Serialization.Unserialize<CarMutableData>(ramBytes);
                                     
-                                    var romBytes = Base16.Decode(data.rom);
-                                    var carMutableData = Serialization.Unserialize<CarMutableData>(romBytes);
+                                    var romBytes    = Base16.Decode(data.rom);
+                                    var carData     = Serialization.Unserialize<CarData>(romBytes);
 
                                     var newCar = new Car();
-                                    newCar.SetCar(new BigInteger(int.Parse(tokenID)), 0, carData, carMutableData);
+                                    newCar.SetCar(BigInteger.Parse(tokenID), 0, carData, carMutableData);
+
+                                    MyCars.Add(newCar.CarID, newCar);
                                 }),
                                 (type, s) =>
                                 {
@@ -332,7 +334,7 @@ public class PhantasmaDemo : MonoBehaviour
                 foreach (var token in result)
                 {
                     PhantasmaTokens.Add(token.symbol, token);
-                    Debug.Log("ADD token: " + token.symbol);
+                    //Debug.Log("ADD token: " + token.symbol);
 
                     if (token.symbol.Equals(TOKEN_SYMBOL))
                     {
