@@ -171,7 +171,7 @@ public class PhantasmaDemo : MonoBehaviour
 
                 foreach (var balance in result.balances)
                 {
-                    var isFungible = PhantasmaTokens[balance.symbol].isFungible;
+                    var isFungible = PhantasmaTokens[balance.symbol].Flags.Contains("Fungible");
 
                     var amount = isFungible ? decimal.Parse(balance.amount) / (decimal) Mathf.Pow(10f, 8) : decimal.Parse(balance.amount);
                     CanvasManager.Instance.accountMenu.AddBalanceEntry("Chain: " + balance.chain + " - " + amount + " " + balance.symbol);

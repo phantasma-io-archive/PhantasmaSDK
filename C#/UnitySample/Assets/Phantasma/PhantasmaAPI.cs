@@ -68,7 +68,7 @@ namespace Phantasma.SDK
                 throw e;
             }
             
-            Debug.Log("SEND: " + json);
+            Debug.Log("SEND www request json: " + json);
 
             www = UnityWebRequest.Post(url, json);
             yield return www.SendWebRequest();
@@ -77,12 +77,14 @@ namespace Phantasma.SDK
             {
                 Debug.Log(www.error);
                 CanvasManager.Instance.SetErrorMessage("Error: " + www.error);
-				if (errorHandlingCallback != null) errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.WEB_REQUEST_ERROR, www.error);			
+
+                if (errorHandlingCallback != null) errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.WEB_REQUEST_ERROR, www.error);			
             }
             else
             {
-                Debug.Log("RECEIVED: " + www.downloadHandler.text);
-				var root = JSONReader.ReadFromString(www.downloadHandler.text);
+                Debug.Log("RECEIVED json: " + www.downloadHandler.text);
+
+                var root = JSONReader.ReadFromString(www.downloadHandler.text);
 				
 				if (root == null)
 				{
@@ -238,7 +240,7 @@ namespace Phantasma.SDK
 		public uint blockHeight;
 		public string script;
 		public Event[] events;
-	    public string result;
+		public string result;
 	   
 		public static Transaction FromNode(DataNode node) 
 		{
@@ -248,9 +250,8 @@ namespace Phantasma.SDK
 			result.chainAddress = node.GetString("chainAddress");						
 			result.timestamp = node.GetUInt32("timestamp");						
 			result.blockHeight = node.GetUInt32("blockHeight");						
-			result.script = node.GetString("script");			
-			result.result = node.GetString("result");			
-			var events_array = node.GetNode("events");
+			result.script = node.GetString("script");
+            var events_array = node.GetNode("events");
 			if (events_array != null) {
 				result.events = new Event[events_array.ChildCount];
 				for (int i=0; i < events_array.ChildCount; i++) {
@@ -262,7 +263,8 @@ namespace Phantasma.SDK
 			else {
 				result.events = new Event[0];
 			}
-			
+									
+			result.result = node.GetString("result");
 
 			return result;			
 		}
@@ -366,7 +368,7 @@ namespace Phantasma.SDK
 		public string currentSupply;
 		public string maxSupply;
 		public string ownerAddress;
-		public Boolean isFungible;
+		public string Flags;
 	   
 		public static Token FromNode(DataNode node) 
 		{
@@ -378,7 +380,7 @@ namespace Phantasma.SDK
 			result.currentSupply = node.GetString("currentSupply");						
 			result.maxSupply = node.GetString("maxSupply");						
 			result.ownerAddress = node.GetString("ownerAddress");						
-			result.isFungible = node.GetBoolean("isFungible");
+			result.Flags = node.GetString("flags");
 
 			return result;			
 		}
@@ -388,6 +390,7 @@ namespace Phantasma.SDK
 	{
 		public string ID;
 		public string chainAddress;
+		public string ownerAddress;
 		public string ram;
 		public string rom;
 	   
@@ -397,6 +400,7 @@ namespace Phantasma.SDK
 						
 			result.ID = node.GetString("iD");						
 			result.chainAddress = node.GetString("chainAddress");						
+			result.ownerAddress = node.GetString("ownerAddress");						
 			result.ram = node.GetString("ram");						
 			result.rom = node.GetString("rom");
 
@@ -440,12 +444,36 @@ namespace Phantasma.SDK
 		}
 	}
 	
+	public struct Auction 
+	{
+		public string creatorAddress;
+		public uint startDate;
+		public uint endDate;
+		public string Symbol;
+		public string TokenID;
+		public string Price;
+	   
+		public static Auction FromNode(DataNode node) 
+		{
+			Auction result;
+						
+			result.creatorAddress = node.GetString("creatorAddress");						
+			result.startDate = node.GetUInt32("startDate");						
+			result.endDate = node.GetUInt32("endDate");						
+			result.Symbol = node.GetString("symbol");						
+			result.TokenID = node.GetString("tokenID");						
+			result.Price = node.GetString("price");
+
+			return result;			
+		}
+	}
+	
    
    public class API {	   
 		public readonly	string Host;
 		private static JSONRPC_Client _client;
-
-        public API(string host) 
+	   
+		public API(string host) 
 		{
 			this.Host = host;
 			_client = new JSONRPC_Client();
@@ -463,9 +491,9 @@ namespace Phantasma.SDK
 		
 		
 		//Returns the height of a chain.
-		public IEnumerator GetBlockHeightFromChain(string chainInput, Action<int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		public IEnumerator GetBlockHeight(string chainInput, Action<int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
 		{	   
-			yield return _client.SendRequest(Host, "getBlockHeightFromChain", errorHandlingCallback, (node) => { 
+			yield return _client.SendRequest(Host, "getBlockHeight", errorHandlingCallback, (node) => { 
 			var result = int.Parse(node.Value);
 				callback(result);
 			} , chainInput);		   
@@ -610,14 +638,23 @@ namespace Phantasma.SDK
 		}
 		
 		
+		//Returns info about a specific token deployed in Phantasma.
+		public IEnumerator GetToken(string symbol, Action<Token> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
+			yield return _client.SendRequest(Host, "getToken", errorHandlingCallback, (node) => { 
+			var result = Token.FromNode(node);
+				callback(result);
+			} , symbol);		   
+		}
+		
+		
 		//Returns data of a non-fungible token, in hexadecimal format.
-		public IEnumerator GetTokenData(string symbol, string IDtext, Action<TokenData> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
-		{
-		    yield return _client.SendRequest(Host, "getTokenData", errorHandlingCallback, (node) =>
-		    {
-		        var result = TokenData.FromNode(node);
-		        callback(result);
-		    }, symbol, IDtext);
+		public IEnumerator GetTokenData(string symbol, string IDtext, Action<TokenData> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
+			yield return _client.SendRequest(Host, "getTokenData", errorHandlingCallback, (node) => { 
+			var result = TokenData.FromNode(node);
+				callback(result);
+			} , symbol, IDtext);		   
 		}
 		
 		
@@ -677,7 +714,23 @@ namespace Phantasma.SDK
 				callback(result);
 			} , addressText, tokenSymbol, chainInput);		   
 		}
-
+		
+		
+		//Returns the auctions available in the market.
+		public IEnumerator GetAuctions(Action<Auction[]> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
+			yield return _client.SendRequest(Host, "getAuctions", errorHandlingCallback, (node) => { 
+			var result = new Auction[node.ChildCount];
+			for (int i=0; i<result.Length; i++) { 
+				var child = node.GetNodeByIndex(i);
+				result[i] = Auction.FromNode(child);
+			}
+				callback(result);
+			} );		   
+		}
+		
+		
+		
        public IEnumerator SignAndSendTransaction(byte[] script, string chain, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
        {
            Debug.Log("Sending transaction...");
@@ -688,25 +741,11 @@ namespace Phantasma.SDK
 
            yield return SendRawTransaction(Base16.Encode(tx.ToByteArray(true)), callback, errorHandlingCallback);
        }
-
-       // TODO
-       //private uint GetCurrentTime()
-       //{
-       //    //return Transaction != null ? (Transaction.Time + timeSkip) : DateTime.UtcNow.ToTimestamp();
-       //}
-
-       //public void LogTransaction<T>(Address address, BigInteger amount, TransactionType type, T content)
-       //{
-       //    Debug.Log("-------------- LOG TRANSACTION: " + type + " | " + amount);
-
-       //    var bytes = content.Serialize();
-       //    LogTransaction(address, amount, type, bytes);
-       //}
-
+		
        public bool IsValidPrivateKey(string address)
        {
            return (address.StartsWith("L", false, CultureInfo.InvariantCulture) || 
                    address.StartsWith("K", false, CultureInfo.InvariantCulture)) && address.Length == 52;
        }
-   }
+	}
 }
