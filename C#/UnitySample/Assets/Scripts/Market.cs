@@ -49,9 +49,9 @@ public class Market : MonoBehaviour
     public void BuyAsset(Car car)
     {
         var script = ScriptUtils.BeginScript()
-            .AllowGas(car.Data.owner, 1, 9999)
-            .CallContract("token", "BuyToken", car.Data.owner, car.AuctionID)
-            .SpendGas(car.Data.owner)
+            .AllowGas(car.OwnerAddress, 1, 9999)
+            .CallContract("token", "BuyToken", car.OwnerAddress, car.AuctionID)
+            .SpendGas(car.OwnerAddress)
             .EndScript();
 
         StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.SignAndSendTransaction(script, "main",
@@ -81,7 +81,7 @@ public class Market : MonoBehaviour
 
                     //var car = GetCar(carID);
 
-                    if (car.Data.owner != PhantasmaDemo.Instance.Key.Address)
+                    if (car.OwnerAddress != PhantasmaDemo.Instance.Key.Address)
                     {
                         //ProcessAuctionSale(to, auctionID, ref auction);
 
@@ -92,7 +92,7 @@ public class Market : MonoBehaviour
                         newTeam.Add(car.CarID);
 
                         // update car owner
-                        carData.owner = PhantasmaDemo.Instance.Key.Address;
+                        car.OwnerAddress = PhantasmaDemo.Instance.Key.Address;
                     }
 
                     mutableCarData.location = CarLocation.None;

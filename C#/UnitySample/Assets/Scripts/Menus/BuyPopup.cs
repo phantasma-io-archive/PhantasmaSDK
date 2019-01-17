@@ -22,7 +22,7 @@ public class BuyPopup : MonoBehaviour
 
         cost.text = "Cost: " + auction.marketAuction.Price;
 
-        sprite.sprite = car.Icon;
+        sprite.sprite = car.Image;
     }
 
     public void Cancel()

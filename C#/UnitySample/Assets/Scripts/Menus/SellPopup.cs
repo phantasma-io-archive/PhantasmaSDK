@@ -25,7 +25,7 @@ public class SellPopup : MonoBehaviour
         speedStats.text = "Speed: " + car.MutableData.speed;
         powerStats.text = "Power: " + car.MutableData.power;
 
-        sprite.sprite = car.Icon;
+        sprite.sprite = car.Image;
     }
 
     public void Cancel()

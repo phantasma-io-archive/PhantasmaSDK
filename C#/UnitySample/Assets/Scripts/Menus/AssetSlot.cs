@@ -35,7 +35,7 @@ public class AssetSlot : MonoBehaviour
         _asset = car;
 
         nameText.text       = car.MutableData.name;
-        assetImage.sprite   = car.Icon;
+        assetImage.sprite   = car.Image;
 
         switch (type)
         {

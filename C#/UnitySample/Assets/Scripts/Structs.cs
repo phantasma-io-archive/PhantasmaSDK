@@ -5,15 +5,13 @@ using Phantasma.Numerics;
 
 public enum CarRarity
 {
-    //TODO estes dados não podem ser mudados por isso vao numa struct no ram[] -> Car Data
-    Common = 0,
+    Common      = 0,
     Rare        = 1,
     Legendary   = 2
 }
 
 public enum CarLocation
 {
-    //TODO estes dados podem ser mudados por isso vao numa struct no rom[]
     None        = 0,
     Race        = 1,
     Market      = 2,
@@ -55,13 +53,6 @@ public enum AccountFlags
     Banned  = 4,
 }
 
-[Flags]
-public enum CarFlags
-{
-    None    = 0,
-    Locked  = 1,
-}
-
 public enum AuctionCurrency
 {
     Game_Coin,
@@ -70,9 +61,8 @@ public enum AuctionCurrency
 
 public struct CarData
 {
-    public Address      owner;
-    public CarFlags     flags;
     public CarRarity    rarity;
+    public int          imageID;
 }
 
 public struct CarMutableData

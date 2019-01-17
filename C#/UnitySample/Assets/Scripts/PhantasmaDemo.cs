@@ -179,6 +179,28 @@ public class PhantasmaDemo : MonoBehaviour
                     if (balance.symbol.Equals(TOKEN_SYMBOL))
                     {
                         TokenCurrentSupply = amount;
+
+                        MyCars.Clear();
+
+                        foreach (var tokenID in balance.ids)
+                        {
+                            StartCoroutine(PhantasmaApi.GetTokenData(TOKEN_SYMBOL, tokenID.ToString(), 
+                                (data =>
+                                {
+                                    var ramBytes = Base16.Decode(data.ram);
+                                    var carData = Serialization.Unserialize<CarData>(ramBytes);
+                                    
+                                    var romBytes = Base16.Decode(data.rom);
+                                    var carMutableData = Serialization.Unserialize<CarMutableData>(romBytes);
+
+                                    var newCar = new Car();
+                                    newCar.SetCar(new BigInteger(int.Parse(tokenID)), 0, carData, carMutableData);
+                                }),
+                                (type, s) =>
+                                {
+
+                                }));
+                        }
                     }
                 }
 
@@ -375,9 +397,8 @@ public class PhantasmaDemo : MonoBehaviour
     {
         var carData = new CarData
         {
-            owner   = PhantasmaDemo.Instance.Key.Address,
-            flags   = CarFlags.Locked,
             rarity  = CarRarity.Common,
+            imageID = Random.Range(0, carImages.Count)
         };
 
         var carMutableData = new CarMutableData
@@ -425,7 +446,7 @@ public class PhantasmaDemo : MonoBehaviour
                                 Debug.Log("has event: " + evt.kind + " - car token id:" + carID);
 
                                 var newCar = new Car();
-                                newCar.SetCar(carID, 0, carData, carMutableData, carImages[Random.Range(0, carImages.Count)]);
+                                newCar.SetCar(carID, 0, carData, carMutableData);
 
                                 // Add new car to admin assets
                                 MyCars.Add(carID, newCar);
