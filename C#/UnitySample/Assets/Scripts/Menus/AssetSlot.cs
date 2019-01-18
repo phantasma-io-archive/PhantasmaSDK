@@ -64,8 +64,15 @@ public class AssetSlot : MonoBehaviour
             case EASSET_TYPE.SELL_MARKET_ASSET:
                 //auctionID       = car.AuctionID;
 
-                priceText.text  = PhantasmaDemo.Instance.market.Auctions[car.CarID].marketAuction.Price.ToString();
-                priceText.gameObject.SetActive(true);
+                if (PhantasmaDemo.Instance.market.Auctions.ContainsKey(car.CarID))
+                {
+                    priceText.text = PhantasmaDemo.Instance.market.Auctions[car.CarID].marketAuction.Price.ToString();
+                    priceText.gameObject.SetActive(true);
+                }
+                else
+                {
+                    Debug.Log("auctions keys: " + PhantasmaDemo.Instance.market.Auctions.Keys.Count + " | id: " + car.CarID);
+                }
 
                 removeButton.gameObject.SetActive(true);
 

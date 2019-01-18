@@ -25,17 +25,26 @@ public class MarketMenu : MonoBehaviour
 
     void OnEnable()
     {
-        if (_buySlots.Count != PhantasmaDemo.Instance.market.MarketBuyAssets.Count)
+        PhantasmaDemo.Instance.market.GetMarket(() =>
         {
-            UpdateMarket(EMARKETPLACE_TYPE.BUY);
-        }
+            if (_buySlots.Count != PhantasmaDemo.Instance.market.BuyAuctions.Keys.Count)
+            {
+                UpdateMarket(EMARKETPLACE_TYPE.BUY);
+            }
 
-        if (_sellSlots.Count != PhantasmaDemo.Instance.market.MarketSellAssets.Count)
+            if (_sellSlots.Count != PhantasmaDemo.Instance.market.SellAuctions.Keys.Count)
+            {
+                UpdateMarket(EMARKETPLACE_TYPE.SELL);
+            }
+
+            SelectMarketBuyTab();
+        }, () =>
         {
-            UpdateMarket(EMARKETPLACE_TYPE.SELL);
-        }
+            // TODO erro ao fazer get market => mostrar erro e não abrir as tabs
+        });
 
-        SelectMarketBuyTab();
+
+        
     }
 
     public void UpdateMarket(EMARKETPLACE_TYPE marketPlace)
@@ -52,13 +61,13 @@ public class MarketMenu : MonoBehaviour
 
                 _buySlots.Clear();
 
-                for (var i = 0; i < PhantasmaDemo.Instance.market.MarketBuyAssets.Count; i++)
+                for (var i = 0; i < PhantasmaDemo.Instance.market.BuyAuctions.Keys.Count; i++)
                 {
-                    var marketAsset = PhantasmaDemo.Instance.market.MarketBuyAssets[i];
+                    var marketAuction = PhantasmaDemo.Instance.market.BuyAuctions[i];
 
                     var newSlot                     = Instantiate(assetSlot, buyMarketContent.transform, false);
                     newSlot.transform.localPosition += Vector3.down * AssetSlot.SLOT_HEIGHT * i;
-                    newSlot.SetSlot(marketAsset, EASSET_TYPE.BUY_MARKET_ASSET);
+                    //newSlot.SetSlot(marketAsset, EASSET_TYPE.BUY_MARKET_ASSET);
                     newSlot.gameObject.SetActive(true);
 
                     _buySlots.Add(newSlot);
@@ -76,13 +85,13 @@ public class MarketMenu : MonoBehaviour
 
                 _sellSlots.Clear();
 
-                for (var i = 0; i < PhantasmaDemo.Instance.market.MarketSellAssets.Count; i++)
+                for (var i = 0; i < PhantasmaDemo.Instance.market.SellAuctions.Keys.Count; i++)
                 {
-                    var marketAsset = PhantasmaDemo.Instance.market.MarketSellAssets[i];
+                    var marketAuction = PhantasmaDemo.Instance.market.SellAuctions[i];
 
                     var newSlot                     = Instantiate(assetSlot, sellMarketContent.transform, false);
                     newSlot.transform.localPosition += Vector3.down * AssetSlot.SLOT_HEIGHT * i;
-                    newSlot.SetSlot(marketAsset, EASSET_TYPE.SELL_MARKET_ASSET);
+                    //newSlot.SetSlot(marketAsset, EASSET_TYPE.SELL_MARKET_ASSET);
                     newSlot.gameObject.SetActive(true);
 
                     _sellSlots.Add(newSlot);

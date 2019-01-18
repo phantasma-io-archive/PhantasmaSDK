@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
-
+﻿using System;
+using System.Collections.Generic;
+using Phantasma.Blockchain.Contracts;
+using Phantasma.Blockchain.Contracts.Native;
 using UnityEngine;
 
 using Phantasma.Cryptography;
+using Phantasma.IO;
 using Phantasma.Numerics;
 using Phantasma.VM.Utils;
 
@@ -10,14 +13,21 @@ public class Market : MonoBehaviour
 {
     //private Dictionary<BigInteger, CarData> _cars;
 
-    public Dictionary<BigInteger, Auction>  Auctions            { get; private set; }
-    public List<Car>                        MarketBuyAssets     { get; private set; }
-    public List<Car>                        MarketSellAssets    { get; private set; }
+    public Dictionary<BigInteger, Auction>  Auctions        { get; private set; }
+    public Dictionary<BigInteger, Auction>  BuyAuctions     { get; private set; }
+    public Dictionary<BigInteger, Auction>  SellAuctions    { get; private set; }
+
+    //public List<Car>                        MarketBuyAssets     { get; private set; }
+    //public List<Car>                        MarketSellAssets    { get; private set; }
     
     private void Awake()
     {
-        MarketBuyAssets     = new List<Car>();
-        MarketSellAssets    = new List<Car>();
+        Auctions        = new Dictionary<BigInteger, Auction>();
+        BuyAuctions     = new Dictionary<BigInteger, Auction>();
+        SellAuctions    = new Dictionary<BigInteger, Auction>();
+
+        //MarketBuyAssets     = new List<Car>();
+        //MarketSellAssets    = new List<Car>();
     }
 
     // Start is called before the first frame update
@@ -25,13 +35,14 @@ public class Market : MonoBehaviour
     {
 
     }
-    
+
     /// <summary>
     /// Get the market with the current assets
     /// </summary>
-    public void GetMarket()
+    public void GetMarket(Action successCallback = null, Action errorCallback = null)
     {
         // TODO o método GetAuctionIDs não existe no Spook
+
 
         //PhantasmaDemo.Instance.PhantasmaApi.GetTokenData("CAR", result);
         //var script = ScriptUtils.BeginScript()
@@ -41,7 +52,11 @@ public class Market : MonoBehaviour
         //    .EndScript();
 
         //Storage.FindMapForContract<BigInteger, Auction>(GLOBAL_AUCTIONS_LIST);
+
+
     }
+
+
 
     /// <summary>
     /// Buy an asset from the market and add it to my assets
@@ -65,7 +80,7 @@ public class Market : MonoBehaviour
                     var mutableCarData  = car.MutableData;
                     
                     //_cars.Remove(car.CarID);
-                    MarketBuyAssets.Remove(car);
+                    //MarketBuyAssets.Remove(car);
 
                     PhantasmaDemo.Instance.MyCars.Add(car.CarID, car);
 
@@ -123,15 +138,6 @@ public class Market : MonoBehaviour
     /// </summary>
     public void SellAsset(Car car, Address from, BigInteger price, AuctionCurrency currency = AuctionCurrency.Game_Coin, uint duration = 30)
     {
-        //_cars.Add(car.CarID, car.Data);
-
-        MarketSellAssets.Add(car);
-
-        PhantasmaDemo.Instance.MyCars.Remove(car.CarID);
-
-        var carData         = car.Data;
-        var carMutableData  = car.MutableData;
-
         var script = ScriptUtils.BeginScript()
             .AllowGas(from, 1, 9999)
             .CallContract("market", "SellToken", from, PhantasmaDemo.TOKEN_SYMBOL, car.CarID, price)
@@ -145,22 +151,58 @@ public class Market : MonoBehaviour
 
                 StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetTransaction(result, (tx) =>
                 {
-                    // TODO confirmar que foi criado mais um leilão na blockchain e adicionar na lista local
-                    // var auctionIDs = (BigInteger[])simulator.Nexus.RootChain.InvokeContract("market", "GetAuctionIDs");
-                    Auctions = new Dictionary<BigInteger, Auction>(); //Storage.FindMapForContract<BigInteger, NachoAuction>(GLOBAL_AUCTIONS_LIST);
-                    var auctionID = Auctions.Keys.Count + 1;
-                    //Auctions.Add(auctionID, auction);
+                    foreach (var evt in tx.events)
+                    {
+                        if (Enum.TryParse(evt.kind, out EventKind eKind))
+                        {
+                            if (eKind == EventKind.AuctionCreated)
+                            {
+                                var bytes           = Base16.Decode(evt.data);
+                                var marketEventData = Serialization.Unserialize<MarketEventData>(bytes);
 
-                    var activeList = new List<BigInteger>(); //Storage.FindCollectionForContract<BigInteger>(ACTIVE_AUCTIONS_LIST);
-                    activeList.Add(auctionID);
+                                Debug.Log(evt.kind + " - " + marketEventData.ID);
 
-                    carMutableData.location = CarLocation.Market;
+                                //StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetAuctions()Transaction(result, (tx) => { }, () => { }));
 
-                    car.Data        = carData;
-                    car.AuctionID   = auctionID;
-                    
-                    CanvasManager.Instance.myAssetsMenu.UpdateMyAssets();
+                                //var newAuction = new Auction
+                                //{
+                                //    auctionID       = marketEventData.ID,
+                                //    marketAuction   = marketEventData..SellAuctions.Add()
+                                //};
 
+                                //Auctions.Add(auctionID, auction);
+
+                                //var carData = car.Data;
+                                //car.Data    = carData;
+
+                                var carMutableData      = car.MutableData;
+                                carMutableData.location = CarLocation.Market;
+                                car.MutableData         = carMutableData;
+                                
+                                car.AuctionID   = marketEventData.ID;
+
+                                PhantasmaDemo.Instance.MyCars.Remove(car.CarID);
+
+                                CanvasManager.Instance.myAssetsMenu.UpdateMyAssets();
+
+                                CanvasManager.Instance.HideSellPopup();
+                                break;
+                            }
+                            else
+                            {
+                                CanvasManager.Instance.HideSellPopup();
+                                CanvasManager.Instance.HideFetchingDataPopup();
+                                
+                                // TODO aconteceu algum erro... mostrar erro
+                            }
+                        }
+                        else
+                        {
+                            CanvasManager.Instance.HideSellPopup();
+                            CanvasManager.Instance.HideFetchingDataPopup();
+                            // TODO aconteceu algum erro..
+                        }
+                    }
                 }));
 
             },
@@ -177,8 +219,10 @@ public class Market : MonoBehaviour
     /// </summary>
     public void RemoveAsset(Car car)
     {
+        // TODO é um buy na prática (address do buyer == address do owner => free sale on blockchain? )
+
         //_cars.Remove(car.CarID);
-        MarketSellAssets.Remove(car);
+        //MarketSellAssets.Remove(car);
 
         PhantasmaDemo.Instance.MyCars.Add(car.CarID, car);
 
