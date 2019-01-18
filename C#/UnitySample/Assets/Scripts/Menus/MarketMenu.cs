@@ -53,7 +53,7 @@ public class MarketMenu : MonoBehaviour
 
         }, () =>
         {
-            ShowError("Error: Could not fetch blockchain assets market.");
+            ShowError("Error: Could not fetch blockchain assets market.", true);
         });
     }
 
@@ -131,12 +131,12 @@ public class MarketMenu : MonoBehaviour
         buyTab.SetActive(false);
     }
 
-    public void ShowError(string error)
+    public void ShowError(string error, bool showRetryButton = false)
     {
         errorMessage.text = error;
         errorMessage.gameObject.SetActive(true);
 
-        retryRefreshMarket.gameObject.SetActive(true);
+        retryRefreshMarket.gameObject.SetActive(showRetryButton);
     }
 
     public void RetryRefreshClicked()

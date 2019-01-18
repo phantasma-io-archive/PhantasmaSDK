@@ -68,21 +68,20 @@ namespace Phantasma.SDK
                 throw e;
             }
             
-            //Debug.Log("SEND www request json: " + json);
+            Debug.Log("www request json: " + json);
 
             www = UnityWebRequest.Post(url, json);
             yield return www.SendWebRequest();
             
             if (www.isNetworkError || www.isHttpError)
             {
-                Debug.Log("Error: " + www.error);
-                if (errorHandlingCallback != null) errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.WEB_REQUEST_ERROR, www.error);			
+                Debug.Log(www.error);
+				if (errorHandlingCallback != null) errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.WEB_REQUEST_ERROR, www.error);			
             }
             else
             {
-                //Debug.Log("RECEIVED json: " + www.downloadHandler.text);
-
-                var root = JSONReader.ReadFromString(www.downloadHandler.text);
+                Debug.Log(www.downloadHandler.text);
+				var root = JSONReader.ReadFromString(www.downloadHandler.text);
 				
 				if (root == null)
 				{
@@ -248,8 +247,8 @@ namespace Phantasma.SDK
 			result.chainAddress = node.GetString("chainAddress");						
 			result.timestamp = node.GetUInt32("timestamp");						
 			result.blockHeight = node.GetUInt32("blockHeight");						
-			result.script = node.GetString("script");
-            var events_array = node.GetNode("events");
+			result.script = node.GetString("script");			
+			var events_array = node.GetNode("events");
 			if (events_array != null) {
 				result.events = new Event[events_array.ChildCount];
 				for (int i=0; i < events_array.ChildCount; i++) {
@@ -271,15 +270,13 @@ namespace Phantasma.SDK
 	public struct AccountTransactions 
 	{
 		public string address;
-		public uint amount;
 		public Transaction[] txs;
 	   
 		public static AccountTransactions FromNode(DataNode node) 
 		{
 			AccountTransactions result;
 						
-			result.address = node.GetString("address");						
-			result.amount = node.GetUInt32("amount");			
+			result.address = node.GetString("address");			
 			var txs_array = node.GetNode("txs");
 			if (txs_array != null) {
 				result.txs = new Transaction[txs_array.ChildCount];
@@ -335,24 +332,6 @@ namespace Phantasma.SDK
 									
 			result.validatorAddress = node.GetString("validatorAddress");						
 			result.reward = node.GetString("reward");
-
-			return result;			
-		}
-	}
-	
-	public struct RootChain 
-	{
-		public string name;
-		public string address;
-		public uint height;
-	   
-		public static RootChain FromNode(DataNode node) 
-		{
-			RootChain result;
-						
-			result.name = node.GetString("name");						
-			result.address = node.GetString("address");						
-			result.height = node.GetUInt32("height");
 
 			return result;			
 		}
@@ -447,9 +426,9 @@ namespace Phantasma.SDK
 		public string creatorAddress;
 		public uint startDate;
 		public uint endDate;
-		public string Symbol;
-		public string TokenID;
-		public string Price;
+		public string symbol;
+		public string tokenId;
+		public string price;
 	   
 		public static Auction FromNode(DataNode node) 
 		{
@@ -458,9 +437,9 @@ namespace Phantasma.SDK
 			result.creatorAddress = node.GetString("creatorAddress");						
 			result.startDate = node.GetUInt32("startDate");						
 			result.endDate = node.GetUInt32("endDate");						
-			result.Symbol = node.GetString("symbol");						
-			result.TokenID = node.GetString("tokenID");						
-			result.Price = node.GetString("price");
+			result.symbol = node.GetString("symbol");						
+			result.tokenId = node.GetString("tokenId");						
+			result.price = node.GetString("price");
 
 			return result;			
 		}
@@ -518,54 +497,54 @@ namespace Phantasma.SDK
 		}
 		
 		
-		//Returns information about a block (encoded) by hash.
-		public IEnumerator GetRawBlockByHash(string blockHash, Action<Block> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
-		{	   
-			yield return _client.SendRequest(Host, "getRawBlockByHash", errorHandlingCallback, (node) => { 
-			var result = Block.FromNode(node);
-				callback(result);
-			} , blockHash);		   
-		}
+		////Returns a serialized string, containing information about a block by hash.
+		//public IEnumerator GetRawBlockByHash(string blockHash, Action<Single> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		//{	   
+		//	yield return _client.SendRequest(Host, "getRawBlockByHash", errorHandlingCallback, (node) => { 
+		//	var result = Single.FromNode(node);
+		//		callback(result);
+		//	} , blockHash);		   
+		//}
 		
 		
-		//Returns information about a block by height and chain.
-		public IEnumerator GetBlockByHeight(string chainInput, uint height, Action<Block> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
-		{	   
-			yield return _client.SendRequest(Host, "getBlockByHeight", errorHandlingCallback, (node) => { 
-			var result = Block.FromNode(node);
-				callback(result);
-			} , chainInput, height);		   
-		}
+		////Returns information about a block by height and chain.
+		//public IEnumerator GetBlockByHeight(string chainInput, uint height, Action<Block> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		//{	   
+		//	yield return _client.SendRequest(Host, "getBlockByHeight", errorHandlingCallback, (node) => { 
+		//	var result = Block.FromNode(node);
+		//		callback(result);
+		//	} , chainInput, height);		   
+		//}
 		
 		
-		//Returns information about a block by height and chain.
-		public IEnumerator GetRawBlockByHeight(string chainInput, uint height, Action<Block> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
-		{	   
-			yield return _client.SendRequest(Host, "getRawBlockByHeight", errorHandlingCallback, (node) => { 
-			var result = Block.FromNode(node);
-				callback(result);
-			} , chainInput, height);		   
-		}
+		////Returns a serialized string, containing information about a block by height and chain.
+		//public IEnumerator GetRawBlockByHeight(string chainInput, uint height, Action<Single> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		//{	   
+		//	yield return _client.SendRequest(Host, "getRawBlockByHeight", errorHandlingCallback, (node) => { 
+		//	var result = Single.FromNode(node);
+		//		callback(result);
+		//	} , chainInput, height);		   
+		//}
 		
 		
-		//Returns the information about a transaction requested by a block hash and transaction index.
-		public IEnumerator GetTransactionByBlockHashAndIndex(string blockHash, int index, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
-		{	   
-			yield return _client.SendRequest(Host, "getTransactionByBlockHashAndIndex", errorHandlingCallback, (node) => { 
-			var result = Transaction.FromNode(node);
-				callback(result);
-			} , blockHash, index);		   
-		}
+		////Returns the information about a transaction requested by a block hash and transaction index.
+		//public IEnumerator GetTransactionByBlockHashAndIndex(string blockHash, int index, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		//{	   
+		//	yield return _client.SendRequest(Host, "getTransactionByBlockHashAndIndex", errorHandlingCallback, (node) => { 
+		//	var result = Transaction.FromNode(node);
+		//		callback(result);
+		//	} , blockHash, index);		   
+		//}
 		
 		
-		//Returns last X transactions of given address.
-		public IEnumerator GetAddressTransactions(string addressText, int amountTx, Action<AccountTransactions> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
-		{	   
-			yield return _client.SendRequest(Host, "getAddressTransactions", errorHandlingCallback, (node) => { 
-			var result = AccountTransactions.FromNode(node);
-				callback(result);
-			} , addressText, amountTx);		   
-		}
+		////Returns last X transactions of given address.
+		//public IEnumerator GetAddressTransactions(string addressText, uint page, uint pageSize, Action<Paginated> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		//{	   
+		//	yield return _client.SendRequest(Host, "getAddressTransactions", errorHandlingCallback, (node) => { 
+		//	var result = Paginated.FromNode(node);
+		//		callback(result);
+		//	} , addressText, page, pageSize);		   
+		//}
 		
 		
 		//Get number of transactions in a specific address and chain
@@ -670,16 +649,6 @@ namespace Phantasma.SDK
 		}
 		
 		
-		//Returns information about the root chain.
-		public IEnumerator GetRootChain(Action<RootChain> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
-		{	   
-			yield return _client.SendRequest(Host, "getRootChain", errorHandlingCallback, (node) => { 
-			var result = RootChain.FromNode(node);
-				callback(result);
-			} );		   
-		}
-		
-		
 		//Returns last X transactions of given token.
 		public IEnumerator GetTokenTransfers(string tokenSymbol, int amount, Action<Transaction[]> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
 		{	   
@@ -726,6 +695,8 @@ namespace Phantasma.SDK
 				callback(result);
 			} );		   
 		}
+		
+		
 		
        public IEnumerator SignAndSendTransaction(byte[] script, string chain, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
        {

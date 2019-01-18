@@ -40,7 +40,7 @@ public class AssetSlot : MonoBehaviour
                 break;
             case EASSET_TYPE.BUY_MARKET_ASSET:
 
-                priceText.text  = PhantasmaDemo.Instance.market.CarAuctions[car.TokenID].auction.Price;
+                priceText.text  = PhantasmaDemo.Instance.market.CarAuctions[car.TokenID].auction.price;
                 priceText.gameObject.SetActive(true);
 
                 buyButton.gameObject.SetActive(true);
@@ -52,7 +52,7 @@ public class AssetSlot : MonoBehaviour
 
                 if (PhantasmaDemo.Instance.market.CarAuctions.ContainsKey(car.TokenID))
                 {
-                    priceText.text = PhantasmaDemo.Instance.market.CarAuctions[car.TokenID].auction.Price.ToString();
+                    priceText.text = PhantasmaDemo.Instance.market.CarAuctions[car.TokenID].auction.price.ToString();
                     priceText.gameObject.SetActive(true);
                 }
                 else

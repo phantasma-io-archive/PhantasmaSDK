@@ -54,7 +54,7 @@ public class SellPopup : MonoBehaviour
                 return;
             }
 
-            PhantasmaDemo.Instance.market.SellAsset(_car, PhantasmaDemo.Instance.Key.Address, Timestamp.Now, Timestamp.Now + TimeSpan.FromDays(30), price);
+            PhantasmaDemo.Instance.market.SellAsset(_car, PhantasmaDemo.Instance.Key.Address, price, Timestamp.Now + TimeSpan.FromDays(30));
         }
         else
         {

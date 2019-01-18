@@ -17,6 +17,8 @@ public class MyAssetsMenu : MonoBehaviour
 
     void OnEnable()
     {
+        ClearErrorContent();
+
         //Debug.Log("my: " + PhantasmaDemo.Instance.MyCars.Count + " | slots: " + _assetSlots.Count);
         //if (_assetSlots.Count != PhantasmaDemo.Instance.MyCars.Keys.Count)
         //{
@@ -52,6 +54,7 @@ public class MyAssetsMenu : MonoBehaviour
 
     public void ShowError(string error)
     {
+        Debug.Log("show my assets error: " + error);
         errorMessage.text = error;
         errorMessage.gameObject.SetActive(true);
     }
@@ -59,6 +62,7 @@ public class MyAssetsMenu : MonoBehaviour
     private void ClearErrorContent()
     {
         errorMessage.text = string.Empty;
+        errorMessage.gameObject.SetActive(false);
     }
 
     public void BackClicked()

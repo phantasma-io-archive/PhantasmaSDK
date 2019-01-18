@@ -20,7 +20,7 @@ public class BuyPopup : MonoBehaviour
 
         var carAuction = PhantasmaDemo.Instance.market.GetCarAuction(car.TokenID);
 
-        cost.text = "Cost: " + carAuction.auction.Price;
+        cost.text = "Cost: " + carAuction.auction.price;
 
         sprite.sprite = car.Image;
     }
