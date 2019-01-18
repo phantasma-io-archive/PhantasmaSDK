@@ -157,6 +157,8 @@ public class Market : MonoBehaviour
 
                 StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetTransaction(result, (tx) =>
                 {
+                    var succeed = false;
+
                     foreach (var evt in tx.events)
                     {
                         if (Enum.TryParse(evt.kind, out EventKind eKind))
@@ -168,22 +170,9 @@ public class Market : MonoBehaviour
 
                                 Debug.Log(evt.kind + " - " + marketEventData.ID);
 
-                                //StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetTokenData(marketEventData.Symbol, marketEventData.ID.ToString(),
-                                //    (tokenData) =>
-                                //    {
-
-                                //},
-                                //(errorType, errorMessage) =>
-                                //{
-                                //    CanvasManager.Instance.HideFetchingDataPopup();
-
-                                //    CanvasManager.Instance.myAssetsMenu.SetErrorMessage(errorType + " - " + errorMessage);
-                                //}));
-
                                 var newAuction = new Auction
                                 {
                                     creatorAddress  = PhantasmaDemo.Instance.Key.Address.ToString(),
-                                    //startDate       = Timestamp.Now,
                                     endDate         = endDate.Value,
                                     symbol          = marketEventData.Symbol,
                                     tokenId = marketEventData.ID.ToString(),
@@ -209,23 +198,41 @@ public class Market : MonoBehaviour
                                 CanvasManager.Instance.myAssetsMenu.UpdateMyAssets();
 
                                 CanvasManager.Instance.HideSellPopup();
+
+                                succeed = true;
                                 break;
                             }
+                            else
+                            {
+                                CanvasManager.Instance.HideFetchingDataPopup();
+                                CanvasManager.Instance.HideSellPopup();
+                                CanvasManager.Instance.myAssetsMenu.ShowError("Something failed on the connection to the blockchain (02). Please try again.");
+                            }
+
                         }
                         else
                         {
                             CanvasManager.Instance.HideFetchingDataPopup();
                             CanvasManager.Instance.HideSellPopup();
-                            CanvasManager.Instance.myAssetsMenu.ShowError("Something failed on the connection to the blockchain (2). Please try again.");
+                            CanvasManager.Instance.myAssetsMenu.ShowError("Something failed on the connection to the blockchain (01). Please try again.");
                         }
+
                     }
+
+                    if (!succeed)
+                    {
+                        CanvasManager.Instance.HideFetchingDataPopup();
+                        CanvasManager.Instance.HideSellPopup();
+                        CanvasManager.Instance.myAssetsMenu.ShowError("Something failed on the connection to the blockchain (1). Please try again.");
+                    }
+
                 }));
             },
             (errorType, errorMessage) =>
             {
                 CanvasManager.Instance.HideFetchingDataPopup();
                 CanvasManager.Instance.HideSellPopup();
-                CanvasManager.Instance.myAssetsMenu.ShowError("Something failed on the connection to the blockchain (3). Please try again.");
+                CanvasManager.Instance.myAssetsMenu.ShowError("Something failed on the connection to the blockchain (2). Please try again.");
             }
         ));
     }

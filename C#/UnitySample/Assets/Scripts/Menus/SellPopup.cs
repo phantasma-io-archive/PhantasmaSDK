@@ -60,7 +60,6 @@ public class SellPopup : MonoBehaviour
         {
             SetSellError("Error: Price must be a decimal positive value.");
         }
-
     }
 
     public void SetSellError(string error)
