@@ -46,7 +46,8 @@ public class SellPopup : MonoBehaviour
         Debug.Log("Sell Price:" + priceInput.text);
 
         //var price = decimal.Parse(priceInput.text);
-        if (BigInteger.TryParse(priceInput.text, out BigInteger price))
+        BigInteger price;
+        if (BigInteger.TryParse(priceInput.text, out price))
         {
             if (price < 0)
             {
