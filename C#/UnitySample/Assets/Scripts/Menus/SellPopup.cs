@@ -1,4 +1,6 @@
-﻿using Phantasma.Numerics;
+﻿using System;
+using Phantasma.Core.Types;
+using Phantasma.Numerics;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -52,7 +54,7 @@ public class SellPopup : MonoBehaviour
                 return;
             }
 
-            PhantasmaDemo.Instance.market.SellAsset(_car, PhantasmaDemo.Instance.Key.Address, price);
+            PhantasmaDemo.Instance.market.SellAsset(_car, PhantasmaDemo.Instance.Key.Address, Timestamp.Now, Timestamp.Now + TimeSpan.FromDays(30), price);
         }
         else
         {

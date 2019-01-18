@@ -1,5 +1,4 @@
-﻿using Phantasma.Numerics;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public enum EASSET_TYPE
@@ -13,22 +12,11 @@ public class AssetSlot : MonoBehaviour
 {
     public const float SLOT_HEIGHT = 250f;
 
-    public Text         nameText, priceText, powerText, speedText;
-    public Button       buyButton, sellButton, removeButton;
-    public Image        assetImage;
-    //public BigInteger   auctionID;
+    public Text     nameText, priceText, powerText, speedText;
+    public Button   buyButton, sellButton, removeButton;
+    public Image    assetImage;
 
     private Car _asset;
-
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 
     public void SetSlot(Car car, EASSET_TYPE type)
     {
@@ -51,9 +39,8 @@ public class AssetSlot : MonoBehaviour
                 removeButton.gameObject.SetActive(false);
                 break;
             case EASSET_TYPE.BUY_MARKET_ASSET:
-                //auctionID       = car.AuctionID;
 
-                priceText.text  = PhantasmaDemo.Instance.market.CarAuctions[car.TokenID].marketAuction.Price;
+                priceText.text  = PhantasmaDemo.Instance.market.CarAuctions[car.TokenID].auction.Price;
                 priceText.gameObject.SetActive(true);
 
                 buyButton.gameObject.SetActive(true);
@@ -62,11 +49,10 @@ public class AssetSlot : MonoBehaviour
                 removeButton.gameObject.SetActive(false);
                 break;
             case EASSET_TYPE.SELL_MARKET_ASSET:
-                //auctionID       = car.AuctionID;
 
                 if (PhantasmaDemo.Instance.market.CarAuctions.ContainsKey(car.TokenID))
                 {
-                    priceText.text = PhantasmaDemo.Instance.market.CarAuctions[car.TokenID].marketAuction.Price.ToString();
+                    priceText.text = PhantasmaDemo.Instance.market.CarAuctions[car.TokenID].auction.Price.ToString();
                     priceText.gameObject.SetActive(true);
                 }
                 else

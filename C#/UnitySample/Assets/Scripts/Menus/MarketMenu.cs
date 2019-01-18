@@ -53,10 +53,7 @@ public class MarketMenu : MonoBehaviour
 
         }, () =>
         {
-
-
-
-            // TODO erro ao fazer get market => mostrar erro e não abrir as tabs
+            ShowError("Error: Could not fetch blockchain assets market.");
         });
     }
 
@@ -134,7 +131,7 @@ public class MarketMenu : MonoBehaviour
         buyTab.SetActive(false);
     }
 
-    public void SetErrorMessage(string error)
+    public void ShowError(string error)
     {
         errorMessage.text = error;
         errorMessage.gameObject.SetActive(true);

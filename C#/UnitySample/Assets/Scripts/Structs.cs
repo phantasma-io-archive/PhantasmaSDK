@@ -74,7 +74,7 @@ public struct CarMutableData
 public struct CarAuction
 {
     public string       tokenID;
-    public Auction      marketAuction;
+    public Auction      auction;
 }
 
 //public struct Sale

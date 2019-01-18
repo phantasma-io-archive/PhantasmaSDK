@@ -214,7 +214,7 @@ public class PhantasmaDemo : MonoBehaviour
             },
             (errorType, errorMessage) =>
             {
-                CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
+                CanvasManager.Instance.loginMenu.ShowError(errorType + " - " + errorMessage);
             }
         ));
     }
@@ -264,7 +264,7 @@ public class PhantasmaDemo : MonoBehaviour
                 (errorType, errorMessage) =>
                 {
                     CanvasManager.Instance.HideFetchingDataPopup();
-                    CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
+                    CanvasManager.Instance.loginMenu.ShowError(errorType + " - " + errorMessage);
                 }
             ));
         });
@@ -358,7 +358,7 @@ public class PhantasmaDemo : MonoBehaviour
 
                 if (CanvasManager.Instance.loginMenu.gameObject.activeInHierarchy)
                 {
-                    CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
+                    CanvasManager.Instance.loginMenu.ShowError(errorType + " - " + errorMessage);
                 }
                 else
                 {
@@ -400,7 +400,7 @@ public class PhantasmaDemo : MonoBehaviour
             (errorType, errorMessage) =>
             {
                 CanvasManager.Instance.HideFetchingDataPopup();
-                CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
+                CanvasManager.Instance.loginMenu.ShowError(errorType + " - " + errorMessage);
             }
         ));
 
@@ -493,7 +493,7 @@ public class PhantasmaDemo : MonoBehaviour
             },
             (errorType, errorMessage) =>
             {
-                CanvasManager.Instance.loginMenu.SetLoginError(errorType + " - " + errorMessage);
+                CanvasManager.Instance.loginMenu.ShowError(errorType + " - " + errorMessage);
             }
         ));
     }

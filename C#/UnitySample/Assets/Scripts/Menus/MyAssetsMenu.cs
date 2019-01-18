@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
-using Phantasma.Numerics;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MyAssetsMenu : MonoBehaviour
 {
-    public AssetSlot assetSlot;
-    public GameObject galleryContent;
+    public GameObject   galleryContent;
+    public Text         errorMessage;
+    public AssetSlot    assetSlot;
 
     private List<AssetSlot> _assetSlots;
 
@@ -47,6 +48,17 @@ public class MyAssetsMenu : MonoBehaviour
 
             _assetSlots.Add(newSlot);
         }
+    }
+
+    public void ShowError(string error)
+    {
+        errorMessage.text = error;
+        errorMessage.gameObject.SetActive(true);
+    }
+
+    private void ClearErrorContent()
+    {
+        errorMessage.text = string.Empty;
     }
 
     public void BackClicked()

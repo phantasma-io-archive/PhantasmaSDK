@@ -1859,7 +1859,7 @@ MonoBehaviour:
   retryRefreshMarket: {fileID: 725061432}
   buyTab: {fileID: 2077985040}
   sellTab: {fileID: 818214679}
-  errorMessage: {fileID: 0}
+  errorMessage: {fileID: 183482578}
 --- !u!1 &293818584
 GameObject:
   m_ObjectHideFlags: 0

@@ -727,8 +727,6 @@ namespace Phantasma.SDK
 			} );		   
 		}
 		
-		
-		
        public IEnumerator SignAndSendTransaction(byte[] script, string chain, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
        {
            Debug.Log("Sending transaction...");
