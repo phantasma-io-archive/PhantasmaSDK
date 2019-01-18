@@ -18,7 +18,7 @@ public class BuyPopup : MonoBehaviour
         speedStats.text = "Speed: " + car.MutableData.speed;
         powerStats.text = "Power: " + car.MutableData.power;
 
-        var auction = PhantasmaDemo.Instance.market.GetAuction(car.AuctionID);
+        var auction = PhantasmaDemo.Instance.market.GetCarAuction(car.TokenID);
 
         cost.text = "Cost: " + auction.marketAuction.Price;
 

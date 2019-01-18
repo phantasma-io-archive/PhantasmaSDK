@@ -1,7 +1,5 @@
 ﻿using System;
-using Phantasma.Blockchain.Contracts.Native;
-using Phantasma.Cryptography;
-using Phantasma.Numerics;
+using Phantasma.SDK;
 
 public enum CarRarity
 {
@@ -73,10 +71,10 @@ public struct CarMutableData
     public CarLocation  location;
 }
 
-public struct Auction
+public struct CarAuction
 {
-    public BigInteger       auctionID;
-    public MarketAuction    marketAuction;
+    public string       tokenID;
+    public Auction      marketAuction;
 }
 
 //public struct Sale

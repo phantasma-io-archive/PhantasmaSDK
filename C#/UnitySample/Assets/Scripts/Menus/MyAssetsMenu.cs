@@ -34,11 +34,11 @@ public class MyAssetsMenu : MonoBehaviour
         _assetSlots.Clear();
 
         //Debug.Log("my assets: " + PhantasmaDemo.Instance.MyCars.Keys.Count);
-        var carIds = new List<BigInteger>(PhantasmaDemo.Instance.MyCars.Keys);
+        var tokenIds = new List<string>(PhantasmaDemo.Instance.MyCars.Keys);
 
-        for (var i = 0; i < carIds.Count; i++)
+        for (var i = 0; i < tokenIds.Count; i++)
         {
-            var asset = PhantasmaDemo.Instance.MyCars[carIds[i]];
+            var asset = PhantasmaDemo.Instance.MyCars[tokenIds[i]];
 
             var newSlot                     = Instantiate(assetSlot, galleryContent.transform, false);
             newSlot.transform.localPosition += Vector3.down * AssetSlot.SLOT_HEIGHT * i;

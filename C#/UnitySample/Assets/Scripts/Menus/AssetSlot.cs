@@ -53,7 +53,7 @@ public class AssetSlot : MonoBehaviour
             case EASSET_TYPE.BUY_MARKET_ASSET:
                 //auctionID       = car.AuctionID;
 
-                priceText.text  = PhantasmaDemo.Instance.market.Auctions[car.CarID].marketAuction.Price.ToString();
+                priceText.text  = PhantasmaDemo.Instance.market.CarAuctions[car.TokenID].marketAuction.Price;
                 priceText.gameObject.SetActive(true);
 
                 buyButton.gameObject.SetActive(true);
@@ -64,14 +64,14 @@ public class AssetSlot : MonoBehaviour
             case EASSET_TYPE.SELL_MARKET_ASSET:
                 //auctionID       = car.AuctionID;
 
-                if (PhantasmaDemo.Instance.market.Auctions.ContainsKey(car.CarID))
+                if (PhantasmaDemo.Instance.market.CarAuctions.ContainsKey(car.TokenID))
                 {
-                    priceText.text = PhantasmaDemo.Instance.market.Auctions[car.CarID].marketAuction.Price.ToString();
+                    priceText.text = PhantasmaDemo.Instance.market.CarAuctions[car.TokenID].marketAuction.Price.ToString();
                     priceText.gameObject.SetActive(true);
                 }
                 else
                 {
-                    Debug.Log("auctions keys: " + PhantasmaDemo.Instance.market.Auctions.Keys.Count + " | id: " + car.CarID);
+                    Debug.Log("auctions keys: " + PhantasmaDemo.Instance.market.CarAuctions.Keys.Count + " | id: " + car.TokenID);
                 }
 
                 removeButton.gameObject.SetActive(true);

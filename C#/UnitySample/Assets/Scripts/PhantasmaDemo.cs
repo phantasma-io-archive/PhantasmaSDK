@@ -67,7 +67,7 @@ public class PhantasmaDemo : MonoBehaviour
     public bool                         IsTokenCreated      { get; private set; }
     public bool                         IsTokenOwner        { get; private set; }
     public decimal                      TokenCurrentSupply  { get; private set; }
-    public Dictionary<BigInteger, Car>  MyCars              { get; set; }
+    public Dictionary<string, Car>      MyCars              { get; set; }
     
     private static PhantasmaDemo _instance;
     public static PhantasmaDemo Instance
@@ -78,7 +78,7 @@ public class PhantasmaDemo : MonoBehaviour
     private void Awake()
     {
         PhantasmaTokens = new Dictionary<string, Token>();
-        MyCars          = new Dictionary<BigInteger, Car>();
+        MyCars          = new Dictionary<string, Car>();
     }
 
     private void Start ()
@@ -166,11 +166,11 @@ public class PhantasmaDemo : MonoBehaviour
         CanvasManager.Instance.ShowFetchingDataPopup("Fetching account data from the blockchain...");
 
         StartCoroutine(PhantasmaApi.GetAccount(address, 
-            result =>
+            account =>
             {
-                CanvasManager.Instance.accountMenu.SetBalance("Name: " + result.name);
+                CanvasManager.Instance.accountMenu.SetBalance("Name: " + account.name);
 
-                foreach (var balance in result.balances)
+                foreach (var balance in account.balances)
                 {
                     var isFungible = PhantasmaTokens[balance.symbol].Flags.Contains("Fungible");
 
@@ -186,18 +186,18 @@ public class PhantasmaDemo : MonoBehaviour
                         foreach (var tokenID in balance.ids)
                         {
                             StartCoroutine(PhantasmaApi.GetTokenData(TOKEN_SYMBOL, tokenID.ToString(), 
-                                (data =>
+                                (tokenData =>
                                 {
-                                    var ramBytes        = Base16.Decode(data.ram);
+                                    var ramBytes        = Base16.Decode(tokenData.ram);
                                     var carMutableData  = Serialization.Unserialize<CarMutableData>(ramBytes);
                                     
-                                    var romBytes    = Base16.Decode(data.rom);
+                                    var romBytes    = Base16.Decode(tokenData.rom);
                                     var carData     = Serialization.Unserialize<CarData>(romBytes);
 
                                     var newCar = new Car();
-                                    newCar.SetCar(BigInteger.Parse(tokenID), 0, carData, carMutableData);
+                                    newCar.SetCar(Address.FromText(tokenData.ownerAddress), tokenID, carData, carMutableData);
 
-                                    MyCars.Add(newCar.CarID, newCar);
+                                    MyCars.Add(newCar.TokenID, newCar);
                                 }),
                                 (type, s) =>
                                 {
@@ -455,15 +455,15 @@ public class PhantasmaDemo : MonoBehaviour
                                 var bytes       = Base16.Decode(evt.data);
                                 var tokenData   = Serialization.Unserialize<TokenEventData>(bytes);
 
-                                var carID = tokenData.value;
+                                var tokenID = tokenData.value;
 
-                                Debug.Log("has event: " + evt.kind + " - car token id:" + carID);
+                                Debug.Log("has event: " + evt.kind + " - car token id:" + tokenID);
 
                                 var newCar = new Car();
-                                newCar.SetCar(carID, 0, carData, carMutableData);
+                                newCar.SetCar(tokenData.chainAddress, tokenID.ToString(), carData, carMutableData);
 
                                 // Add new car to admin assets
-                                MyCars.Add(carID, newCar);
+                                MyCars.Add(tokenID.ToString(), newCar);
 
                                 //PhantasmaApi.LogTransaction(PhantasmaDemo.Instance.Key.Address, 0, TransactionType.Created_Car, carID);
 
