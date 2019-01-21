@@ -695,20 +695,24 @@ namespace Phantasma.SDK
 				callback(result);
 			} );		   
 		}
-		
-		
-		
+
+       /// <summary>
+       /// Sign an operation on Phantasma Blockchain and broadcast it to the network.
+       /// </summary>
+       /// <param name="script">Operation to execute on the blockchain</param>
+       /// <param name="chain">Name of the blockchain</param>
+       /// <param name="callback">Callback that will be executed if the operation was successfully signed and sent.</param>
+       /// <param name="errorHandlingCallback">Calllback that will be executed if the operation failed to be signed and sent to the blockchain.</param>
        public IEnumerator SignAndSendTransaction(byte[] script, string chain, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
        {
            Debug.Log("Sending transaction...");
 
-           //var tx = new Blockchain.Transaction("nexus", chain, script,  DateTime.UtcNow + TimeSpan.FromHours(1));
-           var tx = new Blockchain.Transaction("simnet", chain, script,  DateTime.UtcNow + TimeSpan.FromHours(1));
-            tx.Sign(PhantasmaDemo.Instance.Key);
+           var tx = new Blockchain.Transaction("simnet", chain, script, DateTime.UtcNow + TimeSpan.FromHours(1));
+           tx.Sign(PhantasmaDemo.Instance.Key);
 
            yield return SendRawTransaction(Base16.Encode(tx.ToByteArray(true)), callback, errorHandlingCallback);
        }
-		
+
        public bool IsValidPrivateKey(string address)
        {
            return (address.StartsWith("L", false, CultureInfo.InvariantCulture) || 

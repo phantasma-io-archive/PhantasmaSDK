@@ -85,11 +85,14 @@ public class PhantasmaDemo : MonoBehaviour
     {
         //GetAccount("P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr"); //TEST
 
-        PhantasmaApi = new API("http://localhost:7077/rpc");
+        PhantasmaApi = new API(_SERVER_ADDRESS);
         
         Invoke("LoadPhantasmaData", 2f);
     }
 
+    /// <summary>
+    /// Load the tokens deployed on Phantasma Blockchain
+    /// </summary>
     public void LoadPhantasmaData()
     {
         CheckTokens(() =>
@@ -126,6 +129,10 @@ public class PhantasmaDemo : MonoBehaviour
         }		
 	}
 
+    /// <summary>
+    /// Log in to Phantasma Blockchain
+    /// </summary>
+    /// <param name="privateKey">User private key</param>
     public void Login(string privateKey)
     {
         Key = KeyPair.FromWIF(privateKey);
@@ -156,6 +163,10 @@ public class PhantasmaDemo : MonoBehaviour
 
     #region Blockchain calls
 
+    /// <summary>
+    /// Returns the account name and balance of given address.
+    /// </summary>
+    /// <param name="address">String, base58 encoded - address to check for balance and name.</param>
     public void GetAccount(string address)
     {
         // Private key: L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25
@@ -241,6 +252,9 @@ public class PhantasmaDemo : MonoBehaviour
     //    }
     //}
 
+    /// <summary>
+    /// Create a new token on Phantasma Blockchain
+    /// </summary>
     public void CreateToken()
     {
         CheckTokens(() =>
@@ -270,6 +284,9 @@ public class PhantasmaDemo : MonoBehaviour
         });
     }
 
+    /// <summary>
+    /// Check if the creation of a new token on Phantasma Blockchain was successful
+    /// </summary>
     public IEnumerator CheckTokenCreation(string result)
     {
         CanvasManager.Instance.ShowFetchingDataPopup("Checking token creation...");
@@ -319,6 +336,10 @@ public class PhantasmaDemo : MonoBehaviour
         });
     }
 
+    /// <summary>
+    /// Check the tokens deployed in Phantasma Blockchain.
+    /// </summary>
+    /// <param name="callback"></param>
     public void CheckTokens(Action callback = null)
     {
         IsTokenCreated = false;
@@ -369,7 +390,10 @@ public class PhantasmaDemo : MonoBehaviour
         ));
     }
 
-    // TODO merge this method with the GetTOkens
+    /// <summary>
+    /// Check if the logged in address is the owner of a token
+    /// </summary>
+    /// <param name="tokenSymbol">Symbol of the token</param>
     public bool OwnsToken(string tokenSymbol, Action callback = null)
     {
         IsTokenOwner = false;
@@ -408,6 +432,9 @@ public class PhantasmaDemo : MonoBehaviour
         return IsTokenOwner;
     }
 
+    /// <summary>
+    /// Mint a new token and increase the supply of the created token
+    /// </summary>
     public void MintToken()
     {
         var carData = new CarData

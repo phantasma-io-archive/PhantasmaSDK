@@ -16,18 +16,12 @@ public class Market : MonoBehaviour
     public Dictionary<string, CarAuction>  CarAuctions      { get; private set; }
     public Dictionary<string, CarAuction>  BuyCarAuctions   { get; private set; }
     public Dictionary<string, CarAuction>  SellCarAuctions     { get; private set; }
-
-    //public List<Car> MarketBuyAssets     { get; private set; }
-    //public List<Car> MarketSellAssets    { get; private set; }
     
     private void Awake()
     {
         CarAuctions     = new Dictionary<string, CarAuction>();
         BuyCarAuctions  = new Dictionary<string, CarAuction>();
         SellCarAuctions = new Dictionary<string, CarAuction>();
-
-        //MarketBuyAssets     = new List<Car>();
-        //MarketSellAssets    = new List<Car>();
     }
 
     // Start is called before the first frame update
@@ -37,7 +31,7 @@ public class Market : MonoBehaviour
     }
 
     /// <summary>
-    /// Get the market with the current assets
+    /// Get the market in Phantasma Blockchain with the current assets
     /// </summary>
     public void GetMarket(Action successCallback = null, Action errorCallback = null)
     {
@@ -255,6 +249,10 @@ public class Market : MonoBehaviour
         CanvasManager.Instance.marketMenu.UpdateMarket(MarketMenu.EMARKETPLACE_TYPE.SELL);
     }
 
+    /// <summary>
+    /// Get the auction from Phantasma Blockchain relative to a specific token
+    /// </summary>
+    /// <param name="tokenID">ID of the token</param>
     public CarAuction GetCarAuction(string tokenID)
     {
         if (CarAuctions.ContainsKey(tokenID))
