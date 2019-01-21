@@ -47,13 +47,15 @@ public class Market : MonoBehaviour
                     return;
                 }
 
+                CarAuctions.Clear();
+                SellCarAuctions.Clear();
+                BuyCarAuctions.Clear();
                 foreach (var auction in auctions)
                 {
                     var carAuction = new CarAuction
                     {
                         tokenID = auction.tokenId,
-                        auction = auction,
-
+                        auction = auction
                     };
 
                     CarAuctions.Add(auction.tokenId, carAuction);
@@ -74,8 +76,10 @@ public class Market : MonoBehaviour
             },
             (errorType, errorMessage) =>
             {
+                Debug.Log("FAIL");
                 // TODO se este método for chamado de outro menu, então o erro deve ir para esse menu
-                CanvasManager.Instance.marketMenu.ShowError(errorType + " - " + errorMessage, true);
+                //CanvasManager.Instance.marketMenu.ShowError(errorType + " - " + errorMessage, true);
+                CanvasManager.Instance.marketMenu.ShowError("LALALAL", true);
                 CanvasManager.Instance.HideFetchingDataPopup();
             }));
     }
