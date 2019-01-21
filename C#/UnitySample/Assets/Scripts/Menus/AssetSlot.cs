@@ -90,6 +90,6 @@ public class AssetSlot : MonoBehaviour
     /// </summary>
     public void RemoveAsset()
     {
-        PhantasmaDemo.Instance.market.RemoveAsset(_asset);
+        CanvasManager.Instance.ShowRemovePopup(_asset);
     }
 }

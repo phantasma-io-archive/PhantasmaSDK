@@ -15,6 +15,7 @@ public class CanvasManager : MonoBehaviour {
     public AdminMenu            adminMenu;
     public BuyPopup             buyPopup;
     public SellPopup            sellPopup;
+    public RemovePopup          removePopup;
     public FetchingDataPopup    fetchingDataPopup;
 
     private static CanvasManager _instance;
@@ -194,6 +195,17 @@ public class CanvasManager : MonoBehaviour {
     public void HideBuyPopup()
     {
         buyPopup.gameObject.SetActive(false);
+    }
+
+    public void ShowRemovePopup(Car car)
+    {
+        removePopup.SetPopup(car);
+        removePopup.gameObject.SetActive(true);
+    }
+
+    public void HideRemovePopup()
+    {
+        removePopup.gameObject.SetActive(false);
     }
 
     #endregion
