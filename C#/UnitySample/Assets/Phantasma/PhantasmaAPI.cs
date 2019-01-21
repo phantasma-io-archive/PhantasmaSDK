@@ -684,7 +684,7 @@ namespace Phantasma.SDK
 		
 		
 		//Returns the auctions available in the market.
-		public IEnumerator GetAuctions(Action<Auction[]> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		public IEnumerator GetAuctions(string tokenSymbol, Action<Auction[]> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
 		{	   
 			yield return _client.SendRequest(Host, "getAuctions", errorHandlingCallback, (node) => { 
 			var result = new Auction[node.ChildCount];
@@ -693,7 +693,7 @@ namespace Phantasma.SDK
 				result[i] = Auction.FromNode(child);
 			}
 				callback(result);
-			} );		   
+			}, tokenSymbol);		   
 		}
 
        /// <summary>

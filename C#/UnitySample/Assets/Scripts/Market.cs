@@ -37,7 +37,8 @@ public class Market : MonoBehaviour
     {
         CanvasManager.Instance.ShowFetchingDataPopup("Refreshing blockchain asset market...");
 
-        StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(
+        StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.TOKEN_SYMBOL,
+        //StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetAuctions("NACHO",
             (auctions) =>
             {
                 if (auctions.Length == 0)
