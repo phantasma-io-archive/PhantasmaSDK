@@ -148,7 +148,7 @@ public class Market : MonoBehaviour
 
                         CanvasManager.Instance.HideBuyPopup();
                         CanvasManager.Instance.HideOperationPopup();
-                        CanvasManager.Instance.ShowResultPopup("Asset purchased from the market with success.");
+                        CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.SUCCESS, "Asset purchased from the market with success.");
 
                         return;
                     }
@@ -244,7 +244,7 @@ public class Market : MonoBehaviour
 
                         CanvasManager.Instance.HideSellPopup();
                         CanvasManager.Instance.HideOperationPopup();
-                        CanvasManager.Instance.ShowResultPopup("Asset put up for sale in the market with success.");
+                        CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.SUCCESS, "Asset put up for sale in the market with success.");
                         return;
                     }
                 }
@@ -327,7 +327,7 @@ public class Market : MonoBehaviour
 
                         CanvasManager.Instance.HideRemovePopup();
                         CanvasManager.Instance.HideOperationPopup();
-                        CanvasManager.Instance.ShowResultPopup("Asset removed from the market with success.");
+                        CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.SUCCESS, "Asset removed from the market with success.");
                         return;
                     }
                 }

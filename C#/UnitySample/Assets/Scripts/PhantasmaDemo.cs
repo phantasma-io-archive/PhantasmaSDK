@@ -205,7 +205,7 @@ public class PhantasmaDemo : MonoBehaviour
             },
             (errorType, errorMessage) =>
             {
-                CanvasManager.Instance.loginMenu.ShowError(errorType + " - " + errorMessage);
+                CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, errorType + " - " + errorMessage);
             }
         ));
     }
@@ -236,7 +236,7 @@ public class PhantasmaDemo : MonoBehaviour
                 (errorType, errorMessage) =>
                 {
                     CanvasManager.Instance.HideOperationPopup();
-                    CanvasManager.Instance.loginMenu.ShowError(errorType + " - " + errorMessage);
+                    CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, errorType + " - " + errorMessage);
                 }
             ));
         });
@@ -283,7 +283,7 @@ public class PhantasmaDemo : MonoBehaviour
             }
 
             CanvasManager.Instance.HideOperationPopup();
-            CanvasManager.Instance.adminMenu.ShowError("Something failed on the connection to the blockchain. Please try again.");
+            CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, "Something failed on the connection to the blockchain. Please try again.");
         });
     }
 
@@ -331,11 +331,11 @@ public class PhantasmaDemo : MonoBehaviour
 
                 if (CanvasManager.Instance.loginMenu.gameObject.activeInHierarchy)
                 {
-                    CanvasManager.Instance.loginMenu.ShowError(errorType + " - " + errorMessage);
+                    CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, errorType + " - " + errorMessage);
                 }
                 else if (CanvasManager.Instance.adminMenu.gameObject.activeInHierarchy)
                 {
-                    CanvasManager.Instance.adminMenu.ShowError(errorType + " - " + errorMessage);
+                    CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, errorType + " - " + errorMessage);
                 }
                 else
                 {
@@ -380,7 +380,7 @@ public class PhantasmaDemo : MonoBehaviour
             (errorType, errorMessage) =>
             {
                 CanvasManager.Instance.HideOperationPopup();
-                CanvasManager.Instance.loginMenu.ShowError(errorType + " - " + errorMessage);
+                CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, errorType + " - " + errorMessage);
             }
         ));
 
@@ -426,7 +426,7 @@ public class PhantasmaDemo : MonoBehaviour
             },
             (errorType, errorMessage) =>
             {
-                CanvasManager.Instance.loginMenu.ShowError(errorType + " - " + errorMessage);
+                CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, errorType + " - " + errorMessage);
             }
         ));
     }
@@ -472,7 +472,7 @@ public class PhantasmaDemo : MonoBehaviour
             }
 
             CanvasManager.Instance.HideOperationPopup();
-            CanvasManager.Instance.adminMenu.ShowError("Something failed while executing a new token mint. Please try again.");
+            CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, "Something failed while executing a new token mint. Please try again.");
 
         });
     }

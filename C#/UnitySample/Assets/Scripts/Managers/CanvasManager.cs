@@ -179,9 +179,9 @@ public class CanvasManager : MonoBehaviour {
         operationPopup.HidePopup();
     }
 
-    public void ShowResultPopup(string message)
+    public void ShowResultPopup(ERESULT_TYPE type, string message)
     {
-        resultPopup.ShowPopup(message);
+        resultPopup.ShowPopup(type, message);
     }
 
     public void HideResultPopup()
