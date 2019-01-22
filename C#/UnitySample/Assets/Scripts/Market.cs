@@ -72,10 +72,7 @@ public class Market : MonoBehaviour
             },
             (errorType, errorMessage) =>
             {
-                Debug.Log("FAIL");
-                // TODO se este método for chamado de outro menu, então o erro deve ir para esse menu
-                //CanvasManager.Instance.marketMenu.ShowError(errorType + " - " + errorMessage, true);
-                CanvasManager.Instance.marketMenu.ShowError("LALALAL", true);
+                CanvasManager.Instance.marketMenu.ShowError(errorType + " - " + errorMessage, true);
                 CanvasManager.Instance.HideFetchingDataPopup();
             }));
     }
@@ -188,8 +185,7 @@ public class Market : MonoBehaviour
             {
                 CanvasManager.Instance.HideFetchingDataPopup();
                 CanvasManager.Instance.HideSellPopup();
-                CanvasManager.Instance.myAssetsMenu.ShowError(
-                    "Something failed on the connection to the blockchain (2). Please try again.");
+                CanvasManager.Instance.myAssetsMenu.ShowError("Something failed on the connection to the blockchain. Please try again.");
             }
         ));
     }

@@ -15,7 +15,7 @@ public class LoginMenu : MonoBehaviour
     {
         if (string.IsNullOrEmpty(addressInputField.text))
         {
-            ShowError("Address cannot be empty.");
+            ShowError("Private Key cannot be empty.");
             return;
         }
 
@@ -23,7 +23,7 @@ public class LoginMenu : MonoBehaviour
         {
             if (PhantasmaDemo.Instance.PhantasmaApi != null && !PhantasmaDemo.Instance.PhantasmaApi.IsValidPrivateKey(addressInputField.text))
             {
-                ShowError("Error: The entered address is not valid.\nThe private key must start with an 'L' or a 'K' and have 52 characaters.");
+                ShowError("Error: The entered private key is not valid.\nThe private key must start with an 'L' or a 'K' and have 52 characters.");
                 return;
             }
 

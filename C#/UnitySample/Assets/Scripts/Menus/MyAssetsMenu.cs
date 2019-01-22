@@ -28,7 +28,6 @@ public class MyAssetsMenu : MonoBehaviour
 
     public void UpdateMyAssets()
     {
-        // TODO optimized this to use pool slots
         foreach (var slot in _assetSlots)
         {
             DestroyImmediate(slot.gameObject);

@@ -12,7 +12,7 @@ public class MarketMenu : MonoBehaviour
 
     public AssetSlot    assetSlot;
     public GameObject   buyMarketContent, sellMarketContent;
-    public Button       buyButton, sellButton, retryRefreshMarket;
+    public Button       buyButton, sellButton, refreshButton;
     public GameObject   buyTab, sellTab;
     public Text         errorMessage;
 
@@ -63,7 +63,6 @@ public class MarketMenu : MonoBehaviour
         {
             case EMARKETPLACE_TYPE.BUY:
 
-                // TODO optimized this to use pool slots
                 foreach (var buySlot in _buySlots)
                 {
                     DestroyImmediate(buySlot.gameObject);
@@ -88,7 +87,6 @@ public class MarketMenu : MonoBehaviour
 
             case EMARKETPLACE_TYPE.SELL:
 
-                // TODO optimized this to use pool slots
                 foreach (var sellSlot in _sellSlots)
                 {
                     DestroyImmediate(sellSlot.gameObject);
@@ -137,10 +135,10 @@ public class MarketMenu : MonoBehaviour
         errorMessage.text = error;
         errorMessage.gameObject.SetActive(true);
 
-        retryRefreshMarket.gameObject.SetActive(showRetryButton);
+        refreshButton.gameObject.SetActive(showRetryButton);
     }
 
-    public void RetryRefreshClicked()
+    public void RefreshClicked()
     {
         GetMarket();
     }

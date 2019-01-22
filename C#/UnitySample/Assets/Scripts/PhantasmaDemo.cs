@@ -137,10 +137,6 @@ public class PhantasmaDemo : MonoBehaviour
 
     public void LogOut()
     {
-        //Debug.Log("logged out");
-
-        // TODO something else here ?
-
         CanvasManager.Instance.ClearAddress();
         CanvasManager.Instance.OpenLogin();
     }
@@ -281,18 +277,13 @@ public class PhantasmaDemo : MonoBehaviour
                             });
                         }
 
-                        break;
-                    }
-                    else
-                    {
-                        CanvasManager.Instance.HideFetchingDataPopup();
-                        // TODO aconteceu algum erro...
+                        return;
                     }
                 }
                 else
                 {
                     CanvasManager.Instance.HideFetchingDataPopup();
-                    // TODO aconteceu algum erro..
+                    CanvasManager.Instance.adminMenu.ShowError("Something failed on the connection to the blockchain. Please try again.");
                 }
             }
         });
@@ -322,7 +313,7 @@ public class PhantasmaDemo : MonoBehaviour
 
                     if (token.symbol.Equals(TOKEN_SYMBOL))
                     {
-                        Debug.Log("CREATED TRUE: " + token.symbol);
+                        //Debug.Log("CREATED TRUE: " + token.symbol);
                         IsTokenCreated = true;
                         break;
                     }
@@ -343,6 +334,10 @@ public class PhantasmaDemo : MonoBehaviour
                 if (CanvasManager.Instance.loginMenu.gameObject.activeInHierarchy)
                 {
                     CanvasManager.Instance.loginMenu.ShowError(errorType + " - " + errorMessage);
+                }
+                else if (CanvasManager.Instance.adminMenu.gameObject.activeInHierarchy)
+                {
+                    CanvasManager.Instance.adminMenu.ShowError(errorType + " - " + errorMessage);
                 }
                 else
                 {
@@ -446,9 +441,9 @@ public class PhantasmaDemo : MonoBehaviour
     {
         CanvasManager.Instance.ShowFetchingDataPopup("Checking token mint...");
 
-        yield return new WaitForSecondsRealtime(PhantasmaDemo.TRANSACTION_CONFIRMATION_DELAY);
+        yield return new WaitForSecondsRealtime(TRANSACTION_CONFIRMATION_DELAY);
 
-        yield return PhantasmaDemo.Instance.PhantasmaApi.GetTransaction(result, (tx) =>
+        yield return PhantasmaApi.GetTransaction(result, (tx) =>
         {
             foreach (var evt in tx.events)
             {
@@ -477,11 +472,7 @@ public class PhantasmaDemo : MonoBehaviour
                         //CanvasManager.Instance.adminMenu.SetContent();
                         //CanvasManager.Instance.HideFetchingDataPopup();
 
-                        break;
-                    }
-                    else
-                    {
-                        // TODO aconteceu algum erro...
+                        return;
                     }
                 }
                 else

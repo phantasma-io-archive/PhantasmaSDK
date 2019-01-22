@@ -5,6 +5,7 @@ public class AdminMenu : MonoBehaviour
 {
     public Button       createTokenButton, mintTokenButton;
     public Text         tokenSymbol, tokenName, myWalletTokens, currentSupplyTokens;
+    public Text         errorMessage;
     public GameObject   tokenContent, supplyContent;
 
     private Color _defaultColor;
@@ -22,6 +23,8 @@ public class AdminMenu : MonoBehaviour
 
     void OnEnable()
     {
+        ClearErrorContent();
+
         PhantasmaDemo.Instance.CheckTokens(() =>
         {
             CanvasManager.Instance.adminMenu.SetContent();
@@ -73,6 +76,18 @@ public class AdminMenu : MonoBehaviour
             myWalletTokens.text         = "0";
             currentSupplyTokens.text    = "0";
         }
+    }
+
+    public void ShowError(string error)
+    {
+        errorMessage.text = error;
+        errorMessage.gameObject.SetActive(true);
+    }
+
+    private void ClearErrorContent()
+    {
+        errorMessage.text = string.Empty;
+        errorMessage.gameObject.SetActive(false);
     }
 
     public void CreateTokenClicked()
