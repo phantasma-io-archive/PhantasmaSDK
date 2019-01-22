@@ -59,6 +59,8 @@ public class MyAssetsMenu : MonoBehaviour
 
     public void ShowError(string error)
     {
+        // TODO change to use show error popup and use this to show messages like: "There are no assets on your account.";
+
         errorMessage.text = error;
         errorMessage.gameObject.SetActive(true);
     }

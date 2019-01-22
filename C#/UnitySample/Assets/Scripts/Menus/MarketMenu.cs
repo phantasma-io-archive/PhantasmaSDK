@@ -131,6 +131,7 @@ public class MarketMenu : MonoBehaviour
 
     public void ShowError(string error, bool showRetryButton = false)
     {
+        // TODO change to use show error popup and use this for messages like: empty market (not an error)
         Debug.Log("show error:" + error);
         errorMessage.text = error;
         errorMessage.gameObject.SetActive(true);

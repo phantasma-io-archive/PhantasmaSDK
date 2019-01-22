@@ -33,6 +33,8 @@ public class LoginMenu : MonoBehaviour
 
     public void ShowError(string error)
     {
+        // TODO change to use show error popup
+
         loginError.gameObject.SetActive(true);
         loginError.text = error;
     }

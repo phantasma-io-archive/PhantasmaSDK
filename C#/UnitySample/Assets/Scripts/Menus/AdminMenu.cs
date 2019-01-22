@@ -8,17 +8,12 @@ public class AdminMenu : MonoBehaviour
     public Text         errorMessage;
     public GameObject   tokenContent, supplyContent;
 
-    private Color _defaultColor;
+    private Color   _defaultColor;
+    private int     _tokenSupply;
 
     void Awake()
     {
         _defaultColor = createTokenButton.targetGraphic.color;
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-
     }
 
     void OnEnable()
@@ -56,6 +51,11 @@ public class AdminMenu : MonoBehaviour
 
                 myWalletTokens.text         = PhantasmaDemo.Instance.MyCars.Count.ToString();
                 currentSupplyTokens.text    = token.currentSupply;
+
+                if (int.TryParse(token.currentSupply, out var suply))
+                {
+                    _tokenSupply = suply;
+                }
             }
         }
         else
@@ -80,6 +80,7 @@ public class AdminMenu : MonoBehaviour
 
     public void ShowError(string error)
     {
+        // TODO change to use show error popup
         errorMessage.text = error;
         errorMessage.gameObject.SetActive(true);
     }
@@ -97,7 +98,7 @@ public class AdminMenu : MonoBehaviour
 
     public void MintTokenClicked()
     {
-        PhantasmaDemo.Instance.MintToken();
+        PhantasmaDemo.Instance.MintToken("Car " + (_tokenSupply + 1));
     }
 
     public void BackClicked()

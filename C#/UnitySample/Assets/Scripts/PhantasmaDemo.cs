@@ -280,12 +280,10 @@ public class PhantasmaDemo : MonoBehaviour
                         return;
                     }
                 }
-                else
-                {
-                    CanvasManager.Instance.HideOperationPopup();
-                    CanvasManager.Instance.adminMenu.ShowError("Something failed on the connection to the blockchain. Please try again.");
-                }
             }
+
+            CanvasManager.Instance.HideOperationPopup();
+            CanvasManager.Instance.adminMenu.ShowError("Something failed on the connection to the blockchain. Please try again.");
         });
     }
 
@@ -392,7 +390,7 @@ public class PhantasmaDemo : MonoBehaviour
     /// <summary>
     /// Mint a new token and increase the supply of the created token
     /// </summary>
-    public void MintToken()
+    public void MintToken(string tokenName)
     {
         var carData = new CarData
         {
@@ -402,7 +400,7 @@ public class PhantasmaDemo : MonoBehaviour
 
         var carMutableData = new CarMutableData
         {
-            name        = "Super Cadillac",
+            name        = tokenName,
             power       = (byte)Random.Range(1, 10),
             speed       = (byte)Random.Range(1, 10),
             location    = CarLocation.None,
@@ -468,17 +466,13 @@ public class PhantasmaDemo : MonoBehaviour
 
                         CheckTokens(() => { CanvasManager.Instance.adminMenu.SetContent(); });
 
-                        //CanvasManager.Instance.adminMenu.SetContent();
-                        //CanvasManager.Instance.HideFetchingDataPopup();
-
                         return;
                     }
                 }
-                else
-                {
-                    // TODO aconteceu algum erro..
-                }
             }
+
+            CanvasManager.Instance.HideOperationPopup();
+            CanvasManager.Instance.adminMenu.ShowError("Something failed while executing a new token mint. Please try again.");
 
         });
     }
