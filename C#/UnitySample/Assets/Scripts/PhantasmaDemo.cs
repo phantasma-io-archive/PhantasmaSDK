@@ -23,6 +23,8 @@ using Token = Phantasma.SDK.Token;
 
 public class PhantasmaDemo : MonoBehaviour
 {
+    public const float TRANSACTION_CONFIRMATION_DELAY = 10f;
+
     public const string TOKEN_SYMBOL    = "CAR";
     public const string TOKEN_NAME      = "Car Demo Token";
 
@@ -37,24 +39,6 @@ public class PhantasmaDemo : MonoBehaviour
         UPDATE,
         READY
     }
-
-    /*
-    public enum EventKind
-    {
-        ChainCreate,
-        TokenCreate,
-        TokenSend,
-        TokenReceive,
-        TokenMint,
-        TokenBurn,
-        TokenEscrow,
-        AddressRegister,
-        FriendAdd,
-        FriendRemove,
-        GasEscrow,
-        GasPayment,
-    }
-     */
 
     public Market       market;
     public List<Sprite> carImages;
@@ -230,28 +214,6 @@ public class PhantasmaDemo : MonoBehaviour
         ));
     }
 
-    //public void ListTransactions()
-    //{
-    //    StartCoroutine(ListTransactionsCoroutine());
-    //}
-
-    //private IEnumerator ListTransactionsCoroutine()
-    //{
-    //    var myData = "{ \"jsonrpc\":\"2.0\",\"method\":\"getAccount\",\"params\":[\"P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr\"],\"id\":1}";
-    //    var www = UnityWebRequest.Post(_SERVER_ADDRESS, myData);
-
-    //    yield return www.SendWebRequest();
-
-    //    if (www.isNetworkError || www.isHttpError)
-    //    {
-    //        Debug.Log(www.error);
-    //    }
-    //    else
-    //    {
-    //        Debug.Log(www.downloadHandler.text);
-    //    }
-    //}
-
     /// <summary>
     /// Create a new token on Phantasma Blockchain
     /// </summary>
@@ -291,7 +253,7 @@ public class PhantasmaDemo : MonoBehaviour
     {
         CanvasManager.Instance.ShowFetchingDataPopup("Checking token creation...");
 
-        yield return new WaitForSecondsRealtime(10f);
+        yield return new WaitForSecondsRealtime(TRANSACTION_CONFIRMATION_DELAY);
         
         yield return PhantasmaApi.GetTransaction(result, (tx) =>
         {
