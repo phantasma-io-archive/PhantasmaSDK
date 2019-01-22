@@ -117,7 +117,7 @@ public class Market : MonoBehaviour
     /// <summary>
     /// Check if the auction purchase was successful
     /// </summary>
-    public IEnumerator CheckAssetPurchase(Car car, string result)
+    private IEnumerator CheckAssetPurchase(Car car, string result)
     {
         CanvasManager.Instance.ShowFetchingDataPopup("Checking auction purchase...");
 
@@ -223,7 +223,7 @@ public class Market : MonoBehaviour
     /// <summary>
     /// Check if the auction sale creation was successful
     /// </summary>
-    public IEnumerator CheckAssetSale(Car car, BigInteger price, Timestamp endDate, string result)
+    private IEnumerator CheckAssetSale(Car car, BigInteger price, Timestamp endDate, string result)
     {
         CanvasManager.Instance.ShowFetchingDataPopup("Checking auction sale creation...");
 
@@ -338,7 +338,7 @@ public class Market : MonoBehaviour
     /// <summary>
     /// Check if the auction sale creation was successful
     /// </summary>
-    public IEnumerator CheckAssetRemoval(Car car, string result)
+    private IEnumerator CheckAssetRemoval(Car car, string result)
     {
         CanvasManager.Instance.ShowFetchingDataPopup("Checking auction sale removal...");
 

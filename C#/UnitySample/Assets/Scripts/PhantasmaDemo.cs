@@ -416,17 +416,12 @@ public class PhantasmaDemo : MonoBehaviour
         var txData          = Serialization.Serialize(carData);
         var txMutableData   = Serialization.Serialize(carMutableData);
 
-        var mintData = Base16.Encode(txData);
-
-        Debug.Log("mint data: " + mintData);
-
         var script = ScriptUtils.BeginScript()
                         .AllowGas(Key.Address, 1, 9999)
                         .CallContract("token", "MintToken", Key.Address, TOKEN_SYMBOL, txData, txMutableData)
                         .SpendGas(Key.Address)
                         .EndScript();
-
-
+        
         CanvasManager.Instance.ShowFetchingDataPopup("Minting a new token...");
 
         StartCoroutine(PhantasmaApi.SignAndSendTransaction(script, "main",
@@ -434,52 +429,7 @@ public class PhantasmaDemo : MonoBehaviour
             {
                 Debug.Log("sign result: " + result);
 
-                StartCoroutine(PhantasmaApi.GetTransaction(result, (tx) =>
-                {
-                    foreach (var evt in tx.events)
-                    {
-                        EventKind eKind;
-                        if (Enum.TryParse(evt.kind, out eKind))
-                        {
-                            if (eKind == EventKind.TokenMint)
-                            {
-                                var bytes       = Base16.Decode(evt.data);
-                                var tokenData   = Serialization.Unserialize<TokenEventData>(bytes);
-
-                                var tokenID = tokenData.value;
-
-                                Debug.Log("has event: " + evt.kind + " - car token id:" + tokenID);
-
-                                var newCar = new Car();
-                                newCar.SetCar(tokenData.chainAddress, tokenID.ToString(), carData, carMutableData);
-
-                                // Add new car to admin assets
-                                MyCars.Add(tokenID.ToString(), newCar);
-
-                                //PhantasmaApi.LogTransaction(PhantasmaDemo.Instance.Key.Address, 0, TransactionType.Created_Car, carID);
-
-                                CheckTokens(() =>
-                                {
-                                    CanvasManager.Instance.adminMenu.SetContent();
-                                });
-
-                                //CanvasManager.Instance.adminMenu.SetContent();
-                                //CanvasManager.Instance.HideFetchingDataPopup();
-
-                                break;
-                            }
-                            else
-                            {
-                                // TODO aconteceu algum erro...
-                            }
-                        }
-                        else
-                        {
-                            // TODO aconteceu algum erro..
-                        }
-                    }
-
-                }));
+                StartCoroutine(CheckTokenMint(carData, carMutableData, result));
 
             },
             (errorType, errorMessage) =>
@@ -487,6 +437,60 @@ public class PhantasmaDemo : MonoBehaviour
                 CanvasManager.Instance.loginMenu.ShowError(errorType + " - " + errorMessage);
             }
         ));
+    }
+
+    /// <summary>
+    /// Check if the auction purchase was successful
+    /// </summary>
+    private IEnumerator CheckTokenMint(CarData carData, CarMutableData carMutableData, string result)
+    {
+        CanvasManager.Instance.ShowFetchingDataPopup("Checking token mint...");
+
+        yield return new WaitForSecondsRealtime(PhantasmaDemo.TRANSACTION_CONFIRMATION_DELAY);
+
+        yield return PhantasmaDemo.Instance.PhantasmaApi.GetTransaction(result, (tx) =>
+        {
+            foreach (var evt in tx.events)
+            {
+                EventKind eKind;
+                if (Enum.TryParse(evt.kind, out eKind))
+                {
+                    if (eKind == EventKind.TokenMint)
+                    {
+                        var bytes = Base16.Decode(evt.data);
+                        var tokenData = Serialization.Unserialize<TokenEventData>(bytes);
+
+                        var tokenID = tokenData.value;
+
+                        Debug.Log("has event: " + evt.kind + " - car token id:" + tokenID);
+
+                        var newCar = new Car();
+                        newCar.SetCar(tokenData.chainAddress, tokenID.ToString(), carData, carMutableData);
+
+                        // Add new car to admin assets
+                        MyCars.Add(tokenID.ToString(), newCar);
+
+                        //PhantasmaApi.LogTransaction(PhantasmaDemo.Instance.Key.Address, 0, TransactionType.Created_Car, carID);
+
+                        CheckTokens(() => { CanvasManager.Instance.adminMenu.SetContent(); });
+
+                        //CanvasManager.Instance.adminMenu.SetContent();
+                        //CanvasManager.Instance.HideFetchingDataPopup();
+
+                        break;
+                    }
+                    else
+                    {
+                        // TODO aconteceu algum erro...
+                    }
+                }
+                else
+                {
+                    // TODO aconteceu algum erro..
+                }
+            }
+
+        });
     }
 
     #endregion
