@@ -39,6 +39,12 @@ public class MyAssetsMenu : MonoBehaviour
         //Debug.Log("my assets: " + PhantasmaDemo.Instance.MyCars.Keys.Count);
         var tokenIds = new List<string>(PhantasmaDemo.Instance.MyCars.Keys);
 
+        if (tokenIds.Count == 0)
+        {
+            ShowError("There are no assets on your account.");
+            return;
+        }
+
         for (var i = 0; i < tokenIds.Count; i++)
         {
             var asset = PhantasmaDemo.Instance.MyCars[tokenIds[i]];
@@ -54,7 +60,6 @@ public class MyAssetsMenu : MonoBehaviour
 
     public void ShowError(string error)
     {
-        Debug.Log("show my assets error: " + error);
         errorMessage.text = error;
         errorMessage.gameObject.SetActive(true);
     }
