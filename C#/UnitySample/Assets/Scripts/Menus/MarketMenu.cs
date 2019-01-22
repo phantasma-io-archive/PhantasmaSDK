@@ -133,6 +133,7 @@ public class MarketMenu : MonoBehaviour
 
     public void ShowError(string error, bool showRetryButton = false)
     {
+        Debug.Log("show error:" + error);
         errorMessage.text = error;
         errorMessage.gameObject.SetActive(true);
 
