@@ -30,7 +30,8 @@ public class Market : MonoBehaviour
     /// </summary>
     public void GetMarket(Action successCallback = null, Action errorCallback = null)
     {
-        CanvasManager.Instance.ShowFetchingDataPopup("Refreshing blockchain asset market...");
+        // TODO FIX vêm tokens no get market mas aparece msg de erro: Failed to get market auctions
+        CanvasManager.Instance.ShowOperationPopup("Refreshing blockchain asset market...");
 
         StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.TOKEN_SYMBOL,
         //StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetAuctions("NACHO",
@@ -38,7 +39,7 @@ public class Market : MonoBehaviour
             {
                 if (auctions.Length == 0)
                 {
-                    CanvasManager.Instance.HideFetchingDataPopup();
+                    CanvasManager.Instance.HideOperationPopup();
                     CanvasManager.Instance.marketMenu.ShowError("There are no auctions on the blockchain market.");
                     return;
                 }
@@ -68,12 +69,12 @@ public class Market : MonoBehaviour
                     }
                 }
 
-                CanvasManager.Instance.HideFetchingDataPopup();
+                CanvasManager.Instance.HideOperationPopup();
             },
             (errorType, errorMessage) =>
             {
                 CanvasManager.Instance.marketMenu.ShowError(errorType + " - " + errorMessage, true);
-                CanvasManager.Instance.HideFetchingDataPopup();
+                CanvasManager.Instance.HideOperationPopup();
             }));
     }
 
@@ -82,7 +83,7 @@ public class Market : MonoBehaviour
     /// </summary>
     public void BuyAsset(Car car)
     {
-        CanvasManager.Instance.ShowFetchingDataPopup("Purchasing an asset from the blockchain asset market...");
+        CanvasManager.Instance.ShowOperationPopup("Purchasing an asset from the blockchain asset market...");
 
         var script = ScriptUtils.BeginScript()
             .AllowGas(car.OwnerAddress, 1, 9999)
@@ -100,7 +101,7 @@ public class Market : MonoBehaviour
             (errorType, errorMessage) =>
             {
                 CanvasManager.Instance.marketMenu.ShowError(errorType + " - " + errorMessage);
-                CanvasManager.Instance.HideFetchingDataPopup();
+                CanvasManager.Instance.HideOperationPopup();
             }
         ));
     }
@@ -110,7 +111,7 @@ public class Market : MonoBehaviour
     /// </summary>
     private IEnumerator CheckAssetPurchase(Car car, string result)
     {
-        CanvasManager.Instance.ShowFetchingDataPopup("Checking auction purchase...");
+        CanvasManager.Instance.ShowOperationPopup("Checking auction purchase...");
 
         yield return new WaitForSecondsRealtime(PhantasmaDemo.TRANSACTION_CONFIRMATION_DELAY);
 
@@ -126,16 +127,16 @@ public class Market : MonoBehaviour
                         var bytes = Base16.Decode(evt.data);
                         var marketEventData = Serialization.Unserialize<MarketEventData>(bytes);
 
-                        Debug.Log(evt.kind + " - " + marketEventData.ID);
+                        //Debug.Log(evt.kind + " - " + marketEventData.ID);
                         
                         //var carData = car.Data;
                         //car.Data    = carData;
 
-                        var carMutableData = car.MutableData;
+                        var carMutableData      = car.MutableData;
                         carMutableData.location = CarLocation.None;
 
-                        car.OwnerAddress = PhantasmaDemo.Instance.Key.Address;
-                        car.MutableData = carMutableData;
+                        car.OwnerAddress    = PhantasmaDemo.Instance.Key.Address;
+                        car.MutableData     = carMutableData;
 
                         CarAuctions.Remove(car.TokenID);
                         BuyCarAuctions.Remove(car.TokenID);
@@ -145,19 +146,18 @@ public class Market : MonoBehaviour
                         
                         CanvasManager.Instance.marketMenu.UpdateMarket(MarketMenu.EMARKETPLACE_TYPE.BUY);
 
-                        CanvasManager.Instance.HideFetchingDataPopup();
                         CanvasManager.Instance.HideBuyPopup();
-
-                        // TODO show successful operation popup
+                        CanvasManager.Instance.HideOperationPopup();
+                        CanvasManager.Instance.ShowResultPopup("Asset purchased from the market with success.");
 
                         return;
                     }
                 }
             }
 
-            CanvasManager.Instance.HideFetchingDataPopup();
+            CanvasManager.Instance.HideOperationPopup();
             CanvasManager.Instance.HideBuyPopup();
-            CanvasManager.Instance.myAssetsMenu.ShowError("Something failed on the connection to the blockchain. Please try again.");
+            CanvasManager.Instance.myAssetsMenu.ShowError("Something failed while purchasing the asset from the market. Please try again.");
         });
     }
 
@@ -166,7 +166,7 @@ public class Market : MonoBehaviour
     /// </summary>
     public void SellAsset(Car car, Address from, BigInteger price, Timestamp endDate, AuctionCurrency currency = AuctionCurrency.Game_Coin)
     {
-        CanvasManager.Instance.ShowFetchingDataPopup("Puting an asset for sale on the blockchain asset market...");
+        CanvasManager.Instance.ShowOperationPopup("Puting an asset for sale on the blockchain asset market...");
 
         var script = ScriptUtils.BeginScript()
             .AllowGas(from, 1, 9999)
@@ -183,9 +183,9 @@ public class Market : MonoBehaviour
             },
             (errorType, errorMessage) =>
             {
-                CanvasManager.Instance.HideFetchingDataPopup();
+                CanvasManager.Instance.HideOperationPopup();
                 CanvasManager.Instance.HideSellPopup();
-                CanvasManager.Instance.myAssetsMenu.ShowError("Something failed on the connection to the blockchain. Please try again.");
+                CanvasManager.Instance.myAssetsMenu.ShowError("Something failed while creating the auction sale on the market. Please try again.");
             }
         ));
     }
@@ -195,7 +195,7 @@ public class Market : MonoBehaviour
     /// </summary>
     private IEnumerator CheckAssetSale(Car car, BigInteger price, Timestamp endDate, string result)
     {
-        CanvasManager.Instance.ShowFetchingDataPopup("Checking auction sale creation...");
+        CanvasManager.Instance.ShowOperationPopup("Checking auction sale creation...");
 
         yield return new WaitForSecondsRealtime(PhantasmaDemo.TRANSACTION_CONFIRMATION_DELAY);
 
@@ -203,7 +203,7 @@ public class Market : MonoBehaviour
         {
             foreach (var evt in tx.events)
             {
-                Debug.Log("event: " + evt.kind);
+                //Debug.Log("event: " + evt.kind);
 
                 EventKind eKind;
                 if (Enum.TryParse(evt.kind, out eKind))
@@ -213,15 +213,15 @@ public class Market : MonoBehaviour
                         var bytes           = Base16.Decode(evt.data);
                         var marketEventData = Serialization.Unserialize<MarketEventData>(bytes);
 
-                        Debug.Log(evt.kind + " - " + marketEventData.ID);
+                        //Debug.Log(evt.kind + " - " + marketEventData.ID);
 
                         var newAuction = new Auction
                         {
-                            creatorAddress = PhantasmaDemo.Instance.Key.Address.ToString(),
-                            endDate = endDate.Value,
-                            symbol = marketEventData.Symbol,
-                            tokenId = marketEventData.ID.ToString(),
-                            price = price.ToString()
+                            creatorAddress  = PhantasmaDemo.Instance.Key.Address.ToString(),
+                            endDate         = endDate.Value,
+                            symbol          = marketEventData.Symbol,
+                            tokenId         = marketEventData.ID.ToString(),
+                            price           = price.ToString()
                         };
 
                         var newCarAuction = new CarAuction
@@ -235,26 +235,24 @@ public class Market : MonoBehaviour
                         //var carData = car.Data;
                         //car.Data = carData;
 
-                        var carMutableData = car.MutableData;
+                        var carMutableData      = car.MutableData;
                         carMutableData.location = CarLocation.Market;
-                        car.MutableData = carMutableData;
+                        car.MutableData         = carMutableData;
 
                         PhantasmaDemo.Instance.MyCars.Remove(car.TokenID);
                         CanvasManager.Instance.myAssetsMenu.UpdateMyAssets();
 
-                        CanvasManager.Instance.HideFetchingDataPopup();
                         CanvasManager.Instance.HideSellPopup();
-
-                        // TODO show successful operation popup
-
+                        CanvasManager.Instance.HideOperationPopup();
+                        CanvasManager.Instance.ShowResultPopup("Asset put up for sale in the market with success.");
                         return;
                     }
                 }
             }
 
-            CanvasManager.Instance.HideFetchingDataPopup();
             CanvasManager.Instance.HideSellPopup();
-            CanvasManager.Instance.myAssetsMenu.ShowError("Something failed on the connection to the blockchain. Please try again.");
+            CanvasManager.Instance.HideOperationPopup();
+            CanvasManager.Instance.myAssetsMenu.ShowError("Something failed while creating the auction sale on the market. Please try again.");
         });
     }
 
@@ -263,7 +261,7 @@ public class Market : MonoBehaviour
     /// </summary>
     public void RemoveAsset(Car car)
     {
-        CanvasManager.Instance.ShowFetchingDataPopup("Removing an asset from the blockchain market...");
+        CanvasManager.Instance.ShowOperationPopup("Removing an asset from the blockchain market...");
 
         var script = ScriptUtils.BeginScript()
             .AllowGas(car.OwnerAddress, 1, 9999)
@@ -282,7 +280,7 @@ public class Market : MonoBehaviour
             (errorType, errorMessage) =>
             {
                 CanvasManager.Instance.marketMenu.ShowError(errorType + " - " + errorMessage);
-                CanvasManager.Instance.HideFetchingDataPopup();
+                CanvasManager.Instance.HideOperationPopup();
             }
         ));
     }
@@ -292,7 +290,7 @@ public class Market : MonoBehaviour
     /// </summary>
     private IEnumerator CheckAssetRemoval(Car car, string result)
     {
-        CanvasManager.Instance.ShowFetchingDataPopup("Checking auction sale removal...");
+        CanvasManager.Instance.ShowOperationPopup("Checking auction sale removal...");
 
         yield return new WaitForSecondsRealtime(PhantasmaDemo.TRANSACTION_CONFIRMATION_DELAY);
 
@@ -308,16 +306,16 @@ public class Market : MonoBehaviour
                         var bytes = Base16.Decode(evt.data);
                         var marketEventData = Serialization.Unserialize<MarketEventData>(bytes);
 
-                        Debug.Log(evt.kind + " - " + marketEventData.ID);
+                        //Debug.Log(evt.kind + " - " + marketEventData.ID);
 
                         //var carData = car.Data;
                         //car.Data    = carData;
 
-                        var carMutableData = car.MutableData;
+                        var carMutableData      = car.MutableData;
                         carMutableData.location = CarLocation.None;
 
-                        car.OwnerAddress = PhantasmaDemo.Instance.Key.Address;
-                        car.MutableData = carMutableData;
+                        car.OwnerAddress    = PhantasmaDemo.Instance.Key.Address;
+                        car.MutableData     = carMutableData;
 
                         CarAuctions.Remove(car.TokenID);
                         SellCarAuctions.Remove(car.TokenID);
@@ -326,21 +324,18 @@ public class Market : MonoBehaviour
                         //CanvasManager.Instance.myAssetsMenu.UpdateMyAssets(); // Talvez não seja necessário isto
 
                         CanvasManager.Instance.marketMenu.UpdateMarket(MarketMenu.EMARKETPLACE_TYPE.SELL);
-                        
-                        CanvasManager.Instance.HideFetchingDataPopup();
+
                         CanvasManager.Instance.HideRemovePopup();
-
-                        // TODO show successful operation popup
-
+                        CanvasManager.Instance.HideOperationPopup();
+                        CanvasManager.Instance.ShowResultPopup("Asset removed from the market with success.");
                         return;
                     }
                 }
-
             }
 
-            CanvasManager.Instance.HideFetchingDataPopup();
+            CanvasManager.Instance.HideOperationPopup();
             CanvasManager.Instance.HideRemovePopup();
-            CanvasManager.Instance.myAssetsMenu.ShowError("Something failed on the connection to the blockchain (1). Please try again.");
+            CanvasManager.Instance.myAssetsMenu.ShowError("Something failed while removing the auction from the market. Please try again.");
         });
     }
 

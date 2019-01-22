@@ -4,20 +4,24 @@ using UnityEngine.UI;
 
 public class CanvasManager : MonoBehaviour {
 
-    public Text                 addressLabel;
-    public Text                 errorMessage;
+    public Text                 addressLabel, errorMessage;
     public Button               retryConnectionButton;
+
+    // Menus
     public MyAssetsMenu         myAssetsMenu;
     public LoginMenu            loginMenu;
     public MainMenu             mainMenu;
     public AccountMenu          accountMenu;
     public MarketMenu           marketMenu;
     public AdminMenu            adminMenu;
+
+    // Popups
+    public OperationPopup       operationPopup;
+    public ResultPopup          resultPopup;
     public BuyPopup             buyPopup;
     public SellPopup            sellPopup;
     public RemovePopup          removePopup;
-    public FetchingDataPopup    fetchingDataPopup;
-
+    
     private static CanvasManager _instance;
     public static CanvasManager Instance
     {
@@ -165,14 +169,24 @@ public class CanvasManager : MonoBehaviour {
 
     #region Popups
 
-    public void ShowFetchingDataPopup(string message = null)
+    public void ShowOperationPopup(string message)
     {
-        fetchingDataPopup.ShowPopup(message);
+        operationPopup.ShowPopup(message);
     }
 
-    public void HideFetchingDataPopup()
+    public void HideOperationPopup()
     {
-        fetchingDataPopup.HidePopup();
+        operationPopup.HidePopup();
+    }
+
+    public void ShowResultPopup(string message)
+    {
+        resultPopup.ShowPopup(message);
+    }
+
+    public void HideResultPopup()
+    {
+        resultPopup.HidePopup();
     }
 
     public void ShowSellPopup(Car car)
@@ -209,15 +223,5 @@ public class CanvasManager : MonoBehaviour {
     }
 
     #endregion
-
-    //public void RegisterName()
-    //{
-    //    PhantasmaDemo.Instance.RegisterName();
-    //}
-
-    //public void ListTransactions()
-    //{
-    //    PhantasmaDemo.Instance.ListTransactions();
-    //}
 
 }

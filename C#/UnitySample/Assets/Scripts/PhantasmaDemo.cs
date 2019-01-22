@@ -154,7 +154,7 @@ public class PhantasmaDemo : MonoBehaviour
 
         Debug.Log("Get account: " + address);
 
-        CanvasManager.Instance.ShowFetchingDataPopup("Fetching account data from the blockchain...");
+        CanvasManager.Instance.ShowOperationPopup("Fetching account data from the blockchain...");
 
         StartCoroutine(PhantasmaApi.GetAccount(address, 
             account =>
@@ -198,7 +198,7 @@ public class PhantasmaDemo : MonoBehaviour
                     }
                 }
 
-                CanvasManager.Instance.HideFetchingDataPopup();
+                CanvasManager.Instance.HideOperationPopup();
 
                 LoggedIn(address);
 
@@ -217,7 +217,7 @@ public class PhantasmaDemo : MonoBehaviour
     {
         CheckTokens(() =>
         {
-            CanvasManager.Instance.ShowFetchingDataPopup("Creating a new token on the blockchain...");
+            CanvasManager.Instance.ShowOperationPopup("Creating a new token on the blockchain...");
 
             var script = ScriptUtils.BeginScript()
                 .AllowGas(Key.Address, 1, 9999)
@@ -235,7 +235,7 @@ public class PhantasmaDemo : MonoBehaviour
                 },
                 (errorType, errorMessage) =>
                 {
-                    CanvasManager.Instance.HideFetchingDataPopup();
+                    CanvasManager.Instance.HideOperationPopup();
                     CanvasManager.Instance.loginMenu.ShowError(errorType + " - " + errorMessage);
                 }
             ));
@@ -247,7 +247,7 @@ public class PhantasmaDemo : MonoBehaviour
     /// </summary>
     public IEnumerator CheckTokenCreation(string result)
     {
-        CanvasManager.Instance.ShowFetchingDataPopup("Checking token creation...");
+        CanvasManager.Instance.ShowOperationPopup("Checking token creation...");
 
         yield return new WaitForSecondsRealtime(TRANSACTION_CONFIRMATION_DELAY);
         
@@ -282,7 +282,7 @@ public class PhantasmaDemo : MonoBehaviour
                 }
                 else
                 {
-                    CanvasManager.Instance.HideFetchingDataPopup();
+                    CanvasManager.Instance.HideOperationPopup();
                     CanvasManager.Instance.adminMenu.ShowError("Something failed on the connection to the blockchain. Please try again.");
                 }
             }
@@ -297,7 +297,7 @@ public class PhantasmaDemo : MonoBehaviour
     {
         IsTokenCreated = false;
 
-        CanvasManager.Instance.ShowFetchingDataPopup("Fetching Phantasma tokens...");
+        CanvasManager.Instance.ShowOperationPopup("Fetching Phantasma tokens...");
         
         PhantasmaTokens.Clear();
 
@@ -319,7 +319,7 @@ public class PhantasmaDemo : MonoBehaviour
                     }
                 }
 
-                CanvasManager.Instance.HideFetchingDataPopup();
+                CanvasManager.Instance.HideOperationPopup();
 
                 if (callback != null)
                 {
@@ -329,7 +329,7 @@ public class PhantasmaDemo : MonoBehaviour
             },
             (errorType, errorMessage) =>
             {
-                CanvasManager.Instance.HideFetchingDataPopup();
+                CanvasManager.Instance.HideOperationPopup();
 
                 if (CanvasManager.Instance.loginMenu.gameObject.activeInHierarchy)
                 {
@@ -355,7 +355,7 @@ public class PhantasmaDemo : MonoBehaviour
     {
         IsTokenOwner = false;
 
-        CanvasManager.Instance.ShowFetchingDataPopup("Fetching tokens from the blockchain...");
+        CanvasManager.Instance.ShowOperationPopup("Fetching tokens from the blockchain...");
 
         StartCoroutine(PhantasmaApi.GetTokens(
             (result) =>
@@ -372,7 +372,7 @@ public class PhantasmaDemo : MonoBehaviour
                     }
                 }
 
-                CanvasManager.Instance.HideFetchingDataPopup();
+                CanvasManager.Instance.HideOperationPopup();
 
                 if (callback != null)
                 {
@@ -381,7 +381,7 @@ public class PhantasmaDemo : MonoBehaviour
             },
             (errorType, errorMessage) =>
             {
-                CanvasManager.Instance.HideFetchingDataPopup();
+                CanvasManager.Instance.HideOperationPopup();
                 CanvasManager.Instance.loginMenu.ShowError(errorType + " - " + errorMessage);
             }
         ));
@@ -417,13 +417,12 @@ public class PhantasmaDemo : MonoBehaviour
                         .SpendGas(Key.Address)
                         .EndScript();
         
-        CanvasManager.Instance.ShowFetchingDataPopup("Minting a new token...");
+        CanvasManager.Instance.ShowOperationPopup("Minting a new token...");
 
         StartCoroutine(PhantasmaApi.SignAndSendTransaction(script, "main",
             (result) =>
             {
                 Debug.Log("sign result: " + result);
-
                 StartCoroutine(CheckTokenMint(carData, carMutableData, result));
 
             },
@@ -439,7 +438,7 @@ public class PhantasmaDemo : MonoBehaviour
     /// </summary>
     private IEnumerator CheckTokenMint(CarData carData, CarMutableData carMutableData, string result)
     {
-        CanvasManager.Instance.ShowFetchingDataPopup("Checking token mint...");
+        CanvasManager.Instance.ShowOperationPopup("Checking token mint...");
 
         yield return new WaitForSecondsRealtime(TRANSACTION_CONFIRMATION_DELAY);
 

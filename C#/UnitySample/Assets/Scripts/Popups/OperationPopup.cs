@@ -1,10 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class FetchingDataPopup : MonoBehaviour
+public class OperationPopup : MonoBehaviour
 {
-    private const float     _MIN_VISIBLE_DURATION   = 2.5f;
-    private const string    _DEFAULT_MESSAGE        = "Fetching data from the Blockchain...";
+    private const float _MIN_VISIBLE_DURATION   = 2.5f;
 
     public Text message;
 
@@ -27,12 +26,13 @@ public class FetchingDataPopup : MonoBehaviour
         }
     }
 
-    public void ShowPopup(string msg = null)
+    public void ShowPopup(string msg)
     {
+        Debug.Log("show: " + msg);
         _isClosing = false;
         _timeVisible = 0;
 
-        message.text = msg == null ? _DEFAULT_MESSAGE : msg;
+        message.text = msg;
 
         gameObject.SetActive(true);
     }
