@@ -77,6 +77,7 @@ public class CanvasManager : MonoBehaviour {
     {
         mainMenu.gameObject.SetActive(false);
 
+        loginMenu.ClearAddress();
         loginMenu.gameObject.SetActive(true);
     }
 

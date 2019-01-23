@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class LoginMenu : MonoBehaviour
@@ -29,5 +28,10 @@ public class LoginMenu : MonoBehaviour
     public void GeneratePrivateKeyClicked()
     {
         PhantasmaDemo.Instance.GenerateNewKey((newKey) => CanvasManager.Instance.ShowNewKeyPopup(newKey));
+    }
+
+    public void ClearAddress()
+    {
+        addressInputField.text = string.Empty;
     }
 }
