@@ -159,10 +159,22 @@ public class Market : MonoBehaviour
                         CanvasManager.Instance.HideOperationPopup();
                         CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.SUCCESS, "Asset purchased from the market with success.");
 
+                        GetMarket((auctions) =>
+                        {
+                            CanvasManager.Instance.marketMenu.SetContent(auctions);
+
+                            if (CarAuctions.Keys.Count > 0)
+                            {
+                                CanvasManager.Instance.marketMenu.SelectMarketBuyTab();
+                            }
+                        });
+
                         return;
                     }
                 }
             }
+
+            // TODO detectar se a compra falhou por ex por falta de saldo 
 
             CanvasManager.Instance.HideOperationPopup();
             CanvasManager.Instance.HideBuyPopup();
@@ -336,6 +348,17 @@ public class Market : MonoBehaviour
 
                         CanvasManager.Instance.HideRemovePopup();
                         CanvasManager.Instance.HideOperationPopup();
+
+                        GetMarket((auctions) =>
+                        {
+                            CanvasManager.Instance.marketMenu.SetContent(auctions);
+
+                            if (CarAuctions.Keys.Count > 0)
+                            {
+                                CanvasManager.Instance.marketMenu.SelectMarketSellTab();
+                            }
+                        });
+
                         CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.SUCCESS, "Asset removed from the market with success.");
                         return;
                     }

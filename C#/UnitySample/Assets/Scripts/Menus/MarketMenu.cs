@@ -2,6 +2,7 @@
 using Phantasma.Cryptography;
 using Phantasma.IO;
 using Phantasma.Numerics;
+using Phantasma.SDK;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -41,44 +42,48 @@ public class MarketMenu : MonoBehaviour
 
     public void GetMarket()
     {
-        PhantasmaDemo.Instance.market.GetMarket((auctions) =>
-        {
-            if (auctions.Length == 0)
-            {
-                CanvasManager.Instance.HideOperationPopup();
-                ShowRefreshButton("There are no auctions on the blockchain market.");
-                return;
-            }
-
-            Debug.Log("buy slots: " + _buySlots.Count + " | market buy: " + PhantasmaDemo.Instance.market.BuyCarAuctions.Keys.Count);
-            
-            if (_buySlots.Count != PhantasmaDemo.Instance.market.BuyCarAuctions.Keys.Count)
-            {
-                UpdateMarket(EMARKETPLACE_TYPE.BUY);
-            }
-
-            buyTabMessage.text = _buySlots.Count == 0 ? "There are no assets to buy on the market." : string.Empty;
-            buyTabMessage.gameObject.SetActive(_buySlots.Count == 0);
-
-            Debug.Log("sell slots: " + _sellSlots.Count + " | market sell: " + PhantasmaDemo.Instance.market.SellCarAuctions.Keys.Count);
-            if (_sellSlots.Count != PhantasmaDemo.Instance.market.SellCarAuctions.Keys.Count)
-            {
-                UpdateMarket(EMARKETPLACE_TYPE.SELL);
-            }
-
-            sellTabMessage.text = _buySlots.Count == 0 ? "You don't have any assets for sale on the market." : string.Empty;
-            sellTabMessage.gameObject.SetActive(_sellSlots.Count == 0);
-
-            buyButton.gameObject.SetActive(true);
-            sellButton.gameObject.SetActive(true);
-
-            SelectMarketBuyTab();
-
-        }, () =>
+        PhantasmaDemo.Instance.market.GetMarket(SetContent, () =>
         {
             //CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL,"Could not fetch blockchain assets market.");
             ShowRefreshButton();
         });
+    }
+
+    public void SetContent(Auction[] auctions)
+    {
+        if (auctions.Length == 0)
+        {
+            CanvasManager.Instance.HideOperationPopup();
+            ShowRefreshButton("There are no auctions on the blockchain market.");
+            return;
+        }
+
+        message.gameObject.SetActive(false);
+        refreshButton.gameObject.SetActive(false);
+
+        Debug.Log("buy slots: " + _buySlots.Count + " | market buy: " + PhantasmaDemo.Instance.market.BuyCarAuctions.Keys.Count);
+
+        if (_buySlots.Count != PhantasmaDemo.Instance.market.BuyCarAuctions.Keys.Count)
+        {
+            UpdateMarket(EMARKETPLACE_TYPE.BUY);
+        }
+
+        buyTabMessage.text = _buySlots.Count == 0 ? "There are no assets to buy on the market." : string.Empty;
+        buyTabMessage.gameObject.SetActive(_buySlots.Count == 0);
+
+        Debug.Log("sell slots: " + _sellSlots.Count + " | market sell: " + PhantasmaDemo.Instance.market.SellCarAuctions.Keys.Count);
+        if (_sellSlots.Count != PhantasmaDemo.Instance.market.SellCarAuctions.Keys.Count)
+        {
+            UpdateMarket(EMARKETPLACE_TYPE.SELL);
+        }
+
+        sellTabMessage.text = _sellSlots.Count == 0 ? "You don't have any assets for sale on the market." : string.Empty;
+        sellTabMessage.gameObject.SetActive(_sellSlots.Count == 0);
+
+        buyButton.gameObject.SetActive(true);
+        sellButton.gameObject.SetActive(true);
+
+        SelectMarketBuyTab();
     }
 
     public void UpdateMarket(EMARKETPLACE_TYPE marketPlace)
@@ -194,10 +199,14 @@ public class MarketMenu : MonoBehaviour
 
     public void ShowRefreshButton(string msg = null)
     {
+        Debug.Log("SHOW: " + msg);
         message.text = msg;
         message.gameObject.SetActive(true);
 
         refreshButton.gameObject.SetActive(true);
+
+        buyButton.gameObject.SetActive(false);
+        sellButton.gameObject.SetActive(false);
     }
 
     public void RefreshClicked()

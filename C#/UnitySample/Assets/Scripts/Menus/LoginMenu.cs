@@ -5,6 +5,8 @@ public class LoginMenu : MonoBehaviour
 {
     public InputField   addressInputField;
 
+    // TODO adicionar botão para gerar novas chaves privadas
+
     public void Login()
     {
         if (string.IsNullOrEmpty(addressInputField.text))
