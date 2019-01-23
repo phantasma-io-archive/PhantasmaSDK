@@ -96,7 +96,7 @@ public class Market : MonoBehaviour
 
         var script = ScriptUtils.BeginScript()
             .AllowGas(car.OwnerAddress, 1, 9999)
-            .CallContract("market", "BuyToken", car.OwnerAddress, car.TokenID)
+            .CallContract("market", "BuyToken", car.OwnerAddress, PhantasmaDemo.TOKEN_SYMBOL, car.TokenID)
             .SpendGas(car.OwnerAddress)
             .EndScript();
 
@@ -274,7 +274,7 @@ public class Market : MonoBehaviour
 
         var script = ScriptUtils.BeginScript()
             .AllowGas(car.OwnerAddress, 1, 9999)
-            .CallContract("market", "BuyToken", car.OwnerAddress, car.TokenID)
+            .CallContract("market", "BuyToken", car.OwnerAddress, PhantasmaDemo.TOKEN_SYMBOL, car.TokenID)
             .SpendGas(car.OwnerAddress)
             .EndScript();
 
