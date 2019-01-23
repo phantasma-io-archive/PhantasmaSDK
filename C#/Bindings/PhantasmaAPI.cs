@@ -89,7 +89,7 @@ namespace Phantasma.SDK
 				}
 				else 
 				if (root.HasNode("error")) {
-					var errorDesc = root.GetString("error");
+					var errorDesc = root["error"].GetString("message");
 					if (errorHandlingCallback != null) errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.API_ERROR, errorDesc);
 				}
 				else
