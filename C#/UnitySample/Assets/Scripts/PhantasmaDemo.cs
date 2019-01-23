@@ -114,6 +114,20 @@ public class PhantasmaDemo : MonoBehaviour
 	}
 
     /// <summary>
+    /// Generate a new WIF
+    /// </summary>
+    /// <param name="callback"></param>
+    public void GenerateNewKey(Action<string> callback = null)
+    {
+        var newKey = KeyPair.Generate().ToWIF();
+
+        if (callback != null)
+        {
+            callback(newKey);
+        }
+    }
+
+    /// <summary>
     /// Log in to Phantasma Blockchain
     /// </summary>
     /// <param name="privateKey">User private key</param>

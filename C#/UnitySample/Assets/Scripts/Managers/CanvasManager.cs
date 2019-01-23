@@ -16,6 +16,7 @@ public class CanvasManager : MonoBehaviour {
     public AdminMenu            adminMenu;
 
     // Popups
+    public NewKeyPopup          newKeyPopup;
     public OperationPopup       operationPopup;
     public ResultPopup          resultPopup;
     public BuyPopup             buyPopup;
@@ -168,6 +169,16 @@ public class CanvasManager : MonoBehaviour {
     #endregion
 
     #region Popups
+
+    public void ShowNewKeyPopup(string newKey)
+    {
+        newKeyPopup.ShowPopup(newKey);
+    }
+
+    public void HideNewKeyPopup()
+    {
+        newKeyPopup.HidePopup();
+    }
 
     public void ShowOperationPopup(string message)
     {

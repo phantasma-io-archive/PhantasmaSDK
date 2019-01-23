@@ -76,11 +76,3 @@ public struct CarAuction
     public string       tokenID;
     public Auction      auction;
 }
-
-//public struct Sale
-//{
-//    public uint         time;
-//    public BigInteger   auctionID;
-//    public BigInteger   price;
-//    public Address      buyer;
-//}

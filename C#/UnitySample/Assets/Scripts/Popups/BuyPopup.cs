@@ -27,7 +27,7 @@ public class BuyPopup : MonoBehaviour
 
     public void Cancel()
     {
-        CanvasManager.Instance.HideSellPopup();
+        CanvasManager.Instance.HideBuyPopup();
     }
 
     public void Buy()
