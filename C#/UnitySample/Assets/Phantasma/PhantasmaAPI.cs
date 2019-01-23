@@ -89,7 +89,7 @@ namespace Phantasma.SDK
 				}
 				else 
 				if (root.HasNode("error")) {
-					var errorDesc = root.GetString("error");
+					var errorDesc = root["error"].GetString("message");
 					if (errorHandlingCallback != null) errorHandlingCallback(EPHANTASMA_SDK_ERROR_TYPE.API_ERROR, errorDesc);
 				}
 				else
@@ -715,8 +715,7 @@ namespace Phantasma.SDK
 
        public bool IsValidPrivateKey(string address)
        {
-           return (address.StartsWith("L", false, CultureInfo.InvariantCulture) || 
-                   address.StartsWith("K", false, CultureInfo.InvariantCulture)) && address.Length == 52;
+           return (address.StartsWith("L", false, CultureInfo.InvariantCulture) || address.StartsWith("K", false, CultureInfo.InvariantCulture)) && address.Length == 52;
        }
 
        // TODO create method to getTransaction with several attemps if the transaction was not yet proccessed
