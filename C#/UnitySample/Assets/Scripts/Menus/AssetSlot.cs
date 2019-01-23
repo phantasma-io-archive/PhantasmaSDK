@@ -18,7 +18,7 @@ public class AssetSlot : MonoBehaviour
 
     private Car _asset;
 
-    public void SetSlot(Car car, EASSET_TYPE type)
+    public void SetSlot(EASSET_TYPE type, Car car)
     {
         _asset = car;
 
@@ -40,7 +40,16 @@ public class AssetSlot : MonoBehaviour
                 break;
             case EASSET_TYPE.BUY_MARKET_ASSET:
 
-                priceText.text  = PhantasmaDemo.Instance.market.CarAuctions[car.TokenID].auction.price;
+                if (PhantasmaDemo.Instance.market.CarAuctions.ContainsKey(car.TokenID))
+                {
+                    priceText.text = "Cost: " + PhantasmaDemo.Instance.market.CarAuctions[car.TokenID].auction.price;
+                }
+                else
+                {
+                    Debug.Log("auctions keys: " + PhantasmaDemo.Instance.market.CarAuctions.Keys.Count + " | id: " + car.TokenID);
+                    priceText.text = "Cost: NA";
+                }
+
                 priceText.gameObject.SetActive(true);
 
                 buyButton.gameObject.SetActive(true);
@@ -52,14 +61,15 @@ public class AssetSlot : MonoBehaviour
 
                 if (PhantasmaDemo.Instance.market.CarAuctions.ContainsKey(car.TokenID))
                 {
-                    priceText.text = PhantasmaDemo.Instance.market.CarAuctions[car.TokenID].auction.price.ToString();
-                    priceText.gameObject.SetActive(true);
+                    priceText.text = "Cost: " + PhantasmaDemo.Instance.market.CarAuctions[car.TokenID].auction.price;
                 }
                 else
                 {
                     Debug.Log("auctions keys: " + PhantasmaDemo.Instance.market.CarAuctions.Keys.Count + " | id: " + car.TokenID);
+                    priceText.text = "Cost: NA";
                 }
 
+                priceText.gameObject.SetActive(true);
                 removeButton.gameObject.SetActive(true);
 
                 buyButton.gameObject.SetActive(false);

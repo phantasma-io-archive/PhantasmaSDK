@@ -50,7 +50,7 @@ public class MyAssetsMenu : MonoBehaviour
 
             var newSlot                     = Instantiate(assetSlot, galleryContent.transform, false);
             newSlot.transform.localPosition += Vector3.down * AssetSlot.SLOT_HEIGHT * i;
-            newSlot.SetSlot(asset, EASSET_TYPE.MY_ASSET);
+            newSlot.SetSlot(EASSET_TYPE.MY_ASSET, asset);
             newSlot.gameObject.SetActive(true);
 
             _assetSlots.Add(newSlot);

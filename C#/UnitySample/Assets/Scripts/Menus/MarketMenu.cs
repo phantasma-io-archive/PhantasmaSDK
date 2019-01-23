@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using Phantasma.Cryptography;
+using Phantasma.IO;
+using Phantasma.Numerics;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,6 +29,10 @@ public class MarketMenu : MonoBehaviour
 
     void OnEnable()
     {
+        message.gameObject.SetActive(false);
+        buyTabMessage.gameObject.SetActive(false);
+        sellTabMessage.gameObject.SetActive(false);
+
         buyButton.gameObject.SetActive(false);
         sellButton.gameObject.SetActive(false);
 
@@ -94,7 +101,26 @@ public class MarketMenu : MonoBehaviour
 
                     var newSlot                     = Instantiate(assetSlot, buyMarketContent.transform, false);
                     newSlot.transform.localPosition += Vector3.down * AssetSlot.SLOT_HEIGHT * i;
-                    //newSlot.SetSlot(marketAsset, EASSET_TYPE.BUY_MARKET_ASSET);
+                    
+                    StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetTokenData(PhantasmaDemo.TOKEN_SYMBOL, marketAuction.tokenID,
+                        (tokenData =>
+                        {
+                            var ramBytes = Base16.Decode(tokenData.ram);
+                            var carMutableData = Serialization.Unserialize<CarMutableData>(ramBytes);
+
+                            var romBytes = Base16.Decode(tokenData.rom);
+                            var carData = Serialization.Unserialize<CarData>(romBytes);
+
+                            var newCar = new Car();
+                            newCar.SetCar(Address.FromText(tokenData.ownerAddress), marketAuction.tokenID, carData, carMutableData);
+
+                            newSlot.SetSlot(EASSET_TYPE.BUY_MARKET_ASSET, newCar);
+                        }),
+                        (type, s) =>
+                        {
+                            // TODO anything in error case?
+                        }));
+
                     newSlot.gameObject.SetActive(true);
 
                     _buySlots.Add(newSlot);
@@ -118,7 +144,27 @@ public class MarketMenu : MonoBehaviour
 
                     var newSlot                     = Instantiate(assetSlot, sellMarketContent.transform, false);
                     newSlot.transform.localPosition += Vector3.down * AssetSlot.SLOT_HEIGHT * i;
-                    //newSlot.SetSlot(marketAsset, EASSET_TYPE.SELL_MARKET_ASSET);
+
+                    StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetTokenData(PhantasmaDemo.TOKEN_SYMBOL, marketAuction.tokenID,
+                        (tokenData =>
+                        {
+                            var ramBytes = Base16.Decode(tokenData.ram);
+                            var carMutableData = Serialization.Unserialize<CarMutableData>(ramBytes);
+
+                            var romBytes = Base16.Decode(tokenData.rom);
+                            var carData = Serialization.Unserialize<CarData>(romBytes);
+
+                            var newCar = new Car();
+                            newCar.SetCar(Address.FromText(tokenData.ownerAddress), marketAuction.tokenID, carData, carMutableData);
+
+                            newSlot.SetSlot(EASSET_TYPE.SELL_MARKET_ASSET, newCar);
+                        }),
+                        (type, s) =>
+                        {
+                            // TODO anything in error case?
+                        }));
+
+
                     newSlot.gameObject.SetActive(true);
 
                     _sellSlots.Add(newSlot);

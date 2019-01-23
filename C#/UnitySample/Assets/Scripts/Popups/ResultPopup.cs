@@ -9,7 +9,7 @@ public enum ERESULT_TYPE
 
 public class ResultPopup : MonoBehaviour
 {  
-    public Text     message;
+    public Text message;
 
     public void ShowPopup(ERESULT_TYPE type, string msg)
     {
