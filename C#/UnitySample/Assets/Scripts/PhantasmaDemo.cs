@@ -170,6 +170,8 @@ public class PhantasmaDemo : MonoBehaviour
     /// <param name="address">String, base58 encoded - address to check for balance and name.</param>
     public void GetAccount(string address)
     {
+        // Second test account: KyHrxZyrGPorgJKLv4Cg6dm5xCjEb6k8USRoSysVXAQK6eEb5taU
+
         // Private key: L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25
         // Public key:  P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr
 
