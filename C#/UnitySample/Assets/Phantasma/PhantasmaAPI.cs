@@ -720,5 +720,7 @@ namespace Phantasma.SDK
        }
 
        // TODO create method to getTransaction with several attemps if the transaction was not yet proccessed
+       // TODO show cancel operation button that removes the transaction if it is still in the mempool or show a message
+       // TODO "The operation is being processed by the blockchain and cannot be canceled anymore."
 	}
 }
