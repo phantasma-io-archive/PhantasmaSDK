@@ -28,7 +28,7 @@ public class Market : MonoBehaviour
     /// <summary>
     /// Get the market in Phantasma Blockchain with the current assets
     /// </summary>
-    public void GetMarket(Action successCallback = null, Action errorCallback = null)
+    public void GetMarket(Action<Auction[]> successCallback = null, Action errorCallback = null)
     {
         // TODO FIX vêm tokens no get market mas aparece msg de erro: Failed to get market auctions
         CanvasManager.Instance.ShowOperationPopup("Refreshing blockchain asset market...");
@@ -37,12 +37,7 @@ public class Market : MonoBehaviour
         //StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetAuctions("NACHO",
             (auctions) =>
             {
-                if (auctions.Length == 0)
-                {
-                    CanvasManager.Instance.HideOperationPopup();
-                    CanvasManager.Instance.marketMenu.ShowError("There are no auctions on the blockchain market.");
-                    return;
-                }
+                Debug.Log("auctions: " + (auctions == null) + " | " + auctions.Length);
 
                 CarAuctions.Clear();
                 SellCarAuctions.Clear();
@@ -61,20 +56,34 @@ public class Market : MonoBehaviour
                     {
                         // Auction has my address -> Selling Auction
                         SellCarAuctions.Add(auction.tokenId, carAuction);
+                        Debug.Log("add SELL");
                     }
                     else
                     {
                         // No my auction -> Buying Auction
                         BuyCarAuctions.Add(auction.tokenId, carAuction);
+                        Debug.Log("add BUY");
                     }
                 }
 
                 CanvasManager.Instance.HideOperationPopup();
+
+                if (successCallback != null)
+                {
+                    successCallback(auctions);
+                }
             },
             (errorType, errorMessage) =>
             {
-                CanvasManager.Instance.marketMenu.ShowError(errorType + " - " + errorMessage, true);
+                Debug.Log("FAIL");
+
                 CanvasManager.Instance.HideOperationPopup();
+                CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, errorType + " - " + errorMessage);
+
+                if (errorCallback != null)
+                {
+                    errorCallback();
+                }
             }));
     }
 
@@ -100,8 +109,8 @@ public class Market : MonoBehaviour
             },
             (errorType, errorMessage) =>
             {
-                CanvasManager.Instance.marketMenu.ShowError(errorType + " - " + errorMessage);
                 CanvasManager.Instance.HideOperationPopup();
+                CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, errorType + " - " + errorMessage);
             }
         ));
     }
@@ -157,7 +166,7 @@ public class Market : MonoBehaviour
 
             CanvasManager.Instance.HideOperationPopup();
             CanvasManager.Instance.HideBuyPopup();
-            CanvasManager.Instance.myAssetsMenu.ShowError("Something failed while purchasing the asset from the market. Please try again.");
+            CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, "Something failed while purchasing the asset from the market. Please try again.");
         });
     }
 
@@ -185,7 +194,7 @@ public class Market : MonoBehaviour
             {
                 CanvasManager.Instance.HideOperationPopup();
                 CanvasManager.Instance.HideSellPopup();
-                CanvasManager.Instance.myAssetsMenu.ShowError("Something failed while creating the auction sale on the market. Please try again.");
+                CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, "Something failed while creating the auction sale on the market. Please try again.");
             }
         ));
     }
@@ -252,7 +261,7 @@ public class Market : MonoBehaviour
 
             CanvasManager.Instance.HideSellPopup();
             CanvasManager.Instance.HideOperationPopup();
-            CanvasManager.Instance.myAssetsMenu.ShowError("Something failed while creating the auction sale on the market. Please try again.");
+            CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, "Something failed while creating the auction sale on the market. Please try again.");
         });
     }
 
@@ -279,7 +288,7 @@ public class Market : MonoBehaviour
             },
             (errorType, errorMessage) =>
             {
-                CanvasManager.Instance.marketMenu.ShowError(errorType + " - " + errorMessage);
+                CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, errorType + " - " + errorMessage);
                 CanvasManager.Instance.HideOperationPopup();
             }
         ));
@@ -335,7 +344,7 @@ public class Market : MonoBehaviour
 
             CanvasManager.Instance.HideOperationPopup();
             CanvasManager.Instance.HideRemovePopup();
-            CanvasManager.Instance.myAssetsMenu.ShowError("Something failed while removing the auction from the market. Please try again.");
+            CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, "Something failed while removing the auction from the market. Please try again.");
         });
     }
 

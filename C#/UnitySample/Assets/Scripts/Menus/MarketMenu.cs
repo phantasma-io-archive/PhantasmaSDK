@@ -14,7 +14,7 @@ public class MarketMenu : MonoBehaviour
     public GameObject   buyMarketContent, sellMarketContent;
     public Button       buyButton, sellButton, refreshButton;
     public GameObject   buyTab, sellTab;
-    public Text         errorMessage;
+    public Text         message, buyTabMessage, sellTabMessage;
 
     private List<AssetSlot> _buySlots, _sellSlots;
 
@@ -34,17 +34,33 @@ public class MarketMenu : MonoBehaviour
 
     public void GetMarket()
     {
-        PhantasmaDemo.Instance.market.GetMarket(() =>
+        PhantasmaDemo.Instance.market.GetMarket((auctions) =>
         {
+            if (auctions.Length == 0)
+            {
+                CanvasManager.Instance.HideOperationPopup();
+                ShowRefreshButton("There are no auctions on the blockchain market.");
+                return;
+            }
+
+            Debug.Log("buy slots: " + _buySlots.Count + " | market buy: " + PhantasmaDemo.Instance.market.BuyCarAuctions.Keys.Count);
+            
             if (_buySlots.Count != PhantasmaDemo.Instance.market.BuyCarAuctions.Keys.Count)
             {
                 UpdateMarket(EMARKETPLACE_TYPE.BUY);
             }
 
+            buyTabMessage.text = _buySlots.Count == 0 ? "There are no assets to buy on the market." : string.Empty;
+            buyTabMessage.gameObject.SetActive(_buySlots.Count == 0);
+
+            Debug.Log("sell slots: " + _sellSlots.Count + " | market sell: " + PhantasmaDemo.Instance.market.SellCarAuctions.Keys.Count);
             if (_sellSlots.Count != PhantasmaDemo.Instance.market.SellCarAuctions.Keys.Count)
             {
                 UpdateMarket(EMARKETPLACE_TYPE.SELL);
             }
+
+            sellTabMessage.text = _buySlots.Count == 0 ? "You don't have any assets for sale on the market." : string.Empty;
+            sellTabMessage.gameObject.SetActive(_sellSlots.Count == 0);
 
             buyButton.gameObject.SetActive(true);
             sellButton.gameObject.SetActive(true);
@@ -53,7 +69,8 @@ public class MarketMenu : MonoBehaviour
 
         }, () =>
         {
-            ShowError("Error: Could not fetch blockchain assets market.", true);
+            //CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL,"Could not fetch blockchain assets market.");
+            ShowRefreshButton();
         });
     }
 
@@ -129,14 +146,12 @@ public class MarketMenu : MonoBehaviour
         buyTab.SetActive(false);
     }
 
-    public void ShowError(string error, bool showRetryButton = false)
+    public void ShowRefreshButton(string msg = null)
     {
-        // TODO change to use show error popup and use this for messages like: empty market (not an error)
-        Debug.Log("show error:" + error);
-        errorMessage.text = error;
-        errorMessage.gameObject.SetActive(true);
+        message.text = msg;
+        message.gameObject.SetActive(true);
 
-        refreshButton.gameObject.SetActive(showRetryButton);
+        refreshButton.gameObject.SetActive(true);
     }
 
     public void RefreshClicked()

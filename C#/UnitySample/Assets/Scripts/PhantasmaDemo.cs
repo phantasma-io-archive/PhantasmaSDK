@@ -275,6 +275,9 @@ public class PhantasmaDemo : MonoBehaviour
                                 CanvasManager.Instance.adminMenu.SetContent();
                                 //PhantasmaApi.LogTransaction(Key.Address, 0, TransactionType.Created_Token, "CAR");
                             });
+
+                            CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.SUCCESS, "New token created with success.");
+
                         }
 
                         return;
@@ -465,6 +468,8 @@ public class PhantasmaDemo : MonoBehaviour
                         //PhantasmaApi.LogTransaction(PhantasmaDemo.Instance.Key.Address, 0, TransactionType.Created_Car, carID);
 
                         CheckTokens(() => { CanvasManager.Instance.adminMenu.SetContent(); });
+
+                        CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.SUCCESS, "Token mint with success.");
 
                         return;
                     }

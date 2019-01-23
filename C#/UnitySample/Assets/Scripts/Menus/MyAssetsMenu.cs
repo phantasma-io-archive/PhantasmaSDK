@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class MyAssetsMenu : MonoBehaviour
 {
     public GameObject   galleryContent;
-    public Text         errorMessage;
+    public Text         message;
     public AssetSlot    assetSlot;
 
     private List<AssetSlot> _assetSlots;
@@ -40,7 +40,7 @@ public class MyAssetsMenu : MonoBehaviour
 
         if (tokenIds.Count == 0)
         {
-            ShowError("There are no assets on your account.");
+            ShowMessage("There are no assets on your account.");
             return;
         }
 
@@ -57,18 +57,16 @@ public class MyAssetsMenu : MonoBehaviour
         }
     }
 
-    public void ShowError(string error)
+    public void ShowMessage(string msg)
     {
-        // TODO change to use show error popup and use this to show messages like: "There are no assets on your account.";
-
-        errorMessage.text = error;
-        errorMessage.gameObject.SetActive(true);
+        message.text = msg;
+        message.gameObject.SetActive(true);
     }
 
     private void ClearErrorContent()
     {
-        errorMessage.text = string.Empty;
-        errorMessage.gameObject.SetActive(false);
+        message.text = string.Empty;
+        message.gameObject.SetActive(false);
     }
 
     public void BackClicked()
