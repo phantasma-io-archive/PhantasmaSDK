@@ -148,16 +148,25 @@ public class PhantasmaDemo : MonoBehaviour
     private void LoggedIn(string address)
     {
         Debug.Log("logged in: " + address);
-
-        //var address = "L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25";
-        //var addressBytes = Encoding.ASCII.GetBytes(address);
-        
+       
         CanvasManager.Instance.SetAddress(address);
         CanvasManager.Instance.CloseLogin();
     }
 
     public void LogOut()
     {
+        IsTokenCreated  = false;
+        IsTokenOwner    = false;
+        
+        TokenCurrentSupply = 0;
+
+        MyCars.Clear();
+
+        CanvasManager.Instance.mainMenu.SetAdminButton();
+
+        CanvasManager.Instance.myAssetsMenu.ClearContent();
+        CanvasManager.Instance.marketMenu.ClearContent();
+
         CanvasManager.Instance.ClearAddress();
         CanvasManager.Instance.OpenLogin();
     }
