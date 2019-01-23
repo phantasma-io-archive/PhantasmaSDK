@@ -123,7 +123,7 @@ public class MarketMenu : MonoBehaviour
                         }),
                         (type, s) =>
                         {
-                            // TODO anything in error case?
+                            newSlot.DataNotAvailable();
                         }));
 
                     newSlot.gameObject.SetActive(true);
@@ -166,7 +166,7 @@ public class MarketMenu : MonoBehaviour
                         }),
                         (type, s) =>
                         {
-                            // TODO anything in error case?
+                            newSlot.DataNotAvailable();
                         }));
 
 

@@ -213,7 +213,7 @@ public class PhantasmaDemo : MonoBehaviour
                                 }),
                                 (type, s) =>
                                 {
-                                    // TODO anything in error case?
+
                                 }));
                         }
                     }

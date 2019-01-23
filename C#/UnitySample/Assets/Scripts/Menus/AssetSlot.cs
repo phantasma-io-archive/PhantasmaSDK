@@ -79,6 +79,20 @@ public class AssetSlot : MonoBehaviour
 
     }
 
+    public void DataNotAvailable()
+    {
+        assetImage.gameObject.SetActive(false);
+
+        nameText.text   = "Name: NA";
+        powerText.text  = "Power: NA";
+        speedText.text  = "Speed: NA";
+        priceText.text  = "Price: NA";
+
+        removeButton.gameObject.SetActive(false);
+        buyButton.gameObject.SetActive(false);
+        sellButton.gameObject.SetActive(false);
+    }
+
     /// <summary>
     /// Buy this asset from the market
     /// </summary>

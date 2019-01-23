@@ -30,11 +30,9 @@ public class Market : MonoBehaviour
     /// </summary>
     public void GetMarket(Action<Auction[]> successCallback = null, Action errorCallback = null)
     {
-        // TODO FIX vêm tokens no get market mas aparece msg de erro: Failed to get market auctions
         CanvasManager.Instance.ShowOperationPopup("Refreshing blockchain asset market...");
 
         StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.TOKEN_SYMBOL,
-        //StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetAuctions("NACHO",
             (auctions) =>
             {
                 Debug.Log("auctions: " + (auctions == null) + " | " + auctions.Length);
@@ -174,7 +172,7 @@ public class Market : MonoBehaviour
                 }
             }
 
-            // TODO detectar se a compra falhou por ex por falta de saldo 
+            // TODO detectar se a compra falhou por ex por falta de saldo -> on hold backend
 
             CanvasManager.Instance.HideOperationPopup();
             CanvasManager.Instance.HideBuyPopup();

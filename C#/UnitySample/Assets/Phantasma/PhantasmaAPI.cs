@@ -718,5 +718,7 @@ namespace Phantasma.SDK
            return (address.StartsWith("L", false, CultureInfo.InvariantCulture) || 
                    address.StartsWith("K", false, CultureInfo.InvariantCulture)) && address.Length == 52;
        }
+
+       // TODO create method to getTransaction with several attemps if the transaction was not yet proccessed
 	}
 }
