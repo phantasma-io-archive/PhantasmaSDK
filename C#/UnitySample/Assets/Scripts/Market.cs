@@ -171,12 +171,16 @@ public class Market : MonoBehaviour
                     }
                 }
             }
-
-            // TODO detectar se a compra falhou por ex por falta de saldo -> on hold backend
-
+            
             CanvasManager.Instance.HideOperationPopup();
             CanvasManager.Instance.HideBuyPopup();
             CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, "Something failed while purchasing the asset from the market. Please try again.");
+        }, 
+        (errorType, errorMessage) =>
+        {
+            CanvasManager.Instance.HideOperationPopup();
+            CanvasManager.Instance.HideBuyPopup();
+            CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, errorType + " - " + errorMessage);
         });
     }
 
@@ -204,7 +208,8 @@ public class Market : MonoBehaviour
             {
                 CanvasManager.Instance.HideOperationPopup();
                 CanvasManager.Instance.HideSellPopup();
-                CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, "Something failed while creating the auction sale on the market. Please try again.");
+                //CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, "Something failed while creating the auction sale on the market. Please try again.");
+                CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, errorType + " - " + errorMessage);
             }
         ));
     }
@@ -272,6 +277,12 @@ public class Market : MonoBehaviour
             CanvasManager.Instance.HideSellPopup();
             CanvasManager.Instance.HideOperationPopup();
             CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, "Something failed while creating the auction sale on the market. Please try again.");
+        },
+        (errorType, errorMessage) =>
+        {
+            CanvasManager.Instance.HideOperationPopup();
+            CanvasManager.Instance.HideSellPopup();
+            CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, errorType + " - " + errorMessage);
         });
     }
 
@@ -314,59 +325,64 @@ public class Market : MonoBehaviour
         yield return new WaitForSecondsRealtime(PhantasmaDemo.TRANSACTION_CONFIRMATION_DELAY);
 
         yield return PhantasmaDemo.Instance.PhantasmaApi.GetTransaction(result, (tx) =>
-        {
-            foreach (var evt in tx.events)
             {
-                EventKind eKind;
-                if (Enum.TryParse(evt.kind, out eKind))
+                foreach (var evt in tx.events)
                 {
-                    if (eKind == EventKind.AuctionCancelled)
+                    EventKind eKind;
+                    if (Enum.TryParse(evt.kind, out eKind))
                     {
-                        var bytes = Base16.Decode(evt.data);
-                        var marketEventData = Serialization.Unserialize<MarketEventData>(bytes);
-
-                        //Debug.Log(evt.kind + " - " + marketEventData.ID);
-
-                        //var carData = car.Data;
-                        //car.Data    = carData;
-
-                        var carMutableData      = car.MutableData;
-                        carMutableData.location = CarLocation.None;
-
-                        car.OwnerAddress    = PhantasmaDemo.Instance.Key.Address;
-                        car.MutableData     = carMutableData;
-
-                        CarAuctions.Remove(car.TokenID);
-                        SellCarAuctions.Remove(car.TokenID);
-
-                        PhantasmaDemo.Instance.MyCars.Add(car.TokenID, car);
-                        //CanvasManager.Instance.myAssetsMenu.UpdateMyAssets(); // Talvez não seja necessário isto
-
-                        CanvasManager.Instance.marketMenu.UpdateMarket(MarketMenu.EMARKETPLACE_TYPE.SELL);
-
-                        CanvasManager.Instance.HideRemovePopup();
-                        CanvasManager.Instance.HideOperationPopup();
-
-                        GetMarket((auctions) =>
+                        if (eKind == EventKind.AuctionCancelled)
                         {
-                            CanvasManager.Instance.marketMenu.SetContent(auctions);
+                            var bytes           = Base16.Decode(evt.data);
+                            //var marketEventData = Serialization.Unserialize<MarketEventData>(bytes);
+                            //Debug.Log(evt.kind + " - " + marketEventData.ID);
 
-                            if (CarAuctions.Keys.Count > 0)
+                            //var carData = car.Data;
+                            //car.Data    = carData;
+
+                            var carMutableData      = car.MutableData;
+                            carMutableData.location = CarLocation.None;
+
+                            car.OwnerAddress = PhantasmaDemo.Instance.Key.Address;
+                            car.MutableData = carMutableData;
+
+                            CarAuctions.Remove(car.TokenID);
+                            SellCarAuctions.Remove(car.TokenID);
+
+                            PhantasmaDemo.Instance.MyCars.Add(car.TokenID, car);
+                            //CanvasManager.Instance.myAssetsMenu.UpdateMyAssets(); // Talvez não seja necessário isto
+
+                            CanvasManager.Instance.marketMenu.UpdateMarket(MarketMenu.EMARKETPLACE_TYPE.SELL);
+
+                            CanvasManager.Instance.HideRemovePopup();
+                            CanvasManager.Instance.HideOperationPopup();
+
+                            GetMarket((auctions) =>
                             {
-                                CanvasManager.Instance.marketMenu.SelectMarketSellTab();
-                            }
-                        });
+                                CanvasManager.Instance.marketMenu.SetContent(auctions);
 
-                        CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.SUCCESS, "Asset removed from the market with success.");
-                        return;
+                                if (CarAuctions.Keys.Count > 0)
+                                {
+                                    CanvasManager.Instance.marketMenu.SelectMarketSellTab();
+                                }
+                            });
+
+                            CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.SUCCESS, "Asset removed from the market with success.");
+                            return;
+                        }
                     }
                 }
-            }
 
-            CanvasManager.Instance.HideOperationPopup();
-            CanvasManager.Instance.HideRemovePopup();
-            CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, "Something failed while removing the auction from the market. Please try again.");
-        });
+                CanvasManager.Instance.HideOperationPopup();
+                CanvasManager.Instance.HideRemovePopup();
+                CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, "Something failed while removing the auction from the market. Please try again.");
+            },
+            (errorType, errorMessage) =>
+            {
+                CanvasManager.Instance.HideOperationPopup();
+                CanvasManager.Instance.HideRemovePopup();
+                CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, errorType + " - " + errorMessage);
+            });
     }
 
     /// <summary>

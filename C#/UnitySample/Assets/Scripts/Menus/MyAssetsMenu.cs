@@ -17,23 +17,14 @@ public class MyAssetsMenu : MonoBehaviour
 
     void OnEnable()
     {
-        ClearErrorContent();
+        ClearMessage();
 
-        //Debug.Log("my: " + PhantasmaDemo.Instance.MyCars.Count + " | slots: " + _assetSlots.Count);
-        //if (_assetSlots.Count != PhantasmaDemo.Instance.MyCars.Keys.Count)
-        //{
-            UpdateMyAssets();
-        //}
+        UpdateMyAssets();
     }
 
     public void UpdateMyAssets()
     {
-        foreach (var slot in _assetSlots)
-        {
-            DestroyImmediate(slot.gameObject);
-        }
-
-        _assetSlots.Clear();
+        ClearContent();
 
         //Debug.Log("my assets: " + PhantasmaDemo.Instance.MyCars.Keys.Count);
         var tokenIds = new List<string>(PhantasmaDemo.Instance.MyCars.Keys);
@@ -57,13 +48,23 @@ public class MyAssetsMenu : MonoBehaviour
         }
     }
 
+    public void ClearContent()
+    {
+        foreach (var slot in _assetSlots)
+        {
+            DestroyImmediate(slot.gameObject);
+        }
+
+        _assetSlots.Clear();
+    }
+
     public void ShowMessage(string msg)
     {
         message.text = msg;
         message.gameObject.SetActive(true);
     }
 
-    private void ClearErrorContent()
+    private void ClearMessage()
     {
         message.text = string.Empty;
         message.gameObject.SetActive(false);

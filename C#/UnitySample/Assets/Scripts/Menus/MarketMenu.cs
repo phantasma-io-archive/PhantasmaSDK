@@ -92,12 +92,7 @@ public class MarketMenu : MonoBehaviour
         {
             case EMARKETPLACE_TYPE.BUY:
 
-                foreach (var buySlot in _buySlots)
-                {
-                    DestroyImmediate(buySlot.gameObject);
-                }
-
-                _buySlots.Clear();
+                ClearBuyMarket();
 
                 var buyAuctionsKeys = new List<string>(PhantasmaDemo.Instance.market.BuyCarAuctions.Keys);
                 for (var i = 0; i < buyAuctionsKeys.Count; i++)
@@ -135,12 +130,7 @@ public class MarketMenu : MonoBehaviour
 
             case EMARKETPLACE_TYPE.SELL:
 
-                foreach (var sellSlot in _sellSlots)
-                {
-                    DestroyImmediate(sellSlot.gameObject);
-                }
-
-                _sellSlots.Clear();
+                ClearSellMarket();
 
                 var sellAuctionsKeys = new List<string>(PhantasmaDemo.Instance.market.SellCarAuctions.Keys);
                 for (var i = 0; i < sellAuctionsKeys.Count; i++)
@@ -177,6 +167,32 @@ public class MarketMenu : MonoBehaviour
 
                 break;
         }
+    }
+
+    public void ClearContent()
+    {
+        ClearBuyMarket();
+        ClearSellMarket();
+    }
+
+    private void ClearBuyMarket()
+    {
+        foreach (var buySlot in _buySlots)
+        {
+            DestroyImmediate(buySlot.gameObject);
+        }
+
+        _buySlots.Clear();
+    }
+
+    private void ClearSellMarket()
+    {
+        foreach (var sellSlot in _sellSlots)
+        {
+            DestroyImmediate(sellSlot.gameObject);
+        }
+
+        _sellSlots.Clear();
     }
 
     public void SelectMarketBuyTab()
