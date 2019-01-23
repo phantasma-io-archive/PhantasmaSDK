@@ -119,9 +119,16 @@ public class PhantasmaDemo : MonoBehaviour
     /// <param name="privateKey">User private key</param>
     public void Login(string privateKey)
     {
-        Key = KeyPair.FromWIF(privateKey);
+        try
+        {
+            Key = KeyPair.FromWIF(privateKey);
 
-        GetAccount(Key.Address.ToString());
+            GetAccount(Key.Address.ToString());
+        }
+        catch (Exception e)
+        {
+            CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, "Not valid Private Key: " + e.Message);   
+        }
     }
 
     private void LoggedIn(string address)
