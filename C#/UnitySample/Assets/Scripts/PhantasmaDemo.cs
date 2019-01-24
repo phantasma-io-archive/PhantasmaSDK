@@ -173,6 +173,46 @@ public class PhantasmaDemo : MonoBehaviour
 
     #region Blockchain calls
 
+    public IEnumerator CheckOperation(string transactionHash, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
+    {
+        var isTransactionCompleted = false;
+
+        while (!isTransactionCompleted)
+        {
+            yield return new WaitForSecondsRealtime(TRANSACTION_CONFIRMATION_DELAY);
+
+            yield return PhantasmaApi.GetTransaction(transactionHash,
+                (tx) =>
+                {
+                    isTransactionCompleted = true;
+
+                    if (callback != null)
+                    {
+                        callback(tx);
+                    }
+                },
+                (errorType, errorMessage) =>
+                {
+                    if (errorType == EPHANTASMA_SDK_ERROR_TYPE.API_ERROR && errorMessage.Equals("pending"))
+                    {
+                        Debug.Log("PENDING TRANSACTION");
+                        // recursive test
+                        //StartCoroutine(CheckOperation(transactionHash, callback, errorHandlingCallback));
+                        //return;
+                    }
+                    else
+                    {
+                        isTransactionCompleted = true;
+
+                        if (errorHandlingCallback != null)
+                        {
+                            errorHandlingCallback(errorType, errorMessage);
+                        }
+                    }
+                });
+        }
+    }
+
     /// <summary>
     /// Returns the account name and balance of given address.
     /// </summary>
@@ -281,45 +321,52 @@ public class PhantasmaDemo : MonoBehaviour
     {
         CanvasManager.Instance.ShowOperationPopup("Checking token creation...");
 
-        yield return new WaitForSecondsRealtime(TRANSACTION_CONFIRMATION_DELAY);
-        
-        yield return PhantasmaApi.GetTransaction(result, (tx) =>
-        {
-            foreach (var evt in tx.events)
+        yield return CheckOperation(result, 
+            (tx) =>
             {
-                EventKind eKind;
-                if (Enum.TryParse(evt.kind, out eKind))
+                foreach (var evt in tx.events)
                 {
-                    if (eKind == EventKind.TokenCreate)
+                    EventKind eKind;
+                    if (Enum.TryParse(evt.kind, out eKind))
                     {
-                        var bytes       = Base16.Decode(evt.data);
-                        var tokenSymbol = Serialization.Unserialize<string>(bytes);
-
-                        Debug.Log(evt.kind + " - " + tokenSymbol);
-
-                        if (tokenSymbol.Equals(TOKEN_SYMBOL))
+                        if (eKind == EventKind.TokenCreate)
                         {
-                            IsTokenCreated  = true;
-                            IsTokenOwner    = true;
+                            var bytes = Base16.Decode(evt.data);
+                            var tokenSymbol = Serialization.Unserialize<string>(bytes);
 
-                            CheckTokens(() =>
+                            Debug.Log(evt.kind + " - " + tokenSymbol);
+
+                            if (tokenSymbol.Equals(TOKEN_SYMBOL))
                             {
-                                CanvasManager.Instance.adminMenu.SetContent();
-                                //PhantasmaApi.LogTransaction(Key.Address, 0, TransactionType.Created_Token, "CAR");
-                            });
+                                IsTokenCreated = true;
+                                IsTokenOwner = true;
 
-                            CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.SUCCESS, "New token created with success.");
+                                CheckTokens(() =>
+                                {
+                                    CanvasManager.Instance.adminMenu.SetContent();
+                                    //PhantasmaApi.LogTransaction(Key.Address, 0, TransactionType.Created_Token, "CAR");
+                                });
 
+                                CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.SUCCESS, "New token created with success.");
+                            }
+
+                            return;
                         }
-
-                        return;
                     }
                 }
-            }
 
-            CanvasManager.Instance.HideOperationPopup();
-            CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, "Something failed on the connection to the blockchain. Please try again.");
-        });
+                CanvasManager.Instance.HideOperationPopup();
+                CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, "Something failed on the connection to the blockchain. Please try again.");
+            },
+            ((errorType, errorMessage) =>
+            {
+                Debug.Log("FAIL create token");
+
+                CanvasManager.Instance.HideOperationPopup();
+                CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, errorType + " - " + errorMessage);
+            }));
+
+        
     }
 
     /// <summary>
@@ -473,45 +520,48 @@ public class PhantasmaDemo : MonoBehaviour
     {
         CanvasManager.Instance.ShowOperationPopup("Checking token mint...");
 
-        yield return new WaitForSecondsRealtime(TRANSACTION_CONFIRMATION_DELAY);
-
-        yield return PhantasmaApi.GetTransaction(result, (tx) =>
-        {
-            foreach (var evt in tx.events)
+        yield return CheckOperation(result,
+            (tx) =>
             {
-                EventKind eKind;
-                if (Enum.TryParse(evt.kind, out eKind))
+                foreach (var evt in tx.events)
                 {
-                    if (eKind == EventKind.TokenMint)
+                    EventKind eKind;
+                    if (Enum.TryParse(evt.kind, out eKind))
                     {
-                        var bytes = Base16.Decode(evt.data);
-                        var tokenData = Serialization.Unserialize<TokenEventData>(bytes);
+                        if (eKind == EventKind.TokenMint)
+                        {
+                            var bytes = Base16.Decode(evt.data);
+                            var tokenData = Serialization.Unserialize<TokenEventData>(bytes);
 
-                        var tokenID = tokenData.value;
+                            var tokenID = tokenData.value;
 
-                        Debug.Log("has event: " + evt.kind + " - car token id:" + tokenID);
+                            Debug.Log("has event: " + evt.kind + " - car token id:" + tokenID);
 
-                        var newCar = new Car();
-                        newCar.SetCar(tokenData.chainAddress, tokenID.ToString(), carData, carMutableData);
+                            var newCar = new Car();
+                            newCar.SetCar(tokenData.chainAddress, tokenID.ToString(), carData, carMutableData);
 
-                        // Add new car to admin assets
-                        MyCars.Add(tokenID.ToString(), newCar);
+                            // Add new car to admin assets
+                            MyCars.Add(tokenID.ToString(), newCar);
 
-                        //PhantasmaApi.LogTransaction(PhantasmaDemo.Instance.Key.Address, 0, TransactionType.Created_Car, carID);
+                            //PhantasmaApi.LogTransaction(PhantasmaDemo.Instance.Key.Address, 0, TransactionType.Created_Car, carID);
 
-                        CheckTokens(() => { CanvasManager.Instance.adminMenu.SetContent(); });
+                            CheckTokens(() => { CanvasManager.Instance.adminMenu.SetContent(); });
 
-                        CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.SUCCESS, "Token mint with success.");
+                            CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.SUCCESS, "Token mint with success.");
 
-                        return;
+                            return;
+                        }
                     }
                 }
-            }
 
-            CanvasManager.Instance.HideOperationPopup();
-            CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, "Something failed while executing a new token mint. Please try again.");
-
-        });
+                CanvasManager.Instance.HideOperationPopup();
+                CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, "Something failed while executing a new token mint. Please try again.");
+            },
+            ((errorType, errorMessage) =>
+            {
+                CanvasManager.Instance.HideOperationPopup();
+                CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, errorType + " - " + errorMessage);
+            }));
     }
 
     #endregion
