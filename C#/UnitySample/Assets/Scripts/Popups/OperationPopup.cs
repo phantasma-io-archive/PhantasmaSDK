@@ -34,7 +34,7 @@ public class OperationPopup : MonoBehaviour
 
     public void ShowPopup(string msg)
     {
-        Debug.Log("show: " + msg);
+        Debug.Log("------> " + msg);
         _isClosing = false;
         _timeVisible = 0;
 

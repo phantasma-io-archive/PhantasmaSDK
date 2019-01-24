@@ -61,7 +61,7 @@ public class MarketMenu : MonoBehaviour
         message.gameObject.SetActive(false);
         refreshButton.gameObject.SetActive(false);
 
-        Debug.Log("buy slots: " + _buySlots.Count + " | market buy: " + PhantasmaDemo.Instance.market.BuyCarAuctions.Keys.Count);
+        //Debug.Log("buy slots: " + _buySlots.Count + " | market buy: " + PhantasmaDemo.Instance.market.BuyCarAuctions.Keys.Count);
 
         if (_buySlots.Count != PhantasmaDemo.Instance.market.BuyCarAuctions.Keys.Count)
         {
@@ -71,7 +71,7 @@ public class MarketMenu : MonoBehaviour
         buyTabMessage.text = _buySlots.Count == 0 ? "There are no assets to buy on the market." : string.Empty;
         buyTabMessage.gameObject.SetActive(_buySlots.Count == 0);
 
-        Debug.Log("sell slots: " + _sellSlots.Count + " | market sell: " + PhantasmaDemo.Instance.market.SellCarAuctions.Keys.Count);
+        //Debug.Log("sell slots: " + _sellSlots.Count + " | market sell: " + PhantasmaDemo.Instance.market.SellCarAuctions.Keys.Count);
         if (_sellSlots.Count != PhantasmaDemo.Instance.market.SellCarAuctions.Keys.Count)
         {
             UpdateMarket(EMARKETPLACE_TYPE.SELL);
@@ -215,7 +215,6 @@ public class MarketMenu : MonoBehaviour
 
     public void ShowRefreshButton(string msg = null)
     {
-        Debug.Log("SHOW: " + msg);
         message.text = msg;
         message.gameObject.SetActive(true);
 

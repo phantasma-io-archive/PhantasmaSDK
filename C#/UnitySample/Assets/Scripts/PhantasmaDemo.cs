@@ -301,8 +301,6 @@ public class PhantasmaDemo : MonoBehaviour
             StartCoroutine(PhantasmaApi.SignAndSendTransaction(script, "main",
                 (result) =>
                 {
-                    Debug.Log("create token result: " + result);
-
                     StartCoroutine(CheckTokenCreation(result));
                 },
                 (errorType, errorMessage) =>
@@ -365,8 +363,6 @@ public class PhantasmaDemo : MonoBehaviour
                 CanvasManager.Instance.HideOperationPopup();
                 CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, errorType + " - " + errorMessage);
             }));
-
-        
     }
 
     /// <summary>
@@ -502,9 +498,7 @@ public class PhantasmaDemo : MonoBehaviour
         StartCoroutine(PhantasmaApi.SignAndSendTransaction(script, "main",
             (result) =>
             {
-                Debug.Log("sign result: " + result);
                 StartCoroutine(CheckTokenMint(carData, carMutableData, result));
-
             },
             (errorType, errorMessage) =>
             {
