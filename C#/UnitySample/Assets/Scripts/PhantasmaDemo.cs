@@ -294,7 +294,7 @@ public class PhantasmaDemo : MonoBehaviour
 
         Debug.Log("Get account: " + address);
 
-        CanvasManager.Instance.ShowOperationPopup("Fetching account data from the blockchain...");
+        CanvasManager.Instance.ShowOperationPopup("Fetching account data from the blockchain...", false);
 
         StartCoroutine(PhantasmaApi.GetAccount(address, 
             account =>
@@ -357,7 +357,7 @@ public class PhantasmaDemo : MonoBehaviour
     {
         CheckTokens(() =>
         {
-            CanvasManager.Instance.ShowOperationPopup("Creating a new token on the blockchain...");
+            CanvasManager.Instance.ShowOperationPopup("Creating a new token on the blockchain...", false);
 
             var script = ScriptUtils.BeginScript()
                 .AllowGas(Key.Address, 1, 9999)
@@ -385,7 +385,7 @@ public class PhantasmaDemo : MonoBehaviour
     /// </summary>
     public IEnumerator CheckTokenCreation(EBLOCKCHAIN_OPERATION operation, string result)
     {
-        CanvasManager.Instance.ShowOperationPopup("Checking token creation...");
+        CanvasManager.Instance.ShowOperationPopup("Checking token creation...", true);
 
         yield return CheckOperation(operation, result, 
             (tx) =>
@@ -441,7 +441,7 @@ public class PhantasmaDemo : MonoBehaviour
     {
         IsTokenCreated = false;
 
-        CanvasManager.Instance.ShowOperationPopup("Fetching Phantasma tokens...");
+        CanvasManager.Instance.ShowOperationPopup("Fetching Phantasma tokens...", false);
         
         PhantasmaTokens.Clear();
 
@@ -499,7 +499,7 @@ public class PhantasmaDemo : MonoBehaviour
     {
         IsTokenOwner = false;
 
-        CanvasManager.Instance.ShowOperationPopup("Fetching tokens from the blockchain...");
+        CanvasManager.Instance.ShowOperationPopup("Fetching tokens from the blockchain...", false);
 
         StartCoroutine(PhantasmaApi.GetTokens(
             (result) =>
@@ -561,7 +561,7 @@ public class PhantasmaDemo : MonoBehaviour
                         .SpendGas(Key.Address)
                         .EndScript();
         
-        CanvasManager.Instance.ShowOperationPopup("Minting a new token...");
+        CanvasManager.Instance.ShowOperationPopup("Minting a new token...", false);
 
         StartCoroutine(PhantasmaApi.SignAndSendTransaction(script, "main",
             (result) =>
@@ -580,7 +580,7 @@ public class PhantasmaDemo : MonoBehaviour
     /// </summary>
     private IEnumerator CheckTokenMint(CarData carData, CarMutableData carMutableData, string result)
     {
-        CanvasManager.Instance.ShowOperationPopup("Checking token mint...");
+        CanvasManager.Instance.ShowOperationPopup("Checking token mint...", true);
 
         yield return CheckOperation(EBLOCKCHAIN_OPERATION.MINT_TOKEN, result,
             (tx) =>

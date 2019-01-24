@@ -30,7 +30,7 @@ public class Market : MonoBehaviour
     /// </summary>
     public void GetMarket(Action<Auction[]> successCallback = null, Action errorCallback = null)
     {
-        CanvasManager.Instance.ShowOperationPopup("Refreshing blockchain asset market...");
+        CanvasManager.Instance.ShowOperationPopup("Refreshing blockchain asset market...", false);
 
         StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.TOKEN_SYMBOL,
             (auctions) =>
@@ -84,7 +84,7 @@ public class Market : MonoBehaviour
     /// </summary>
     public void BuyAsset(Car car)
     {
-        CanvasManager.Instance.ShowOperationPopup("Purchasing an asset from the blockchain asset market...");
+        CanvasManager.Instance.ShowOperationPopup("Purchasing an asset from the blockchain asset market...", false);
 
         var script = ScriptUtils.BeginScript()
             .AllowGas(car.OwnerAddress, 1, 9999)
@@ -110,7 +110,7 @@ public class Market : MonoBehaviour
     /// </summary>
     private IEnumerator CheckAssetPurchase(Car car, string result)
     {
-        CanvasManager.Instance.ShowOperationPopup("Checking auction purchase...");
+        CanvasManager.Instance.ShowOperationPopup("Checking auction purchase...", true);
 
         yield return PhantasmaDemo.Instance.CheckOperation(PhantasmaDemo.EBLOCKCHAIN_OPERATION.BUY_ASSET, result,
             (tx) =>
@@ -179,7 +179,7 @@ public class Market : MonoBehaviour
     /// </summary>
     public void SellAsset(Car car, Address from, BigInteger price, Timestamp endDate, AuctionCurrency currency = AuctionCurrency.Game_Coin)
     {
-        CanvasManager.Instance.ShowOperationPopup("Puting an asset for sale on the blockchain asset market...");
+        CanvasManager.Instance.ShowOperationPopup("Putting an asset for sale on the blockchain asset market...", false);
 
         var script = ScriptUtils.BeginScript()
             .AllowGas(from, 1, 9999)
@@ -206,7 +206,7 @@ public class Market : MonoBehaviour
     /// </summary>
     private IEnumerator CheckAssetSale(Car car, BigInteger price, Timestamp endDate, string result)
     {
-        CanvasManager.Instance.ShowOperationPopup("Checking auction sale creation...");
+        CanvasManager.Instance.ShowOperationPopup("Checking auction sale creation...", true);
 
         yield return PhantasmaDemo.Instance.CheckOperation(PhantasmaDemo.EBLOCKCHAIN_OPERATION.SELL_ASSET, result,
             (tx) =>
@@ -273,7 +273,7 @@ public class Market : MonoBehaviour
     /// </summary>
     public void RemoveAsset(Car car)
     {
-        CanvasManager.Instance.ShowOperationPopup("Removing an asset from the blockchain market...");
+        CanvasManager.Instance.ShowOperationPopup("Removing an asset from the blockchain market...", false);
 
         var script = ScriptUtils.BeginScript()
             .AllowGas(car.OwnerAddress, 1, 9999)
@@ -299,7 +299,7 @@ public class Market : MonoBehaviour
     /// </summary>
     private IEnumerator CheckAssetRemoval(Car car, string result)
     {
-        CanvasManager.Instance.ShowOperationPopup("Checking auction sale removal...");
+        CanvasManager.Instance.ShowOperationPopup("Checking auction sale removal...", true);
 
         yield return PhantasmaDemo.Instance.CheckOperation(PhantasmaDemo.EBLOCKCHAIN_OPERATION.REMOVE_ASSET, result,
             (tx) =>

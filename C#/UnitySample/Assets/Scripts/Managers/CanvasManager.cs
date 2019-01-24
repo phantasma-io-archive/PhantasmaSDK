@@ -181,9 +181,9 @@ public class CanvasManager : MonoBehaviour {
         newKeyPopup.HidePopup();
     }
 
-    public void ShowOperationPopup(string message)
+    public void ShowOperationPopup(string message, bool showCancelButton)
     {
-        operationPopup.ShowPopup(message);
+        operationPopup.ShowPopup(message, showCancelButton);
     }
 
     public void HideOperationPopup()

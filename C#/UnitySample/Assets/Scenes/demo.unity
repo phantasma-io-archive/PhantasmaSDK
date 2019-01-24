@@ -7973,6 +7973,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   message: {fileID: 1915146688}
+  cancelButton: {fileID: 1580571319}
   loadingBarRectComponent: {fileID: 2903226960624260730}
   rotateSpeed: 2.5
 --- !u!1 &869266877

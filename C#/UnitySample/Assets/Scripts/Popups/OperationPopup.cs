@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Net.Configuration;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class OperationPopup : MonoBehaviour
@@ -6,6 +7,7 @@ public class OperationPopup : MonoBehaviour
     private const float _MIN_VISIBLE_DURATION   = 2.5f;
 
     public Text             message;
+    public Button           cancelButton;
     public RectTransform    loadingBarRectComponent;
     public float            rotateSpeed = 2.5f;
 
@@ -32,13 +34,15 @@ public class OperationPopup : MonoBehaviour
         }
     }
 
-    public void ShowPopup(string msg)
+    public void ShowPopup(string msg, bool showCancelButton)
     {
         Debug.Log("------> " + msg);
         _isClosing = false;
         _timeVisible = 0;
 
         message.text = msg;
+
+        cancelButton.gameObject.SetActive(showCancelButton);
 
         gameObject.SetActive(true);
     }
