@@ -23,6 +23,24 @@ using Token = Phantasma.SDK.Token;
 
 public class PhantasmaDemo : MonoBehaviour
 {
+    public enum EBLOCKCHAIN_OPERATION
+    {
+        CREATE_TOKEN,
+        MINT_TOKEN,
+        SELL_ASSET,
+        BUY_ASSET,
+        REMOVE_ASSET
+    }
+
+    private readonly Dictionary<EBLOCKCHAIN_OPERATION, string> _BLOCKCHAIN_OPERATION_DESCRIPTION = new Dictionary<EBLOCKCHAIN_OPERATION, string>
+        {
+            { EBLOCKCHAIN_OPERATION.CREATE_TOKEN,   "Create new token." },
+            { EBLOCKCHAIN_OPERATION.MINT_TOKEN,     "Mint new token." },
+            { EBLOCKCHAIN_OPERATION.SELL_ASSET,     "Sell asset on the market." },
+            { EBLOCKCHAIN_OPERATION.BUY_ASSET,      "Buy asset from the market." },
+            { EBLOCKCHAIN_OPERATION.REMOVE_ASSET,   "Remove asset from the market." },
+        };
+
     public const string TOKEN_SYMBOL    = "CAR";
     public const string TOKEN_NAME      = "Car Demo Token";
 
@@ -53,8 +71,9 @@ public class PhantasmaDemo : MonoBehaviour
     public decimal                      TokenCurrentSupply  { get; private set; }
     public Dictionary<string, Car>      MyCars              { get; set; }
 
-    private IEnumerator _pendingTxCoroutine;
-    private string      _lastTransactionHash;
+    private IEnumerator             _pendingTxCoroutine;
+    private string                  _lastTransactionHash;
+    private EBLOCKCHAIN_OPERATION   _lastTransactionType;
 
     private static PhantasmaDemo _instance;
     public static PhantasmaDemo Instance
@@ -176,7 +195,7 @@ public class PhantasmaDemo : MonoBehaviour
 
     #region Blockchain calls
 
-    public IEnumerator CheckOperation(string transactionHash, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
+    public IEnumerator CheckOperation(EBLOCKCHAIN_OPERATION operation, string transactionHash, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
     {
         if (_pendingTxCoroutine != null)
         {
@@ -185,13 +204,14 @@ public class PhantasmaDemo : MonoBehaviour
             _pendingTxCoroutine = null;
         }
 
-        _pendingTxCoroutine = CheckOperationCoroutine(transactionHash, callback, errorHandlingCallback);
+        _pendingTxCoroutine = CheckOperationCoroutine(operation, transactionHash, callback, errorHandlingCallback);
 
         yield return StartCoroutine(_pendingTxCoroutine);
     }
 
-    private IEnumerator CheckOperationCoroutine(string transactionHash, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
+    private IEnumerator CheckOperationCoroutine(EBLOCKCHAIN_OPERATION operation, string transactionHash, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
     {
+        _lastTransactionType = operation;
         _lastTransactionHash = transactionHash;
 
         var isTransactionCompleted = false;
@@ -349,7 +369,7 @@ public class PhantasmaDemo : MonoBehaviour
             StartCoroutine(PhantasmaApi.SignAndSendTransaction(script, "main",
                 (result) =>
                 {
-                    StartCoroutine(CheckTokenCreation(result));
+                    StartCoroutine(CheckTokenCreation(EBLOCKCHAIN_OPERATION.CREATE_TOKEN, result));
                 },
                 (errorType, errorMessage) =>
                 {
@@ -363,11 +383,11 @@ public class PhantasmaDemo : MonoBehaviour
     /// <summary>
     /// Check if the creation of a new token on Phantasma Blockchain was successful
     /// </summary>
-    public IEnumerator CheckTokenCreation(string result)
+    public IEnumerator CheckTokenCreation(EBLOCKCHAIN_OPERATION operation, string result)
     {
         CanvasManager.Instance.ShowOperationPopup("Checking token creation...");
 
-        yield return CheckOperation(result, 
+        yield return CheckOperation(operation, result, 
             (tx) =>
             {
                 foreach (var evt in tx.events)
@@ -562,7 +582,7 @@ public class PhantasmaDemo : MonoBehaviour
     {
         CanvasManager.Instance.ShowOperationPopup("Checking token mint...");
 
-        yield return CheckOperation(result,
+        yield return CheckOperation(EBLOCKCHAIN_OPERATION.MINT_TOKEN, result,
             (tx) =>
             {
                 foreach (var evt in tx.events)

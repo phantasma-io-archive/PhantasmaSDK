@@ -112,7 +112,7 @@ public class Market : MonoBehaviour
     {
         CanvasManager.Instance.ShowOperationPopup("Checking auction purchase...");
 
-        yield return PhantasmaDemo.Instance.CheckOperation(result,
+        yield return PhantasmaDemo.Instance.CheckOperation(PhantasmaDemo.EBLOCKCHAIN_OPERATION.BUY_ASSET, result,
             (tx) =>
             {
                 foreach (var evt in tx.events)
@@ -208,7 +208,7 @@ public class Market : MonoBehaviour
     {
         CanvasManager.Instance.ShowOperationPopup("Checking auction sale creation...");
 
-        yield return PhantasmaDemo.Instance.CheckOperation(result,
+        yield return PhantasmaDemo.Instance.CheckOperation(PhantasmaDemo.EBLOCKCHAIN_OPERATION.SELL_ASSET, result,
             (tx) =>
             {
                 foreach (var evt in tx.events)
@@ -301,7 +301,7 @@ public class Market : MonoBehaviour
     {
         CanvasManager.Instance.ShowOperationPopup("Checking auction sale removal...");
 
-        yield return PhantasmaDemo.Instance.CheckOperation(result,
+        yield return PhantasmaDemo.Instance.CheckOperation(PhantasmaDemo.EBLOCKCHAIN_OPERATION.REMOVE_ASSET, result,
             (tx) =>
             {
                 foreach (var evt in tx.events)
