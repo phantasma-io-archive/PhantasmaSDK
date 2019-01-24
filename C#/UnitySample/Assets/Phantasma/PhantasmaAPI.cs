@@ -718,18 +718,12 @@ namespace Phantasma.SDK
            return (address.StartsWith("L", false, CultureInfo.InvariantCulture) || address.StartsWith("K", false, CultureInfo.InvariantCulture)) && address.Length == 52;
        }
 
-       public IEnumerator CancelTransaction(string transactionHash, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
+        public IEnumerator CancelTransaction(string txData, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
         {
-           // TODO CancelTransaction() in blockchain that removes the transaction if it is still in the mempool return an error if the transaction cannot be canceled anymore
-
-           var canceled = false;
-
-           yield return _client.SendRequest(Host, "cancelTransaction", errorHandlingCallback, (node) => {
-               var result = Transaction.FromNode(node);
-               callback(result);
-           }, transactionHash);
-
+            yield return _client.SendRequest(Host, "cancelTransaction", errorHandlingCallback, (txHash) => {
+                var result = txHash.Value;
+                callback(result);
+            }, txData);
         }
-
     }
 }
