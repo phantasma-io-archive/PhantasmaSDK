@@ -23,12 +23,12 @@ using Token = Phantasma.SDK.Token;
 
 public class PhantasmaDemo : MonoBehaviour
 {
-    public const float TRANSACTION_CONFIRMATION_DELAY = 10f;
-
     public const string TOKEN_SYMBOL    = "CAR";
     public const string TOKEN_NAME      = "Car Demo Token";
 
     private const string _SERVER_ADDRESS = "http://localhost:7077/rpc";
+
+    private const float _TRANSACTION_CONFIRMATION_DELAY = 10f;
 
     public KeyPair Key { get; private set; }
 
@@ -52,7 +52,10 @@ public class PhantasmaDemo : MonoBehaviour
     public bool                         IsTokenOwner        { get; private set; }
     public decimal                      TokenCurrentSupply  { get; private set; }
     public Dictionary<string, Car>      MyCars              { get; set; }
-    
+
+    private IEnumerator _pendingTxCoroutine;
+    private string      _lastTransactionHash;
+
     private static PhantasmaDemo _instance;
     public static PhantasmaDemo Instance
     {
@@ -175,11 +178,27 @@ public class PhantasmaDemo : MonoBehaviour
 
     public IEnumerator CheckOperation(string transactionHash, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
     {
+        if (_pendingTxCoroutine != null)
+        {
+            StopCoroutine(_pendingTxCoroutine);
+
+            _pendingTxCoroutine = null;
+        }
+
+        _pendingTxCoroutine = CheckOperationCoroutine(transactionHash, callback, errorHandlingCallback);
+
+        yield return StartCoroutine(_pendingTxCoroutine);
+    }
+
+    private IEnumerator CheckOperationCoroutine(string transactionHash, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
+    {
+        _lastTransactionHash = transactionHash;
+
         var isTransactionCompleted = false;
 
         while (!isTransactionCompleted)
         {
-            yield return new WaitForSecondsRealtime(TRANSACTION_CONFIRMATION_DELAY);
+            yield return new WaitForSecondsRealtime(_TRANSACTION_CONFIRMATION_DELAY);
 
             yield return PhantasmaApi.GetTransaction(transactionHash,
                 (tx) =>
@@ -211,6 +230,35 @@ public class PhantasmaDemo : MonoBehaviour
                     }
                 });
         }
+    }
+
+    public void CancelTransaction()
+    {
+        //if (_pendingTxCoroutine != null)
+        //{
+        //    // set flag pause to true
+        //    _pendingTxCoroutine
+        //}
+
+        StartCoroutine(CancelTransactionCoroutine(_lastTransactionHash));
+    }
+
+    private IEnumerator CancelTransactionCoroutine(string transactionHash)
+    {
+        yield return PhantasmaApi.CancelTransaction(transactionHash,
+            (tx) =>
+            {
+                CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.SUCCESS, "The operation was canceled with success.");
+            },
+            (errorType, errorMessage) =>
+            {
+                if (errorType == EPHANTASMA_SDK_ERROR_TYPE.API_ERROR && errorMessage.Equals("cannot cancel operation"))
+                {
+                    Debug.Log("PENDING TRANSACTION");
+
+                    CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, "The transaction is already being processed by the blockchain and cannot be canceled anymore.");
+                }
+            });
     }
 
     /// <summary>

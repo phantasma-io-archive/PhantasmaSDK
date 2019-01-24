@@ -47,4 +47,9 @@ public class OperationPopup : MonoBehaviour
     {
         _isClosing = true;
     }
+
+    public void CancelClicked()
+    {
+        PhantasmaDemo.Instance.CancelTransaction();
+    }
 }

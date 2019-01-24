@@ -718,8 +718,18 @@ namespace Phantasma.SDK
            return (address.StartsWith("L", false, CultureInfo.InvariantCulture) || address.StartsWith("K", false, CultureInfo.InvariantCulture)) && address.Length == 52;
        }
 
-       // TODO create method to getTransaction with several attemps if the transaction was not yet proccessed
-       // TODO show cancel operation button that removes the transaction if it is still in the mempool or show a message
-       // TODO "The operation is being processed by the blockchain and cannot be canceled anymore."
-	}
+       public IEnumerator CancelTransaction(string transactionHash, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
+        {
+           // TODO CancelTransaction() in blockchain that removes the transaction if it is still in the mempool return an error if the transaction cannot be canceled anymore
+
+           var canceled = false;
+
+           yield return _client.SendRequest(Host, "cancelTransaction", errorHandlingCallback, (node) => {
+               var result = Transaction.FromNode(node);
+               callback(result);
+           }, transactionHash);
+
+        }
+
+    }
 }
