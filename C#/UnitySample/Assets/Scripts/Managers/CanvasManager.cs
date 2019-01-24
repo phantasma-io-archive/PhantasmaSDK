@@ -19,6 +19,7 @@ public class CanvasManager : MonoBehaviour {
     public NewKeyPopup          newKeyPopup;
     public OperationPopup       operationPopup;
     public ResultPopup          resultPopup;
+    public CancelOperationPopup cancelOperationPopup;
     public BuyPopup             buyPopup;
     public SellPopup            sellPopup;
     public RemovePopup          removePopup;
@@ -191,7 +192,7 @@ public class CanvasManager : MonoBehaviour {
         operationPopup.HidePopup();
     }
 
-    public void ShowResultPopup(ERESULT_TYPE type, string message)
+    public void ShowResultPopup(EOPERATION_RESULT type, string message)
     {
         resultPopup.ShowPopup(type, message);
     }
@@ -199,6 +200,16 @@ public class CanvasManager : MonoBehaviour {
     public void HideResultPopup()
     {
         resultPopup.HidePopup();
+    }
+
+    public void ShowCancelOperationPopup(EOPERATION_RESULT type, string message)
+    {
+        cancelOperationPopup.ShowPopup(type, message);
+    }
+
+    public void HideCancelOperationPopup()
+    {
+        cancelOperationPopup.HidePopup();
     }
 
     public void ShowSellPopup(Car car)

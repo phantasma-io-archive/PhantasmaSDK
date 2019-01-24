@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class ResultPopup : MonoBehaviour
-{  
+public class CancelOperationPopup : MonoBehaviour
+{
     public Text message;
 
     public void ShowPopup(EOPERATION_RESULT type, string msg)

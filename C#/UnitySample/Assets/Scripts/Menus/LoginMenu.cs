@@ -9,7 +9,7 @@ public class LoginMenu : MonoBehaviour
     {
         if (string.IsNullOrEmpty(addressInputField.text))
         {
-            CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, "Private Key cannot be empty.");
+            CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Private Key cannot be empty.");
             return;
         }
 
@@ -17,7 +17,7 @@ public class LoginMenu : MonoBehaviour
         {
             if (PhantasmaDemo.Instance.PhantasmaApi != null && !PhantasmaDemo.Instance.PhantasmaApi.IsValidPrivateKey(addressInputField.text))
             {
-                CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL, "Error: The entered private key is not valid.\nThe private key must start with an 'L' or a 'K' and have 52 characters.");
+                CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Error: The entered private key is not valid.\nThe private key must start with an 'L' or a 'K' and have 52 characters.");
                 return;
             }
 
