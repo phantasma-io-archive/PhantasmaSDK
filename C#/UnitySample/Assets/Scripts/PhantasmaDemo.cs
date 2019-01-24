@@ -512,7 +512,6 @@ public class PhantasmaDemo : MonoBehaviour
 
                     if (token.symbol.Equals(TOKEN_SYMBOL) && token.ownerAddress.Equals(Key.Address.ToString()))
                     {
-                        Debug.Log("IS TOKEN OWNER: " + token.symbol);
                         IsTokenOwner = true;
                         break;
                     }
