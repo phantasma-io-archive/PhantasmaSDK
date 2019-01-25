@@ -61,7 +61,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Test.cs" />
+    <Compile Include="Assets\HONETi\Scripts\switch_scenes.cs" />
+    <Compile Include="Assets\Scripts\Constants.cs" />
+    <Compile Include="Assets\Scripts\Managers\CanvasManager.cs" />
+    <Compile Include="Assets\Scripts\Menus\AccountMenu.cs" />
+    <Compile Include="Assets\Scripts\Menus\LoginMenu.cs" />
+    <Compile Include="Assets\Scripts\Menus\MainMenu.cs" />
+    <Compile Include="Assets\Scripts\Popups\CancelOperationPopup.cs" />
+    <Compile Include="Assets\Scripts\Popups\NewKeyPopup.cs" />
+    <Compile Include="Assets\Scripts\Popups\OperationPopup.cs" />
+    <Compile Include="Assets\Scripts\Popups\ResultPopup.cs" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/PhantasmaApp/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>
