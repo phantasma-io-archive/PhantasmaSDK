@@ -14,7 +14,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <BaseDirectory>.</BaseDirectory>
   </PropertyGroup>
@@ -53,6 +53,27 @@
     <UnityVersion>2019.1.0a11</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="LunarParser">
+      <HintPath>Assets\Phantasma\Plugins\LunarParser.dll</HintPath>
+    </Reference>
+    <Reference Include="Phantasma.Blockchain">
+      <HintPath>Assets\Phantasma\Plugins\Phantasma.Blockchain.dll</HintPath>
+    </Reference>
+    <Reference Include="Phantasma.Core">
+      <HintPath>Assets\Phantasma\Plugins\Phantasma.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Phantasma.Cryptography">
+      <HintPath>Assets\Phantasma\Plugins\Phantasma.Cryptography.dll</HintPath>
+    </Reference>
+    <Reference Include="Phantasma.IO">
+      <HintPath>Assets\Phantasma\Plugins\Phantasma.IO.dll</HintPath>
+    </Reference>
+    <Reference Include="Phantasma.Numerics">
+      <HintPath>Assets\Phantasma\Plugins\Phantasma.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="Phantasma.VM">
+      <HintPath>Assets\Phantasma\Plugins\Phantasma.VM.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity 2019.1.0a11\Editor\Data\Managed/UnityEngine/UnityEngine.dll</HintPath>
     </Reference>
@@ -62,11 +83,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\HONETi\Scripts\switch_scenes.cs" />
+    <Compile Include="Assets\Phantasma\PhantasmaAPI.cs" />
     <Compile Include="Assets\Scripts\Constants.cs" />
     <Compile Include="Assets\Scripts\Managers\CanvasManager.cs" />
     <Compile Include="Assets\Scripts\Menus\AccountMenu.cs" />
     <Compile Include="Assets\Scripts\Menus\LoginMenu.cs" />
     <Compile Include="Assets\Scripts\Menus\MainMenu.cs" />
+    <Compile Include="Assets\Scripts\PhantasmaDemo.cs" />
     <Compile Include="Assets\Scripts\Popups\CancelOperationPopup.cs" />
     <Compile Include="Assets\Scripts\Popups\NewKeyPopup.cs" />
     <Compile Include="Assets\Scripts\Popups\OperationPopup.cs" />

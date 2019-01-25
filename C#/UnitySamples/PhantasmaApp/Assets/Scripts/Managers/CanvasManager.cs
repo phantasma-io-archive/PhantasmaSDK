@@ -60,7 +60,7 @@ public class CanvasManager : MonoBehaviour {
         errorMessage.gameObject.SetActive(false);
         retryConnectionButton.gameObject.SetActive(false);
 
-        //PhantasmaDemo.Instance.LoadPhantasmaData();
+        PhantasmaDemo.Instance.LoadPhantasmaData();
     }
 
     #region Login Menu
@@ -123,20 +123,20 @@ public class CanvasManager : MonoBehaviour {
         operationPopup.HidePopup();
     }
 
-    //public void ShowResultPopup(EOPERATION_RESULT type, string message)
-    //{
-    //    resultPopup.ShowPopup(type, message);
-    //}
+    public void ShowResultPopup(EOPERATION_RESULT type, string message)
+    {
+        resultPopup.ShowPopup(type, message);
+    }
 
     public void HideResultPopup()
     {
         resultPopup.HidePopup();
     }
 
-    //public void ShowCancelOperationPopup(EOPERATION_RESULT type, string message)
-    //{
-    //    cancelOperationPopup.ShowPopup(type, message);
-    //}
+    public void ShowCancelOperationPopup(EOPERATION_RESULT type, string message)
+    {
+        cancelOperationPopup.ShowPopup(type, message);
+    }
 
     public void HideCancelOperationPopup()
     {
