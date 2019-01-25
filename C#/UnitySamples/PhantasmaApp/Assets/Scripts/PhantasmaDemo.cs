@@ -22,10 +22,7 @@ public class PhantasmaDemo : MonoBehaviour
 
     }
 
-    private readonly Dictionary<EBLOCKCHAIN_OPERATION, string> _BLOCKCHAIN_OPERATION_DESCRIPTION = new Dictionary<EBLOCKCHAIN_OPERATION, string>
-        {
-
-        };
+    private readonly Dictionary<EBLOCKCHAIN_OPERATION, string> _BLOCKCHAIN_OPERATION_DESCRIPTION = new Dictionary<EBLOCKCHAIN_OPERATION, string> {};
 
     public const string TOKEN_SYMBOL    = "CAR";
     public const string TOKEN_NAME      = "Car Demo Token";
@@ -157,8 +154,6 @@ public class PhantasmaDemo : MonoBehaviour
 
     public void LogOut()
     {
-        CanvasManager.Instance.mainMenu.SetAdminButton();
-
         CanvasManager.Instance.ClearAddress();
         CanvasManager.Instance.OpenLogin();
     }
