@@ -1,5 +1,4 @@
-﻿using System.Net.Configuration;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class OperationPopup : MonoBehaviour
@@ -54,6 +53,6 @@ public class OperationPopup : MonoBehaviour
 
     public void CancelClicked()
     {
-        //PhantasmaDemo.Instance.CancelTransaction();
+        PhantasmaDemo.Instance.CancelTransaction();
     }
 }
