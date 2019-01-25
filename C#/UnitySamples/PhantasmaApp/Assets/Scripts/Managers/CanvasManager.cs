@@ -101,6 +101,42 @@ public class CanvasManager : MonoBehaviour {
 
     #endregion
 
+    #region Transfer Tokens Menu
+
+    public void OpenTransferTokensMenu()
+    {
+        mainMenu.gameObject.SetActive(false);
+
+        //transferTokensMenu.gameObject.SetActive(true);
+    }
+
+    public void CloseTransferTokensMenu()
+    {
+        mainMenu.gameObject.SetActive(true);
+
+        //transferTokensMenu.gameObject.SetActive(false);
+    }
+
+    #endregion
+
+    #region Trnsactions History Menu
+
+    public void OpenTransactionsHistoryMenu()
+    {
+        mainMenu.gameObject.SetActive(false);
+
+        //transactionsHistoryMenu.gameObject.SetActive(true);
+    }
+
+    public void CloseTransactionsHistoryMenu()
+    {
+        mainMenu.gameObject.SetActive(true);
+
+        //transactionsHistoryMenu.gameObject.SetActive(false);
+    }
+
+    #endregion
+
     #region Popups
 
     public void ShowNewKeyPopup(string newKey)

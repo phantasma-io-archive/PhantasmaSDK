@@ -2,9 +2,19 @@
 
 public class MainMenu : MonoBehaviour
 {
-    public void AccountClicked()
+    public void AccountBalancesClicked()
     {
         CanvasManager.Instance.OpenAccount();
+    }
+
+    public void TranferTokensClicked()
+    {
+        CanvasManager.Instance.OpenTransferTokensMenu();
+    }
+
+    public void TransactionsHistoryClicked()
+    {
+        CanvasManager.Instance.OpenTransactionsHistoryMenu();
     }
 
     public void LogoutClicked()
