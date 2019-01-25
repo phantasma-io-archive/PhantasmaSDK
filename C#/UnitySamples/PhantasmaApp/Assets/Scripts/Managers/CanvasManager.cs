@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class CanvasManager : MonoBehaviour {
@@ -8,9 +7,11 @@ public class CanvasManager : MonoBehaviour {
     public Button               retryConnectionButton;
 
     // Menus
-    public LoginMenu            loginMenu;
-    public MainMenu             mainMenu;
-    public AccountMenu          accountMenu;
+    public LoginMenu                loginMenu;
+    public MainMenu                 mainMenu;
+    public AccountBalancesMenu      accountBalancesMenu;
+    public TransferTokensMenu       transferTokensMenu;
+    public TransactionsHistoryMenu  transactionsHistoryMenu;
 
     // Popups
     public NewKeyPopup          newKeyPopup;
@@ -32,7 +33,9 @@ public class CanvasManager : MonoBehaviour {
 
         loginMenu.gameObject.SetActive(false);
         mainMenu.gameObject.SetActive(false);
-        accountMenu.gameObject.SetActive(false);
+        accountBalancesMenu.gameObject.SetActive(false);
+        transferTokensMenu.gameObject.SetActive(false);
+        transactionsHistoryMenu.gameObject.SetActive(false);
         
         //OpenLogin();
     }
@@ -83,20 +86,20 @@ public class CanvasManager : MonoBehaviour {
 
     #endregion
 
-    #region Account Menu
+    #region Account Balances Menu
 
-    public void OpenAccount()
+    public void OpenAccountBalancesMenu()
     {
         mainMenu.gameObject.SetActive(false);
 
-        accountMenu.gameObject.SetActive(true);
+        accountBalancesMenu.gameObject.SetActive(true);
     }
 
-    public void CloseAccount()
+    public void CloseAccountBalancesMenu()
     {
         mainMenu.gameObject.SetActive(true);
 
-        accountMenu.gameObject.SetActive(false);
+        accountBalancesMenu.gameObject.SetActive(false);
     }
 
     #endregion
@@ -105,16 +108,18 @@ public class CanvasManager : MonoBehaviour {
 
     public void OpenTransferTokensMenu()
     {
+        addressLabel.gameObject.SetActive(false);
         mainMenu.gameObject.SetActive(false);
 
-        //transferTokensMenu.gameObject.SetActive(true);
+        transferTokensMenu.gameObject.SetActive(true);
     }
 
     public void CloseTransferTokensMenu()
     {
+        addressLabel.gameObject.SetActive(true);
         mainMenu.gameObject.SetActive(true);
 
-        //transferTokensMenu.gameObject.SetActive(false);
+        transferTokensMenu.gameObject.SetActive(false);
     }
 
     #endregion
@@ -123,16 +128,18 @@ public class CanvasManager : MonoBehaviour {
 
     public void OpenTransactionsHistoryMenu()
     {
+        addressLabel.gameObject.SetActive(false);
         mainMenu.gameObject.SetActive(false);
 
-        //transactionsHistoryMenu.gameObject.SetActive(true);
+        transactionsHistoryMenu.gameObject.SetActive(true);
     }
 
     public void CloseTransactionsHistoryMenu()
     {
+        addressLabel.gameObject.SetActive(true);
         mainMenu.gameObject.SetActive(true);
 
-        //transactionsHistoryMenu.gameObject.SetActive(false);
+        transactionsHistoryMenu.gameObject.SetActive(false);
     }
 
     #endregion

@@ -4,7 +4,7 @@ public class MainMenu : MonoBehaviour
 {
     public void AccountBalancesClicked()
     {
-        CanvasManager.Instance.OpenAccount();
+        CanvasManager.Instance.OpenAccountBalancesMenu();
     }
 
     public void TranferTokensClicked()

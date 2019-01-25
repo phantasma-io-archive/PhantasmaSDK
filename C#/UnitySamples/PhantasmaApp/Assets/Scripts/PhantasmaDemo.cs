@@ -19,14 +19,14 @@ public class PhantasmaDemo : MonoBehaviour
 {
     public enum EBLOCKCHAIN_OPERATION
     {
-
+        TRANSFER_TOKENS
     }
 
-    private readonly Dictionary<EBLOCKCHAIN_OPERATION, string> _BLOCKCHAIN_OPERATION_DESCRIPTION = new Dictionary<EBLOCKCHAIN_OPERATION, string> {};
-
-    public const string TOKEN_SYMBOL    = "CAR";
-    public const string TOKEN_NAME      = "Car Demo Token";
-
+    private readonly Dictionary<EBLOCKCHAIN_OPERATION, string> _BLOCKCHAIN_OPERATION_DESCRIPTION = new Dictionary<EBLOCKCHAIN_OPERATION, string>
+    {
+        { EBLOCKCHAIN_OPERATION.TRANSFER_TOKENS, "Transfer Tokens" }
+    };
+    
     private const string _SERVER_ADDRESS = "http://localhost:7077/rpc";
 
     private const float _TRANSACTION_CONFIRMATION_DELAY = 10f;
@@ -40,8 +40,6 @@ public class PhantasmaDemo : MonoBehaviour
         UPDATE,
         READY
     }
-
-    public List<Sprite> carImages;
 
     private EWALLET_STATE   _state = EWALLET_STATE.INIT;
     private decimal         _balance;
@@ -106,7 +104,7 @@ public class PhantasmaDemo : MonoBehaviour
             case EWALLET_STATE.UPDATE:
                 {
                     _state = EWALLET_STATE.READY;
-                    CanvasManager.Instance.accountMenu.SetBalance(_balance.ToString(CultureInfo.InvariantCulture));
+                    CanvasManager.Instance.accountBalancesMenu.SetBalance(_balance.ToString(CultureInfo.InvariantCulture));
                     break;
                 }
         }		
@@ -260,14 +258,14 @@ public class PhantasmaDemo : MonoBehaviour
         StartCoroutine(PhantasmaApi.GetAccount(address, 
             account =>
             {
-                CanvasManager.Instance.accountMenu.SetBalance("Name: " + account.name);
+                CanvasManager.Instance.accountBalancesMenu.SetBalance("Name: " + account.name);
 
                 foreach (var balance in account.balances)
                 {
                     var isFungible = PhantasmaTokens[balance.symbol].Flags.Contains("Fungible");
 
                     var amount = isFungible ? decimal.Parse(balance.amount) / (decimal) Mathf.Pow(10f, 8) : decimal.Parse(balance.amount);
-                    CanvasManager.Instance.accountMenu.AddBalanceEntry("Chain: " + balance.chain + " - " + amount + " " + balance.symbol);
+                    CanvasManager.Instance.accountBalancesMenu.AddBalanceEntry("Chain: " + balance.chain + " - " + amount + " " + balance.symbol);
                 }
 
                 CanvasManager.Instance.HideOperationPopup();

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class AccountMenu : MonoBehaviour
+public class AccountBalancesMenu : MonoBehaviour
 {
     public Text balanceLabel;
 
@@ -19,6 +19,6 @@ public class AccountMenu : MonoBehaviour
 
     public void BackClicked()
     {
-        CanvasManager.Instance.CloseAccount();
+        CanvasManager.Instance.CloseAccountBalancesMenu();
     }
 }

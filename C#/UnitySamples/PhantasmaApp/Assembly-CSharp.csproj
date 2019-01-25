@@ -64,9 +64,11 @@
     <Compile Include="Assets\Phantasma\PhantasmaAPI.cs" />
     <Compile Include="Assets\Scripts\Constants.cs" />
     <Compile Include="Assets\Scripts\Managers\CanvasManager.cs" />
-    <Compile Include="Assets\Scripts\Menus\AccountMenu.cs" />
+    <Compile Include="Assets\Scripts\Menus\AccountBalancesMenu.cs" />
     <Compile Include="Assets\Scripts\Menus\LoginMenu.cs" />
     <Compile Include="Assets\Scripts\Menus\MainMenu.cs" />
+    <Compile Include="Assets\Scripts\Menus\TransactionsHistoryMenu.cs" />
+    <Compile Include="Assets\Scripts\Menus\TransferTokensMenu.cs" />
     <Compile Include="Assets\Scripts\PhantasmaDemo.cs" />
     <Compile Include="Assets\Scripts\Popups\CancelOperationPopup.cs" />
     <Compile Include="Assets\Scripts\Popups\NewKeyPopup.cs" />
