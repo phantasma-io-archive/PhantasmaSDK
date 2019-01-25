@@ -306,9 +306,6 @@
     <Reference Include="Phantasma.VM">
       <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/PhantasmaApp/Assets/Phantasma/Plugins/Phantasma.VM.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.Advertisements">
-      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/PhantasmaApp/Library/PackageCache/com.unity.ads@2.0.8/UnityEngine.Advertisements.dll</HintPath>
-    </Reference>
     <Reference Include="Unity.Analytics.Editor">
       <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/PhantasmaApp/Library/PackageCache/com.unity.analytics@3.2.2/Unity.Analytics.Editor.dll</HintPath>
     </Reference>
