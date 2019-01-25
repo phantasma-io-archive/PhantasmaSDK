@@ -114,6 +114,11 @@ public class CanvasManager : MonoBehaviour {
         transferTokensMenu.gameObject.SetActive(true);
     }
 
+    public void ClearTransferTokensMenu()
+    {
+        transferTokensMenu.Clear();
+    }
+
     public void CloseTransferTokensMenu()
     {
         addressLabel.gameObject.SetActive(true);

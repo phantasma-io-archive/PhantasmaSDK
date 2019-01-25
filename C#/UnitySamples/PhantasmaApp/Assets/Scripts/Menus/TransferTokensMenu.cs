@@ -16,6 +16,11 @@ public class TransferTokensMenu : MonoBehaviour
         
     }
 
+    public void Clear()
+    {
+
+    }
+
     public void BackClicked()
     {
         CanvasManager.Instance.CloseTransferTokensMenu();

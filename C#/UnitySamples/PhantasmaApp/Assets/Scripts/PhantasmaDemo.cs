@@ -2,11 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-
+using Phantasma.Blockchain.Contracts;
 using UnityEngine;
 
 using Phantasma.Cryptography;
+using Phantasma.Numerics;
 using Phantasma.SDK;
+using Phantasma.VM.Utils;
 using Token = Phantasma.SDK.Token;
 
 public enum EOPERATION_RESULT
@@ -324,6 +326,114 @@ public class PhantasmaDemo : MonoBehaviour
             }
         ));
     }
-    
+
+    /// <summary>
+    /// Returns the account name and balance of given address.
+    /// </summary>
+    /// <param name="address">String, base58 encoded - address to check for balance and name.</param>
+    public void GetTransactions(string address)
+    {
+        Debug.Log("Get Transactions: " + address);
+
+        CanvasManager.Instance.ShowOperationPopup("Fetching last transactions from the blockchain...", false);
+
+        //StartCoroutine(PhantasmaApi.GetTransactions(address,
+        //    account =>
+        //    {
+        //        CanvasManager.Instance.accountBalancesMenu.SetBalance("Name: " + account.name);
+
+        //        foreach (var balance in account.balances)
+        //        {
+        //            var isFungible = PhantasmaTokens[balance.symbol].Flags.Contains("Fungible");
+
+        //            var amount = isFungible ? decimal.Parse(balance.amount) / (decimal)Mathf.Pow(10f, 8) : decimal.Parse(balance.amount);
+        //            CanvasManager.Instance.accountBalancesMenu.AddBalanceEntry("Chain: " + balance.chain + " - " + amount + " " + balance.symbol);
+        //        }
+
+        //        CanvasManager.Instance.HideOperationPopup();
+
+        //        LoggedIn(address);
+
+        //    },
+        //    (errorType, errorMessage) =>
+        //    {
+        //        CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, errorType + " - " + errorMessage);
+        //    }
+        //));
+    }
+
+    public void TransferTokens(Address from, Address to, string tokenSymbol, BigInteger amount)
+    {
+        CanvasManager.Instance.ShowOperationPopup("Transfering tokens between addresses...", false);
+
+        var script = ScriptUtils.BeginScript()
+            .AllowGas(Key.Address, 1, 9999)
+            .CallContract("nexus", "TransferTokens", from, to, tokenSymbol, amount)
+            .SpendGas(Key.Address)
+            .EndScript();
+
+        StartCoroutine(PhantasmaApi.SignAndSendTransaction(script, "main",
+            (result) =>
+            {
+                StartCoroutine(CheckTokensTransfer(result));
+            },
+            (errorType, errorMessage) =>
+            {
+                CanvasManager.Instance.HideOperationPopup();
+                CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, errorType + " - " + errorMessage);
+            }
+        ));
+    }
+
+    /// <summary>
+    /// Check if the auction purchase was successful
+    /// </summary>
+    private IEnumerator CheckTokensTransfer(string result)
+    {
+        CanvasManager.Instance.ShowOperationPopup("Checking auction purchase...", true);
+
+        yield return CheckOperation(EBLOCKCHAIN_OPERATION.TRANSFER_TOKENS, result,
+            (tx) =>
+            {
+                var sentTokens      = false;
+                var receivedTokens  = false;
+
+                foreach (var evt in tx.events)
+                {
+                    EventKind eKind;
+                    if (Enum.TryParse(evt.kind, out eKind))
+                    {
+                        switch (eKind)
+                        {
+                            case EventKind.TokenSend:
+                                sentTokens = true;
+                                break;
+                            case EventKind.TokenReceive:
+                                receivedTokens = true;
+                                break;
+                        }
+                    }
+                }
+
+                CanvasManager.Instance.HideOperationPopup();
+                CanvasManager.Instance.ClearTransferTokensMenu();
+
+                if (sentTokens && receivedTokens)
+                {
+                    CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.SUCCESS, "Tokens where transfered with success.");
+                }
+                else
+                {
+                    CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Something failed while transfering tokens. Please try again.");
+                }
+            },
+            ((errorType, errorMessage) =>
+            {
+                CanvasManager.Instance.HideOperationPopup();
+                CanvasManager.Instance.ClearTransferTokensMenu();
+                CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, errorType + " - " + errorMessage);
+            }));
+    }
+
     #endregion
 }
