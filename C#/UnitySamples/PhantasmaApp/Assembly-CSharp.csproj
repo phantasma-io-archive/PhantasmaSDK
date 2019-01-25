@@ -10,7 +10,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace>
     </RootNamespace>
-    <ProjectGuid>{B64691E4-BF4F-D156-A912-28D4B0CF91A6}</ProjectGuid>
+    <ProjectGuid>{00BDEA84-8520-98E9-CE5E-794D37CD6395}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -63,31 +63,31 @@
   <ItemGroup>
     <Compile Include="Assets\Test.cs" />
     <Reference Include="Unity.Timeline.Editor">
-      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/UnityApp/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
+      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/PhantasmaApp/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro.Editor">
-      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/UnityApp/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
+      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/PhantasmaApp/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.PackageManagerUI.Editor">
-      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/UnityApp/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
+      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/PhantasmaApp/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Timeline">
-      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/UnityApp/Library/ScriptAssemblies/Unity.Timeline.dll</HintPath>
+      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/PhantasmaApp/Library/ScriptAssemblies/Unity.Timeline.dll</HintPath>
     </Reference>
     <Reference Include="Unity.CollabProxy.Editor">
-      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/UnityApp/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
+      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/PhantasmaApp/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
     </Reference>
     <Reference Include="UnityEditor.SpatialTracking">
-      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/UnityApp/Library/ScriptAssemblies/UnityEditor.SpatialTracking.dll</HintPath>
+      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/PhantasmaApp/Library/ScriptAssemblies/UnityEditor.SpatialTracking.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.SpatialTracking">
-      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/UnityApp/Library/ScriptAssemblies/UnityEngine.SpatialTracking.dll</HintPath>
+      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/PhantasmaApp/Library/ScriptAssemblies/UnityEngine.SpatialTracking.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/UnityApp/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
+      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/PhantasmaApp/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Analytics.DataPrivacy">
-      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/UnityApp/Library/ScriptAssemblies/Unity.Analytics.DataPrivacy.dll</HintPath>
+      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/PhantasmaApp/Library/ScriptAssemblies/Unity.Analytics.DataPrivacy.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AIModule">
       <HintPath>C:/Program Files/Unity 2019.1.0a11/Editor/Data/Managed/UnityEngine/UnityEngine.AIModule.dll</HintPath>
@@ -276,16 +276,16 @@
       <HintPath>C:/Program Files/Unity 2019.1.0a11/Editor/Data/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Analytics.Editor">
-      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/UnityApp/Library/PackageCache/com.unity.analytics@3.2.2/Unity.Analytics.Editor.dll</HintPath>
+      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/PhantasmaApp/Library/PackageCache/com.unity.analytics@3.2.2/Unity.Analytics.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Analytics.StandardEvents">
-      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/UnityApp/Library/PackageCache/com.unity.analytics@3.2.2/Unity.Analytics.StandardEvents.dll</HintPath>
+      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/PhantasmaApp/Library/PackageCache/com.unity.analytics@3.2.2/Unity.Analytics.StandardEvents.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Analytics.Tracker">
-      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/UnityApp/Library/PackageCache/com.unity.analytics@3.2.2/Unity.Analytics.Tracker.dll</HintPath>
+      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/PhantasmaApp/Library/PackageCache/com.unity.analytics@3.2.2/Unity.Analytics.Tracker.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.Purchasing">
-      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/UnityApp/Library/PackageCache/com.unity.purchasing@2.0.1/UnityEngine.Purchasing.dll</HintPath>
+      <HintPath>D:/UnityProjects/PhantasmaSDK/C#/UnitySamples/PhantasmaApp/Library/PackageCache/com.unity.purchasing@2.0.1/UnityEngine.Purchasing.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib">
       <HintPath>C:/Program Files/Unity 2019.1.0a11/Editor/Data/MonoBleedingEdge/lib/mono/unity/mscorlib.dll</HintPath>
