@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using Phantasma.Blockchain;
 using Phantasma.Blockchain.Contracts;
 using UnityEngine;
 
@@ -10,6 +11,7 @@ using Phantasma.Numerics;
 using Phantasma.SDK;
 using Phantasma.VM.Utils;
 using Token = Phantasma.SDK.Token;
+using Transaction = Phantasma.SDK.Transaction;
 
 public enum EOPERATION_RESULT
 {

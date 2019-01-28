@@ -87,27 +87,24 @@ public class TransferTokensMenu : MonoBehaviour
         // Validate amount
         if (string.IsNullOrEmpty(amountInput.text))
         {
-            CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Amount Key cannot be empty.");
+            CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Amount cannot be empty.");
             return;
         }
 
         //var price = decimal.Parse(priceInput.text);
         BigInteger amount;
-        Debug.Log("amount: " + amountInput.text);
-
         if (BigInteger.TryParse(amountInput.text, out amount))
         {
             if (amount < 0)
             {
-                CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Amount must be a decimal positive value 1: " + amountInput.text);
+                CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Amount must be a decimal positive value.");
                 amountInput.text = string.Empty;
                 return;
             }
         }
         else
         {
-            // TODO fix
-            CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Amount must be a decimal positive value 2: " + amountInput.text);
+            CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Amount must be a decimal positive value.");
             amountInput.text = string.Empty;
             return;
         }
