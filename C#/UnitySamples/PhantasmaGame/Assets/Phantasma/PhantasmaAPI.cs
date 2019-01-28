@@ -295,6 +295,28 @@ namespace Phantasma.SDK
 		}
 	}
 	
+	//public struct Paginated 
+	//{
+	//	public uint page;
+	//	public uint pageSize;
+	//	public uint total;
+	//	public uint totalPages;
+	//	public IAPI results;
+	   
+	//	public static Paginated FromNode(DataNode node) 
+	//	{
+	//		Paginated result;
+						
+	//		result.page = node.GetUInt32("page");						
+	//		result.pageSize = node.GetUInt32("pageSize");						
+	//		result.total = node.GetUInt32("total");						
+	//		result.totalPages = node.GetUInt32("totalPages");						
+	//		result.results = node.GetIAPIResult("results");
+
+	//		return result;			
+	//	}
+	//}
+	
 	public struct Block 
 	{
 		public string hash;
@@ -426,7 +448,8 @@ namespace Phantasma.SDK
 		public string creatorAddress;
 		public uint startDate;
 		public uint endDate;
-		public string symbol;
+		public string baseSymbol;
+		public string quoteSymbol;
 		public string tokenId;
 		public string price;
 	   
@@ -437,7 +460,8 @@ namespace Phantasma.SDK
 			result.creatorAddress = node.GetString("creatorAddress");						
 			result.startDate = node.GetUInt32("startDate");						
 			result.endDate = node.GetUInt32("endDate");						
-			result.symbol = node.GetString("symbol");						
+			result.baseSymbol = node.GetString("baseSymbol");						
+			result.quoteSymbol = node.GetString("quoteSymbol");						
 			result.tokenId = node.GetString("tokenId");						
 			result.price = node.GetString("price");
 
@@ -497,47 +521,47 @@ namespace Phantasma.SDK
 		}
 		
 		
-		////Returns a serialized string, containing information about a block by hash.
-		//public IEnumerator GetRawBlockByHash(string blockHash, Action<Single> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
-		//{	   
-		//	yield return _client.SendRequest(Host, "getRawBlockByHash", errorHandlingCallback, (node) => { 
-		//	var result = Single.FromNode(node);
-		//		callback(result);
-		//	} , blockHash);		   
-		//}
+		//Returns a serialized string, containing information about a block by hash.
+		public IEnumerator GetRawBlockByHash(string blockHash, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
+			yield return _client.SendRequest(Host, "getRawBlockByHash", errorHandlingCallback, (node) => { 
+			var result = node.Value;
+				callback(result);
+			} , blockHash);		   
+		}
 		
 		
-		////Returns information about a block by height and chain.
-		//public IEnumerator GetBlockByHeight(string chainInput, uint height, Action<Block> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
-		//{	   
-		//	yield return _client.SendRequest(Host, "getBlockByHeight", errorHandlingCallback, (node) => { 
-		//	var result = Block.FromNode(node);
-		//		callback(result);
-		//	} , chainInput, height);		   
-		//}
+		//Returns information about a block by height and chain.
+		public IEnumerator GetBlockByHeight(string chainInput, uint height, Action<Block> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
+			yield return _client.SendRequest(Host, "getBlockByHeight", errorHandlingCallback, (node) => { 
+			var result = Block.FromNode(node);
+				callback(result);
+			} , chainInput, height);		   
+		}
 		
 		
-		////Returns a serialized string, containing information about a block by height and chain.
-		//public IEnumerator GetRawBlockByHeight(string chainInput, uint height, Action<Single> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
-		//{	   
-		//	yield return _client.SendRequest(Host, "getRawBlockByHeight", errorHandlingCallback, (node) => { 
-		//	var result = Single.FromNode(node);
-		//		callback(result);
-		//	} , chainInput, height);		   
-		//}
+		//Returns a serialized string, in hex format, containing information about a block by height and chain.
+		public IEnumerator GetRawBlockByHeight(string chainInput, uint height, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
+			yield return _client.SendRequest(Host, "getRawBlockByHeight", errorHandlingCallback, (node) => { 
+			var result = node.Value;
+				callback(result);
+			} , chainInput, height);		   
+		}
 		
 		
-		////Returns the information about a transaction requested by a block hash and transaction index.
-		//public IEnumerator GetTransactionByBlockHashAndIndex(string blockHash, int index, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
-		//{	   
-		//	yield return _client.SendRequest(Host, "getTransactionByBlockHashAndIndex", errorHandlingCallback, (node) => { 
-		//	var result = Transaction.FromNode(node);
-		//		callback(result);
-		//	} , blockHash, index);		   
-		//}
+		//Returns the information about a transaction requested by a block hash and transaction index.
+		public IEnumerator GetTransactionByBlockHashAndIndex(string blockHash, int index, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
+			yield return _client.SendRequest(Host, "getTransactionByBlockHashAndIndex", errorHandlingCallback, (node) => { 
+			var result = Transaction.FromNode(node);
+				callback(result);
+			} , blockHash, index);		   
+		}
 		
 		
-		////Returns last X transactions of given address.
+		//Returns last X transactions of given address.
 		//public IEnumerator GetAddressTransactions(string addressText, uint page, uint pageSize, Action<Paginated> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
 		//{	   
 		//	yield return _client.SendRequest(Host, "getAddressTransactions", errorHandlingCallback, (node) => { 
@@ -579,9 +603,18 @@ namespace Phantasma.SDK
 		
 		//Returns information about a transaction by hash.
 		public IEnumerator GetTransaction(string hashText, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
-		{
-		    //Debug.Log("GET T: " + hashText);
-            yield return _client.SendRequest(Host, "getTransaction", errorHandlingCallback, (node) => { 
+		{	   
+			yield return _client.SendRequest(Host, "getTransaction", errorHandlingCallback, (node) => { 
+			var result = Transaction.FromNode(node);
+				callback(result);
+			} , hashText);		   
+		}
+		
+		
+		//Removes a pending transaction from the mempool.
+		public IEnumerator CancelTransaction(string hashText, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
+			yield return _client.SendRequest(Host, "cancelTransaction", errorHandlingCallback, (node) => { 
 			var result = Transaction.FromNode(node);
 				callback(result);
 			} , hashText);		   
@@ -651,17 +684,13 @@ namespace Phantasma.SDK
 		
 		
 		//Returns last X transactions of given token.
-		public IEnumerator GetTokenTransfers(string tokenSymbol, int amount, Action<Transaction[]> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
-		{	   
-			yield return _client.SendRequest(Host, "getTokenTransfers", errorHandlingCallback, (node) => { 
-			var result = new Transaction[node.ChildCount];
-			for (int i=0; i<result.Length; i++) { 
-				var child = node.GetNodeByIndex(i);
-				result[i] = Transaction.FromNode(child);
-			}
-				callback(result);
-			} , tokenSymbol, amount);		   
-		}
+		//public IEnumerator GetTokenTransfers(string tokenSymbol, uint page, uint pageSize, Action<Paginated> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		//{	   
+		//	yield return _client.SendRequest(Host, "getTokenTransfers", errorHandlingCallback, (node) => { 
+		//	var result = Paginated.FromNode(node);
+		//		callback(result);
+		//	} , tokenSymbol, page, pageSize);		   
+		//}
 		
 		
 		//Returns the number of transaction of a given token.
@@ -685,7 +714,7 @@ namespace Phantasma.SDK
 		
 		
 		//Returns the auctions available in the market.
-		public IEnumerator GetAuctions(string tokenSymbol, Action<Auction[]> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		public IEnumerator GetAuctions(string symbol, Action<Auction[]> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
 		{	   
 			yield return _client.SendRequest(Host, "getAuctions", errorHandlingCallback, (node) => { 
 			var result = new Auction[node.ChildCount];
@@ -694,39 +723,31 @@ namespace Phantasma.SDK
 				result[i] = Auction.FromNode(child);
 			}
 				callback(result);
-			}, tokenSymbol);		   
+			} , symbol);		   
 		}
-
-       /// <summary>
-       /// Sign an operation on Phantasma Blockchain and broadcast it to the network.
-       /// </summary>
-       /// <param name="script">Operation to execute on the blockchain</param>
-       /// <param name="chain">Name of the blockchain</param>
-       /// <param name="callback">Callback that will be executed if the operation was successfully signed and sent.</param>
-       /// <param name="errorHandlingCallback">Calllback that will be executed if the operation failed to be signed and sent to the blockchain.</param>
+		
+		
+		
        public IEnumerator SignAndSendTransaction(byte[] script, string chain, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
        {
            Debug.Log("Sending transaction...");
 
-           var tx = new Blockchain.Transaction("simnet", chain, script, DateTime.UtcNow + TimeSpan.FromHours(1));
-           tx.Sign(PhantasmaDemo.Instance.Key);
+           //var tx = new Blockchain.Transaction("nexus", chain, script,  DateTime.UtcNow + TimeSpan.FromHours(1));
+           var tx = new Blockchain.Transaction("simnet", chain, script,  DateTime.UtcNow + TimeSpan.FromHours(1));
+            tx.Sign(PhantasmaDemo.Instance.Key);
 
            yield return SendRawTransaction(Base16.Encode(tx.ToByteArray(true)), callback, errorHandlingCallback);
        }
-
+		
        public bool IsValidPrivateKey(string address)
        {
-           return (address.StartsWith("L", false, CultureInfo.InvariantCulture) || address.StartsWith("K", false, CultureInfo.InvariantCulture)) && address.Length == 52;
+           return (address.StartsWith("L", false, CultureInfo.InvariantCulture) || 
+                   address.StartsWith("K", false, CultureInfo.InvariantCulture)) && address.Length == 52;
        }
 
-        public IEnumerator CancelTransaction(string txData, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
-        {
-            Debug.Log("-------------- cancel T: " + txData);
-
-            yield return _client.SendRequest(Host, "cancelTransaction", errorHandlingCallback, (txHash) => {
-                var result = txHash.Value;
-                callback(result);
-            }, txData);
-        }
+       public bool IsValidAddress(string address)
+       {
+           return address.StartsWith("P", false, CultureInfo.InvariantCulture) && address.Length == 45;
+       }
     }
 }
