@@ -579,8 +579,9 @@ namespace Phantasma.SDK
 		
 		//Returns information about a transaction by hash.
 		public IEnumerator GetTransaction(string hashText, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
-		{	   
-			yield return _client.SendRequest(Host, "getTransaction", errorHandlingCallback, (node) => { 
+		{
+		    //Debug.Log("GET T: " + hashText);
+            yield return _client.SendRequest(Host, "getTransaction", errorHandlingCallback, (node) => { 
 			var result = Transaction.FromNode(node);
 				callback(result);
 			} , hashText);		   
@@ -720,6 +721,8 @@ namespace Phantasma.SDK
 
         public IEnumerator CancelTransaction(string txData, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
         {
+            Debug.Log("-------------- cancel T: " + txData);
+
             yield return _client.SendRequest(Host, "cancelTransaction", errorHandlingCallback, (txHash) => {
                 var result = txHash.Value;
                 callback(result);

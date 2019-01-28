@@ -217,6 +217,7 @@ public class PhantasmaDemo : MonoBehaviour
 
     private IEnumerator CheckOperationCoroutine(EBLOCKCHAIN_OPERATION operation, string transactionHash, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
     {
+        Debug.Log("check operation: " + operation);
         _lastTransactionType = operation;
         _lastTransactionHash = transactionHash;
 
@@ -224,11 +225,10 @@ public class PhantasmaDemo : MonoBehaviour
 
         while (!isTransactionCompleted)
         {
-            yield return new WaitForSecondsRealtime(_TRANSACTION_CONFIRMATION_DELAY);
-
             yield return PhantasmaApi.GetTransaction(transactionHash,
                 (tx) =>
                 {
+                    Debug.Log("get transaction callback");
                     isTransactionCompleted = true;
 
                     if (callback != null)
@@ -238,6 +238,8 @@ public class PhantasmaDemo : MonoBehaviour
                 },
                 (errorType, errorMessage) =>
                 {
+                    Debug.Log("PENDING TRANSACTION: " + errorType + " | msg: " + errorMessage);
+
                     if (errorType == EPHANTASMA_SDK_ERROR_TYPE.API_ERROR && errorMessage.Equals("pending"))
                     {
                         Debug.Log("PENDING TRANSACTION");
@@ -255,6 +257,8 @@ public class PhantasmaDemo : MonoBehaviour
                         }
                     }
                 });
+
+            yield return new WaitForSecondsRealtime(_TRANSACTION_CONFIRMATION_DELAY);
         }
     }
 
@@ -274,6 +278,15 @@ public class PhantasmaDemo : MonoBehaviour
         yield return PhantasmaApi.CancelTransaction(transactionHash,
             (tx) =>
             {
+                if (_pendingTxCoroutine != null)
+                {
+                    StopCoroutine(_pendingTxCoroutine);
+
+                    _pendingTxCoroutine = null;
+                }
+
+                CanvasManager.Instance.HideOperationPopup();
+                CanvasManager.Instance.HideResultPopup();
                 CanvasManager.Instance.ShowCancelOperationPopup(EOPERATION_RESULT.SUCCESS, "The operation '" + _BLOCKCHAIN_OPERATION_DESCRIPTION[_lastTransactionType] + "' was canceled with success.");
             },
             (errorType, errorMessage) =>

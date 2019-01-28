@@ -233,6 +233,8 @@ public class PhantasmaDemo : MonoBehaviour
         yield return PhantasmaApi.CancelTransaction(transactionHash,
             (tx) =>
             {
+                CanvasManager.Instance.HideOperationPopup();
+                CanvasManager.Instance.HideResultPopup();
                 CanvasManager.Instance.ShowCancelOperationPopup(EOPERATION_RESULT.SUCCESS, "The operation '" + _BLOCKCHAIN_OPERATION_DESCRIPTION[_lastTransactionType] + "' was canceled with success.");
             },
             (errorType, errorMessage) =>
