@@ -253,6 +253,9 @@ public class PhantasmaDemo : MonoBehaviour
         // Private key: L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25
         // Public key:  P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr
 
+        //_keyField.Content = "Kws5PuviJskdo2V7hGnr37T1Bt4ymEpnLWYyStySvxXwXAiANNuH"; // P54Dd8E4khN4LeVTBXZtS2FSk4666mspuM6aUGtVQS2yX
+        //_keyField.Content = "L17u4Eu5eXpdguGxVFV1a5sr5mmGf389nodq9gJYPVMJS9PVrbnm"; // PDSMhv7EeXoAnedYSsHZhavougRJ9rt99kQYzztJDzWkd
+
         Debug.Log("Get account: " + address);
 
         CanvasManager.Instance.ShowOperationPopup("Fetching account data from the blockchain...", false);

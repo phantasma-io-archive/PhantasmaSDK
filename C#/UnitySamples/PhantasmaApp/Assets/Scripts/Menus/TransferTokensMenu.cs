@@ -38,6 +38,7 @@ public class TransferTokensMenu : MonoBehaviour
 
     public void Clear()
     {
+        Debug.Log("clear");
         addressInput.text   = string.Empty;
         amountInput.text    = string.Empty;
 
@@ -77,8 +78,9 @@ public class TransferTokensMenu : MonoBehaviour
 
             if (PhantasmaDemo.Instance.Key.Address.Equals(address))
             {
-                Clear();
+                addressInput.text = string.Empty;
                 CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Cannot send tokens to your own address. Destination address must be different from the origin address.");
+                return;
             }
         }
 
@@ -91,17 +93,23 @@ public class TransferTokensMenu : MonoBehaviour
 
         //var price = decimal.Parse(priceInput.text);
         BigInteger amount;
+        Debug.Log("amount: " + amountInput.text);
+
         if (BigInteger.TryParse(amountInput.text, out amount))
         {
             if (amount < 0)
             {
-                CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Amount must be a decimal positive value.");
+                amountInput.text = string.Empty;
+                CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Amount must be a decimal positive value 1: " + amountInput.text);
                 return;
             }
         }
         else
         {
-            CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Amount must be a decimal positive value.");
+            // TODO fix
+            amountInput.text = string.Empty;
+            CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Amount must be a decimal positive value 2: " + amountInput.text);
+            return;
         }
 
         if (tokenDropdown.options[tokenDropdown.value].text.Equals(_SELECT_COIN))
@@ -112,7 +120,7 @@ public class TransferTokensMenu : MonoBehaviour
 
         Debug.Log("Transfer:" + addressInput.text + " | " + amountInput.text);
 
-        PhantasmaDemo.Instance.TransferTokens(PhantasmaDemo.Instance.Key.Address, address, "SOUL", amount);
+        PhantasmaDemo.Instance.TransferTokens(PhantasmaDemo.Instance.Key.Address, address, tokenDropdown.options[tokenDropdown.value].text, amount);
     }
 
     public void ClearClicked()
