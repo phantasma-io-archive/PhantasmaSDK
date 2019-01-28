@@ -238,11 +238,11 @@ public class PhantasmaDemo : MonoBehaviour
                 },
                 (errorType, errorMessage) =>
                 {
-                    Debug.Log("PENDING TRANSACTION: " + errorType + " | msg: " + errorMessage);
+                    Debug.Log("ERROR TRANSACTION: " + errorType + " | msg: " + errorMessage);
 
                     if (errorType == EPHANTASMA_SDK_ERROR_TYPE.API_ERROR && errorMessage.Equals("pending"))
                     {
-                        Debug.Log("PENDING TRANSACTION");
+                        Debug.Log("PENDING");
                         // recursive test
                         //StartCoroutine(CheckOperation(transactionHash, callback, errorHandlingCallback));
                         //return;

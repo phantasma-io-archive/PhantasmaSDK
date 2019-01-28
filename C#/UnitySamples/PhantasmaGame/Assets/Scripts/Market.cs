@@ -181,9 +181,10 @@ public class Market : MonoBehaviour
     {
         CanvasManager.Instance.ShowOperationPopup("Putting an asset for sale on the blockchain asset market...", false);
 
+        // Add the possibility to create auctions with other coins than SOUL and pass the other coin as an argument of the SellToken method
         var script = ScriptUtils.BeginScript()
             .AllowGas(from, 1, 9999)
-            .CallContract("market", "SellToken", from, PhantasmaDemo.TOKEN_SYMBOL, car.TokenID, price, endDate)
+            .CallContract("market", "SellToken", from, PhantasmaDemo.TOKEN_SYMBOL, "SOUL", car.TokenID, price, endDate)
             .SpendGas(from)
             .EndScript();
 
@@ -225,7 +226,8 @@ public class Market : MonoBehaviour
                             {
                                 creatorAddress  = PhantasmaDemo.Instance.Key.Address.ToString(),
                                 endDate         = endDate.Value,
-                                symbol          = marketEventData.Symbol,
+                                baseSymbol      = marketEventData.BaseSymbol,
+                                quoteSymbol     = marketEventData.QuoteSymbol,
                                 tokenId         = marketEventData.ID.ToString(),
                                 price           = price.ToString()
                             };
