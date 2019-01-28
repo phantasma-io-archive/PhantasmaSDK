@@ -1,11 +1,15 @@
-﻿using Phantasma.Cryptography;
+﻿using System.Collections.Generic;
+using Phantasma.Cryptography;
 using Phantasma.Numerics;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class TransferTokensMenu : MonoBehaviour
 {
-    public InputField addressInput, amountInput;
+    private const string _SELECT_COIN = "SELECT COIN";
+
+    public InputField   addressInput, amountInput;
+    public Dropdown     tokenDropdown;
 
     // Start is called before the first frame update
     void Start()
@@ -13,10 +17,31 @@ public class TransferTokensMenu : MonoBehaviour
 
     }
 
+    void OnEnable()
+    {
+        PhantasmaDemo.Instance.CheckTokens(() =>
+        {
+            CanvasManager.Instance.transferTokensMenu.SetContent();
+        });
+    }
+
+    public void SetContent()
+    {
+        Clear();
+
+        var tokensList = new List<string>{ _SELECT_COIN };
+        tokensList.AddRange(PhantasmaDemo.Instance.PhantasmaTokens.Keys);
+
+        tokenDropdown.ClearOptions();
+        tokenDropdown.AddOptions(tokensList);
+    }
+
     public void Clear()
     {
         addressInput.text   = string.Empty;
         amountInput.text    = string.Empty;
+
+        tokenDropdown.value = 0;
     }
 
     public void SendClicked()
@@ -30,7 +55,7 @@ public class TransferTokensMenu : MonoBehaviour
         // Validate private key
             if (string.IsNullOrEmpty(addressInput.text))
         {
-            CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Private Key cannot be empty.");
+            CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Public address cannot be empty.");
             return;
         }
 
@@ -77,6 +102,12 @@ public class TransferTokensMenu : MonoBehaviour
         else
         {
             CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Amount must be a decimal positive value.");
+        }
+
+        if (tokenDropdown.options[tokenDropdown.value].text.Equals(_SELECT_COIN))
+        {
+            CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "You must select a coin from the dropdown menu.");
+            return;
         }
 
         Debug.Log("Transfer:" + addressInput.text + " | " + amountInput.text);
