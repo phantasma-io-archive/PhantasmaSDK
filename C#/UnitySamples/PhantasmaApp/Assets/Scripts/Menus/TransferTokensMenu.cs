@@ -75,7 +75,7 @@ public class TransferTokensMenu : MonoBehaviour
             // TODO OU?
             //address = KeyPair.FromWIF(addressInput.text).Address; Chave privada
 
-            // Check if the 'from' and 'to' address is the same
+            // Check if the 'from' and 'to' addresses are the same
             if (PhantasmaDemo.Instance.Key.Address.Equals(address))
             {
                 CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Cannot send tokens to your own address. Destination address must be different from the origin address.");
@@ -107,8 +107,8 @@ public class TransferTokensMenu : MonoBehaviour
         else
         {
             // TODO fix
-            amountInput.text = string.Empty;
             CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Amount must be a decimal positive value 2: " + amountInput.text);
+            amountInput.text = string.Empty;
             return;
         }
 
