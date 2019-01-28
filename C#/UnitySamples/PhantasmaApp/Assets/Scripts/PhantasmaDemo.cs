@@ -420,17 +420,17 @@ public class PhantasmaDemo : MonoBehaviour
 
                 if (sentTokens && receivedTokens)
                 {
-                    CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.SUCCESS, "Tokens where transfered with success.");
+                    CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.SUCCESS, "Tokens where transferred with success.");
                 }
                 else
                 {
-                    CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Something failed while transfering tokens. Please try again.");
+                    CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Something failed while transferring tokens. Please try again.");
                 }
             },
             ((errorType, errorMessage) =>
             {
                 CanvasManager.Instance.HideOperationPopup();
-                CanvasManager.Instance.ClearTransferTokensMenu();
+                //CanvasManager.Instance.ClearTransferTokensMenu();
                 CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, errorType + " - " + errorMessage);
             }));
     }

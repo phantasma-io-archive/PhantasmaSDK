@@ -718,6 +718,11 @@ namespace Phantasma.SDK
            return (address.StartsWith("L", false, CultureInfo.InvariantCulture) || address.StartsWith("K", false, CultureInfo.InvariantCulture)) && address.Length == 52;
        }
 
+       public bool IsValidAddress(string address)
+       {
+           return address.StartsWith("P", false, CultureInfo.InvariantCulture) && address.Length == 45;
+       }
+
         public IEnumerator CancelTransaction(string txData, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
         {
             yield return _client.SendRequest(Host, "cancelTransaction", errorHandlingCallback, (txHash) => {
