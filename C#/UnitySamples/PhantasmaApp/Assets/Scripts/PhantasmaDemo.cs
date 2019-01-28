@@ -371,7 +371,7 @@ public class PhantasmaDemo : MonoBehaviour
 
         var script = ScriptUtils.BeginScript()
             .AllowGas(Key.Address, 1, 9999)
-            .CallContract("nexus", "TransferTokens", from, to, tokenSymbol, amount)
+            .CallContract("token", "TransferTokens", from, to, tokenSymbol, amount)
             .SpendGas(Key.Address)
             .EndScript();
 
