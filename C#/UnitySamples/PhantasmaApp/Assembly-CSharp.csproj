@@ -62,7 +62,6 @@
   <ItemGroup>
     <Compile Include="Assets\HONETi\Scripts\switch_scenes.cs" />
     <Compile Include="Assets\Phantasma\PhantasmaAPI.cs" />
-    <Compile Include="Assets\Scripts\Constants.cs" />
     <Compile Include="Assets\Scripts\Managers\CanvasManager.cs" />
     <Compile Include="Assets\Scripts\Menus\AccountBalancesMenu.cs" />
     <Compile Include="Assets\Scripts\Menus\LoginMenu.cs" />

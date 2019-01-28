@@ -61,9 +61,8 @@ public class TransferTokensMenu : MonoBehaviour
         }
 
         Address address;
-        // TODO validar if the address is the same
 
-        //if (PhantasmaDemo.Instance != null && PhantasmaDemo.Instance.PhantasmaApi != null && !PhantasmaDemo.Instance.PhantasmaApi.IsValidPrivateKey(addressInput.text))
+        //if (!PhantasmaDemo.Instance.PhantasmaApi.IsValidPrivateKey(addressInput.text))
         if(!PhantasmaDemo.Instance.PhantasmaApi.IsValidAddress(addressInput.text))
         {
             CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "The entered address is not valid.\nThe address must start with a 'P' and have 45 characters.");
@@ -76,10 +75,11 @@ public class TransferTokensMenu : MonoBehaviour
             // TODO OU?
             //address = KeyPair.FromWIF(addressInput.text).Address; Chave privada
 
+            // Check if the 'from' and 'to' address is the same
             if (PhantasmaDemo.Instance.Key.Address.Equals(address))
             {
-                addressInput.text = string.Empty;
                 CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Cannot send tokens to your own address. Destination address must be different from the origin address.");
+                addressInput.text = string.Empty;
                 return;
             }
         }
@@ -99,8 +99,8 @@ public class TransferTokensMenu : MonoBehaviour
         {
             if (amount < 0)
             {
-                amountInput.text = string.Empty;
                 CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Amount must be a decimal positive value 1: " + amountInput.text);
+                amountInput.text = string.Empty;
                 return;
             }
         }
