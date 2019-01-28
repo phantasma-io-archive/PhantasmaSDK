@@ -183,8 +183,6 @@ public class PhantasmaDemo : MonoBehaviour
 
         while (!isTransactionCompleted)
         {
-            yield return new WaitForSecondsRealtime(_TRANSACTION_CONFIRMATION_DELAY);
-
             yield return PhantasmaApi.GetTransaction(transactionHash,
                 (tx) =>
                 {
@@ -214,6 +212,8 @@ public class PhantasmaDemo : MonoBehaviour
                         }
                     }
                 });
+
+            yield return new WaitForSecondsRealtime(_TRANSACTION_CONFIRMATION_DELAY);
         }
     }
 
@@ -233,6 +233,13 @@ public class PhantasmaDemo : MonoBehaviour
         yield return PhantasmaApi.CancelTransaction(transactionHash,
             (tx) =>
             {
+                if (_pendingTxCoroutine != null)
+                {
+                    StopCoroutine(_pendingTxCoroutine);
+
+                    _pendingTxCoroutine = null;
+                }
+
                 CanvasManager.Instance.HideOperationPopup();
                 CanvasManager.Instance.HideResultPopup();
                 CanvasManager.Instance.ShowCancelOperationPopup(EOPERATION_RESULT.SUCCESS, "The operation '" + _BLOCKCHAIN_OPERATION_DESCRIPTION[_lastTransactionType] + "' was canceled with success.");
