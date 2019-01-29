@@ -159,7 +159,6 @@ public class MarketMenu : MonoBehaviour
                             newSlot.DataNotAvailable();
                         }));
 
-
                     newSlot.gameObject.SetActive(true);
 
                     _sellSlots.Add(newSlot);

@@ -16,11 +16,6 @@ using Phantasma.VM.Utils;
 using Random = UnityEngine.Random;
 using Token = Phantasma.SDK.Token;
 
-/*
- * Phantasma Spook
- * https://github.com/phantasma-io/PhantasmaSpook/tree/master/Docs
- */
-
 public enum EOPERATION_RESULT
 {
     FAIL,
@@ -67,7 +62,6 @@ public class PhantasmaDemo : MonoBehaviour
     public Market       market;
     public List<Sprite> carImages;
 
-    private EWALLET_STATE   _state = EWALLET_STATE.INIT;
     private decimal         _balance;
 
     public API                          PhantasmaApi        { get; private set; }
@@ -95,8 +89,6 @@ public class PhantasmaDemo : MonoBehaviour
 
     private void Start ()
     {
-        //GetAccount("P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr"); //TEST
-
         PhantasmaApi = new API(_SERVER_ADDRESS);
         
         Invoke("LoadPhantasmaData", 2f);
@@ -112,34 +104,6 @@ public class PhantasmaDemo : MonoBehaviour
             CanvasManager.Instance.OpenLogin();
         });
     }
-
-    private IEnumerator SyncBalance()
-    {
-        yield return new WaitForSeconds(2);
-        //var balances = api.GetAssetBalancesOf(this.keys);
-        //balance = balances.ContainsKey(assetSymbol) ? balances[assetSymbol] : 0;
-        _state = EWALLET_STATE.UPDATE;
-    }
-
-    private void Update () {
-
-        switch (_state)
-        {
-            case EWALLET_STATE.INIT:
-                {
-                    _state = EWALLET_STATE.SYNC;
-                    StartCoroutine(SyncBalance());
-                    break;
-                }
-
-            case EWALLET_STATE.UPDATE:
-                {
-                    _state = EWALLET_STATE.READY;
-                    CanvasManager.Instance.accountMenu.SetBalance(_balance.ToString(CultureInfo.InvariantCulture));
-                    break;
-                }
-        }		
-	}
 
     /// <summary>
     /// Generate a new WIF
@@ -243,9 +207,7 @@ public class PhantasmaDemo : MonoBehaviour
                     if (errorType == EPHANTASMA_SDK_ERROR_TYPE.API_ERROR && errorMessage.Equals("pending"))
                     {
                         Debug.Log("PENDING");
-                        // recursive test
-                        //StartCoroutine(CheckOperation(transactionHash, callback, errorHandlingCallback));
-                        //return;
+                        // Pending
                     }
                     else
                     {
@@ -264,12 +226,6 @@ public class PhantasmaDemo : MonoBehaviour
 
     public void CancelTransaction()
     {
-        //if (_pendingTxCoroutine != null)
-        //{
-        //    // set flag pause to true
-        //    _pendingTxCoroutine
-        //}
-
         StartCoroutine(CancelTransactionCoroutine(_lastTransactionHash));
     }
 
@@ -376,7 +332,6 @@ public class PhantasmaDemo : MonoBehaviour
 
             var script = ScriptUtils.BeginScript()
                 .AllowGas(Key.Address, 1, 9999)
-                //.CallContract("nexus", "CreateToken", Key.Address, TOKEN_SYMBOL, TOKEN_NAME, 0, 0, TokenFlags.Transferable)
                 .CallContract("nexus", "CreateToken", Key.Address, TOKEN_SYMBOL, TOKEN_NAME, 10000, 0, TokenFlags.Transferable | TokenFlags.Finite)
                 .SpendGas(Key.Address)
                 .EndScript();
@@ -425,7 +380,7 @@ public class PhantasmaDemo : MonoBehaviour
                                 CheckTokens(() =>
                                 {
                                     CanvasManager.Instance.adminMenu.SetContent();
-                                    //PhantasmaApi.LogTransaction(Key.Address, 0, TransactionType.Created_Token, "CAR");
+                                    //PhantasmaApi.LogTransaction(Key.Address, 0, TransactionType.Created_Token, "CAR"); // TODO ?
                                 });
 
                                 CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.SUCCESS, "New token created with success.");
@@ -484,7 +439,6 @@ public class PhantasmaDemo : MonoBehaviour
                 {
                     callback();
                 }
-
             },
             (errorType, errorMessage) =>
             {

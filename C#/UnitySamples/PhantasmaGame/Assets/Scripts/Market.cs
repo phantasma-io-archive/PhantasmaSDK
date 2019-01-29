@@ -122,9 +122,6 @@ public class Market : MonoBehaviour
                     {
                         if (eKind == EventKind.AuctionFilled)
                         {
-                            //var bytes = Base16.Decode(evt.data);
-                            //var marketEventData = Serialization.Unserialize<MarketEventData>(bytes);
-
                             //Debug.Log(evt.kind + " - " + marketEventData.ID);
 
                             //var carData = car.Data;
@@ -313,8 +310,6 @@ public class Market : MonoBehaviour
                     {
                         if (eKind == EventKind.AuctionCancelled)
                         {
-                            //var bytes = Base16.Decode(evt.data);
-                            //var marketEventData = Serialization.Unserialize<MarketEventData>(bytes);
                             //Debug.Log(evt.kind + " - " + marketEventData.ID);
 
                             //var carData = car.Data;
