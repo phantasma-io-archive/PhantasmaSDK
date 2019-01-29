@@ -11,12 +11,6 @@ public class TransferTokensMenu : MonoBehaviour
     public InputField   addressInput, amountInput;
     public Dropdown     tokenDropdown;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
     void OnEnable()
     {
         PhantasmaDemo.Instance.CheckTokens(() =>
@@ -70,10 +64,7 @@ public class TransferTokensMenu : MonoBehaviour
         }
         else
         {
-
             address = Address.FromText(addressInput.text);
-            // TODO OU?
-            //address = KeyPair.FromWIF(addressInput.text).Address; Chave privada
 
             // Check if the 'from' and 'to' addresses are the same
             if (PhantasmaDemo.Instance.Key.Address.Equals(address))

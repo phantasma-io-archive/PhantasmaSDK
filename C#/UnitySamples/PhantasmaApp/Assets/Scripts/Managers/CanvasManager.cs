@@ -36,8 +36,6 @@ public class CanvasManager : MonoBehaviour {
         accountBalancesMenu.gameObject.SetActive(false);
         transferTokensMenu.gameObject.SetActive(false);
         transactionsHistoryMenu.gameObject.SetActive(false);
-        
-        //OpenLogin();
     }
 	
     public void SetAddress(string address)

@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using Phantasma.Blockchain;
 using Phantasma.Blockchain.Contracts;
 using UnityEngine;
 
@@ -37,16 +36,7 @@ public class PhantasmaDemo : MonoBehaviour
 
     public KeyPair Key { get; private set; }
 
-    private enum EWALLET_STATE
-    {
-        INIT,
-        SYNC,
-        UPDATE,
-        READY
-    }
-
-    private EWALLET_STATE   _state = EWALLET_STATE.INIT;
-    private decimal         _balance;
+    private decimal _balance;
 
     public API                          PhantasmaApi        { get; private set; }
     public Dictionary<string, Token>    PhantasmaTokens     { get; private set; }
@@ -68,8 +58,6 @@ public class PhantasmaDemo : MonoBehaviour
 
     private void Start ()
     {
-        //GetAccount("P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr"); //TEST
-
         PhantasmaApi = new API(_SERVER_ADDRESS);
         
         Invoke("LoadPhantasmaData", 2f);
@@ -85,34 +73,6 @@ public class PhantasmaDemo : MonoBehaviour
             CanvasManager.Instance.OpenLogin();
         });
     }
-
-    private IEnumerator SyncBalance()
-    {
-        yield return new WaitForSeconds(2);
-        //var balances = api.GetAssetBalancesOf(this.keys);
-        //balance = balances.ContainsKey(assetSymbol) ? balances[assetSymbol] : 0;
-        _state = EWALLET_STATE.UPDATE;
-    }
-
-    private void Update () {
-
-        switch (_state)
-        {
-            case EWALLET_STATE.INIT:
-                {
-                    _state = EWALLET_STATE.SYNC;
-                    StartCoroutine(SyncBalance());
-                    break;
-                }
-
-            case EWALLET_STATE.UPDATE:
-                {
-                    _state = EWALLET_STATE.READY;
-                    CanvasManager.Instance.accountBalancesMenu.SetBalance(_balance.ToString(CultureInfo.InvariantCulture));
-                    break;
-                }
-        }		
-	}
 
     /// <summary>
     /// Generate a new WIF
@@ -200,9 +160,7 @@ public class PhantasmaDemo : MonoBehaviour
                     if (errorType == EPHANTASMA_SDK_ERROR_TYPE.API_ERROR && errorMessage.Equals("pending"))
                     {
                         Debug.Log("PENDING TRANSACTION");
-                        // recursive test
-                        //StartCoroutine(CheckOperation(transactionHash, callback, errorHandlingCallback));
-                        //return;
+                        // Pending Transaction
                     }
                     else
                     {
@@ -221,12 +179,6 @@ public class PhantasmaDemo : MonoBehaviour
 
     public void CancelTransaction()
     {
-        //if (_pendingTxCoroutine != null)
-        //{
-        //    // set flag pause to true
-        //    _pendingTxCoroutine
-        //}
-
         StartCoroutine(CancelTransactionCoroutine(_lastTransactionHash));
     }
 
@@ -309,8 +261,6 @@ public class PhantasmaDemo : MonoBehaviour
         StartCoroutine(PhantasmaApi.GetTokens(
             (result) =>
             {
-                //Debug.Log("sign result tokens: " + result.Length);
-
                 foreach (var token in result)
                 {
                     PhantasmaTokens.Add(token.symbol, token);
@@ -323,7 +273,6 @@ public class PhantasmaDemo : MonoBehaviour
                 {
                     callback();
                 }
-
             },
             (errorType, errorMessage) =>
             {
@@ -444,7 +393,6 @@ public class PhantasmaDemo : MonoBehaviour
             ((errorType, errorMessage) =>
             {
                 CanvasManager.Instance.HideOperationPopup();
-                //CanvasManager.Instance.ClearTransferTokensMenu();
                 CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, errorType + " - " + errorMessage);
             }));
     }
