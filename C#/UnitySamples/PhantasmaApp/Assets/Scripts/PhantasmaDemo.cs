@@ -361,7 +361,7 @@ public class PhantasmaDemo : MonoBehaviour
         //            var isFungible = PhantasmaTokens[balance.symbol].Flags.Contains("Fungible");
 
         //            var amount = isFungible ? decimal.Parse(balance.amount) / (decimal)Mathf.Pow(10f, 8) : decimal.Parse(balance.amount);
-        //            CanvasManager.Instance.accountBalancesMenu.AddBalanceEntry("Chain: " + balance.chain + " - " + amount + " " + balance.symbol);
+        //            CanvasManager.Instance.transactionsHistoryMenu.AddHistoryEntry("Chain: " + balance.chain + " - " + amount + " " + balance.symbol);
         //        }
 
         //        CanvasManager.Instance.HideOperationPopup();
