@@ -154,7 +154,7 @@ namespace Phantasma.SDK
 			yield return _client.SendRequest(Host, "{{#camel-case Info.Name}}", errorHandlingCallback, (node) => { 
 {{#parse-lines false}}
 {{#if Info.IsPaginated}}
-				var page = node.GetInt32("page");{{#new-line}}
+				var currentPage = node.GetInt32("page");{{#new-line}}
 				var totalPages = node.GetInt32("totalPages");{{#new-line}}
 				node = node.GetNode("result");{{#new-line}}
 {{/if}}
@@ -175,7 +175,7 @@ namespace Phantasma.SDK
 {{/if}}
 {{/if}}
 {{/if}}{{#parse-lines true}}
-				callback(result{{#if Info.IsPaginated==true}}, page, totalPages{{/if}});
+				callback(result{{#if Info.IsPaginated==true}}, currentPage, totalPages{{/if}});
 			} {{#each Info.Parameters}}, {{Name}}{{/each}});		   
 		}
 		
