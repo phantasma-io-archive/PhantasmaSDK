@@ -9,3 +9,8 @@ Go/Workspace/
 /C#/UnitySample/Temp
 /C#/UnitySample/*.csproj
 /C#/UnitySample/*.sln
+C#/UnitySamples/UnitySample/Library/
+C#/UnitySamples/PhantasmaGame/Library/
+C#/UnitySamples/PhantasmaGame/Temp/
+C#/UnitySamples/PhantasmaApp/Library/
+C#/UnitySamples/PhantasmaApp/Temp/
