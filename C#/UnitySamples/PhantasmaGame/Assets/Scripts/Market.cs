@@ -30,42 +30,21 @@ public class Market : MonoBehaviour
     /// </summary>
     public void GetMarket(Action<Auction[]> successCallback = null, Action errorCallback = null)
     {
+        StartCoroutine(GetMarketCoroutine(successCallback, errorCallback));
+    }
+
+    private IEnumerator GetMarketCoroutine(Action<Auction[]> successCallback = null, Action errorCallback = null)
+    {
         CanvasManager.Instance.ShowOperationPopup("Refreshing blockchain asset market...", false);
 
-        StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.TOKEN_SYMBOL,
-            (auctions) =>
+        uint itemsPerPage = 20;
+
+        //GetAuctions(string symbol, uint page, uint pageSize, Action<Auction[], int, int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
+
+        yield return PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.TOKEN_SYMBOL, 1, itemsPerPage,
+            (auctions, currentPage, totalPages) =>
             {
-                CarAuctions.Clear();
-                SellCarAuctions.Clear();
-                BuyCarAuctions.Clear();
-                foreach (var auction in auctions)
-                {
-                    var carAuction = new CarAuction
-                    {
-                        tokenID = auction.tokenId,
-                        auction = auction
-                    };
-
-                    CarAuctions.Add(auction.tokenId, carAuction);
-
-                    if (auction.creatorAddress.Equals(PhantasmaDemo.Instance.Key.Address.ToString()))
-                    {
-                        // Auction has my address -> Selling Auction
-                        SellCarAuctions.Add(auction.tokenId, carAuction);
-                    }
-                    else
-                    {
-                        // No my auction -> Buying Auction
-                        BuyCarAuctions.Add(auction.tokenId, carAuction);
-                    }
-                }
-
-                CanvasManager.Instance.HideOperationPopup();
-
-                if (successCallback != null)
-                {
-                    successCallback(auctions);
-                }
+                ProcessAuctions(auctions, currentPage, totalPages);
             },
             (errorType, errorMessage) =>
             {
@@ -76,7 +55,59 @@ public class Market : MonoBehaviour
                 {
                     errorCallback();
                 }
-            }));
+            });
+
+        // todo check if received everything
+
+        //CarAuctions.Clear();
+        //SellCarAuctions.Clear();
+        //BuyCarAuctions.Clear();
+        //foreach (var auction in auctions)
+        //{
+        //    var carAuction = new CarAuction
+        //    {
+        //        tokenID = auction.tokenId,
+        //        auction = auction
+        //    };
+
+        //    CarAuctions.Add(auction.tokenId, carAuction);
+
+        //    if (auction.creatorAddress.Equals(PhantasmaDemo.Instance.Key.Address.ToString()))
+        //    {
+        //        // Auction has my address -> Selling Auction
+        //        SellCarAuctions.Add(auction.tokenId, carAuction);
+        //    }
+        //    else
+        //    {
+        //        // No my auction -> Buying Auction
+        //        BuyCarAuctions.Add(auction.tokenId, carAuction);
+        //    }
+        //}
+
+        //CanvasManager.Instance.HideOperationPopup();
+
+        //if (successCallback != null)
+        //{
+        //    successCallback(auctions);
+        //}
+    }
+
+    //private IEnumerator ProcessAuctions(Auction auctions, uint currentPage, uint totalPages, Action<Auction[], int,int> successCallback = null, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorCallback = null)
+    private IEnumerator ProcessAuctions(Auction[] auctions, int currentPage, int totalPages)
+    {
+        if (currentPage < totalPages)
+        {
+            yield return PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.TOKEN_SYMBOL, (uint) currentPage + 1, (uint) totalPages,
+                (a, cPage, tPages) =>
+                {
+                    ProcessAuctions(a, cPage, tPages);
+                },
+                (errorType, errorMessage) =>
+                {
+                    CanvasManager.Instance.HideOperationPopup();
+                    CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, errorType + " - " + errorMessage);
+                });
+        }
     }
 
     /// <summary>
