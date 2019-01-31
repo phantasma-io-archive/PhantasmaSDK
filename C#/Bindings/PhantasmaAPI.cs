@@ -110,7 +110,7 @@ namespace Phantasma.SDK
    {{#each types}}
 	public struct {{#fix-type Key}} 
 	{
-{{#each Value}}		public {{#fix-type FieldType.Name}}{{#if FieldType.IsArray}}[]{{/if}} {{Name}};
+{{#each Value}}		public {{#fix-type FieldType.Name}}{{#if FieldType.IsArray}}[]{{/if}} {{Name}}; //{{Key.Description}}
 {{/each}}	   
 		public static {{#fix-type Key}} FromNode(DataNode node) 
 		{
@@ -148,36 +148,41 @@ namespace Phantasma.SDK
 		}
 	   
 		{{#each methods}}
-		//{{Info.Description}}
-		public IEnumerator {{Info.Name}}({{#each Info.Parameters}}{{#fix-type Type.Name}} {{Name}}, {{/each}}Action<{{#fix-type Info.ReturnType.Name}}{{#if Info.ReturnType.IsArray}}[]{{/if}}> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		//{{Info.Description}}{{#if Info.IsPaginated==true}}{{#new-line}}		//This api call is paginated, multiple calls might be required to obtain a complete result {{/if}}
+		public IEnumerator {{Info.Name}}({{#each Info.Parameters}}{{#fix-type Type.Name}} {{Name}}, {{/each}}Action<{{#fix-type Info.ReturnType.Name}}{{#if Info.ReturnType.IsArray}}[]{{/if}}{{#if Info.IsPaginated==true}}, int, int{{/if}}> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
 		{	   
 			yield return _client.SendRequest(Host, "{{#camel-case Info.Name}}", errorHandlingCallback, (node) => { 
 {{#parse-lines false}}
+{{#if Info.IsPaginated}}
+				var currentPage = node.GetInt32("page");{{#new-line}}
+				var totalPages = node.GetInt32("totalPages");{{#new-line}}
+				node = node.GetNode("result");{{#new-line}}
+{{/if}}
 {{#if Info.ReturnType.IsPrimitive}}
-			var result = {{#fix-type Info.ReturnType.Name}}.Parse(node.Value);
+				var result = {{#fix-type Info.ReturnType.Name}}.Parse(node.Value);
 {{#else}}
 {{#if Info.ReturnType.Name=='String'}}
-			var result = node.Value;
+				var result = node.Value;
 {{#else}}
 {{#if Info.ReturnType.IsArray}}
-			var result = new {{#fix-type Info.ReturnType.Name}}[node.ChildCount];{{#new-line}}
-			for (int i=0; i<result.Length; i++) { {{#new-line}}
-				var child = node.GetNodeByIndex(i);{{#new-line}}
-				result[i] = {{#fix-type Info.ReturnType.Name}}.FromNode(child);{{#new-line}}
-			}
+				var result = new {{#fix-type Info.ReturnType.Name}}[node.ChildCount];{{#new-line}}
+				for (int i=0; i<result.Length; i++) { {{#new-line}}
+					var child = node.GetNodeByIndex(i);{{#new-line}}
+					result[i] = {{#fix-type Info.ReturnType.Name}}.FromNode(child);{{#new-line}}
+				}
 {{#else}}
-			var result = {{#fix-type Info.ReturnType.Name}}.FromNode(node);
+				var result = {{#fix-type Info.ReturnType.Name}}.FromNode(node);
 {{/if}}
 {{/if}}
 {{/if}}{{#parse-lines true}}
-				callback(result);
+				callback(result{{#if Info.IsPaginated==true}}, currentPage, totalPages{{/if}});
 			} {{#each Info.Parameters}}, {{Name}}{{/each}});		   
 		}
 		
 		{{/each}}
 		
-       public IEnumerator SignAndSendTransaction(byte[] script, string chain, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
-       {
+		public IEnumerator SignAndSendTransaction(byte[] script, string chain, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
+		{
            Debug.Log("Sending transaction...");
 
            //var tx = new Blockchain.Transaction("nexus", chain, script,  DateTime.UtcNow + TimeSpan.FromHours(1));
@@ -185,12 +190,17 @@ namespace Phantasma.SDK
             tx.Sign(PhantasmaDemo.Instance.Key);
 
            yield return SendRawTransaction(Base16.Encode(tx.ToByteArray(true)), callback, errorHandlingCallback);
-       }
+		}
 		
-       public bool IsValidPrivateKey(string address)
-       {
+		public bool IsValidPrivateKey(string address)
+		{
            return (address.StartsWith("L", false, CultureInfo.InvariantCulture) || 
                    address.StartsWith("K", false, CultureInfo.InvariantCulture)) && address.Length == 52;
-       }
+		}
+	   
+		public bool IsValidAddress(string address)
+		{
+           return address.StartsWith("P", false, CultureInfo.InvariantCulture) && address.Length == 45;
+		} 	   
 	}
 }

@@ -199,11 +199,11 @@ namespace SDK.Builder
             var nexus = new Nexus("test", KeyPair.Generate().Address);
             var api = new NexusAPI(nexus);
 
-            var typeDic = new Dictionary<string, FieldInfo[]>();
+            var typeDic = new Dictionary<string, IEnumerable<MetaField>>();
             var apiTypes = api.GetType().Assembly.GetTypes().Where(x => !x.IsInterface && x != typeof(SingleResult) && x != typeof(ArrayResult) && x != typeof(ErrorResult) && typeof(IAPIResult).IsAssignableFrom(x)).ToList();
             foreach (var entry in apiTypes)
             {
-                typeDic[entry.Name/*.Replace("Result", "")*/] = entry.GetFields();
+                typeDic[entry.Name/*.Replace("Result", "")*/] = GetMetaFields(entry);
             }
 
             var compiler = new Compiler();
@@ -242,6 +242,41 @@ namespace SDK.Builder
                 filePath = file.Replace(inputPath, outputPath);
                 File.WriteAllText(filePath, context.output.ToString());
             }
+        }
+
+        public struct MetaField
+        {
+            public string Name;
+            public Type FieldType;
+            public string Description;
+        }
+
+        private static List<MetaField> GetMetaFields(Type type)
+        {
+            var fields = type.GetFields();
+
+            var result = new List<MetaField>();
+            foreach (var field in fields)
+            {
+                string desc = "TODO document me";
+
+                var attr = field.GetCustomAttribute<APIDescriptionAttribute>();
+                if (attr != null)
+                {
+                    desc = attr.Description;
+                }
+
+                var meta = new MetaField()
+                {
+                    Name = field.Name,
+                    FieldType = field.FieldType,
+                    Description = desc
+                };
+
+                result.Add(meta);
+            }
+
+            return result;
         }
 
         private static void GenerateUnityPackage(string dllPath, string bindingPath)
