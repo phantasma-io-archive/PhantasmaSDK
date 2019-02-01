@@ -60,7 +60,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\HONETi\Scripts\switch_scenes.cs" />
     <Compile Include="Assets\Phantasma\PhantasmaAPI.cs" />
     <Compile Include="Assets\Scripts\Car.cs" />
     <Compile Include="Assets\Scripts\Constants.cs" />
