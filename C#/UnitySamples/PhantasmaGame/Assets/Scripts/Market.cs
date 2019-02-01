@@ -118,7 +118,7 @@ public class Market : MonoBehaviour
         CanvasManager.Instance.ShowOperationPopup("Purchasing an asset from the blockchain asset market...", false);
 
         var script = ScriptUtils.BeginScript()
-            .AllowGas(car.OwnerAddress, 1, 9999)
+            .AllowGas(car.OwnerAddress, Address.FromText(PhantasmaDemo.Instance.PhantasmaTokens[PhantasmaDemo.TOKEN_SYMBOL].ownerAddress), 1, 9999)
             .CallContract("market", "BuyToken", PhantasmaDemo.Instance.Key.Address, PhantasmaDemo.TOKEN_SYMBOL, car.TokenID)
             .SpendGas(car.OwnerAddress)
             .EndScript();
@@ -211,7 +211,7 @@ public class Market : MonoBehaviour
 
         // Add the possibility to create auctions with other coins than SOUL and pass the other coin as an argument of the SellToken method
         var script = ScriptUtils.BeginScript()
-            .AllowGas(from, 1, 9999)
+            .AllowGas(car.OwnerAddress, Address.FromText(PhantasmaDemo.Instance.PhantasmaTokens[PhantasmaDemo.TOKEN_SYMBOL].ownerAddress), 1, 9999)
             .CallContract("market", "SellToken", from, PhantasmaDemo.TOKEN_SYMBOL, "SOUL", car.TokenID, price, endDate)
             .SpendGas(from)
             .EndScript();
@@ -306,7 +306,7 @@ public class Market : MonoBehaviour
         CanvasManager.Instance.ShowOperationPopup("Removing an asset from the blockchain market...", false);
 
         var script = ScriptUtils.BeginScript()
-            .AllowGas(car.OwnerAddress, 1, 9999)
+            .AllowGas(car.OwnerAddress, Address.FromText(PhantasmaDemo.Instance.PhantasmaTokens[PhantasmaDemo.TOKEN_SYMBOL].ownerAddress), 1, 9999)
             .CallContract("market", "BuyToken", PhantasmaDemo.Instance.Key.Address, PhantasmaDemo.TOKEN_SYMBOL, car.TokenID)
             .SpendGas(car.OwnerAddress)
             .EndScript();

@@ -331,7 +331,7 @@ public class PhantasmaDemo : MonoBehaviour
             CanvasManager.Instance.ShowOperationPopup("Creating a new token on the blockchain...", false);
 
             var script = ScriptUtils.BeginScript()
-                .AllowGas(Key.Address, 1, 9999)
+                .AllowGas(Key.Address, Address.FromText(PhantasmaTokens[TOKEN_SYMBOL].ownerAddress), 1, 9999)
                 .CallContract("nexus", "CreateToken", Key.Address, TOKEN_SYMBOL, TOKEN_NAME, 10000, 0, TokenFlags.Transferable | TokenFlags.Finite)
                 .SpendGas(Key.Address)
                 .EndScript();
@@ -524,7 +524,7 @@ public class PhantasmaDemo : MonoBehaviour
         var txMutableData   = Serialization.Serialize(carMutableData);
 
         var script = ScriptUtils.BeginScript()
-                        .AllowGas(Key.Address, 1, 9999)
+                        .AllowGas(Key.Address, Address.FromText(PhantasmaTokens[TOKEN_SYMBOL].ownerAddress), 1, 9999)
                         .CallContract("token", "MintToken", Key.Address, TOKEN_SYMBOL, txData, txMutableData)
                         .SpendGas(Key.Address)
                         .EndScript();
