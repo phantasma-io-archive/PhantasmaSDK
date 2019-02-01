@@ -330,7 +330,7 @@ public class PhantasmaDemo : MonoBehaviour
         CanvasManager.Instance.ShowOperationPopup("Transfering tokens between addresses...", false);
 
         var script = ScriptUtils.BeginScript()
-            .AllowGas(Key.Address, 1, 9999)
+            .AllowGas(Key.Address, Address.Null, 1, 9999)
             .CallContract("token", "TransferTokens", from, to, tokenSymbol, amount)
             .SpendGas(Key.Address)
             .EndScript();
