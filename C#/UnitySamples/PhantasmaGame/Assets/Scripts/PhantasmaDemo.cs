@@ -330,6 +330,13 @@ public class PhantasmaDemo : MonoBehaviour
         {
             CanvasManager.Instance.ShowOperationPopup("Creating a new token on the blockchain...", false);
 
+            if (!PhantasmaTokens.ContainsKey(TOKEN_SYMBOL))
+            {
+                CanvasManager.Instance.HideOperationPopup();
+                CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Something failed while creating the new token: " + TOKEN_SYMBOL + ". Please try again.");
+                return;
+            }
+
             var script = ScriptUtils.BeginScript()
                 .AllowGas(Key.Address, Address.FromText(PhantasmaTokens[TOKEN_SYMBOL].ownerAddress), 1, 9999)
                 .CallContract("nexus", "CreateToken", Key.Address, TOKEN_SYMBOL, TOKEN_NAME, 10000, 0, TokenFlags.Transferable | TokenFlags.Finite)
