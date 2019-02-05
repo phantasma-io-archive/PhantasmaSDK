@@ -351,6 +351,8 @@ public class PhantasmaDemo : MonoBehaviour
 
     private IEnumerator ProcessTransactions(AccountTransactions accountTransactions, int currentPage, int totalPages, Action<AccountTransactions> successCallback = null, Action errorCallback = null)
     {
+        Debug.Log("current page: " + currentPage + " | total: " + totalPages);
+
         if (currentPage < totalPages)
         {
             yield return PhantasmaApi.GetAddressTransactions(Key.Address.Text, (uint)currentPage + 1, (uint)totalPages,
@@ -367,6 +369,8 @@ public class PhantasmaDemo : MonoBehaviour
         }
         else
         {
+            Debug.Log("ELSE");
+
             CanvasManager.Instance.HideOperationPopup();
 
             if (totalPages == 0)
@@ -375,6 +379,8 @@ public class PhantasmaDemo : MonoBehaviour
             }
             else
             {
+                Debug.Log("FILL history. TXs:" + accountTransactions.txs.Length);
+                
                 LastTransactions.Clear();
                 LastTransactions.AddRange(accountTransactions.txs);
 

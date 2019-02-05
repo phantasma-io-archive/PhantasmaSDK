@@ -16,11 +16,15 @@ public class TransactionsHistoryMenu : MonoBehaviour
 
     void OnEnable()
     {
+        message.gameObject.SetActive(false);
+        refreshButton.gameObject.SetActive(false);
 
+        GetTransactions();
     }
 
     private void GetTransactions()
     {
+        Debug.Log("get transactions");
         PhantasmaDemo.Instance.GetTransactions(SetContent, () =>
         {
             ShowRefreshButton();
@@ -29,7 +33,7 @@ public class TransactionsHistoryMenu : MonoBehaviour
 
     public void SetContent(AccountTransactions accountTransactions)
     {
-        //Debug.Log("menu set content: " + auctions.Length);
+        Debug.Log("menu set content: " + accountTransactions.txs.Length);
         if (accountTransactions.txs.Length == 0)
         {
             CanvasManager.Instance.HideOperationPopup();
@@ -39,8 +43,6 @@ public class TransactionsHistoryMenu : MonoBehaviour
 
         message.gameObject.SetActive(false);
         refreshButton.gameObject.SetActive(false);
-
-        //Debug.Log("buy slots: " + _buySlots.Count + " | market buy: " + PhantasmaDemo.Instance.market.BuyCarAuctions.Keys.Count);
 
         foreach (var transaction in accountTransactions.txs)
         {
