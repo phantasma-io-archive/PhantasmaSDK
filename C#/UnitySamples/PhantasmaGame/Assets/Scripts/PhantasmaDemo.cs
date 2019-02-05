@@ -344,7 +344,7 @@ public class PhantasmaDemo : MonoBehaviour
                 .SpendGas(Key.Address)
                 .EndScript();
 
-            StartCoroutine(PhantasmaApi.SignAndSendTransaction(script, "main",
+            StartCoroutine(PhantasmaApi.SignAndSendTransaction(Key, script, "main",
                 (result) =>
                 {
                     StartCoroutine(CheckTokenCreation(EBLOCKCHAIN_OPERATION.CREATE_TOKEN, result));
@@ -540,7 +540,7 @@ public class PhantasmaDemo : MonoBehaviour
         
         CanvasManager.Instance.ShowOperationPopup("Minting a new token...", false);
 
-        StartCoroutine(PhantasmaApi.SignAndSendTransaction(script, "main",
+        StartCoroutine(PhantasmaApi.SignAndSendTransaction(Key, script, "main",
             (result) =>
             {
                 StartCoroutine(CheckTokenMint(carData, carMutableData, result));

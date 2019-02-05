@@ -135,7 +135,7 @@ public class Market : MonoBehaviour
             .SpendGas(car.OwnerAddress)
             .EndScript();
 
-        StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.SignAndSendTransaction(script, "main",
+        StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.SignAndSendTransaction(PhantasmaDemo.Instance.Key, script, "main",
             (result) =>
             {
                 StartCoroutine(CheckAssetPurchase(car, result));
@@ -229,7 +229,7 @@ public class Market : MonoBehaviour
             .SpendGas(from)
             .EndScript();
 
-        StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.SignAndSendTransaction(script, "main",
+        StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.SignAndSendTransaction(PhantasmaDemo.Instance.Key, script, "main",
             (result) =>
             {
                 StartCoroutine(CheckAssetSale(car, price, endDate, result));
@@ -325,7 +325,7 @@ public class Market : MonoBehaviour
             .SpendGas(car.OwnerAddress)
             .EndScript();
 
-        StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.SignAndSendTransaction(script, "main",
+        StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.SignAndSendTransaction(PhantasmaDemo.Instance.Key, script, "main",
             (result) =>
             {
                 StartCoroutine(CheckAssetRemoval(car, result));
