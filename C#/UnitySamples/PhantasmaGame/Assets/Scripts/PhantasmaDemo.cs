@@ -337,6 +337,8 @@ public class PhantasmaDemo : MonoBehaviour
             //    return;
             //}
 
+            Debug.Log(" create: " + Key.Address);
+
             var script = ScriptUtils.BeginScript()
                 //.AllowGas(Key.Address, Address.FromText(PhantasmaTokens[TOKEN_SYMBOL].ownerAddress), 1, 9999)
                 .AllowGas(Key.Address, Address.Null, 1, 9999)
@@ -431,7 +433,7 @@ public class PhantasmaDemo : MonoBehaviour
                 foreach (var token in result)
                 {
                     PhantasmaTokens.Add(token.symbol, token);
-                    //Debug.Log("ADD token: " + token.symbol);
+                    Debug.Log("ADD token: " + token.symbol + " | owner: " + token.ownerAddress);
 
                     if (token.symbol.Equals(TOKEN_SYMBOL))
                     {
@@ -531,6 +533,8 @@ public class PhantasmaDemo : MonoBehaviour
         var txData          = Serialization.Serialize(carData);
         var txMutableData   = Serialization.Serialize(carMutableData);
 
+        Debug.Log(" mint: " + Key.Address);
+
         var script = ScriptUtils.BeginScript()
                         //.AllowGas(Key.Address, Address.FromText(PhantasmaTokens[TOKEN_SYMBOL].ownerAddress), 1, 9999)
                         .AllowGas(Key.Address, Address.Null, 1, 9999)
@@ -575,9 +579,8 @@ public class PhantasmaDemo : MonoBehaviour
                             var tokenID = tokenData.value;
 
                             Debug.Log("has event: " + evt.kind + " - car token id:" + tokenID);
-
                             var newCar = new Car();
-                            newCar.SetCar(tokenData.chainAddress, tokenID.ToString(), carData, carMutableData);
+                            newCar.SetCar(Key.Address, tokenID.ToString(), carData, carMutableData);
 
                             // Add new car to admin assets
                             MyCars.Add(tokenID.ToString(), newCar);
