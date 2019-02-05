@@ -3899,7 +3899,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 75, y: -104.32459}
+  m_AnchoredPosition: {x: 50, y: -104.32459}
   m_SizeDelta: {x: 1000, y: 87.5}
   m_Pivot: {x: 0, y: 0.75}
 --- !u!114 &707905404
@@ -3951,9 +3951,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Last X transactions
-
-    ....'
+  m_Text: Last X transactions
 --- !u!222 &707905406
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -9269,7 +9267,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -9.2}
-  m_SizeDelta: {x: 1000, y: 417.3}
+  m_SizeDelta: {x: 1100, y: 417.3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1871403110
 MonoBehaviour:

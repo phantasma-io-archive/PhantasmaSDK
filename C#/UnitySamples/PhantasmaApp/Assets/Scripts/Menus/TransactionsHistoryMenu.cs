@@ -1,4 +1,5 @@
-﻿using Phantasma.SDK;
+﻿using System;
+using Phantasma.SDK;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,12 +8,6 @@ public class TransactionsHistoryMenu : MonoBehaviour
     public Text     transactionsLabel;
     public Text     message;
     public Button   refreshButton;
-
-    //public void SetBalance(string balance)
-    //{
-    //    balanceLabel.text = balance + "\n";
-    //    //Debug.Log("set balance: " + balanceLabel.text);
-    //}
 
     void OnEnable()
     {
@@ -41,12 +36,17 @@ public class TransactionsHistoryMenu : MonoBehaviour
             return;
         }
 
+        message.text = string.Empty;
         message.gameObject.SetActive(false);
         refreshButton.gameObject.SetActive(false);
 
-        foreach (var transaction in accountTransactions.txs)
+        transactionsLabel.text = "\n";
+
+        for (var i = 0; i < accountTransactions.txs.Length; i++)
         {
-            AddHistoryEntry(transaction.chainAddress + " | " + transaction.timestamp);
+            var transaction = accountTransactions.txs[i];
+
+            AddHistoryEntry((i+1) + " - " + transaction.chainAddress + "\nDate: " + new DateTime(transaction.timestamp));
         }
     }
 
