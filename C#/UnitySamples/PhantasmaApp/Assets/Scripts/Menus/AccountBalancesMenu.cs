@@ -7,9 +7,9 @@ public class AccountBalancesMenu : MonoBehaviour
 
     void OnEnable()
     {
-        PhantasmaDemo.Instance.GetTransactions(PhantasmaDemo.Instance.Key.Address.Text);
+        //PhantasmaDemo.Instance.GetTransactions(PhantasmaDemo.Instance.Key.Address.Text);
     }
-
+    
     public void SetBalance(string balance)
     {
         balanceLabel.text = balance + "\n";

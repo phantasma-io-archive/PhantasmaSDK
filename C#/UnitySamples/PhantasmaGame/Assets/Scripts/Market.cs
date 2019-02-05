@@ -64,6 +64,7 @@ public class Market : MonoBehaviour
             yield return PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.TOKEN_SYMBOL, (uint) currentPage + 1, (uint) totalPages,
                 (a, cPage, tPages) =>
                 {
+                    // TODO check if this is not running with StartCoroutine maybe its not needed
                     ProcessAuctions(a, cPage, tPages);
                 },
                 (errorType, errorMessage) =>

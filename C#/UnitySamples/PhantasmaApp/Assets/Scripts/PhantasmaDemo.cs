@@ -36,14 +36,14 @@ public class PhantasmaDemo : MonoBehaviour
 
     public KeyPair Key { get; private set; }
 
-    private decimal _balance;
-
-    public API                          PhantasmaApi        { get; private set; }
-    public Dictionary<string, Token>    PhantasmaTokens     { get; private set; }
-
+    private decimal                 _balance;
     private IEnumerator             _pendingTxCoroutine;
     private string                  _lastTransactionHash;
     private EBLOCKCHAIN_OPERATION   _lastTransactionType;
+
+    public API                          PhantasmaApi        { get; private set; }
+    public Dictionary<string, Token>    PhantasmaTokens     { get; private set; }
+    public List<Transaction>            LastTransactions    { get; private set; }
 
     private static PhantasmaDemo _instance;
     public static PhantasmaDemo Instance
@@ -53,7 +53,8 @@ public class PhantasmaDemo : MonoBehaviour
 
     private void Awake()
     {
-        PhantasmaTokens = new Dictionary<string, Token>();
+        PhantasmaTokens     = new Dictionary<string, Token>();
+        LastTransactions    = new List<Transaction>();
     }
 
     private void Start ()
@@ -294,11 +295,11 @@ public class PhantasmaDemo : MonoBehaviour
     /// Returns the account name and balance of given address.
     /// </summary>
     /// <param name="address">String, base58 encoded - address to check for balance and name.</param>
-    public void GetTransactions(string address)
+    public void GetTransactions(Action<AccountTransactions> successCallback = null, Action errorCallback = null)
     {
-        Debug.Log("Get Transactions: " + address);
+        Debug.Log("Get Transactions");
 
-        CanvasManager.Instance.ShowOperationPopup("Fetching last transactions from the blockchain...", false);
+        StartCoroutine(GetTransactionsHistoryCoroutine(successCallback, errorCallback));
 
         //StartCoroutine(PhantasmaApi.GetTransactions(address,
         //    account =>
@@ -323,6 +324,66 @@ public class PhantasmaDemo : MonoBehaviour
         //        CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, errorType + " - " + errorMessage);
         //    }
         //));
+    }
+
+    private IEnumerator GetTransactionsHistoryCoroutine(Action<AccountTransactions> successCallback = null, Action errorCallback = null)
+    {
+        CanvasManager.Instance.ShowOperationPopup("Fetching last transactions from the blockchain...", false);
+
+        uint itemsPerPage = 20;
+
+        yield return PhantasmaApi.GetAddressTransactions(Key.Address.Text, 1, itemsPerPage,
+            (accountTransactions, currentPage, totalPages) =>
+            {
+                StartCoroutine(ProcessTransactions(accountTransactions, currentPage, totalPages, successCallback, errorCallback));
+            },
+            (errorType, errorMessage) =>
+            {
+                CanvasManager.Instance.HideOperationPopup();
+                CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, errorType + " - " + errorMessage);
+
+                if (errorCallback != null)
+                {
+                    errorCallback();
+                }
+            });
+    }
+
+    private IEnumerator ProcessTransactions(AccountTransactions accountTransactions, int currentPage, int totalPages, Action<AccountTransactions> successCallback = null, Action errorCallback = null)
+    {
+        if (currentPage < totalPages)
+        {
+            yield return PhantasmaApi.GetAddressTransactions(Key.Address.Text, (uint)currentPage + 1, (uint)totalPages,
+                (accountTxs, cPage, tPages) =>
+                {
+                    // TODO check if this is not running with StartCoroutine maybe its not needed
+                    ProcessTransactions(accountTxs, cPage, tPages);
+                },
+                (errorType, errorMessage) =>
+                {
+                    CanvasManager.Instance.HideOperationPopup();
+                    CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, errorType + " - " + errorMessage);
+                });
+        }
+        else
+        {
+            CanvasManager.Instance.HideOperationPopup();
+
+            if (totalPages == 0)
+            {
+                CanvasManager.Instance.transactionsHistoryMenu.ShowRefreshButton("No transactions associated to your address on the blockchain.");
+            }
+            else
+            {
+                LastTransactions.Clear();
+                LastTransactions.AddRange(accountTransactions.txs);
+
+                if (successCallback != null)
+                {
+                    successCallback(accountTransactions);
+                }
+            }
+        }
     }
 
     public void TransferTokens(Address from, Address to, string tokenSymbol, BigInteger amount)
