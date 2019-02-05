@@ -44,7 +44,7 @@ public class Market : MonoBehaviour
         yield return PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.TOKEN_SYMBOL, 1, itemsPerPage,
             (auctions, currentPage, totalPages) =>
             {
-                ProcessAuctions(auctions, currentPage, totalPages);
+                StartCoroutine(ProcessAuctions(auctions, currentPage, totalPages));
             },
             (errorType, errorMessage) =>
             {
@@ -95,6 +95,7 @@ public class Market : MonoBehaviour
     //private IEnumerator ProcessAuctions(Auction auctions, uint currentPage, uint totalPages, Action<Auction[], int,int> successCallback = null, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorCallback = null)
     private IEnumerator ProcessAuctions(Auction[] auctions, int currentPage, int totalPages)
     {
+        Debug.Log("current page: " + currentPage + " | total: " + totalPages);
         if (currentPage < totalPages)
         {
             yield return PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.TOKEN_SYMBOL, (uint) currentPage + 1, (uint) totalPages,
@@ -107,6 +108,16 @@ public class Market : MonoBehaviour
                     CanvasManager.Instance.HideOperationPopup();
                     CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, errorType + " - " + errorMessage);
                 });
+        }
+        else
+        {
+            Debug.Log("ELSE");
+            CanvasManager.Instance.HideOperationPopup();
+
+            if (totalPages == 0)
+            {
+                CanvasManager.Instance.marketMenu.ShowRefreshButton("No auctions at this moment in the market.");
+            }
         }
     }
 
