@@ -91,7 +91,6 @@ public class MarketMenu : MonoBehaviour
 
     public void UpdateMarket(EMARKETPLACE_TYPE marketPlace)
     {
-        //Debug.Log("update market place: " + marketPlace);
         switch (marketPlace)
         {
             case EMARKETPLACE_TYPE.BUY:

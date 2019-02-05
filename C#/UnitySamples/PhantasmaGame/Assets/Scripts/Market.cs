@@ -39,8 +39,6 @@ public class Market : MonoBehaviour
 
         uint itemsPerPage = 20;
 
-        //GetAuctions(string symbol, uint page, uint pageSize, Action<Auction[], int, int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
-
         yield return PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.TOKEN_SYMBOL, 1, itemsPerPage,
             (auctions, currentPage, totalPages) =>
             {
@@ -61,7 +59,6 @@ public class Market : MonoBehaviour
     //private IEnumerator ProcessAuctions(Auction auctions, uint currentPage, uint totalPages, Action<Auction[], int,int> successCallback = null, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorCallback = null)
     private IEnumerator ProcessAuctions(Auction[] auctions, int currentPage, int totalPages, Action<Auction[]> successCallback = null, Action errorCallback = null)
     {
-        Debug.Log("current page: " + currentPage + " | total: " + totalPages);
         if (currentPage < totalPages)
         {
             yield return PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.TOKEN_SYMBOL, (uint) currentPage + 1, (uint) totalPages,
@@ -77,7 +74,6 @@ public class Market : MonoBehaviour
         }
         else
         {
-            //Debug.Log("ELSE");
             CanvasManager.Instance.HideOperationPopup();
 
             if (totalPages == 0)
@@ -89,9 +85,7 @@ public class Market : MonoBehaviour
                 CarAuctions.Clear();
                 SellCarAuctions.Clear();
                 BuyCarAuctions.Clear();
-
-                //Debug.Log("FILL MARKET. Auctions:" + auctions.Length);
-
+                
                 foreach (var auction in auctions)
                 {
                     var carAuction = new CarAuction

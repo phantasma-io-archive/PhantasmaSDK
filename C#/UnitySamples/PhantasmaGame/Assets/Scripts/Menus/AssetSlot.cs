@@ -46,7 +46,6 @@ public class AssetSlot : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("auctions keys: " + PhantasmaDemo.Instance.market.CarAuctions.Keys.Count + " | id: " + car.TokenID);
                     priceText.text = "Cost: NA";
                 }
 
@@ -65,7 +64,6 @@ public class AssetSlot : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("auctions keys: " + PhantasmaDemo.Instance.market.CarAuctions.Keys.Count + " | id: " + car.TokenID);
                     priceText.text = "Cost: NA";
                 }
 
@@ -76,7 +74,6 @@ public class AssetSlot : MonoBehaviour
                 sellButton.gameObject.SetActive(false);
                 break;
         }
-
     }
 
     public void DataNotAvailable()

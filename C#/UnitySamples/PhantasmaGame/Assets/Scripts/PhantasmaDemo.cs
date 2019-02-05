@@ -192,7 +192,7 @@ public class PhantasmaDemo : MonoBehaviour
             yield return PhantasmaApi.GetTransaction(transactionHash,
                 (tx) =>
                 {
-                    Debug.Log("get transaction callback");
+                    //Debug.Log("get transaction callback");
                     isTransactionCompleted = true;
 
                     if (callback != null)
@@ -206,7 +206,7 @@ public class PhantasmaDemo : MonoBehaviour
 
                     if (errorType == EPHANTASMA_SDK_ERROR_TYPE.API_ERROR && errorMessage.Equals("pending"))
                     {
-                        Debug.Log("PENDING");
+                        //Debug.Log("PENDING");
                         // Pending
                     }
                     else
@@ -330,15 +330,6 @@ public class PhantasmaDemo : MonoBehaviour
         {
             CanvasManager.Instance.ShowOperationPopup("Creating a new token on the blockchain...", false);
 
-            //if (!PhantasmaTokens.ContainsKey(TOKEN_SYMBOL))
-            //{
-            //    CanvasManager.Instance.HideOperationPopup();
-            //    CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Something failed while creating the new token: " + TOKEN_SYMBOL + ". Please try again.");
-            //    return;
-            //}
-
-            Debug.Log(" create: " + Key.Address);
-
             var script = ScriptUtils.BeginScript()
                 //.AllowGas(Key.Address, Address.FromText(PhantasmaTokens[TOKEN_SYMBOL].ownerAddress), 1, 9999)
                 .AllowGas(Key.Address, Address.Null, 1, 9999)
@@ -390,7 +381,7 @@ public class PhantasmaDemo : MonoBehaviour
                                 CheckTokens(() =>
                                 {
                                     CanvasManager.Instance.adminMenu.SetContent();
-                                    //PhantasmaApi.LogTransaction(Key.Address, 0, TransactionType.Created_Token, "CAR"); // TODO ?
+                                    //PhantasmaApi.LogTransaction(Key.Address, 0, TransactionType.Created_Token, "CAR");
                                 });
 
                                 CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.SUCCESS, "New token created with success.");
@@ -406,8 +397,6 @@ public class PhantasmaDemo : MonoBehaviour
             },
             ((errorType, errorMessage) =>
             {
-                Debug.Log("FAIL create token");
-
                 CanvasManager.Instance.HideOperationPopup();
                 CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, errorType + " - " + errorMessage);
             }));
@@ -428,16 +417,13 @@ public class PhantasmaDemo : MonoBehaviour
         StartCoroutine(PhantasmaApi.GetTokens(
             (result) =>
             {
-                //Debug.Log("sign result tokens: " + result.Length);
-
                 foreach (var token in result)
                 {
                     PhantasmaTokens.Add(token.symbol, token);
-                    Debug.Log("ADD token: " + token.symbol + " | owner: " + token.ownerAddress);
+                    //Debug.Log("ADD token: " + token.symbol + " | owner: " + token.ownerAddress);
 
                     if (token.symbol.Equals(TOKEN_SYMBOL))
                     {
-                        //Debug.Log("CREATED TRUE: " + token.symbol);
                         IsTokenCreated = true;
                         break;
                     }
@@ -532,9 +518,7 @@ public class PhantasmaDemo : MonoBehaviour
 
         var txData          = Serialization.Serialize(carData);
         var txMutableData   = Serialization.Serialize(carMutableData);
-
-        Debug.Log(" mint: " + Key.Address);
-
+        
         var script = ScriptUtils.BeginScript()
                         //.AllowGas(Key.Address, Address.FromText(PhantasmaTokens[TOKEN_SYMBOL].ownerAddress), 1, 9999)
                         .AllowGas(Key.Address, Address.Null, 1, 9999)
@@ -578,7 +562,6 @@ public class PhantasmaDemo : MonoBehaviour
 
                             var tokenID = tokenData.value;
 
-                            Debug.Log("has event: " + evt.kind + " - car token id:" + tokenID);
                             var newCar = new Car();
                             newCar.SetCar(Key.Address, tokenID.ToString(), carData, carMutableData);
 
