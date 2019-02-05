@@ -749,7 +749,7 @@ namespace Phantasma.SDK
 		//This api call is paginated, multiple calls might be required to obtain a complete result 
 		public IEnumerator GetAuctions(string symbol, uint page, uint pageSize, Action<Auction[], int, int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
 		{	   
-            Debug.Log("get auctions: " + symbol + " | page: " + page + " | page size: " + pageSize);
+            //Debug.Log("get auctions: " + symbol + " | page: " + page + " | page size: " + pageSize);
 			yield return _client.SendRequest(Host, "getAuctions", errorHandlingCallback, (node) => { 
 				var currentPage = node.GetInt32("page");
 				var totalPages = node.GetInt32("totalPages");

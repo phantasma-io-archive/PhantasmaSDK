@@ -44,7 +44,7 @@ public class Market : MonoBehaviour
         yield return PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.TOKEN_SYMBOL, 1, itemsPerPage,
             (auctions, currentPage, totalPages) =>
             {
-                StartCoroutine(ProcessAuctions(auctions, currentPage, totalPages));
+                StartCoroutine(ProcessAuctions(auctions, currentPage, totalPages, successCallback, errorCallback));
             },
             (errorType, errorMessage) =>
             {
@@ -56,44 +56,10 @@ public class Market : MonoBehaviour
                     errorCallback();
                 }
             });
-
-        // todo check if received everything
-
-        //CarAuctions.Clear();
-        //SellCarAuctions.Clear();
-        //BuyCarAuctions.Clear();
-        //foreach (var auction in auctions)
-        //{
-        //    var carAuction = new CarAuction
-        //    {
-        //        tokenID = auction.tokenId,
-        //        auction = auction
-        //    };
-
-        //    CarAuctions.Add(auction.tokenId, carAuction);
-
-        //    if (auction.creatorAddress.Equals(PhantasmaDemo.Instance.Key.Address.ToString()))
-        //    {
-        //        // Auction has my address -> Selling Auction
-        //        SellCarAuctions.Add(auction.tokenId, carAuction);
-        //    }
-        //    else
-        //    {
-        //        // No my auction -> Buying Auction
-        //        BuyCarAuctions.Add(auction.tokenId, carAuction);
-        //    }
-        //}
-
-        //CanvasManager.Instance.HideOperationPopup();
-
-        //if (successCallback != null)
-        //{
-        //    successCallback(auctions);
-        //}
     }
 
     //private IEnumerator ProcessAuctions(Auction auctions, uint currentPage, uint totalPages, Action<Auction[], int,int> successCallback = null, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorCallback = null)
-    private IEnumerator ProcessAuctions(Auction[] auctions, int currentPage, int totalPages)
+    private IEnumerator ProcessAuctions(Auction[] auctions, int currentPage, int totalPages, Action<Auction[]> successCallback = null, Action errorCallback = null)
     {
         Debug.Log("current page: " + currentPage + " | total: " + totalPages);
         if (currentPage < totalPages)
@@ -111,12 +77,47 @@ public class Market : MonoBehaviour
         }
         else
         {
-            Debug.Log("ELSE");
+            //Debug.Log("ELSE");
             CanvasManager.Instance.HideOperationPopup();
 
             if (totalPages == 0)
             {
                 CanvasManager.Instance.marketMenu.ShowRefreshButton("No auctions at this moment in the market.");
+            }
+            else
+            {
+                CarAuctions.Clear();
+                SellCarAuctions.Clear();
+                BuyCarAuctions.Clear();
+
+                //Debug.Log("FILL MARKET. Auctions:" + auctions.Length);
+
+                foreach (var auction in auctions)
+                {
+                    var carAuction = new CarAuction
+                    {
+                        tokenID = auction.tokenId,
+                        auction = auction
+                    };
+
+                    CarAuctions.Add(auction.tokenId, carAuction);
+
+                    if (auction.creatorAddress.Equals(PhantasmaDemo.Instance.Key.Address.ToString()))
+                    {
+                        // Auction has my address -> Selling Auction
+                        SellCarAuctions.Add(auction.tokenId, carAuction);
+                    }
+                    else
+                    {
+                        // No my auction -> Buying Auction
+                        BuyCarAuctions.Add(auction.tokenId, carAuction);
+                    }
+                }
+
+                if (successCallback != null)
+                {
+                    successCallback(auctions);
+                }
             }
         }
     }

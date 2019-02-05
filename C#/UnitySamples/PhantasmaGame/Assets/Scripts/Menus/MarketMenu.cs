@@ -42,21 +42,24 @@ public class MarketMenu : MonoBehaviour
 
     public void GetMarket()
     {
+        //CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL,"Could not fetch blockchain assets market.");
+
         PhantasmaDemo.Instance.market.GetMarket(SetContent, () =>
         {
-            //CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL,"Could not fetch blockchain assets market.");
             ShowRefreshButton();
         });
     }
 
     public void SetContent(Auction[] auctions)
     {
+        //Debug.Log("menu set content: " + auctions.Length);
         if (auctions.Length == 0)
         {
             CanvasManager.Instance.HideOperationPopup();
             ShowRefreshButton("There are no auctions on the blockchain market.");
             return;
         }
+
 
         message.gameObject.SetActive(false);
         refreshButton.gameObject.SetActive(false);
@@ -88,6 +91,7 @@ public class MarketMenu : MonoBehaviour
 
     public void UpdateMarket(EMARKETPLACE_TYPE marketPlace)
     {
+        //Debug.Log("update market place: " + marketPlace);
         switch (marketPlace)
         {
             case EMARKETPLACE_TYPE.BUY:
