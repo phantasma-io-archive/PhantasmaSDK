@@ -7,7 +7,7 @@ using UnityEngine.Networking;
 
 using LunarLabs.Parser;
 using LunarLabs.Parser.JSON;
-
+using Phantasma.Cryptography;
 using Phantasma.Numerics;
 
 namespace Phantasma.SDK
@@ -764,13 +764,13 @@ namespace Phantasma.SDK
 		
 		
 		
-		public IEnumerator SignAndSendTransaction(byte[] script, string chain, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
+		public IEnumerator SignAndSendTransaction(KeyPair keys, byte[] script, string chain, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
 		{
            Debug.Log("Sending transaction...");
 
            //var tx = new Blockchain.Transaction("nexus", chain, script,  DateTime.UtcNow + TimeSpan.FromHours(1));
            var tx = new Blockchain.Transaction("simnet", chain, script,  DateTime.UtcNow + TimeSpan.FromHours(1));
-            tx.Sign(PhantasmaDemo.Instance.Key);
+            tx.Sign(keys);
 
            yield return SendRawTransaction(Base16.Encode(tx.ToByteArray(true)), callback, errorHandlingCallback);
 		}

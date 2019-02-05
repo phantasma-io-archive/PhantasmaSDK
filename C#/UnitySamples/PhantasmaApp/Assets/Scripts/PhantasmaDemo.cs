@@ -335,7 +335,7 @@ public class PhantasmaDemo : MonoBehaviour
             .SpendGas(Key.Address)
             .EndScript();
 
-        StartCoroutine(PhantasmaApi.SignAndSendTransaction(script, "main",
+        StartCoroutine(PhantasmaApi.SignAndSendTransaction(Key, script, "main",
             (result) =>
             {
                 StartCoroutine(CheckTokensTransfer(result));
