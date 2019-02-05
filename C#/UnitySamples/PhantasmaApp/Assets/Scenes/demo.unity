@@ -3089,7 +3089,7 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 0.99858904}
+  m_AnchorMax: {x: 1, y: 0.99964225}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -3874,8 +3874,8 @@ GameObject:
   m_Component:
   - component: {fileID: 707905403}
   - component: {fileID: 707905406}
-  - component: {fileID: 707905405}
   - component: {fileID: 707905404}
+  - component: {fileID: 707905405}
   m_Layer: 5
   m_Name: Transactions
   m_TagString: Untagged
@@ -3899,8 +3899,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 75, y: -104.32323}
-  m_SizeDelta: {x: 1000, y: 350}
+  m_AnchoredPosition: {x: 75, y: -104.32459}
+  m_SizeDelta: {x: 1000, y: 87.5}
   m_Pivot: {x: 0, y: 0.75}
 --- !u!114 &707905404
 MonoBehaviour:
@@ -3912,12 +3912,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_GeneratorAsset: {fileID: 0}
-  m_Script: {fileID: 1573420865, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
+  m_Script: {fileID: 1741964061, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_EffectColor: {r: 0, g: 0, b: 0, a: 0.5019608}
-  m_EffectDistance: {x: 0, y: -4}
-  m_UseGraphicAlpha: 1
+  m_HorizontalFit: 0
+  m_VerticalFit: 2
 --- !u!114 &707905405
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3941,10 +3940,10 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 12800000, guid: 1e4024715e192604087ebb2193701851, type: 3}
-    m_FontSize: 48
+    m_FontSize: 40
     m_FontStyle: 0
     m_BestFit: 0
-    m_MinSize: 10
+    m_MinSize: 3
     m_MaxSize: 48
     m_Alignment: 3
     m_AlignByGeometry: 0
@@ -6702,7 +6701,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 585119625}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.99858904
+  m_Size: 0.99964225
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -9330,7 +9329,7 @@ MonoBehaviour:
   m_Elasticity: 0.1
   m_Inertia: 1
   m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 5
+  m_ScrollSensitivity: 30
   m_Viewport: {fileID: 1881578385}
   m_HorizontalScrollbar: {fileID: 0}
   m_VerticalScrollbar: {fileID: 1312141884}
@@ -10238,7 +10237,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1980652942
 RectTransform:
   m_ObjectHideFlags: 0
