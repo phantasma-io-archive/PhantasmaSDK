@@ -19,7 +19,6 @@ public class TransactionsHistoryMenu : MonoBehaviour
 
     private void GetTransactions()
     {
-        Debug.Log("get transactions");
         PhantasmaDemo.Instance.GetTransactions(SetContent, () =>
         {
             ShowRefreshButton();
@@ -28,7 +27,6 @@ public class TransactionsHistoryMenu : MonoBehaviour
 
     public void SetContent(AccountTransactions accountTransactions)
     {
-        Debug.Log("menu set content: " + accountTransactions.txs.Length);
         if (accountTransactions.txs.Length == 0)
         {
             CanvasManager.Instance.HideOperationPopup();
@@ -66,7 +64,6 @@ public class TransactionsHistoryMenu : MonoBehaviour
     public void AddHistoryEntry(string entry)
     {
         transactionsLabel.text += entry + "\n";
-        //Debug.Log("add entry: " + transactionsLabel.text);
     }
 
     public void ShowRefreshButton(string msg = null)

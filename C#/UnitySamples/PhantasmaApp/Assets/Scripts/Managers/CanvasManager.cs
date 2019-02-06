@@ -190,5 +190,4 @@ public class CanvasManager : MonoBehaviour {
     }
     
     #endregion
-
 }

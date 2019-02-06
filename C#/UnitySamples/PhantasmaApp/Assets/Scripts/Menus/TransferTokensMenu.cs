@@ -32,7 +32,6 @@ public class TransferTokensMenu : MonoBehaviour
 
     public void Clear()
     {
-        Debug.Log("clear");
         addressInput.text   = string.Empty;
         amountInput.text    = string.Empty;
 
@@ -48,7 +47,7 @@ public class TransferTokensMenu : MonoBehaviour
         }
 
         // Validate private key
-            if (string.IsNullOrEmpty(addressInput.text))
+        if (string.IsNullOrEmpty(addressInput.text))
         {
             CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Public address cannot be empty.");
             return;
@@ -56,23 +55,20 @@ public class TransferTokensMenu : MonoBehaviour
 
         Address address;
 
-        //if (!PhantasmaDemo.Instance.PhantasmaApi.IsValidPrivateKey(addressInput.text))
         if(!PhantasmaDemo.Instance.PhantasmaApi.IsValidAddress(addressInput.text))
         {
             CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "The entered address is not valid.\nThe address must start with a 'P' and have 45 characters.");
             return;
         }
-        else
-        {
-            address = Address.FromText(addressInput.text);
 
-            // Check if the 'from' and 'to' addresses are the same
-            if (PhantasmaDemo.Instance.Key.Address.Equals(address))
-            {
-                CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Cannot send tokens to your own address. Destination address must be different from the origin address.");
-                addressInput.text = string.Empty;
-                return;
-            }
+        address = Address.FromText(addressInput.text);
+
+        // Check if the 'from' and 'to' addresses are the same
+        if (PhantasmaDemo.Instance.Key.Address.Equals(address))
+        {
+            CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Cannot send tokens to your own address. Destination address must be different from the origin address.");
+            addressInput.text = string.Empty;
+            return;
         }
 
         // Validate amount
@@ -82,9 +78,7 @@ public class TransferTokensMenu : MonoBehaviour
             return;
         }
 
-        //var price = decimal.Parse(priceInput.text);
-        BigInteger amount;
-        if (BigInteger.TryParse(amountInput.text, out amount))
+        if (BigInteger.TryParse(amountInput.text, out var amount))
         {
             if (amount < 0)
             {
@@ -106,8 +100,6 @@ public class TransferTokensMenu : MonoBehaviour
             return;
         }
 
-        Debug.Log("Transfer:" + addressInput.text + " | " + amountInput.text);
-
         PhantasmaDemo.Instance.TransferTokens(PhantasmaDemo.Instance.Key.Address, address, tokenDropdown.options[tokenDropdown.value].text, amount);
     }
 
@@ -120,5 +112,4 @@ public class TransferTokensMenu : MonoBehaviour
     {
         CanvasManager.Instance.CloseTransferTokensMenu();
     }
-
 }

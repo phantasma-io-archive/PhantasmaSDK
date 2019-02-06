@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using Phantasma.Blockchain.Contracts;
 using UnityEngine;
 
@@ -109,8 +108,6 @@ public class PhantasmaDemo : MonoBehaviour
 
     private void LoggedIn(string address)
     {
-        Debug.Log("logged in: " + address);
-       
         CanvasManager.Instance.SetAddress(address);
         CanvasManager.Instance.CloseLogin();
     }
@@ -160,7 +157,6 @@ public class PhantasmaDemo : MonoBehaviour
                 {
                     if (errorType == EPHANTASMA_SDK_ERROR_TYPE.API_ERROR && errorMessage.Equals("pending"))
                     {
-                        Debug.Log("PENDING TRANSACTION");
                         // Pending Transaction
                     }
                     else
@@ -212,16 +208,6 @@ public class PhantasmaDemo : MonoBehaviour
     /// <param name="address">String, base58 encoded - address to check for balance and name.</param>
     public void GetAccount(string address)
     {
-        // Second test account: KyHrxZyrGPorgJKLv4Cg6dm5xCjEb6k8USRoSysVXAQK6eEb5taU
-
-        // Private key: L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25
-        // Public key:  P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr
-
-        //_keyField.Content = "Kws5PuviJskdo2V7hGnr37T1Bt4ymEpnLWYyStySvxXwXAiANNuH"; // P54Dd8E4khN4LeVTBXZtS2FSk4666mspuM6aUGtVQS2yX
-        //_keyField.Content = "L17u4Eu5eXpdguGxVFV1a5sr5mmGf389nodq9gJYPVMJS9PVrbnm"; // PDSMhv7EeXoAnedYSsHZhavougRJ9rt99kQYzztJDzWkd
-
-        Debug.Log("Get account: " + address);
-
         CanvasManager.Instance.ShowOperationPopup("Fetching account data from the blockchain...", false);
 
         StartCoroutine(PhantasmaApi.GetAccount(address, 
@@ -240,7 +226,6 @@ public class PhantasmaDemo : MonoBehaviour
                 CanvasManager.Instance.HideOperationPopup();
 
                 LoggedIn(address);
-
             },
             (errorType, errorMessage) =>
             {
@@ -265,7 +250,6 @@ public class PhantasmaDemo : MonoBehaviour
                 foreach (var token in result)
                 {
                     PhantasmaTokens.Add(token.symbol, token);
-                    //Debug.Log("ADD token: " + token.symbol);
                 }
 
                 CanvasManager.Instance.HideOperationPopup();
@@ -292,38 +276,11 @@ public class PhantasmaDemo : MonoBehaviour
     }
 
     /// <summary>
-    /// Returns the account name and balance of given address.
+    /// Returns the last transactions associated to the login address
     /// </summary>
-    /// <param name="address">String, base58 encoded - address to check for balance and name.</param>
     public void GetTransactions(Action<AccountTransactions> successCallback = null, Action errorCallback = null)
     {
-        Debug.Log("Get Transactions");
-
         StartCoroutine(GetTransactionsHistoryCoroutine(successCallback, errorCallback));
-
-        //StartCoroutine(PhantasmaApi.GetTransactions(address,
-        //    account =>
-        //    {
-        //        CanvasManager.Instance.accountBalancesMenu.SetBalance("Name: " + account.name);
-
-        //        foreach (var balance in account.balances)
-        //        {
-        //            var isFungible = PhantasmaTokens[balance.symbol].Flags.Contains("Fungible");
-
-        //            var amount = isFungible ? decimal.Parse(balance.amount) / (decimal)Mathf.Pow(10f, 8) : decimal.Parse(balance.amount);
-        //            CanvasManager.Instance.transactionsHistoryMenu.AddHistoryEntry("Chain: " + balance.chain + " - " + amount + " " + balance.symbol);
-        //        }
-
-        //        CanvasManager.Instance.HideOperationPopup();
-
-        //        LoggedIn(address);
-
-        //    },
-        //    (errorType, errorMessage) =>
-        //    {
-        //        CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, errorType + " - " + errorMessage);
-        //    }
-        //));
     }
 
     private IEnumerator GetTransactionsHistoryCoroutine(Action<AccountTransactions> successCallback = null, Action errorCallback = null)
@@ -351,8 +308,6 @@ public class PhantasmaDemo : MonoBehaviour
 
     private IEnumerator ProcessTransactions(AccountTransactions accountTransactions, int currentPage, int totalPages, Action<AccountTransactions> successCallback = null, Action errorCallback = null)
     {
-        //Debug.Log("current page: " + currentPage + " | total: " + totalPages);
-
         if (currentPage < totalPages)
         {
             yield return PhantasmaApi.GetAddressTransactions(Key.Address.Text, (uint)currentPage + 1, (uint)totalPages,
@@ -376,9 +331,7 @@ public class PhantasmaDemo : MonoBehaviour
                 CanvasManager.Instance.transactionsHistoryMenu.ShowRefreshButton("No transactions associated to your address on the blockchain.");
             }
             else
-            {
-                //Debug.Log("FILL history. TXs:" + accountTransactions.txs.Length);
-                
+            {               
                 LastTransactions.Clear();
                 LastTransactions.AddRange(accountTransactions.txs);
 
@@ -392,7 +345,7 @@ public class PhantasmaDemo : MonoBehaviour
 
     public void TransferTokens(Address from, Address to, string tokenSymbol, BigInteger amount)
     {
-        CanvasManager.Instance.ShowOperationPopup("Transfering tokens between addresses...", false);
+        CanvasManager.Instance.ShowOperationPopup("Transferring tokens between addresses...", false);
 
         var script = ScriptUtils.BeginScript()
             .AllowGas(Key.Address, Address.Null, 1, 9999)
@@ -414,7 +367,7 @@ public class PhantasmaDemo : MonoBehaviour
     }
 
     /// <summary>
-    /// Check if the auction purchase was successful
+    /// Check if the token transfer was successful
     /// </summary>
     private IEnumerator CheckTokensTransfer(string result)
     {
@@ -428,8 +381,7 @@ public class PhantasmaDemo : MonoBehaviour
 
                 foreach (var evt in tx.events)
                 {
-                    EventKind eKind;
-                    if (Enum.TryParse(evt.kind, out eKind))
+                    if (Enum.TryParse(evt.kind, out EventKind eKind))
                     {
                         switch (eKind)
                         {
