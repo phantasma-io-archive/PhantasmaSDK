@@ -25,28 +25,30 @@ public class TransactionsHistoryMenu : MonoBehaviour
         });
     }
 
-    public void SetContent(AccountTransactions accountTransactions)
+    public void SetContent()
     {
-        if (accountTransactions.txs.Length == 0)
+        var transactions = PhantasmaDemo.Instance.LastTransactions;
+
+        if (transactions.Count == 0)
         {
             CanvasManager.Instance.HideOperationPopup();
             ShowRefreshButton("There are no transactions associated to your address on the blockchain.");
             return;
         }
-
+        
         message.text = string.Empty;
         message.gameObject.SetActive(false);
         refreshButton.gameObject.SetActive(false);
 
-        transactionsLabel.text = "\n";
+        transactionsLabel.text = string.Empty;
 
         var newEntry = string.Empty;
 
-        for (var i = 0; i < accountTransactions.txs.Length; i++)
+        for (var i = 0; i < transactions.Count; i++)
         {
-            var transaction = accountTransactions.txs[i];
+            var transaction = transactions[i];
 
-            newEntry = (i + 1) + " - " + transaction.chainAddress + "\nDate: " + new DateTime(transaction.timestamp) + "\nEvents: ";
+            newEntry = "\n" + (i + 1) + " - " + transaction.chainAddress + "\nDate: " + new DateTime(transaction.timestamp) + "\nEvents: ";
 
             foreach (var transactionEvent in transaction.events)
             {

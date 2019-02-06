@@ -233,7 +233,7 @@ public class PhantasmaDemo : MonoBehaviour
             }
         ));
     }
-    
+
     /// <summary>
     /// Check the tokens deployed in Phantasma Blockchain.
     /// </summary>
@@ -278,21 +278,23 @@ public class PhantasmaDemo : MonoBehaviour
     /// <summary>
     /// Returns the last transactions associated to the login address
     /// </summary>
-    public void GetTransactions(Action<AccountTransactions> successCallback = null, Action errorCallback = null)
+    public void GetTransactions(Action successCallback = null, Action errorCallback = null)
     {
         StartCoroutine(GetTransactionsHistoryCoroutine(successCallback, errorCallback));
     }
 
-    private IEnumerator GetTransactionsHistoryCoroutine(Action<AccountTransactions> successCallback = null, Action errorCallback = null)
+    private IEnumerator GetTransactionsHistoryCoroutine(Action successCallback = null, Action errorCallback = null)
     {
         CanvasManager.Instance.ShowOperationPopup("Fetching last transactions from the blockchain...", false);
 
-        uint itemsPerPage = 20;
+        int itemsPerPage = 20;
 
-        yield return PhantasmaApi.GetAddressTransactions(Key.Address.Text, 1, itemsPerPage,
+        LastTransactions.Clear();
+
+        yield return PhantasmaApi.GetAddressTransactions(Key.Address.Text, 1, (uint)itemsPerPage,
             (accountTransactions, currentPage, totalPages) =>
             {
-                StartCoroutine(ProcessTransactions(accountTransactions, currentPage, totalPages, successCallback, errorCallback));
+                StartCoroutine(ProcessTransactions(accountTransactions, currentPage, itemsPerPage, totalPages, successCallback, errorCallback));
             },
             (errorType, errorMessage) =>
             {
@@ -306,14 +308,16 @@ public class PhantasmaDemo : MonoBehaviour
             });
     }
 
-    private IEnumerator ProcessTransactions(AccountTransactions accountTransactions, int currentPage, int totalPages, Action<AccountTransactions> successCallback = null, Action errorCallback = null)
+    private IEnumerator ProcessTransactions(AccountTransactions accountTransactions, int currentPage, int itemsPerPage, int totalPages, Action successCallback = null, Action errorCallback = null)
     {
         if (currentPage < totalPages)
         {
-            yield return PhantasmaApi.GetAddressTransactions(Key.Address.Text, (uint)currentPage + 1, (uint)totalPages,
+            yield return PhantasmaApi.GetAddressTransactions(Key.Address.Text, (uint)currentPage + 1, (uint)itemsPerPage,
                 (accountTxs, cPage, tPages) =>
                 {
-                    StartCoroutine(ProcessTransactions(accountTxs, cPage, tPages, successCallback, errorCallback));
+                    LastTransactions.AddRange(accountTransactions.txs);
+
+                    StartCoroutine(ProcessTransactions(accountTxs, cPage, itemsPerPage, tPages, successCallback, errorCallback));
                 },
                 (errorType, errorMessage) =>
                 {
@@ -331,12 +335,11 @@ public class PhantasmaDemo : MonoBehaviour
             }
             else
             {               
-                LastTransactions.Clear();
                 LastTransactions.AddRange(accountTransactions.txs);
 
                 if (successCallback != null)
                 {
-                    successCallback(accountTransactions);
+                    successCallback();
                 }
             }
         }
