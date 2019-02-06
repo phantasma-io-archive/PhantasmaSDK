@@ -313,7 +313,7 @@ public class PhantasmaDemo : MonoBehaviour
             yield return PhantasmaApi.GetAddressTransactions(Key.Address.Text, (uint)currentPage + 1, (uint)totalPages,
                 (accountTxs, cPage, tPages) =>
                 {
-                    ProcessTransactions(accountTxs, cPage, tPages);
+                    StartCoroutine(ProcessTransactions(accountTxs, cPage, tPages, successCallback, errorCallback));
                 },
                 (errorType, errorMessage) =>
                 {
