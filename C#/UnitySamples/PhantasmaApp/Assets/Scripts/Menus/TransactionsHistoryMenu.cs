@@ -42,11 +42,24 @@ public class TransactionsHistoryMenu : MonoBehaviour
 
         transactionsLabel.text = "\n";
 
+        var newEntry = string.Empty;
+
         for (var i = 0; i < accountTransactions.txs.Length; i++)
         {
             var transaction = accountTransactions.txs[i];
 
-            AddHistoryEntry((i+1) + " - " + transaction.chainAddress + "\nDate: " + new DateTime(transaction.timestamp));
+            newEntry = (i + 1) + " - " + transaction.chainAddress + "\nDate: " + new DateTime(transaction.timestamp) + "\nEvents: ";
+
+            foreach (var transactionEvent in transaction.events)
+            {
+                var kind = transactionEvent.kind;
+
+                if (kind == "GasEscrow" || kind == "GasPayment") continue;
+
+                newEntry += transactionEvent.kind + " ; ";
+            }
+
+            AddHistoryEntry(newEntry);
         }
     }
 
