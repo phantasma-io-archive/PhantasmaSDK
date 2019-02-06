@@ -78,7 +78,8 @@ public class TransferTokensMenu : MonoBehaviour
             return;
         }
 
-        if (BigInteger.TryParse(amountInput.text, out var amount))
+        BigInteger amount;
+        if (BigInteger.TryParse(amountInput.text, out amount))
         {
             if (amount < 0)
             {

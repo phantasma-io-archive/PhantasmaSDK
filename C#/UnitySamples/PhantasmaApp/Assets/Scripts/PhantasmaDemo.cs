@@ -383,7 +383,8 @@ public class PhantasmaDemo : MonoBehaviour
 
                 foreach (var evt in tx.events)
                 {
-                    if (Enum.TryParse(evt.kind, out EventKind eKind))
+                    EventKind eKind;
+                    if (Enum.TryParse(evt.kind, out eKind))
                     {
                         switch (eKind)
                         {
