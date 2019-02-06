@@ -175,7 +175,8 @@ public class Market : MonoBehaviour
             {
                 foreach (var evt in tx.events)
                 {
-                    if (Enum.TryParse(evt.kind, out EventKind eKind))
+                    EventKind eKind;
+                    if (Enum.TryParse(evt.kind, out eKind))
                     {
                         if (eKind == EventKind.AuctionFilled)
                         {
@@ -262,7 +263,8 @@ public class Market : MonoBehaviour
             {
                 foreach (var evt in tx.events)
                 {
-                    if (Enum.TryParse(evt.kind, out EventKind eKind))
+                    EventKind eKind;
+                    if (Enum.TryParse(evt.kind, out eKind))
                     {
                         if (eKind == EventKind.AuctionCreated)
                         {
@@ -352,15 +354,16 @@ public class Market : MonoBehaviour
             {
                 foreach (var evt in tx.events)
                 {
-                    if (Enum.TryParse(evt.kind, out EventKind eKind))
+                    EventKind eKind;
+                    if (Enum.TryParse(evt.kind, out eKind))
                     {
                         if (eKind == EventKind.AuctionCancelled)
                         {
-                            var carMutableData = car.MutableData;
+                            var carMutableData      = car.MutableData;
                             carMutableData.location = CarLocation.None;
 
-                            car.OwnerAddress = PhantasmaDemo.Instance.Key.Address;
-                            car.MutableData = carMutableData;
+                            car.OwnerAddress    = PhantasmaDemo.Instance.Key.Address;
+                            car.MutableData     = carMutableData;
 
                             CarAuctions.Remove(car.TokenID);
                             SellCarAuctions.Remove(car.TokenID);

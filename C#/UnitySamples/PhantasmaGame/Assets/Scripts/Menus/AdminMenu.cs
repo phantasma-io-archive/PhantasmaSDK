@@ -47,7 +47,8 @@ public class AdminMenu : MonoBehaviour
                 myWalletTokens.text         = PhantasmaDemo.Instance.MyCars.Count.ToString();
                 currentSupplyTokens.text    = token.currentSupply;
 
-                if (int.TryParse(token.currentSupply, out var supply))
+                int supply;
+                if (int.TryParse(token.currentSupply, out supply))
                 {
                     _tokenSupply = supply;
                 }

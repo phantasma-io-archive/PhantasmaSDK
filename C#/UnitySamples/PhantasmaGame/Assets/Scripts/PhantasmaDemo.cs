@@ -337,19 +337,20 @@ public class PhantasmaDemo : MonoBehaviour
             {
                 foreach (var evt in tx.events)
                 {
-                    if (Enum.TryParse(evt.kind, out EventKind eKind))
+                    EventKind eKind;
+                    if (Enum.TryParse(evt.kind, out eKind))
                     {
                         if (eKind == EventKind.TokenCreate)
                         {
-                            var bytes = Base16.Decode(evt.data);
+                            var bytes       = Base16.Decode(evt.data);
                             var tokenSymbol = Serialization.Unserialize<string>(bytes);
 
                             Debug.Log(evt.kind + " - " + tokenSymbol);
 
                             if (tokenSymbol.Equals(TOKEN_SYMBOL))
                             {
-                                IsTokenCreated = true;
-                                IsTokenOwner = true;
+                                IsTokenCreated  = true;
+                                IsTokenOwner    = true;
 
                                 CheckTokens(() =>
                                 {
@@ -519,7 +520,8 @@ public class PhantasmaDemo : MonoBehaviour
             {
                 foreach (var evt in tx.events)
                 {
-                    if (Enum.TryParse(evt.kind, out EventKind eKind))
+                    EventKind eKind;
+                    if (Enum.TryParse(evt.kind, out eKind))
                     {
                         if (eKind == EventKind.TokenMint)
                         {
