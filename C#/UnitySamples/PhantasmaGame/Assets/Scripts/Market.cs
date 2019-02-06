@@ -37,12 +37,16 @@ public class Market : MonoBehaviour
     {
         CanvasManager.Instance.ShowOperationPopup("Refreshing blockchain asset market...", false);
 
-        uint itemsPerPage = 2;
+        int itemsPerPage = 20;
 
-        yield return PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.TOKEN_SYMBOL, 1, itemsPerPage,
+        CarAuctions.Clear();
+        SellCarAuctions.Clear();
+        BuyCarAuctions.Clear();
+
+        yield return PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.TOKEN_SYMBOL, 1, (uint)itemsPerPage,
             (auctions, currentPage, totalPages) =>
             {
-                StartCoroutine(ProcessAuctions(auctions, currentPage, totalPages, successCallback, errorCallback));
+                StartCoroutine(ProcessAuctions(auctions, currentPage, itemsPerPage, totalPages, successCallback, errorCallback));
             },
             (errorType, errorMessage) =>
             {
@@ -55,17 +59,37 @@ public class Market : MonoBehaviour
                 }
             });
     }
-
-    private IEnumerator ProcessAuctions(Auction[] auctions, int currentPage, int totalPages, Action<Auction[]> successCallback = null, Action errorCallback = null)
+    
+    private IEnumerator ProcessAuctions(Auction[] auctions, int currentPage, int itemsPerPage, int totalPages, Action<Auction[]> successCallback = null, Action errorCallback = null)
     {
-        Debug.Log("current: " + currentPage + " | total:" + totalPages);
         if (currentPage < totalPages)
         {
-            yield return PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.TOKEN_SYMBOL, (uint) currentPage + 1, (uint) totalPages,
+            yield return PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.TOKEN_SYMBOL, (uint) currentPage + 1, (uint) itemsPerPage,
                 (a, cPage, tPages) =>
                 {
-                    Debug.Log("+1");
-                    StartCoroutine(ProcessAuctions(a, cPage, tPages, successCallback, errorCallback));
+                    foreach (var auction in auctions)
+                    {
+                        var carAuction = new CarAuction
+                        {
+                            tokenID = auction.tokenId,
+                            auction = auction
+                        };
+
+                        CarAuctions.Add(auction.tokenId, carAuction);
+
+                        if (auction.creatorAddress.Equals(PhantasmaDemo.Instance.Key.Address.ToString()))
+                        {
+                            // Auction has my address -> Selling Auction
+                            SellCarAuctions.Add(auction.tokenId, carAuction);
+                        }
+                        else
+                        {
+                            // No my auction -> Buying Auction
+                            BuyCarAuctions.Add(auction.tokenId, carAuction);
+                        }
+                    }
+
+                    StartCoroutine(ProcessAuctions(a, cPage, itemsPerPage, tPages, successCallback, errorCallback));
                 },
                 (errorType, errorMessage) =>
                 {
@@ -82,11 +106,7 @@ public class Market : MonoBehaviour
                 CanvasManager.Instance.marketMenu.ShowRefreshButton("No auctions at this moment in the market.");
             }
             else
-            {
-                CarAuctions.Clear();
-                SellCarAuctions.Clear();
-                BuyCarAuctions.Clear();
-                
+            {               
                 foreach (var auction in auctions)
                 {
                     var carAuction = new CarAuction
