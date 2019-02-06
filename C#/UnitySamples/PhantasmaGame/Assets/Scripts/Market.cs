@@ -37,7 +37,7 @@ public class Market : MonoBehaviour
     {
         CanvasManager.Instance.ShowOperationPopup("Refreshing blockchain asset market...", false);
 
-        uint itemsPerPage = 20;
+        uint itemsPerPage = 2;
 
         yield return PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.TOKEN_SYMBOL, 1, itemsPerPage,
             (auctions, currentPage, totalPages) =>
@@ -58,12 +58,14 @@ public class Market : MonoBehaviour
 
     private IEnumerator ProcessAuctions(Auction[] auctions, int currentPage, int totalPages, Action<Auction[]> successCallback = null, Action errorCallback = null)
     {
+        Debug.Log("current: " + currentPage + " | total:" + totalPages);
         if (currentPage < totalPages)
         {
             yield return PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.TOKEN_SYMBOL, (uint) currentPage + 1, (uint) totalPages,
                 (a, cPage, tPages) =>
                 {
-                    ProcessAuctions(a, cPage, tPages);
+                    Debug.Log("+1");
+                    StartCoroutine(ProcessAuctions(a, cPage, tPages, successCallback, errorCallback));
                 },
                 (errorType, errorMessage) =>
                 {
