@@ -42,8 +42,6 @@ public class MarketMenu : MonoBehaviour
 
     public void GetMarket()
     {
-        //CanvasManager.Instance.ShowResultPopup(ERESULT_TYPE.FAIL,"Could not fetch blockchain assets market.");
-
         PhantasmaDemo.Instance.market.GetMarket(SetContent, () =>
         {
             ShowRefreshButton();
@@ -52,7 +50,6 @@ public class MarketMenu : MonoBehaviour
 
     public void SetContent(Auction[] auctions)
     {
-        //Debug.Log("menu set content: " + auctions.Length);
         if (auctions.Length == 0)
         {
             CanvasManager.Instance.HideOperationPopup();
@@ -64,8 +61,6 @@ public class MarketMenu : MonoBehaviour
         message.gameObject.SetActive(false);
         refreshButton.gameObject.SetActive(false);
 
-        //Debug.Log("buy slots: " + _buySlots.Count + " | market buy: " + PhantasmaDemo.Instance.market.BuyCarAuctions.Keys.Count);
-
         if (_buySlots.Count != PhantasmaDemo.Instance.market.BuyCarAuctions.Keys.Count)
         {
             UpdateMarket(EMARKETPLACE_TYPE.BUY);
@@ -74,7 +69,6 @@ public class MarketMenu : MonoBehaviour
         buyTabMessage.text = _buySlots.Count == 0 ? "There are no assets to buy on the market." : string.Empty;
         buyTabMessage.gameObject.SetActive(_buySlots.Count == 0);
 
-        //Debug.Log("sell slots: " + _sellSlots.Count + " | market sell: " + PhantasmaDemo.Instance.market.SellCarAuctions.Keys.Count);
         if (_sellSlots.Count != PhantasmaDemo.Instance.market.SellCarAuctions.Keys.Count)
         {
             UpdateMarket(EMARKETPLACE_TYPE.SELL);
@@ -108,11 +102,11 @@ public class MarketMenu : MonoBehaviour
                     StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetTokenData(PhantasmaDemo.TOKEN_SYMBOL, marketAuction.tokenID,
                         (tokenData =>
                         {
-                            var ramBytes = Base16.Decode(tokenData.ram);
-                            var carMutableData = Serialization.Unserialize<CarMutableData>(ramBytes);
+                            var ramBytes        = Base16.Decode(tokenData.ram);
+                            var carMutableData  = Serialization.Unserialize<CarMutableData>(ramBytes);
 
-                            var romBytes = Base16.Decode(tokenData.rom);
-                            var carData = Serialization.Unserialize<CarData>(romBytes);
+                            var romBytes    = Base16.Decode(tokenData.rom);
+                            var carData     = Serialization.Unserialize<CarData>(romBytes);
 
                             var newCar = new Car();
                             newCar.SetCar(Address.FromText(tokenData.ownerAddress), marketAuction.tokenID, carData, carMutableData);
@@ -146,11 +140,11 @@ public class MarketMenu : MonoBehaviour
                     StartCoroutine(PhantasmaDemo.Instance.PhantasmaApi.GetTokenData(PhantasmaDemo.TOKEN_SYMBOL, marketAuction.tokenID,
                         (tokenData =>
                         {
-                            var ramBytes = Base16.Decode(tokenData.ram);
-                            var carMutableData = Serialization.Unserialize<CarMutableData>(ramBytes);
+                            var ramBytes        = Base16.Decode(tokenData.ram);
+                            var carMutableData  = Serialization.Unserialize<CarMutableData>(ramBytes);
 
-                            var romBytes = Base16.Decode(tokenData.rom);
-                            var carData = Serialization.Unserialize<CarData>(romBytes);
+                            var romBytes    = Base16.Decode(tokenData.rom);
+                            var carData     = Serialization.Unserialize<CarData>(romBytes);
 
                             var newCar = new Car();
                             newCar.SetCar(Address.FromText(tokenData.ownerAddress), marketAuction.tokenID, carData, carMutableData);
@@ -199,7 +193,7 @@ public class MarketMenu : MonoBehaviour
 
     public void SelectMarketBuyTab()
     {
-        buyButton.interactable = false;
+        buyButton.interactable  = false;
         sellButton.interactable = true;
 
         buyTab.SetActive(true);

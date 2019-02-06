@@ -36,9 +36,8 @@ public class OperationPopup : MonoBehaviour
 
     public void ShowPopup(string msg, bool showCancelButton)
     {
-        Debug.Log("------> " + msg);
-        _isClosing = false;
-        _timeVisible = 0;
+        _isClosing      = false;
+        _timeVisible    = 0;
 
         message.text = msg;
 

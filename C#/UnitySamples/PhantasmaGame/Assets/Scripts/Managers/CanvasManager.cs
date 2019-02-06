@@ -41,8 +41,6 @@ public class CanvasManager : MonoBehaviour {
         myAssetsMenu.gameObject.SetActive(false);
         marketMenu.gameObject.SetActive(false);
         adminMenu.gameObject.SetActive(false);
-        
-        //OpenLogin();
     }
 	
     public void SetAddress(string address)

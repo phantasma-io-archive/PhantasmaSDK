@@ -26,7 +26,6 @@ public class MyAssetsMenu : MonoBehaviour
     {
         ClearContent();
 
-        //Debug.Log("my assets: " + PhantasmaDemo.Instance.MyCars.Keys.Count);
         var tokenIds = new List<string>(PhantasmaDemo.Instance.MyCars.Keys);
 
         if (tokenIds.Count == 0)

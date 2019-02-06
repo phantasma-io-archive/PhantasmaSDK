@@ -49,31 +49,20 @@ public class PhantasmaDemo : MonoBehaviour
 
     private const float _TRANSACTION_CONFIRMATION_DELAY = 10f;
 
-    public KeyPair Key { get; private set; }
-
-    private enum EWALLET_STATE
-    {
-        INIT,
-        SYNC,
-        UPDATE,
-        READY
-    }
-
     public Market       market;
     public List<Sprite> carImages;
 
-    private decimal         _balance;
+    private IEnumerator             _pendingTxCoroutine;
+    private string                  _lastTransactionHash;
+    private EBLOCKCHAIN_OPERATION   _lastTransactionType;
 
+    public KeyPair                      Key                 { get; private set; }
     public API                          PhantasmaApi        { get; private set; }
     public Dictionary<string, Token>    PhantasmaTokens     { get; private set; }
     public bool                         IsTokenCreated      { get; private set; }
     public bool                         IsTokenOwner        { get; private set; }
     public decimal                      TokenCurrentSupply  { get; private set; }
     public Dictionary<string, Car>      MyCars              { get; set; }
-
-    private IEnumerator             _pendingTxCoroutine;
-    private string                  _lastTransactionHash;
-    private EBLOCKCHAIN_OPERATION   _lastTransactionType;
 
     private static PhantasmaDemo _instance;
     public static PhantasmaDemo Instance
@@ -139,8 +128,6 @@ public class PhantasmaDemo : MonoBehaviour
 
     private void LoggedIn(string address)
     {
-        Debug.Log("logged in: " + address);
-       
         CanvasManager.Instance.SetAddress(address);
         CanvasManager.Instance.CloseLogin();
     }
@@ -181,7 +168,6 @@ public class PhantasmaDemo : MonoBehaviour
 
     private IEnumerator CheckOperationCoroutine(EBLOCKCHAIN_OPERATION operation, string transactionHash, Action<Transaction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
     {
-        Debug.Log("check operation: " + operation);
         _lastTransactionType = operation;
         _lastTransactionHash = transactionHash;
 
@@ -192,7 +178,6 @@ public class PhantasmaDemo : MonoBehaviour
             yield return PhantasmaApi.GetTransaction(transactionHash,
                 (tx) =>
                 {
-                    //Debug.Log("get transaction callback");
                     isTransactionCompleted = true;
 
                     if (callback != null)
@@ -202,11 +187,8 @@ public class PhantasmaDemo : MonoBehaviour
                 },
                 (errorType, errorMessage) =>
                 {
-                    Debug.Log("ERROR TRANSACTION: " + errorType + " | msg: " + errorMessage);
-
                     if (errorType == EPHANTASMA_SDK_ERROR_TYPE.API_ERROR && errorMessage.Equals("pending"))
                     {
-                        //Debug.Log("PENDING");
                         // Pending
                     }
                     else
@@ -258,13 +240,6 @@ public class PhantasmaDemo : MonoBehaviour
     /// <param name="address">String, base58 encoded - address to check for balance and name.</param>
     public void GetAccount(string address)
     {
-        // Second test account: KyHrxZyrGPorgJKLv4Cg6dm5xCjEb6k8USRoSysVXAQK6eEb5taU
-
-        // Private key: L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25
-        // Public key:  P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr
-
-        Debug.Log("Get account: " + address);
-
         CanvasManager.Instance.ShowOperationPopup("Fetching account data from the blockchain...", false);
 
         StartCoroutine(PhantasmaApi.GetAccount(address, 
@@ -331,7 +306,6 @@ public class PhantasmaDemo : MonoBehaviour
             CanvasManager.Instance.ShowOperationPopup("Creating a new token on the blockchain...", false);
 
             var script = ScriptUtils.BeginScript()
-                //.AllowGas(Key.Address, Address.FromText(PhantasmaTokens[TOKEN_SYMBOL].ownerAddress), 1, 9999)
                 .AllowGas(Key.Address, Address.Null, 1, 9999)
                 .CallContract("nexus", "CreateToken", Key.Address, TOKEN_SYMBOL, TOKEN_NAME, 10000, 0, TokenFlags.Transferable | TokenFlags.Finite)
                 .SpendGas(Key.Address)
@@ -363,8 +337,7 @@ public class PhantasmaDemo : MonoBehaviour
             {
                 foreach (var evt in tx.events)
                 {
-                    EventKind eKind;
-                    if (Enum.TryParse(evt.kind, out eKind))
+                    if (Enum.TryParse(evt.kind, out EventKind eKind))
                     {
                         if (eKind == EventKind.TokenCreate)
                         {
@@ -381,7 +354,6 @@ public class PhantasmaDemo : MonoBehaviour
                                 CheckTokens(() =>
                                 {
                                     CanvasManager.Instance.adminMenu.SetContent();
-                                    //PhantasmaApi.LogTransaction(Key.Address, 0, TransactionType.Created_Token, "CAR");
                                 });
 
                                 CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.SUCCESS, "New token created with success.");
@@ -405,7 +377,6 @@ public class PhantasmaDemo : MonoBehaviour
     /// <summary>
     /// Check the tokens deployed in Phantasma Blockchain.
     /// </summary>
-    /// <param name="callback"></param>
     public void CheckTokens(Action callback = null)
     {
         IsTokenCreated = false;
@@ -420,7 +391,6 @@ public class PhantasmaDemo : MonoBehaviour
                 foreach (var token in result)
                 {
                     PhantasmaTokens.Add(token.symbol, token);
-                    //Debug.Log("ADD token: " + token.symbol + " | owner: " + token.ownerAddress);
 
                     if (token.symbol.Equals(TOKEN_SYMBOL))
                     {
@@ -471,8 +441,6 @@ public class PhantasmaDemo : MonoBehaviour
             {
                 foreach (var token in result)
                 {
-                    //Debug.Log("check token: " + token.symbol + " | owner: " + token.ownerAddress + " | MY: " + Key.Address);
-
                     if (token.symbol.Equals(TOKEN_SYMBOL) && token.ownerAddress.Equals(Key.Address.ToString()))
                     {
                         IsTokenOwner = true;
@@ -520,7 +488,6 @@ public class PhantasmaDemo : MonoBehaviour
         var txMutableData   = Serialization.Serialize(carMutableData);
         
         var script = ScriptUtils.BeginScript()
-                        //.AllowGas(Key.Address, Address.FromText(PhantasmaTokens[TOKEN_SYMBOL].ownerAddress), 1, 9999)
                         .AllowGas(Key.Address, Address.Null, 1, 9999)
                         .CallContract("token", "MintToken", Key.Address, TOKEN_SYMBOL, txData, txMutableData)
                         .SpendGas(Key.Address)
@@ -552,13 +519,12 @@ public class PhantasmaDemo : MonoBehaviour
             {
                 foreach (var evt in tx.events)
                 {
-                    EventKind eKind;
-                    if (Enum.TryParse(evt.kind, out eKind))
+                    if (Enum.TryParse(evt.kind, out EventKind eKind))
                     {
                         if (eKind == EventKind.TokenMint)
                         {
-                            var bytes = Base16.Decode(evt.data);
-                            var tokenData = Serialization.Unserialize<TokenEventData>(bytes);
+                            var bytes       = Base16.Decode(evt.data);
+                            var tokenData   = Serialization.Unserialize<TokenEventData>(bytes);
 
                             var tokenID = tokenData.value;
 
@@ -567,8 +533,6 @@ public class PhantasmaDemo : MonoBehaviour
 
                             // Add new car to admin assets
                             MyCars.Add(tokenID.ToString(), newCar);
-
-                            //PhantasmaApi.LogTransaction(PhantasmaDemo.Instance.Key.Address, 0, TransactionType.Created_Car, carID);
 
                             CheckTokens(() => { CanvasManager.Instance.adminMenu.SetContent(); });
 

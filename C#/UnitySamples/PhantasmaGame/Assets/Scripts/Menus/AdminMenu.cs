@@ -25,8 +25,6 @@ public class AdminMenu : MonoBehaviour
 
     public void SetContent()
     {
-        //Debug.Log("set token: " + PhantasmaDemo.Instance.IsTokenCreated);
-
         if (PhantasmaDemo.Instance.IsTokenCreated)
         {
             createTokenButton.interactable          = false;
@@ -49,8 +47,7 @@ public class AdminMenu : MonoBehaviour
                 myWalletTokens.text         = PhantasmaDemo.Instance.MyCars.Count.ToString();
                 currentSupplyTokens.text    = token.currentSupply;
 
-                int supply;
-                if (int.TryParse(token.currentSupply, out supply))
+                if (int.TryParse(token.currentSupply, out var supply))
                 {
                     _tokenSupply = supply;
                 }
