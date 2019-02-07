@@ -12,12 +12,11 @@ class PhantasmaAPI {
 			'id': '1'
 		};
 		let json = JSON.stringify(message);
+		console.log(json);
 		
 		let request = new XMLHttpRequest();
-		request.open('POST', this.host, true);
-		request.setRequestHeader('Content-Type', 'application/json');
 
-		request.onload = function() {
+		request.onreadystatechange = function() {
 		  if (request.status >= 200 && request.status < 400) {
 			let data = JSON.parse(request.responseText);
 			onSuccess(data);
@@ -31,9 +30,17 @@ class PhantasmaAPI {
 			onError('internal error');
 		};
 
-		request.send();
+		request.open('POST', this.host, true);
+		request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		request.setRequestHeader('Accept', 'application/json'); 
+		request.send(json);
 	}
   
+	convertDecimals(amount, decimals) {
+		let mult = Math.pow(10, decimals);
+		return amount / mult;
+	}
+
 	{{#each methods}}
 	//{{Info.Description}}
 	{{#camel-case Info.Name}}({{#each Info.Parameters}}{{Name}}, {{/each}}onSuccess, onError)  

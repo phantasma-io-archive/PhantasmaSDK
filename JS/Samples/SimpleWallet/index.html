@@ -3,15 +3,26 @@
 <h1>Phantasma Mini Wallet</h1>
 <div id="contents"></div>
 
+<script src="../../../Output/temp/JS/Libs/Phantasma.js"></script> 
+ 
 <script>
-var api = new PhantasmaAPI('http://localhost:7077/rpc');
+var api = new PhantasmaAPI('http://127.0.0.1:7077/rpc');
 
-api.getAccount('', function(data){
-	var json = JSON.parse(data);
-	document.getElementById("contents").innerHTML = "Hello Phantasma!";
+api.getAccount('P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr', function(account){
+	console.log(account);
+	let table = '<table border="1">';
+	for (let i=0; i<account.balances.length; i++) {
+		let balance = account.balances[i];
+		table += '<tr><td>'+balance.chain+'</td><td>'+api.convertDecimals(balance.amount, balance.decimals) + ' ' +balance.symbol+'</td></tr>';
+	}
+	table += '</table>';
+	
+	document.getElementById("contents").innerHTML = 
+		'<h3>Account Name:'+account.name+'</h3>'+
+		'<h3>Address:'+account.address+'</h3>'+
+		table;
 }, 
 function(error){
-	var json = JSON.parse(data);
-	document.getElementById("contents").innerHTML = "An error happened!";
+	document.getElementById("contents").innerHTML = "An error happened: "+error;
 }); 
 </script>
