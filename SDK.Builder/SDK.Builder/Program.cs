@@ -327,7 +327,7 @@ namespace SDK.Builder
 
             GenerateBindings(inputPath + @"PhantasmaSDK\Docs\", tempPath + @"\Docs\");
 
-            foreach (var lang in new[] { "C#", "JS", "PHP", "Python", "Go" })
+            foreach (var lang in new[] { "C#", "JS", "PHP", "Python", "Go", "C++" })
             {
                 CopyFolder(inputPath + @"PhantasmaSDK\" + lang+ @"\Samples\", tempPath + lang + @"\Dapps\");
                 GenerateBindings(inputPath + @"PhantasmaSDK\" + lang + @"\Bindings\", tempPath + lang + @"\Libs\");
