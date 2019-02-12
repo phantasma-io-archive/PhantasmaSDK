@@ -1,17 +1,18 @@
 ﻿using Phantasma.Core.Utils;
 using Phantasma.API;
+using Phantasma.Blockchain;
+using Phantasma.Cryptography;
+
+using LunarLabs.Templates;
+using UnityPacker;
 
 using System;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using Phantasma.Blockchain;
-using Phantasma.Cryptography;
-using LunarLabs.Templates;
 using System.Text;
 using System.Linq;
-using UnityPacker;
 
 namespace SDK.Builder
 {
@@ -153,7 +154,14 @@ namespace SDK.Builder
             {
                 RecursiveDelete(dir);
             }
-            baseDir.Delete(true);
+            try
+            {
+                baseDir.Delete(true);
+            }
+            catch
+            {
+                return;
+            }
         }
 
         static void ZipFile(string inputPath, string outputPath, string version)
@@ -335,14 +343,18 @@ namespace SDK.Builder
 
             GenerateUnityPackage(inputPath + @"PhantasmaSDK\SDK.Builder\SDK.Builder\bin\Debug", tempPath + @"C#\Libs\");
 
-            return;
+            ///return;
             CopyFolder(inputPath + @"PhantasmaSpook\Spook.CLI\Publish", tempPath + @"Tools\Spook");
             CopyFolder(inputPath + @"PhantasmaWallet\PhantasmaWallet\Publish", tempPath + @"Tools\Wallet");
             CopyFolder(inputPath + @"PhantasmaExplorer\PhantasmaExplorer\Publish", tempPath + @"Tools\Explorer");
 
             CopyFolder(inputPath + @"PhantasmaCompiler\Compiler.CLI\Examples", tempPath + @"Contracts\Source", (x) => !x.Contains("_old"));
+            CopyFolder(inputPath + @"PhantasmaExplorer\PhantasmaExplorer\www", tempPath + @"Tools\Explorer\www", (x) => !x.Contains(".db"));
+            CopyFolder(inputPath + @"PhantasmaWallet\PhantasmaWallet\www", tempPath + @"Tools\Wallet\www", (x) => !x.Equals("session"));
 
-            File.WriteAllText(tempPath + "launch_testnet_node.bat", "dotnet %~dp0Tools/Spook/Spook.dll -node.wif=L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25 -rpc.enabled=true");
+            File.WriteAllText(tempPath + "launch_dev_node.bat", "dotnet %~dp0Tools/Spook/Spook.dll -node.wif=L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25 -rpc.enabled=true");
+            File.WriteAllText(tempPath + "launch_explorer.bat", "dotnet %~dp0Tools/Explorer/Phantasma.Explorer.dll --path=%~dp0Tools/Explorer/www --port=7072");
+            File.WriteAllText(tempPath + "launch_wallet.bat", "dotnet %~dp0Tools/Wallet/Phantasma.Wallet.dll --path=%~dp0Tools/Wallet/www --port=7071");
 
             ZipFile(tempPath, outputPath, versionNumber);
 
