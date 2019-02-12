@@ -14,22 +14,26 @@ using namespace json;						// JSON library
 
 #pragma once
 
-{{#each types}}
-struct {{#fix-type Key}}Result
+{{#each types}}{{#if Key!='PaginatedResult'}}
+struct {{#fix-type Key}}
 {
-	{{#each Value}} {{#fix-type FieldType.Name}}{{#if FieldType.IsArray}}* {{/if}}{{Name}}; //{{Key.Description}}
+	{{#each Value}} {{#fix-type FieldType.Name}}{{#if FieldType.IsArray}}*{{/if}} {{Name}};//{{Key.Description}}
 	{{/each}}
 };
-
+{{#else}}// TODO paginated struct: {{#fix-type Key}}{{/if}}
+{{/each}}
 
 class PhantasmaAPI
 {
 public:
-	PhantasmaAPI();
+	std::wstring apiHost;
+	PhantasmaAPI(std::wstring host);
 	~PhantasmaAPI();
 
-	{{#each methods}}
-	//{{Info.Description}}
-	{{Info.ReturnType.Name}} {{Info.Name}} ({{#each Info.Parameters}}{{#fix-type Type.Name}} {{Name}} {{#if !@last}}, {{/if}}{{/each}})
+	{{#each methods}}//{{Info.Description}}
+	{{#if Info.IsPaginated==true}}// TODO paginated api call: {{Info.Name}}
+	{{#else}}{{#fix-type Info.ReturnType.Name}} {{Info.Name}} ({{#each Info.Parameters}}{{#fix-type Type.Name}} {{Name}} {{#if !@last}}, {{/if}}{{/each}}){{/if}}
+	
+	{{/each}}
 };
 
