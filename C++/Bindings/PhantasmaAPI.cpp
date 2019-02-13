@@ -5,36 +5,53 @@
 {{#fix-type Key}} Deserialize{{#fix-type Key}}(json::value json)
 {
 	{{#each Value}}
-	{{#if FieldType.IsArray}}
-	{{#fix-type FieldType.Name}} *{{Name}}Ptr = nullptr;
-	if(json.has_array_field(U("{{Name}}")))
-	{
-		json::array {{Name}}JsonArray = json.at(U("{{Name}}")).asArray();
-		{{Name}}Ptr = new {{#fix-type FieldType.Name}}[{{Name}}JsonArray.size()];
+		{{#if FieldType.Name=='String[]'}}
+			{{#fix-type FieldType.Name}} *{{Name}}Ptr = nullptr;
+			if(json.has_array_field(U("{{Name}}")))
+			{
+				json::array {{Name}}JsonArray = json.at(U("{{Name}}")).asArray();
+				{{Name}}Ptr = new {{#fix-type FieldType.Name}}[{{Name}}JsonArray.size()];
 
-		for(int i = 0; i < {{Name}}JsonArray.size(); i++)
-		{
-			{{#if #fix-type FieldType.Name=='std::string'}}
-			{{Name}}Ptr[i] = {{Name}}JsonArray[i];
-			{{#else}}
-			{{#if FieldType.IsArray==true && FieldType.Name!='std::string' && FieldType.Name=='uint32_t' && FieldType.Name=='int32_t'}}
-			{{Name}}Ptr = Deserialize{{#fix-type FieldType.Name}}(JsonArray[i]);
-			{{/if}}
-			{{/if}}
-		}
-	}
-	{{#else}}
-	{{#if FieldType.Name=='uint32_t' || FieldType.Name=='int32_t'}}
-	uint32_t {{Name}} = FieldToNumber(json, U("{{Name}}"));
+				for(int i = 0; i < {{Name}}JsonArray.size(); i++)
+				{
+					{{Name}}Ptr[i] = {{Name}}JsonArray[i];
+				}
+			}
+		{{#else}}
+		{{#if FieldType.Name contains '[]'}}
+			{{#fix-type FieldType.Name}} *{{Name}}Ptr = nullptr;
+			if(json.has_array_field(U("{{Name}}")))
+			{
+				json::array {{Name}}JsonArray = json.at(U("{{Name}}")).asArray();
+				{{Name}}Ptr = new {{#fix-type FieldType.Name}}[{{Name}}JsonArray.size()];
 
-	{{#else}}
-	{{#if FieldType.Name=='std::string'}}
-	std::string {{Name}} = FieldToString(json, U("{{Name}}"));
-	
-	{{/if}}
-	{{/if}}
-	{{/if}}
+				for(int i = 0; i < {{Name}}JsonArray.size(); i++)
+				{
+					{{Name}}Ptr[i] = Deserialize{{#fix-type FieldType.Name}}(JsonArray[i]);
+				}
+			}
+		{{#else}}
+		{{#if FieldType.Name=='UInt32'}}
+			uint32_t {{Name}} = FieldToNumber(json, U("{{Name}}"));
+
+		{{#else}}
+		{{#if FieldType.Name=='Int32'}}
+			uint32_t {{Name}} = FieldToNumber(json, U("{{Name}}"));
+
+		{{#else}}
+		{{#if FieldType.Name=='String'}}
+			std::string {{Name}} = FieldToString(json, U("{{Name}}"));
+
+		{{#else}}
+			"Variable type {{FieldType.Name}} isnt currently handled by the template system"
+		{{/if}}
+		{{/if}}
+		{{/if}}
+		{{/if}}
+		{{/if}}
 	{{/each}}
+
+	return new {{#fix-type Key}} { {{#each Value}}{{Name}}{{#if FieldType.Name contains '[]'}}Ptr{{/if}}{{#if !@last}}, {{/if}}{{/each}} };
 };
 {{/each}}
 
@@ -48,6 +65,9 @@ PhantasmaAPI::~PhantasmaAPI()= default;
 
 std::string FieldToString(value json, const string_t field)
 {
+	if(!json.has_string_field(field))
+		throw new std::exception("Unexpected JSON format: missing string field " + field);
+
 	return conversions::to_utf8string(json.at(field).as_string());
 }
 
