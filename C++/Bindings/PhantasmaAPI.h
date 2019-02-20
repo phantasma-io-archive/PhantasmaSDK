@@ -6,7 +6,7 @@
 #include <locale>
 #include <codecvt>
 #include <string>
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 using namespace utility;                    // Common utilities like string conversions
 using namespace web;                        // Common features like URIs.
@@ -67,7 +67,7 @@ public:
 
 	{{#each methods}}//{{Info.Description}}
 	{{#if Info.IsPaginated==true}}//paginated call
-	{{/if}}{{#if Info.ReturnType.IsArray}}std::vector<{{/if}}{{#fix-type Info.ReturnType.Name}}{{#if Info.ReturnType.IsArray}}>{{/if}} {{Info.Name}}({{#each Info.Parameters}}{{#fix-type Type.Name}} {{Name}}{{#if !@last}}, {{/if}}{{/each}});	
+	{{/if}}{{#if Info.ReturnType.IsArray}}std::vector<{{/if}}{{#fix-type Info.ReturnType.Name}}{{#if Info.ReturnType.IsArray}}>{{/if}} {{Info.Name}}({{#each Info.Parameters}}{{#fix-type Type.Name}} {{Name}}{{#if !@last}}, {{/if}}{{/each}});
 	
 	
 	{{/each}}
