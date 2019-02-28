@@ -204,7 +204,7 @@ namespace SDK.Builder
                 }
             }
 
-            var nexus = new Nexus("test", KeyPair.Generate().Address);
+            var nexus = new Nexus("test", KeyPair.Generate().Address, 64);
             var api = new NexusAPI(nexus);
 
             var typeDic = new Dictionary<string, IEnumerable<MetaField>>();
