@@ -1,0 +1,18 @@
+﻿  pch.cpp
+  main.cpp
+d:\repos\c++spooktest\c++spooktest\main.cpp(30): warning C4477: 'printf' : format string '%s' requires an argument of type 'char *', but variadic argument 1 has type 'std::string'
+d:\repos\c++spooktest\c++spooktest\main.cpp(32): warning C4018: '<': signed/unsigned mismatch
+  PhantasmaAPI.cpp
+d:\repos\c++spooktest\c++spooktest\phantasmaapi.cpp(129): warning C4018: '<': signed/unsigned mismatch
+d:\repos\c++spooktest\c++spooktest\phantasmaapi.cpp(147): warning C4018: '<': signed/unsigned mismatch
+d:\repos\c++spooktest\c++spooktest\phantasmaapi.cpp(198): warning C4018: '<': signed/unsigned mismatch
+d:\repos\c++spooktest\c++spooktest\phantasmaapi.cpp(216): warning C4018: '<': signed/unsigned mismatch
+d:\repos\c++spooktest\c++spooktest\phantasmaapi.cpp(249): warning C4018: '<': signed/unsigned mismatch
+d:\repos\c++spooktest\c++spooktest\phantasmaapi.cpp(281): warning C4018: '<': signed/unsigned mismatch
+d:\repos\c++spooktest\c++spooktest\phantasmaapi.cpp(556): warning C4018: '<': signed/unsigned mismatch
+d:\repos\c++spooktest\c++spooktest\phantasmaapi.cpp(578): warning C4018: '<': signed/unsigned mismatch
+d:\repos\c++spooktest\c++spooktest\phantasmaapi.cpp(630): warning C4018: '<': signed/unsigned mismatch
+d:\repos\c++spooktest\c++spooktest\phantasmaapi.cpp(650): warning C4018: '<': signed/unsigned mismatch
+d:\repos\c++spooktest\c++spooktest\phantasmaapi.cpp(713): warning C4018: '<': signed/unsigned mismatch
+  Generating Code...
+  C++SpookTest.vcxproj -> D:\Repos\C++SpookTest\Debug\CppApiSample.exe
