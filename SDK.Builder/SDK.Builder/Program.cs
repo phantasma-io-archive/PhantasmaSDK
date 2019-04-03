@@ -204,7 +204,7 @@ namespace SDK.Builder
                 }
             }
 
-            var nexus = new Nexus("test", KeyPair.Generate().Address, 64);
+            var nexus = new Nexus("test", KeyPair.Generate().Address);
             var api = new NexusAPI(nexus);
 
             var typeDic = new Dictionary<string, IEnumerable<MetaField>>();
@@ -343,7 +343,7 @@ namespace SDK.Builder
 
             GenerateUnityPackage(inputPath + @"PhantasmaSDK\SDK.Builder\SDK.Builder\bin\Debug", tempPath + @"C#\Libs\");
 
-            ///return;
+            return;
             CopyFolder(inputPath + @"PhantasmaSpook\Spook.CLI\Publish", tempPath + @"Tools\Spook");
             CopyFolder(inputPath + @"PhantasmaWallet\PhantasmaWallet\Publish", tempPath + @"Tools\Wallet");
             CopyFolder(inputPath + @"PhantasmaExplorer\PhantasmaExplorer\Publish", tempPath + @"Tools\Explorer");
