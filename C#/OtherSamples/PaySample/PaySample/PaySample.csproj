@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{979283F8-4D49-4F5D-986A-C72938A1A646}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>PaySample</RootNamespace>
+    <AssemblyName>PaySample</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="LunarParser, Version=1.2.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\LunarLabs.Parser.1.2.6\lib\net461\LunarParser.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\PhantasmaChain\Phantasma.Core\Phantasma.Core.csproj">
+      <Project>{f92ef53f-f08e-4da7-9e74-0cc0148540fe}</Project>
+      <Name>Phantasma.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\PhantasmaChain\Phantasma.Cryptography\Phantasma.Cryptography.csproj">
+      <Project>{EA84818A-10F3-4B70-B3F0-B30F111F7629}</Project>
+      <Name>Phantasma.Cryptography</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\PhantasmaChain\Phantasma.Numerics\Phantasma.Numerics.csproj">
+      <Project>{d84e74c0-9036-4749-a19b-86bc39875d20}</Project>
+      <Name>Phantasma.Numerics</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\PhantasmaChain\Phantasma.Pay\Phantasma.Pay.csproj">
+      <Project>{226DD486-D0ED-4AE2-B813-A14011DD2EB9}</Project>
+      <Name>Phantasma.Pay</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.271
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaySample", "PaySample\PaySample.csproj", "{979283F8-4D49-4F5D-986A-C72938A1A646}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Pay", "..\..\..\..\PhantasmaChain\Phantasma.Pay\Phantasma.Pay.csproj", "{226DD486-D0ED-4AE2-B813-A14011DD2EB9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Core", "..\..\..\..\PhantasmaChain\Phantasma.Core\Phantasma.Core.csproj", "{F92EF53F-F08E-4DA7-9E74-0CC0148540FE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Cryptography", "..\..\..\..\PhantasmaChain\Phantasma.Cryptography\Phantasma.Cryptography.csproj", "{EA84818A-10F3-4B70-B3F0-B30F111F7629}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Numerics", "..\..\..\..\PhantasmaChain\Phantasma.Numerics\Phantasma.Numerics.csproj", "{D84E74C0-9036-4749-A19B-86BC39875D20}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{979283F8-4D49-4F5D-986A-C72938A1A646}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{979283F8-4D49-4F5D-986A-C72938A1A646}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{979283F8-4D49-4F5D-986A-C72938A1A646}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{979283F8-4D49-4F5D-986A-C72938A1A646}.Release|Any CPU.Build.0 = Release|Any CPU
+		{226DD486-D0ED-4AE2-B813-A14011DD2EB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{226DD486-D0ED-4AE2-B813-A14011DD2EB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{226DD486-D0ED-4AE2-B813-A14011DD2EB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{226DD486-D0ED-4AE2-B813-A14011DD2EB9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F92EF53F-F08E-4DA7-9E74-0CC0148540FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F92EF53F-F08E-4DA7-9E74-0CC0148540FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F92EF53F-F08E-4DA7-9E74-0CC0148540FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F92EF53F-F08E-4DA7-9E74-0CC0148540FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA84818A-10F3-4B70-B3F0-B30F111F7629}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA84818A-10F3-4B70-B3F0-B30F111F7629}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA84818A-10F3-4B70-B3F0-B30F111F7629}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA84818A-10F3-4B70-B3F0-B30F111F7629}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D84E74C0-9036-4749-A19B-86BC39875D20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D84E74C0-9036-4749-A19B-86BC39875D20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D84E74C0-9036-4749-A19B-86BC39875D20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D84E74C0-9036-4749-A19B-86BC39875D20}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {11304722-908F-4E9A-B803-D985A0D03B09}
+	EndGlobalSection
+EndGlobal
