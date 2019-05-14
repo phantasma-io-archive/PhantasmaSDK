@@ -204,7 +204,7 @@ namespace SDK.Builder
                 }
             }
 
-            var nexus = new Nexus("test", KeyPair.Generate().Address, 64);
+            var nexus = new Nexus("test", KeyPair.Generate().Address);
             var api = new NexusAPI(nexus);
 
             var typeDic = new Dictionary<string, IEnumerable<MetaField>>();
@@ -335,7 +335,7 @@ namespace SDK.Builder
 
             GenerateBindings(inputPath + @"PhantasmaSDK\Docs\", tempPath + @"\Docs\");
 
-            foreach (var lang in new[] { "C#", "JS", "PHP", "Python", "Go", "C++" })
+            foreach (var lang in new[] { "C#", "JS", "PHP", "Python", "Go", "C++", "Java" })
             {
                 CopyFolder(inputPath + @"PhantasmaSDK\" + lang+ @"\Samples\", tempPath + lang + @"\Dapps\");
                 GenerateBindings(inputPath + @"PhantasmaSDK\" + lang + @"\Bindings\", tempPath + lang + @"\Libs\");
@@ -358,8 +358,8 @@ namespace SDK.Builder
 
             ZipFile(tempPath, outputPath, versionNumber);
 
-            Log("Cleaning up temporary files...");
-            RecursiveDelete(new DirectoryInfo(tempPath));
+            //Log("Cleaning up temporary files...");
+            //RecursiveDelete(new DirectoryInfo(tempPath));
 
             Log("Success!");
         }
