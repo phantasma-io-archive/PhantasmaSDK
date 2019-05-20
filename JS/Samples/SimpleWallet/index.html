@@ -1,0 +1,21 @@
+/* Very basic implementation of a wallet using Phantasma. Note that we're using a very primitive approach here to keep the code simple.  */
+
+<h1>Phantasma Mini Wallet</h1>
+<div id="contents"></div>
+
+<script src="../../../Output/temp/JS/Libs/Phantasma.js"></script> 
+ 
+<script>
+var api = new PhantasmaAPI('http://localhost:7077/rpc');
+
+api.getAccount('P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr', function(data){
+	var json = JSON.parse(data);
+	alert(json);
+	document.getElementById("contents").innerHTML = "Hello Phantasma!";
+}, 
+function(error){
+	alert(error);
+	var json = JSON.parse(data);
+	document.getElementById("contents").innerHTML = "An error happened!";
+}); 
+</script>
