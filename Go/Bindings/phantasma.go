@@ -9,7 +9,7 @@ import (
 {{#each types}}
 type {{#fix-type Key}} struct 
 {
-{{#each Value}} {{Name}} {{#if FieldType.IsArray}}[]{{/if}}{{#fix-type FieldType.Name}} `json:"{{Name}}"`{{#new-line}}{{/each}}	   
+{{#each Value}} {{#pascal-case Name}} {{#if FieldType.IsArray}}[]{{/if}}{{#fix-type FieldType.Name}} `json:"{{Name}}"`{{#new-line}}{{/each}}	   
 }
 {{/each}}
 

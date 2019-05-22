@@ -3,14 +3,13 @@
 <h1>Phantasma Mini Wallet</h1>
 <div id="contents"></div>
 
-<script src="../../../Output/temp/JS/Libs/Phantasma.js"></script> 
+<script src="phantasma.js"></script> 
  
 <script>
 var api = new PhantasmaAPI('http://localhost:7077/rpc');
 
 api.getAccount('P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr', function(data){
-	var json = JSON.parse(data);
-	alert(json);
+	console.log(data);
 	document.getElementById("contents").innerHTML = "Hello Phantasma!";
 }, 
 function(error){

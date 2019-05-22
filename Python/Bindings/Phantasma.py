@@ -2,28 +2,28 @@ import requests
 import json
 
 class PhantasmaAPI:
-    url = None 
+	url = None 
 
-    def __init__(self, url):
-        self.url = url
+	def __init__(self, url):
+		self.url = url
 
-    def __JSON_RPC(self, method, params):
-        headers = {'content-type': 'application/json'}
+	def __JSON_RPC(self, method, params):
+		headers = {'content-type': 'application/json'}
 
-        payload = {
-                "method": method,
-                "params": params,
-                "jsonrpc": "2.0",
-                "id": 1,
-        }
-        response = requests.post(self.url, data=json.dumps(payload), headers=headers).json()
+		payload = {
+				"method": method,
+				"params": params,
+				"jsonrpc": "2.0",
+				"id": 1,
+		}
+		response = requests.post(self.url, data=json.dumps(payload), headers=headers).json()
 
-        assert response["jsonrpc"]
-        assert response["id"] == 1
-        return response["result"]
+		assert response["jsonrpc"]
+		assert response["id"] == 1
+		return response["result"]
 
 {{#each methods}}
-	def {{#camel-case Info.Name}}(self{{#each Info.Parameters}}, {{Name}}{{/each}}):	
+	def {{#camel-case Info.Name}}(self{{#each Info.Parameters}}, {{Name}}{{/each}}):
 		"""
 		{{Info.Description}}
 		{{#if Info.Parameters}}
