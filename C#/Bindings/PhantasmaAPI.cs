@@ -181,26 +181,25 @@ namespace Phantasma.SDK
 		
 		{{/each}}
 		
-		public IEnumerator SignAndSendTransaction(byte[] script, string chain, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
-		{
-           Debug.Log("Sending transaction...");
+        public IEnumerator SignAndSendTransaction(KeyPair keys, byte[] script, string chain, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
+        {
+            Debug.Log("Sending transaction...");
 
-           //var tx = new Blockchain.Transaction("nexus", chain, script,  DateTime.UtcNow + TimeSpan.FromHours(1));
-           var tx = new Blockchain.Transaction("simnet", chain, script,  DateTime.UtcNow + TimeSpan.FromHours(1));
-            tx.Sign(PhantasmaDemo.Instance.Key);
+            var tx = new Blockchain.Transaction("simnet", chain, script, DateTime.UtcNow + TimeSpan.FromHours(1));
+            tx.Sign(keys);
 
-           yield return SendRawTransaction(Base16.Encode(tx.ToByteArray(true)), callback, errorHandlingCallback);
-		}
-		
-		public bool IsValidPrivateKey(string address)
-		{
-           return (address.StartsWith("L", false, CultureInfo.InvariantCulture) || 
-                   address.StartsWith("K", false, CultureInfo.InvariantCulture)) && address.Length == 52;
-		}
-	   
-		public bool IsValidAddress(string address)
-		{
-           return address.StartsWith("P", false, CultureInfo.InvariantCulture) && address.Length == 45;
-		} 	   
+            yield return SendRawTransaction(Base16.Encode(tx.ToByteArray(true)), callback, errorHandlingCallback);
+        }
+
+        public static bool IsValidPrivateKey(string address)
+        {
+            return (address.StartsWith("L", false, CultureInfo.InvariantCulture) ||
+                    address.StartsWith("K", false, CultureInfo.InvariantCulture)) && address.Length == 52;
+        }
+
+        public static bool IsValidAddress(string address)
+        {
+            return address.StartsWith("P", false, CultureInfo.InvariantCulture) && address.Length == 45;
+        }
 	}
 }
