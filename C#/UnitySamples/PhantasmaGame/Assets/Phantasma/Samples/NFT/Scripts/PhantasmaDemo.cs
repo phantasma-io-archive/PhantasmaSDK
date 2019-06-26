@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 
 using UnityEngine;
 
@@ -13,6 +12,7 @@ using Phantasma.IO;
 using Phantasma.Numerics;
 using Phantasma.SDK;
 using Phantasma.VM.Utils;
+
 using Random = UnityEngine.Random;
 using Token = Phantasma.SDK.Token;
 
@@ -47,10 +47,12 @@ public class PhantasmaDemo : MonoBehaviour
     public const string TOKEN_SYMBOL    = "CAR";
     public const string TOKEN_NAME      = "Car Demo Token";
 
+    public const string SOUL_TOKEN_SYMBOL = "SOUL";
+
     private const string _SERVER_ADDRESS = "http://localhost:7077/rpc";
 
     private const float _TRANSACTION_CONFIRMATION_DELAY = 10f;
-
+    
     public Market       market;
     public List<Sprite> carImages;
 
@@ -492,7 +494,7 @@ public class PhantasmaDemo : MonoBehaviour
         
         var script = ScriptUtils.BeginScript()
                         .AllowGas(Key.Address, Address.Null, 1, 9999)
-                        .CallContract("token", "MintToken", Key.Address, TOKEN_SYMBOL, txData, txMutableData)
+                        .CallContract("token", "MintToken", Key.Address, TOKEN_SYMBOL, txData, txMutableData, 0)
                         .SpendGas(Key.Address)
                         .EndScript();
         

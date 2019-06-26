@@ -146,7 +146,7 @@ public class Market : MonoBehaviour
 
         var script = ScriptUtils.BeginScript()
             .AllowGas(car.OwnerAddress, Address.Null, 1, 9999)
-            .CallContract("market", "BuyToken", PhantasmaDemo.Instance.Key.Address, PhantasmaDemo.TOKEN_SYMBOL, car.TokenID)
+            .CallContract("market", "BuyToken", PhantasmaDemo.Instance.Key.Address, PhantasmaDemo.TOKEN_SYMBOL, BigInteger.Parse(car.TokenID))
             .SpendGas(car.OwnerAddress)
             .EndScript();
 
@@ -233,7 +233,7 @@ public class Market : MonoBehaviour
 
         var script = ScriptUtils.BeginScript()
             .AllowGas(car.OwnerAddress, Address.Null, 1, 9999)
-            .CallContract("market", "SellToken", from, PhantasmaDemo.TOKEN_SYMBOL, "SOUL", car.TokenID, price, endDate)
+            .CallContract("market", "SellToken", from, PhantasmaDemo.TOKEN_SYMBOL, PhantasmaDemo.SOUL_TOKEN_SYMBOL, BigInteger.Parse(car.TokenID), price, endDate)
             .SpendGas(from)
             .EndScript();
 
@@ -325,7 +325,7 @@ public class Market : MonoBehaviour
 
         var script = ScriptUtils.BeginScript()
             .AllowGas(car.OwnerAddress, Address.Null, 1, 9999)
-            .CallContract("market", "BuyToken", PhantasmaDemo.Instance.Key.Address, PhantasmaDemo.TOKEN_SYMBOL, car.TokenID)
+            .CallContract("market", "BuyToken", PhantasmaDemo.Instance.Key.Address, PhantasmaDemo.TOKEN_SYMBOL, BigInteger.Parse(car.TokenID))
             .SpendGas(car.OwnerAddress)
             .EndScript();
 
