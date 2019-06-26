@@ -22,7 +22,7 @@ namespace WalletSample
         private static AccountDto _account;
         private static KeyPair _key;
         private static List<ChainDto> _chains;
-        private static List<TokenDto> _tokens;
+        private static IList<TokenDto> _tokens;
 
         private static void Main(string[] args)
         {
@@ -116,8 +116,8 @@ namespace WalletSample
 
         private static async Task ListTransactions()
         {
-            var txs = await _phantasmaApiService.GetAddressTxs.SendRequestAsync(_key.Address.ToString(), 10);
-            foreach (var tx in txs.Txs)
+            var txs = await _phantasmaApiService.GetAddressTxs.SendRequestAsync(_key.Address.ToString(), 0, 10);
+            foreach (var tx in txs.AccountTransactionsDto.Txs)
             {
                 Console.WriteLine(Utils.Helper.GetTxDescription(tx, _chains, _tokens));
             }
@@ -142,7 +142,7 @@ namespace WalletSample
                     Console.WriteLine("********************");
                     Console.WriteLine($"Token: {balanceSheetDto.Symbol}");
                     Console.WriteLine($"Chain: {balanceSheetDto.ChainName}");
-                    Console.WriteLine($"Amount: {TokenUtils.ToDecimal(BigInteger.Parse(balanceSheetDto.Amount), Helper.GetTokenDecimals(balanceSheetDto.Symbol, _tokens))}");
+                    Console.WriteLine($"Amount: {UnitConversion.ToDecimal(BigInteger.Parse(balanceSheetDto.Amount), Helper.GetTokenDecimals(balanceSheetDto.Symbol, _tokens))}");
                     Console.WriteLine();
                 }
             }
@@ -183,7 +183,7 @@ namespace WalletSample
             var destinationChain = _chains[selectedChainOption - 1];
 
 
-            Console.WriteLine($"Enter amount: (max {TokenUtils.ToDecimal(BigInteger.Parse(token.Amount), Helper.GetTokenDecimals(token.Symbol, _tokens))}");
+            Console.WriteLine($"Enter amount: (max {UnitConversion.ToDecimal(BigInteger.Parse(token.Amount), Helper.GetTokenDecimals(token.Symbol, _tokens))}");
             var amount = Console.ReadLine();
 
             Console.WriteLine("Enter destination address: ");
@@ -202,22 +202,23 @@ namespace WalletSample
             }
             else
             {
-                var listSteps = Helper.GetShortestPath(token.ChainName, destinationChain.Name, _chains);
-                if (listSteps.Count >= 2)
-                {
-                    while (listSteps.Count >= 2)
-                    {
-                        Console.WriteLine($"Sending {cont} transaction of {listSteps.Count}");
-                        var txHash = await CrossChainTransferToken(destinationAddress, listSteps[0].Name, listSteps[1].Name, token.Symbol,
-                            amount);
-                        var confirmationDto = await _phantasmaApiService.GetTxConfirmations.SendRequestAsync(txHash);
-                        while (!confirmationDto.IsConfirmed) await Task.Delay(100);
-                        Console.WriteLine($"Settling block...");
-                        var settleTx = await SettleBlock(listSteps[0].Address, confirmationDto.Hash, listSteps[1].Address);
-                        listSteps.RemoveAt(0);
-                        cont++;
-                    }
-                }
+                Console.WriteLine("TODO");
+                //var listSteps = Helper.GetShortestPath(token.ChainName, destinationChain.Name, _chains);
+                //if (listSteps.Count >= 2)
+                //{
+                //    while (listSteps.Count >= 2)
+                //    {
+                //        Console.WriteLine($"Sending {cont} transaction of {listSteps.Count}");
+                //        var txHash = await CrossChainTransferToken(destinationAddress, listSteps[0].Name, listSteps[1].Name, token.Symbol,
+                //            amount);
+                //        var confirmationDto = await _phantasmaApiService.GetConfirmations.SendRequestAsync(txHash);
+                //        while (!confirmationDto.IsConfirmed) await Task.Delay(100);
+                //        Console.WriteLine($"Settling block...");
+                //        var settleTx = await SettleBlock(listSteps[0].Address, confirmationDto.Hash, listSteps[1].Address);
+                //        listSteps.RemoveAt(0);
+                //        cont++;
+                //    }
+                //}
             }
         }
 
@@ -225,10 +226,10 @@ namespace WalletSample
         {
             var destinationAddress = Address.FromText(addressTo);
             int decimals = Helper.GetTokenDecimals(tokenSymbol, _tokens);
-            var bigIntAmount = TokenUtils.ToBigInteger(decimal.Parse(amount), decimals);
+            var bigIntAmount = UnitConversion.ToBigInteger(decimal.Parse(amount), decimals);
 
             var script = ScriptUtils.BeginScript()
-                .AllowGas(_key.Address, 1, 9999)
+                .AllowGas(_key.Address, Address.Null, 1, 9999)
                 .TransferTokens(tokenSymbol, _key.Address, destinationAddress, bigIntAmount)
                 .SpendGas(_key.Address)
                 .EndScript();
@@ -245,7 +246,7 @@ namespace WalletSample
 
             var settleTxScript = ScriptUtils.BeginScript()
                 .CallContract("token", "SettleBlock", sourceChain, block)
-                .AllowGas(_key.Address, 1, 9999)
+                .AllowGas(_key.Address, Address.Null, 1, 9999)
                 .SpendGas(_key.Address)
                 .EndScript();
             return await SignAndSendTx(settleTxScript, destinationChainName);
@@ -257,11 +258,11 @@ namespace WalletSample
             var toChain = _chains.Find(p => p.Name == destinationChain);
             var destinationAddress = Address.FromText(addressTo);
             int decimals = Helper.GetTokenDecimals(symbol, _tokens);
-            var bigIntAmount = TokenUtils.ToBigInteger(decimal.Parse(amount), decimals);
-            var fee = TokenUtils.ToBigInteger(0.0001m, 8);
+            var bigIntAmount = UnitConversion.ToBigInteger(decimal.Parse(amount), decimals);
+            var fee = UnitConversion.ToBigInteger(0.0001m, 8);
 
             var script = ScriptUtils.BeginScript()
-                    .AllowGas(_key.Address, 1, 9999)
+                    .AllowGas(_key.Address, Address.Null, 1, 9999)
                     .CrossTransferToken(Address.FromText(toChain.Address), symbol, _key.Address,
                         _key.Address, fee)
                     .CrossTransferToken(Address.FromText(toChain.Address), symbol, _key.Address,
@@ -282,7 +283,7 @@ namespace WalletSample
             Console.WriteLine("Enter name for address: ");
             var name = Console.ReadLine();
             var script = ScriptUtils.BeginScript()
-                .AllowGas(_key.Address, 1, 9999)
+                .AllowGas(_key.Address, Address.Null, 1, 9999)
                 .CallContract("account", "Register", _key.Address, name)
                 .SpendGas(_key.Address)
                 .EndScript();

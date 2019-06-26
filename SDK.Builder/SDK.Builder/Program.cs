@@ -191,6 +191,7 @@ namespace SDK.Builder
 
             string replacementFile = inputPath + "language.ini";
             var replacements = new Dictionary<string, string>();
+            var replacementsRef = new Dictionary<string, string>();
             if (File.Exists(replacementFile))
             {
                 var lines = File.ReadAllLines(replacementFile);
@@ -199,14 +200,26 @@ namespace SDK.Builder
                     if (line.Contains(","))
                     {
                         var temp = line.Split(new[] { ',' }, 2);
-                        replacements[temp[0]] = temp[1];
+                        if( temp[0].StartsWith("@") )
+                        {
+                            temp[0] = temp[0].Substring(1);
+                            replacementsRef[temp[0]] = temp[1];
+                        }
+                        else
+                            replacements[temp[0]] = temp[1];
                     }
                 }
             }
 
             var nexus = new Nexus();
             var api = new NexusAPI(nexus);
-
+            foreach (var v in replacements)
+            {
+                if (!replacementsRef.ContainsKey(v.Key))
+                {
+                    replacementsRef.Add(v.Key, v.Value);
+                }
+            }
             var typeDic = new Dictionary<string, IEnumerable<MetaField>>();
             var apiTypes = api.GetType().Assembly.GetTypes().Where(x => !x.IsInterface && x != typeof(SingleResult) && x != typeof(ArrayResult) && x != typeof(ErrorResult) && typeof(IAPIResult).IsAssignableFrom(x)).ToList();
             foreach (var entry in apiTypes)
@@ -217,6 +230,7 @@ namespace SDK.Builder
             var compiler = new Compiler();
             compiler.ParseNewLines = true;
             compiler.RegisterCaseTags();
+            compiler.RegisterTag("fix-ref", (doc, x) => new FixTypeNode(doc, x, replacementsRef));
             compiler.RegisterTag("fix-type", (doc, x) => new FixTypeNode(doc, x, replacements));
             compiler.RegisterTag("fix-array", (doc, x) => new FixArrayNode(doc, x));
 
