@@ -43,7 +43,7 @@ public class Market : MonoBehaviour
         SellCarAuctions.Clear();
         BuyCarAuctions.Clear();
 
-        yield return PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.TOKEN_SYMBOL, 1, (uint)itemsPerPage,
+        yield return PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.PHANTASMA_CHAIN, PhantasmaDemo.TOKEN_SYMBOL, 1, (uint)itemsPerPage,
             (auctions, currentPage, totalPages) =>
             {
                 StartCoroutine(ProcessAuctions(auctions, currentPage, itemsPerPage, totalPages, successCallback, errorCallback));
@@ -64,7 +64,7 @@ public class Market : MonoBehaviour
     {
         if (currentPage < totalPages)
         {
-            yield return PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.TOKEN_SYMBOL, (uint) currentPage + 1, (uint) itemsPerPage,
+            yield return PhantasmaDemo.Instance.PhantasmaApi.GetAuctions(PhantasmaDemo.PHANTASMA_CHAIN, PhantasmaDemo.TOKEN_SYMBOL, (uint) currentPage + 1, (uint) itemsPerPage,
                 (a, cPage, tPages) =>
                 {
                     foreach (var auction in auctions)
@@ -178,7 +178,7 @@ public class Market : MonoBehaviour
                     EventKind eKind;
                     if (Enum.TryParse(evt.kind, out eKind))
                     {
-                        if (eKind == EventKind.AuctionFilled)
+                        if (eKind == EventKind.OrderFilled)
                         {
                             var carMutableData = car.MutableData;
                             carMutableData.location = CarLocation.None;
@@ -266,7 +266,7 @@ public class Market : MonoBehaviour
                     EventKind eKind;
                     if (Enum.TryParse(evt.kind, out eKind))
                     {
-                        if (eKind == EventKind.AuctionCreated)
+                        if (eKind == EventKind.OrderCreated)
                         {
                             var bytes           = Base16.Decode(evt.data);
                             var marketEventData = Serialization.Unserialize<MarketEventData>(bytes);
@@ -357,7 +357,7 @@ public class Market : MonoBehaviour
                     EventKind eKind;
                     if (Enum.TryParse(evt.kind, out eKind))
                     {
-                        if (eKind == EventKind.AuctionCancelled)
+                        if (eKind == EventKind.OrderCancelled)
                         {
                             var carMutableData      = car.MutableData;
                             carMutableData.location = CarLocation.None;

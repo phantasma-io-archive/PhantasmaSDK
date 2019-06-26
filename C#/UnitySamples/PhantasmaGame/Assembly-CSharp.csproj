@@ -317,6 +317,15 @@
     <Reference Include="Unity.Analytics.Tracker">
       <HintPath>C:/UnityProjects/Trabalho/PhantasmaSDK/C#/UnitySamples/PhantasmaGame/Library/PackageCache/com.unity.analytics@3.3.2/Unity.Analytics.Tracker.dll</HintPath>
     </Reference>
+    <Reference Include="Phantasma.CodeGen">
+      <HintPath>C:/UnityProjects/Trabalho/PhantasmaSDK/C#/UnitySamples/PhantasmaGame/Assets/Phantasma/Plugins/Phantasma.CodeGen.dll</HintPath>
+    </Reference>
+    <Reference Include="Phantasma.Storage">
+      <HintPath>C:/UnityProjects/Trabalho/PhantasmaSDK/C#/UnitySamples/PhantasmaGame/Assets/Phantasma/Plugins/Phantasma.Storage.dll</HintPath>
+    </Reference>
+    <Reference Include="Phantasma.Pay">
+      <HintPath>C:/UnityProjects/Trabalho/PhantasmaSDK/C#/UnitySamples/PhantasmaGame/Assets/Phantasma/Plugins/Phantasma.Pay.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib">
       <HintPath>C:/Program Files/Unity/Hub/Editor/2019.1.8f1/Editor/Data/MonoBleedingEdge/lib/mono/4.7.1-api/mscorlib.dll</HintPath>
     </Reference>

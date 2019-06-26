@@ -42,6 +42,8 @@ public class PhantasmaDemo : MonoBehaviour
             { EBLOCKCHAIN_OPERATION.REMOVE_ASSET,   "Remove asset from the market." },
         };
 
+    public const string PHANTASMA_CHAIN = "main";
+
     public const string TOKEN_SYMBOL    = "CAR";
     public const string TOKEN_NAME      = "Car Demo Token";
 
