@@ -13,7 +13,7 @@ namespace WalletSample.Utils
 {
     internal static class Helper
     {
-        public static int GetTokenDecimals(string tokenSymbol, List<TokenDto> tokens)
+        public static int GetTokenDecimals(string tokenSymbol, IList<TokenDto> tokens)
         {
             return tokens.SingleOrDefault(p => p.Symbol.Equals(tokenSymbol)).Decimals;
         }
@@ -89,7 +89,7 @@ namespace WalletSample.Utils
             return SelectShortestPath(from, to, allpaths, phantasmaChains);
         }
 
-        public static string GetTxDescription(TransactionDto tx, List<ChainDto> phantasmaChains, List<TokenDto> phantasmaTokens)
+        public static string GetTxDescription(TransactionDto tx, List<ChainDto> phantasmaChains, IList<TokenDto> phantasmaTokens)
         {
             string description = null;
 
@@ -108,18 +108,18 @@ namespace WalletSample.Utils
                 Event nativeEvent;
                 if (evt.Data != null)
                 {
-                    nativeEvent = new Event((EventKind)evt.EvtKind,
+                    nativeEvent = new Event((Phantasma.Blockchain.Contracts.EventKind)evt.EventKind,
                         Address.FromText(evt.EventAddress), evt.Data.Decode());
                 }
                 else
                 {
                     nativeEvent =
-                        new Event((EventKind)evt.EvtKind, Address.FromText(evt.EventAddress));
+                        new Event((Phantasma.Blockchain.Contracts.EventKind)evt.EventKind, Address.FromText(evt.EventAddress));
                 }
 
-                switch (evt.EvtKind)
+                switch (evt.EventKind)
                 {
-                    case EvtKind.TokenSend:
+                    case Phantasma.RpcClient.DTOs.EventKind.TokenSend:
                         {
                             var data = nativeEvent.GetContent<TokenEventData>();
                             amount = data.value;
@@ -128,7 +128,7 @@ namespace WalletSample.Utils
                         }
                         break;
 
-                    case EvtKind.TokenReceive:
+                    case Phantasma.RpcClient.DTOs.EventKind.TokenReceive:
                         {
                             var data = nativeEvent.GetContent<TokenEventData>();
                             amount = data.value;
@@ -138,11 +138,11 @@ namespace WalletSample.Utils
                         }
                         break;
 
-                    case EvtKind.TokenEscrow:
+                    case Phantasma.RpcClient.DTOs.EventKind.TokenEscrow:
                         {
                             var data = nativeEvent.GetContent<TokenEventData>();
                             amount = data.value;
-                            var amountDecimal = TokenUtils.ToDecimal(amount,
+                            var amountDecimal = UnitConversion.ToDecimal(amount,
                                 phantasmaTokens.SingleOrDefault(p => p.Symbol == data.symbol).Decimals);
                             receiverAddress = nativeEvent.Address;
                             receiverChain = data.chainAddress;
@@ -151,21 +151,21 @@ namespace WalletSample.Utils
                                 $"{amountDecimal} {data.symbol} tokens escrowed for address {receiverAddress} in {chain}";
                         }
                         break;
-                    case EvtKind.AddressRegister:
+                    case Phantasma.RpcClient.DTOs.EventKind.AddressRegister:
                         {
                             var name = nativeEvent.GetContent<string>();
                             description = $"{nativeEvent.Address} registered the name '{name}'";
                         }
                         break;
 
-                    case EvtKind.FriendAdd:
+                    case Phantasma.RpcClient.DTOs.EventKind.AddFriend:
                         {
                             var address = nativeEvent.GetContent<Address>();
                             description = $"{nativeEvent.Address} added '{address} to friends.'";
                         }
                         break;
 
-                    case EvtKind.FriendRemove:
+                    case Phantasma.RpcClient.DTOs.EventKind.RemoveFriend:
                         {
                             var address = nativeEvent.GetContent<Address>();
                             description = $"{nativeEvent.Address} removed '{address} from friends.'";
@@ -179,14 +179,14 @@ namespace WalletSample.Utils
                 if (amount > 0 && senderAddress != Address.Null && receiverAddress != Address.Null &&
                     senderToken != null && senderToken == receiverToken)
                 {
-                    var amountDecimal = TokenUtils.ToDecimal(amount,
+                    var amountDecimal = UnitConversion.ToDecimal(amount,
                         phantasmaTokens.SingleOrDefault(p => p.Symbol == senderToken).Decimals);
                     description =
                         $"{amountDecimal} {senderToken} sent from {senderAddress.Text} to {receiverAddress.Text}";
                 }
                 else if (amount > 0 && receiverAddress != Address.Null && receiverToken != null)
                 {
-                    var amountDecimal = TokenUtils.ToDecimal(amount,
+                    var amountDecimal = UnitConversion.ToDecimal(amount,
                         phantasmaTokens.SingleOrDefault(p => p.Symbol == receiverToken).Decimals);
                     description = $"{amountDecimal} {receiverToken} received on {receiverAddress.Text} ";
                 }
