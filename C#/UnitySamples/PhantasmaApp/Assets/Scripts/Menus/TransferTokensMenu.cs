@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Phantasma.Cryptography;
 using Phantasma.Numerics;
+using Phantasma.SDK;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -55,7 +56,7 @@ public class TransferTokensMenu : MonoBehaviour
 
         Address address;
 
-        if(!PhantasmaDemo.Instance.PhantasmaApi.IsValidAddress(addressInput.text))
+        if(!API.IsValidAddress(addressInput.text))
         {
             CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "The entered address is not valid.\nThe address must start with a 'P' and have 45 characters.");
             return;

@@ -308,6 +308,9 @@
     <Reference Include="Unity.Analytics.Tracker">
       <HintPath>C:/UnityProjects/Trabalho/PhantasmaSDK/C#/UnitySamples/PhantasmaApp/Library/PackageCache/com.unity.analytics@3.3.2/Unity.Analytics.Tracker.dll</HintPath>
     </Reference>
+    <Reference Include="Phantasma.Storage">
+      <HintPath>C:/UnityProjects/Trabalho/PhantasmaSDK/C#/UnitySamples/PhantasmaApp/Assets/Phantasma/Plugins/Phantasma.Storage.dll</HintPath>
+    </Reference>
     <Reference Include="netstandard">
       <HintPath>C:/Program Files/Unity/Hub/Editor/2019.1.0f2/Editor/Data/NetStandard/ref/2.0.0/netstandard.dll</HintPath>
     </Reference>

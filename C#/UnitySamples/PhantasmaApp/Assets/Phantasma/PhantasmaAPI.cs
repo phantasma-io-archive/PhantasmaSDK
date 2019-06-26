@@ -236,10 +236,13 @@ namespace Phantasma.SDK
 		public string hash; //
 		public string chainAddress; //
 		public uint timestamp; //
+		public int confirmations; //
 		public uint blockHeight; //
+		public string blockHash; //
 		public string script; //
 		public Event[] events; //
 		public string result; //
+		public string fee; //
 	   
 		public static Transaction FromNode(DataNode node) 
 		{
@@ -248,7 +251,9 @@ namespace Phantasma.SDK
 			result.hash = node.GetString("hash");						
 			result.chainAddress = node.GetString("chainAddress");						
 			result.timestamp = node.GetUInt32("timestamp");						
+			result.confirmations = node.GetInt32("confirmations");						
 			result.blockHeight = node.GetUInt32("blockHeight");						
+			result.blockHash = node.GetString("blockHash");						
 			result.script = node.GetString("script");			
 			var events_array = node.GetNode("events");
 			if (events_array != null) {
@@ -263,7 +268,8 @@ namespace Phantasma.SDK
 				result.events = new Event[0];
 			}
 									
-			result.result = node.GetString("result");
+			result.result = node.GetString("result");						
+			result.fee = node.GetString("fee");
 
 			return result;			
 		}
@@ -296,6 +302,28 @@ namespace Phantasma.SDK
 			return result;			
 		}
 	}
+	
+	//public struct Paginated 
+	//{
+	//	public uint page; //
+	//	public uint pageSize; //
+	//	public uint total; //
+	//	public uint totalPages; //
+	//	public IAPI result; //
+	   
+	//	public static Paginated FromNode(DataNode node) 
+	//	{
+	//		Paginated result;
+						
+	//		result.page = node.GetUInt32("page");						
+	//		result.pageSize = node.GetUInt32("pageSize");						
+	//		result.total = node.GetUInt32("total");						
+	//		result.totalPages = node.GetUInt32("totalPages");						
+	//		result.result = node.GetIAPIResult("result");
+
+	//		return result;			
+	//	}
+	//}
 	
 	public struct Block 
 	{
@@ -334,6 +362,22 @@ namespace Phantasma.SDK
 									
 			result.validatorAddress = node.GetString("validatorAddress");						
 			result.reward = node.GetString("reward");
+
+			return result;			
+		}
+	}
+	
+	public struct TokenMetadata 
+	{
+		public string key; //
+		public string value; //
+	   
+		public static TokenMetadata FromNode(DataNode node) 
+		{
+			TokenMetadata result;
+						
+			result.key = node.GetString("key");						
+			result.value = node.GetString("value");
 
 			return result;			
 		}
@@ -386,6 +430,7 @@ namespace Phantasma.SDK
 		public string ownerAddress; //
 		public string ram; //
 		public string rom; //
+		public Boolean forSale; //
 	   
 		public static TokenData FromNode(DataNode node) 
 		{
@@ -395,27 +440,8 @@ namespace Phantasma.SDK
 			result.chainAddress = node.GetString("chainAddress");						
 			result.ownerAddress = node.GetString("ownerAddress");						
 			result.ram = node.GetString("ram");						
-			result.rom = node.GetString("rom");
-
-			return result;			
-		}
-	}
-	
-	public struct TxConfirmation 
-	{
-		public string hash; //
-		public string chainAddress; //
-		public int confirmations; //
-		public uint height; //
-	   
-		public static TxConfirmation FromNode(DataNode node) 
-		{
-			TxConfirmation result;
-						
-			result.hash = node.GetString("hash");						
-			result.chainAddress = node.GetString("chainAddress");						
-			result.confirmations = node.GetInt32("confirmations");						
-			result.height = node.GetUInt32("height");
+			result.rom = node.GetString("rom");						
+			result.forSale = node.GetBoolean("forSale");
 
 			return result;			
 		}
@@ -440,40 +466,58 @@ namespace Phantasma.SDK
 	public struct Auction 
 	{
 		public string creatorAddress; //
+		public string chainAddress; //
 		public uint startDate; //
 		public uint endDate; //
 		public string baseSymbol; //
 		public string quoteSymbol; //
 		public string tokenId; //
 		public string price; //
+		public string rom; //
+		public string ram; //
 	   
 		public static Auction FromNode(DataNode node) 
 		{
 			Auction result;
 						
 			result.creatorAddress = node.GetString("creatorAddress");						
+			result.chainAddress = node.GetString("chainAddress");						
 			result.startDate = node.GetUInt32("startDate");						
 			result.endDate = node.GetUInt32("endDate");						
 			result.baseSymbol = node.GetString("baseSymbol");						
 			result.quoteSymbol = node.GetString("quoteSymbol");						
 			result.tokenId = node.GetString("tokenId");						
-			result.price = node.GetString("price");
+			result.price = node.GetString("price");						
+			result.rom = node.GetString("rom");						
+			result.ram = node.GetString("ram");
 
 			return result;			
 		}
 	}
 	
-	public struct TokenMetadata 
+	public struct Script 
 	{
-		public string key; //
-		public string value; //
+		public Event[] events; //
+		public string result; //
 	   
-		public static TokenMetadata FromNode(DataNode node) 
+		public static Script FromNode(DataNode node) 
 		{
-			TokenMetadata result;
-						
-			result.key = node.GetString("key");						
-			result.value = node.GetString("value");
+			Script result;
+			
+			var events_array = node.GetNode("events");
+			if (events_array != null) {
+				result.events = new Event[events_array.ChildCount];
+				for (int i=0; i < events_array.ChildCount; i++) {
+					
+					result.events[i] = Event.FromNode(events_array.GetNodeByIndex(i));
+					
+				}
+			}
+			else {
+				result.events = new Event[0];
+			}
+									
+			result.result = node.GetString("result");
 
 			return result;			
 		}
@@ -498,6 +542,16 @@ namespace Phantasma.SDK
 				var result = Account.FromNode(node);
 				callback(result);
 			} , addressText);		   
+		}
+		
+		
+		//Returns the address that owns a given name.
+		public IEnumerator LookUpName(string name, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
+			yield return _client.SendRequest(Host, "lookUpName", errorHandlingCallback, (node) => { 
+				var result = node.Value;
+				callback(result);
+			} , name);		   
 		}
 		
 		
@@ -595,16 +649,6 @@ namespace Phantasma.SDK
 		}
 		
 		
-		//Returns the number of confirmations of given transaction hash and other useful info.
-		public IEnumerator GetConfirmations(string hashText, Action<int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
-		{	   
-			yield return _client.SendRequest(Host, "getConfirmations", errorHandlingCallback, (node) => { 
-				var result = int.Parse(node.Value);
-				callback(result);
-			} , hashText);		   
-		}
-		
-		
 		//Allows to broadcast a signed operation on the network, but it&apos;s required to build it manually.
 		public IEnumerator SendRawTransaction(string txData, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
 		{	   
@@ -612,6 +656,16 @@ namespace Phantasma.SDK
 				var result = node.Value;
 				callback(result);
 			} , txData);		   
+		}
+		
+		
+		//Allows to invoke script based on network state, without state changes.
+		public IEnumerator InvokeRawScript(string chainInput, string scriptData, Action<Script> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
+			yield return _client.SendRequest(Host, "invokeRawScript", errorHandlingCallback, (node) => { 
+				var result = Script.FromNode(node);
+				callback(result);
+			} , chainInput, scriptData);		   
 		}
 		
 		
@@ -736,18 +790,18 @@ namespace Phantasma.SDK
 		
 		
 		//Returns the number of active auctions.
-		public IEnumerator GetAuctionsCount(string symbol, Action<int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		public IEnumerator GetAuctionsCount(string chainAddressOrName, string symbol, Action<int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
 		{	   
 			yield return _client.SendRequest(Host, "getAuctionsCount", errorHandlingCallback, (node) => { 
 				var result = int.Parse(node.Value);
 				callback(result);
-			} , symbol);		   
+			} , chainAddressOrName, symbol);		   
 		}
 		
 		
 		//Returns the auctions available in the market.
 		//This api call is paginated, multiple calls might be required to obtain a complete result 
-		public IEnumerator GetAuctions(string symbol, uint page, uint pageSize, Action<Auction[], int, int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		public IEnumerator GetAuctions(string chainAddressOrName, string symbol, uint page, uint pageSize, Action<Auction[], int, int> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
 		{	   
 			yield return _client.SendRequest(Host, "getAuctions", errorHandlingCallback, (node) => { 
 				var currentPage = node.GetInt32("page");
@@ -759,29 +813,40 @@ namespace Phantasma.SDK
 					result[i] = Auction.FromNode(child);
 				}
 				callback(result, currentPage, totalPages);
-			} , symbol, page, pageSize);		   
+			} , chainAddressOrName, symbol, page, pageSize);		   
+		}
+		
+		
+		//Returns the auction for a specific token.
+		public IEnumerator GetAuction(string chainAddressOrName, string symbol, string IDtext, Action<Auction> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
+		{	   
+			yield return _client.SendRequest(Host, "getAuction", errorHandlingCallback, (node) => { 
+				var result = Auction.FromNode(node);
+				callback(result);
+			} , chainAddressOrName, symbol, IDtext);		   
 		}
 		
 		
 		
-		public IEnumerator SignAndSendTransaction(KeyPair keys, byte[] script, string chain, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
-		{
-           //var tx = new Blockchain.Transaction("nexus", chain, script,  DateTime.UtcNow + TimeSpan.FromHours(1));
-           var tx = new Blockchain.Transaction("simnet", chain, script,  DateTime.UtcNow + TimeSpan.FromHours(1));
+        public IEnumerator SignAndSendTransaction(KeyPair keys, byte[] script, string chain, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
+        {
+            Debug.Log("Sending transaction...");
+
+            var tx = new Blockchain.Transaction("simnet", chain, script, DateTime.UtcNow + TimeSpan.FromHours(1));
             tx.Sign(keys);
 
-           yield return SendRawTransaction(Base16.Encode(tx.ToByteArray(true)), callback, errorHandlingCallback);
-		}
-		
-		public bool IsValidPrivateKey(string address)
-		{
-           return (address.StartsWith("L", false, CultureInfo.InvariantCulture) || 
-                   address.StartsWith("K", false, CultureInfo.InvariantCulture)) && address.Length == 52;
-		}
-	   
-		public bool IsValidAddress(string address)
-		{
-           return address.StartsWith("P", false, CultureInfo.InvariantCulture) && address.Length == 45;
-		} 	   
+            yield return SendRawTransaction(Base16.Encode(tx.ToByteArray(true)), callback, errorHandlingCallback);
+        }
+
+        public static bool IsValidPrivateKey(string address)
+        {
+            return (address.StartsWith("L", false, CultureInfo.InvariantCulture) ||
+                    address.StartsWith("K", false, CultureInfo.InvariantCulture)) && address.Length == 52;
+        }
+
+        public static bool IsValidAddress(string address)
+        {
+            return address.StartsWith("P", false, CultureInfo.InvariantCulture) && address.Length == 45;
+        }
 	}
 }
