@@ -40,6 +40,8 @@ Language 		| Core Library	| Smart Compiler | Sample Dapps
 [Python](/Python) 		| Beta | Planned | In Development |
 [Golang](/Go) 		| Beta | Planned | In Development |
 [Javascript](/JS) 		| Alpha | Planned | In Development |
+[C++](/C++) 		| Alpha | Planned | In Development |
+[Java](/Java) 		| Alpha | Planned | In Development |
 
 ## Developing
 
