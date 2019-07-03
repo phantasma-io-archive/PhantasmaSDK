@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Linq;
+using Phantasma.VM;
 
 namespace SDK.Builder
 {
@@ -238,6 +239,7 @@ namespace SDK.Builder
 
             data["methods"] = api.Methods.Select(x => new MethodEntry() { Info = x, ResultFields = x.ReturnType.GetFields() });
             data["types"] = typeDic;
+            data["opcodes"] = Enum.GetValues(typeof(Opcode)).Cast<Opcode>().Select(x => new KeyValuePair<string, byte>(x.ToString(),(byte)x));
 
             foreach (var file in files)
             {
@@ -357,7 +359,6 @@ namespace SDK.Builder
 
             GenerateUnityPackage(inputPath + @"PhantasmaSDK\SDK.Builder\SDK.Builder\bin\Debug", tempPath + @"C#\Libs\");
 
-            return;
             CopyFolder(inputPath + @"PhantasmaSpook\Spook.CLI\Publish", tempPath + @"Tools\Spook");
             CopyFolder(inputPath + @"PhantasmaWallet\PhantasmaWallet\Publish", tempPath + @"Tools\Wallet");
             CopyFolder(inputPath + @"PhantasmaExplorer\PhantasmaExplorer\Publish", tempPath + @"Tools\Explorer");

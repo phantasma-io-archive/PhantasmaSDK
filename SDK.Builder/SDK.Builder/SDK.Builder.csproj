@@ -84,6 +84,10 @@
       <Project>{194D325F-A2D7-4D8E-ACD2-78387C321FC4}</Project>
       <Name>Phantasma.Storage</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\PhantasmaChain\Phantasma.VM\Phantasma.VM.csproj">
+      <Project>{3E99832E-6EC8-4B87-822E-5F65474BEBF5}</Project>
+      <Name>Phantasma.VM</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
