@@ -73,17 +73,32 @@ namespace SDK.Builder
 
         static string FixPath(string path)
         {
-            path = path.Replace(@"/", @"\");
-            if (!path.EndsWith(@"\"))
+            String platform = System.Environment.OSVersion.Platform.ToString();
+            
+            if (platform != "Unix")
             {
-                path += @"\";
+                path = path.Replace(@"/", @"\");
+                if (!path.EndsWith(@"\"))
+                {
+                    path += @"\";
+                }
             }
+            else
+            {
+                path = path.Replace(@"\", @"/");
+                if (!path.EndsWith(@"/"))
+                {
+                    path += @"/";
+                }
+            }
+            
             return path;
         }
 
         static void CopyFolder(string sourceDir, string targetDir, Func<string, bool> filter = null)
         {
             sourceDir = FixPath(sourceDir);
+            Log("sourceDir: " + sourceDir);
 
             if (!Directory.Exists(sourceDir))
             {
@@ -103,7 +118,8 @@ namespace SDK.Builder
         }
 
         static void CopyFiles(IEnumerable<string> files, string targetDir, Func<string, bool> filter = null)
-        { 
+        {
+            targetDir = FixPath(targetDir);
             if (!Directory.Exists(targetDir))
             {
                 Directory.CreateDirectory(targetDir);
@@ -167,7 +183,16 @@ namespace SDK.Builder
 
         static void ZipFile(string inputPath, string outputPath, string version)
         {
-            RunCommand("7z.exe", $"a {outputPath}/Phantasma_SDK_v{version}.zip {inputPath}/*");
+            String platform = System.Environment.OSVersion.Platform.ToString();
+            if (platform != "Unix")
+            {
+                RunCommand("7z.exe", $@"a {outputPath}Phantasma_SDK_v{version}.zip {inputPath}\*");
+            }
+            else
+            {
+                string inputDirectory = new DirectoryInfo(inputPath).Name;
+                RunCommand("tar", $"-czf {outputPath}Phantasma_SDK_v{version}.tar.gz -C {inputPath} .");
+            }
         }
 
         public struct MethodEntry
@@ -178,6 +203,7 @@ namespace SDK.Builder
 
         static void GenerateBindings(string inputPath, string outputPath)
         {
+            inputPath = FixPath(inputPath);
             if (!Directory.Exists(inputPath))
             {
                 return;
@@ -185,6 +211,7 @@ namespace SDK.Builder
 
             var files = Directory.GetFiles(inputPath);
 
+            outputPath = FixPath(outputPath);
             if (!Directory.Exists(outputPath))
             {
                 Directory.CreateDirectory(outputPath);
@@ -347,6 +374,7 @@ namespace SDK.Builder
             }
 
             var tempPath = outputPath + @"temp\";
+            tempPath = FixPath(tempPath);
             Directory.CreateDirectory(tempPath);
 
             GenerateBindings(inputPath + @"PhantasmaSDK\Docs\", tempPath + @"\Docs\");
@@ -359,17 +387,44 @@ namespace SDK.Builder
 
             GenerateUnityPackage(inputPath + @"PhantasmaSDK\SDK.Builder\SDK.Builder\bin\Debug", tempPath + @"C#\Libs\");
 
-            CopyFolder(inputPath + @"PhantasmaSpook\Spook.CLI\Publish", tempPath + @"Tools\Spook");
-            CopyFolder(inputPath + @"PhantasmaWallet\PhantasmaWallet\Publish", tempPath + @"Tools\Wallet");
-            CopyFolder(inputPath + @"PhantasmaExplorer\PhantasmaExplorer\Publish", tempPath + @"Tools\Explorer");
 
-            CopyFolder(inputPath + @"PhantasmaCompiler\Compiler.CLI\Examples", tempPath + @"Contracts\Source", (x) => !x.Contains("_old"));
-            CopyFolder(inputPath + @"PhantasmaExplorer\PhantasmaExplorer\www", tempPath + @"Tools\Explorer\www", (x) => !x.Contains(".db"));
-            CopyFolder(inputPath + @"PhantasmaWallet\PhantasmaWallet\www", tempPath + @"Tools\Wallet\www", (x) => !x.Equals("session"));
+            String platform = System.Environment.OSVersion.Platform.ToString();
+            if (platform != "Unix")
+            {
+                CopyFolder(inputPath + @"PhantasmaSpook\Spook.CLI\Publish", tempPath + @"Tools\Spook");
+                CopyFolder(inputPath + @"PhantasmaWallet\PhantasmaWallet\Publish", tempPath + @"Tools\Wallet");
+                CopyFolder(inputPath + @"PhantasmaExplorer\PhantasmaExplorer\Publish", tempPath + @"Tools\Explorer");
 
-            File.WriteAllText(tempPath + "launch_dev_node.bat", "dotnet %~dp0Tools/Spook/Spook.dll -node.wif=L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25 -rpc.enabled=true");
-            File.WriteAllText(tempPath + "launch_explorer.bat", "dotnet %~dp0Tools/Explorer/Phantasma.Explorer.dll --path=%~dp0Tools/Explorer/www --port=7072");
-            File.WriteAllText(tempPath + "launch_wallet.bat", "dotnet %~dp0Tools/Wallet/Phantasma.Wallet.dll --path=%~dp0Tools/Wallet/www --port=7071");
+                CopyFolder(inputPath + @"PhantasmaCompiler\Compiler.CLI\Examples", tempPath + @"Contracts\Source", (x) => !x.Contains("_old"));
+                CopyFolder(inputPath + @"PhantasmaExplorer\PhantasmaExplorer\www", tempPath + @"Tools\Explorer\www", (x) => !x.Contains(".db"));
+                CopyFolder(inputPath + @"PhantasmaWallet\PhantasmaWallet\www", tempPath + @"Tools\Wallet\www", (x) => !x.Equals("session"));
+                
+                File.WriteAllText(tempPath + "launch_dev_node.bat",
+                    "dotnet %~dp0Tools/Spook/Spook.dll -node.wif=L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25 -rpc.enabled=true");
+                File.WriteAllText(tempPath + "launch_explorer.bat",
+                    "dotnet %~dp0Tools/Explorer/Phantasma.Explorer.dll --path=%~dp0Tools/Explorer/www --port=7072");
+                File.WriteAllText(tempPath + "launch_wallet.bat",
+                    "dotnet %~dp0Tools/Wallet/Phantasma.Wallet.dll --path=%~dp0Tools/Wallet/www --port=7071");
+            }
+            else
+            {
+                CopyFolder(inputPath + @"PhantasmaSpook\Spook.CLI\bin\Debug\netcoreapp2.0", tempPath + @"Tools\Spook");
+                CopyFolder(inputPath + @"PhantasmaWallet\PhantasmaWallet\Publish", tempPath + @"Tools\Wallet");
+                CopyFolder(inputPath + @"PhantasmaExplorer\PhantasmaExplorer\Publish", tempPath + @"Tools\Explorer");
+
+                CopyFolder(inputPath + @"PhantasmaCompiler\Compiler.CLI\Examples", tempPath + @"Contracts\Source", (x) => !x.Contains("_old"));
+                CopyFolder(inputPath + @"PhantasmaExplorer\PhantasmaExplorer\www", tempPath + @"Tools\Explorer\www", (x) => !x.Contains(".db"));
+                CopyFolder(inputPath + @"PhantasmaWallet\PhantasmaWallet\www", tempPath + @"Tools\Wallet\www", (x) => !x.Equals("session"));
+                
+                Log("tempPath" + tempPath);
+                File.WriteAllText(tempPath + "launch_dev_node.sh",
+                    "dotnet " + tempPath + "Tools/Spook/Spook.dll -node.wif=L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25 -rpc.enabled=true");
+                File.WriteAllText(tempPath + "launch_explorer.sh",
+                    "dotnet " + tempPath + "Tools/Explorer/Phantasma.Explorer.dll --path=" + tempPath + "Tools/Explorer/www --port=7072");
+                File.WriteAllText(tempPath + "launch_wallet.sh",
+                    "dotnet " + tempPath + "Tools/Wallet/Phantasma.Wallet.dll --path=" + tempPath +"Tools/Wallet/www --port=7071");
+                
+            }
 
             ZipFile(tempPath, outputPath, versionNumber);
 
