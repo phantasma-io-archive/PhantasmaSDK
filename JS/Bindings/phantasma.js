@@ -1,9 +1,9 @@
-class PhantasmaAPI {
+const Opcodes = Object.freeze({
+	{{#each opcodes}}{{#upper-case Key}}:   {{Value}},
+	{{/each}}
+});
 
-	const Opcodes = Object.freeze({
-		{{#each opcodes}}{{#upper-case Key}}:   {{Value}},
-		{{/each}}
-	});
+class PhantasmaAPI {
 
 	constructor(host) {
 		this.host = host;
