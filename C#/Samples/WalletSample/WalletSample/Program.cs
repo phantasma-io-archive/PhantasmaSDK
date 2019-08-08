@@ -143,6 +143,12 @@ namespace WalletSample
                     Console.WriteLine($"Token: {balanceSheetDto.Symbol}");
                     Console.WriteLine($"Chain: {balanceSheetDto.ChainName}");
                     Console.WriteLine($"Amount: {UnitConversion.ToDecimal(BigInteger.Parse(balanceSheetDto.Amount), Helper.GetTokenDecimals(balanceSheetDto.Symbol, _tokens))}");
+                    
+                    foreach( var id in balanceSheetDto.Ids )
+                    {
+                        var tokenData = await _phantasmaApiService.GetTokenData.SendRequestAsync(balanceSheetDto.Symbol, id);
+                        Console.WriteLine($"\tID: {tokenData.Id} - RAM: {tokenData.Ram} ROM: {tokenData.Rom}");
+                    }
                     Console.WriteLine();
                 }
             }
