@@ -107,6 +107,7 @@ namespace WalletSample
                         break;
                     case "6":
                         logout = true;
+                        _account = null;
                         break;
                 }
 
@@ -162,6 +163,8 @@ namespace WalletSample
 
         private static async Task CrossChainTransfer()//todo
         {
+            if (_account == null)
+                _account = await _phantasmaApiService.GetAccount.SendRequestAsync(_key.Address.ToString());
             if (!HaveTokenBalanceToTransfer())
             {
                 Console.WriteLine("No tokens to tranfer");
