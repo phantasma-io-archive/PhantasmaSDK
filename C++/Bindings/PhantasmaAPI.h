@@ -107,6 +107,7 @@
 //
 //    JSONValue Parse(const JSONDocument&);
 //
+//    bool      LookupBool(   const JSONValue&, const Char* field, bool& out_error);
 //    Int32     LookupInt32(  const JSONValue&, const Char* field, bool& out_error);
 //    UInt32    LookupUInt32( const JSONValue&, const Char* field, bool& out_error);
 //    String    LookupString( const JSONValue&, const Char* field, bool& out_error);
@@ -115,6 +116,7 @@
 //    bool      HasField(     const JSONValue&, const Char* field, bool& out_error);
 //    bool      HasArrayField(const JSONValue&, const Char* field, bool& out_error);
 //
+//    bool      AsBool(       const JSONValue&,                    bool& out_error);
 //    Int32     AsInt32(      const JSONValue&,                    bool& out_error);
 //    UInt32    AsUInt32(     const JSONValue&,                    bool& out_error);
 //    String    AsString(     const JSONValue&,                    bool& out_error);
@@ -264,6 +266,7 @@ namespace json
 {
 #ifndef PHANTASMA_JSONBUILDER
     JSONValue Parse(const JSONDocument&);
+	bool LookupBool(const JSONValue&, const Char* field, bool& out_error);
 	Int32 LookupInt32(const JSONValue&, const Char* field, bool& out_error);
 	UInt32 LookupUInt32(const JSONValue&, const Char* field, bool& out_error);
 	String LookupString(const JSONValue&, const Char* field, bool& out_error);
@@ -271,6 +274,7 @@ namespace json
 	JSONArray LookupArray(const JSONValue&, const Char* field, bool& out_error);
 	bool HasField(const JSONValue&, const Char* field, bool& out_error);
 	bool HasArrayField(const JSONValue&, const Char* field, bool& out_error);
+	bool   AsBool(const JSONValue&, bool& out_error);
 	Int32  AsInt32(const JSONValue&, bool& out_error);
 	UInt32 AsUInt32(const JSONValue&, bool& out_error);
 	String AsString(const JSONValue&, bool& out_error);
@@ -314,6 +318,8 @@ private:
 	static JSONValue CheckResponse(JSONValue response, bool& out_error);
 	{{#each types}}static {{#fix-type Key}} Deserialize{{#fix-type Key}}(const JSONValue& json, bool& out_error);
 	{{/each}}
+
+	static bool Deserializebool(const JSONValue& json, bool& out_error);
 };
 
 #if defined(PHANTASMA_HTTPCLIENT)
@@ -333,6 +339,11 @@ private:
 #endif
 	
 #if defined(PHANTASMA_IMPLEMENTATION)
+PHANTASMA_FUNCTION bool PhantasmaJsonAPI::Deserializebool(const JSONValue& value, bool& err)
+{
+	return json::AsBool(value, err);
+}
+
 {{#each types}}
 PHANTASMA_FUNCTION {{#fix-type Key}} PhantasmaJsonAPI::Deserialize{{#fix-type Key}}(const JSONValue& value, bool& err)
 { {{#parse-lines false}}
@@ -371,6 +382,9 @@ PHANTASMA_FUNCTION {{#fix-type Key}} PhantasmaJsonAPI::Deserialize{{#fix-type Ke
 {{#if FieldType.Name contains '[]'}}
 		{{Name}}Vector
 {{#else}}
+{{#if FieldType.Name=='bool'}}
+		json::LookupBool(value, PHANTASMA_LITERAL("{{Name}}"), err)
+{{#else}}
 {{#if FieldType.Name=='UInt32'}}
 		json::LookupUInt32(value, PHANTASMA_LITERAL("{{Name}}"), err)
 {{#else}}
@@ -384,6 +398,7 @@ PHANTASMA_FUNCTION {{#fix-type Key}} PhantasmaJsonAPI::Deserialize{{#fix-type Ke
 		json::LookupValue(value, PHANTASMA_LITERAL("result"), err)
 {{#else}}
 		(err=true, "Variable type {{FieldType.Name}} isnt currently handled by the template system")
+{{/if}}
 {{/if}}
 {{/if}}
 {{/if}}
@@ -627,6 +642,7 @@ namespace json
 		return i == JSONValue::npos ? i : i+1;
 	}
 
+	PHANTASMA_FUNCTION bool LookupBool(const JSONValue& v, const Char* field, bool& out_error)       { return AsBool( LookupValue(v, field, out_error), out_error); }
 	PHANTASMA_FUNCTION Int32 LookupInt32(const JSONValue& v, const Char* field, bool& out_error)     { return AsInt32( LookupValue(v, field, out_error), out_error); }
 	PHANTASMA_FUNCTION UInt32 LookupUInt32(const JSONValue& v, const Char* field, bool& out_error)   { return AsUInt32(LookupValue(v, field, out_error), out_error); }
 	PHANTASMA_FUNCTION String LookupString(const JSONValue& v, const Char* field, bool& out_error)   { return AsString(LookupValue(v, field, out_error), out_error); }
@@ -661,6 +677,16 @@ namespace json
 			}
 		}
 		return "";
+	}
+	PHANTASMA_FUNCTION bool AsBool(const JSONValue& v, bool& out_error)
+	{
+		if( v.length() < 1 ) { out_error = true; return false; }
+		switch(v[0])
+		{
+		default: PHANTASMA_EXCEPTION("Casting non-bool value to bool"); out_error = true;
+		case 'f': return false;
+		case 't': return true;
+		}
 	}
 	PHANTASMA_FUNCTION Int32  AsInt32(const JSONValue& v, bool& out_error)
 	{

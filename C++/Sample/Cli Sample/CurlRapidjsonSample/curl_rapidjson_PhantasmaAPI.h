@@ -89,6 +89,7 @@ struct RapidJsonBufferWriter
 namespace phantasma { 
 	namespace json {
 		inline const rapidjson::Value& Parse(const rapidjson::Document& d) { return d; }
+		inline bool                    LookupBool(   const rapidjson::Value& v, const char* field, bool& out_error) { return v[field].GetBool(); }
 		inline int32_t                 LookupInt32(  const rapidjson::Value& v, const char* field, bool& out_error) { return v[field].GetInt(); }
 		inline uint32_t                LookupUInt32( const rapidjson::Value& v, const char* field, bool& out_error) { return (uint32_t)v[field].GetInt(); }
 		inline PHANTASMA_STRING        LookupString( const rapidjson::Value& v, const char* field, bool& out_error) { return (PHANTASMA_STRING)(v[field].GetString()); }
@@ -96,6 +97,7 @@ namespace phantasma {
 		inline const rapidjson::Value& LookupArray(  const rapidjson::Value& v, const char* field, bool& out_error) { return v[field]; }
 		inline bool                    HasField(     const rapidjson::Value& v, const char* field, bool& out_error) { return v.HasMember(field); }
 		inline bool                    HasArrayField(const rapidjson::Value& v, const char* field, bool& out_error) { return v[field].IsArray(); }
+		inline bool                    AsBool(       const rapidjson::Value& v,                    bool& out_error) { return v.GetBool(); }
 		inline int32_t                 AsInt32(      const rapidjson::Value& v,                    bool& out_error) { return v.GetInt(); }
 		inline uint32_t                AsUInt32(     const rapidjson::Value& v,                    bool& out_error) { return (uint32_t)v.GetInt(); }
 		inline PHANTASMA_STRING        AsString(     const rapidjson::Value& v,                    bool& out_error) { return (PHANTASMA_STRING)(v.GetString()); }

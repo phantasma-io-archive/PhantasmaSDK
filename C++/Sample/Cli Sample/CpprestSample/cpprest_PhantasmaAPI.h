@@ -14,6 +14,7 @@ namespace phantasma {
 	namespace json {
 		inline web::json::value Parse(const web::json::value& d) { return d; }
 
+		inline bool             LookupBool(   const web::json::value& v, const wchar_t* field, bool& out_error) { return v.at(field).as_bool(); }
 		inline int32_t          LookupInt32(  const web::json::value& v, const wchar_t* field, bool& out_error) { return v.at(field).as_integer(); }
 		inline uint32_t         LookupUInt32( const web::json::value& v, const wchar_t* field, bool& out_error) { return (uint32_t)v.at(field).as_integer(); }
 		inline std::wstring     LookupString( const web::json::value& v, const wchar_t* field, bool& out_error) { return v.at(field).as_string(); }
@@ -21,6 +22,7 @@ namespace phantasma {
 		inline web::json::array LookupArray(  const web::json::value& v, const wchar_t* field, bool& out_error) { return v.at(field).as_array(); }
 		inline bool             HasField(     const web::json::value& v, const wchar_t* field, bool& out_error) { return v.has_field(field); }
 		inline bool             HasArrayField(const web::json::value& v, const wchar_t* field, bool& out_error) { return v.has_array_field(field); }
+		inline bool             AsBool(       const web::json::value& v,                       bool& out_error) { return v.as_bool(); }
 		inline int32_t          AsInt32(      const web::json::value& v,                       bool& out_error) { return v.as_integer(); }
 		inline uint32_t         AsUInt32(     const web::json::value& v,                       bool& out_error) { return (uint32_t)v.as_integer(); }
 		inline std::wstring     AsString(     const web::json::value& v,                       bool& out_error) { return v.as_string(); }
@@ -67,9 +69,13 @@ namespace phantasma {
 #define PHANTASMA_JSONDOCUMENT                       web::json::value
 #define PHANTASMA_JSONBUILDER                        web::json::value
 #define PHANTASMA_HTTPCLIENT                         web::http::client::http_client
+#ifdef _UNICODE
 #define PHANTASMA_CHAR                               wchar_t
 #define PHANTASMA_LITERAL(x)                         L ## x
 #define PHANTASMA_STRING                             std::wstring
-#define PHANTASMA_EXCEPTION(message)                 throw std::runtime_error(message)
 #define PHANTASMA_EXCEPTION_MESSAGE(message, string) throw std::runtime_error(std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(string))
+#else
+#define PHANTASMA_EXCEPTION_MESSAGE(message, string) throw std::runtime_error(string)
+#endif
+#define PHANTASMA_EXCEPTION(message)                 throw std::runtime_error(message)
 #include "PhantasmaAPI.h"
