@@ -24,17 +24,18 @@
 // As different C++ projects may use different primitive types, you can use the 
 //  following #defines (BEFORE including phantasma.h) to override the default types.
 //
-// #define               | typedef                | Default           | Notes
-// PHANTASMA_INT32       | phantasma::Int32       | int32_t           |
-// PHANTASMA_UINT32      | phantasma::UInt32      | uint32_t          |
-// PHANTASMA_CHAR        | phantasma::Char        | char              | See Unicode section
-// PHANTASMA_STRING      | phantasma::String      | std::string       | Must support construction from `const phantasma::Char*`
-// PHANTASMA_VECTOR      |                        | std::vector       | Must support `push_back` and `size` members
-// PHANTASMA_JSONVALUE   | phantasma::JSONValue   | std::string_view  | See JSON section
-// PHANTASMA_JSONARRAY   | phantasma::JSONArray   | JSONValue         | See JSON section
-// PHANTASMA_JSONDOCUMENT| phantasma::JSONDocument| std::string       | See JSON section
-// PHANTASMA_JSONBUILDER | phantasma::JSONBuilder | std::stringstream*| See JSON section
-// PHANTASMA_HTTPCLIENT  | phantasma::HttpClient  |                   | See HTTP section
+// #define                | typedef                 | Default           | Notes
+// PHANTASMA_INT32        | phantasma::Int32        | int32_t           |
+// PHANTASMA_UINT32       | phantasma::UInt32       | uint32_t          |
+// PHANTASMA_CHAR         | phantasma::Char         | char              | See Unicode section
+// PHANTASMA_STRING       | phantasma::String       | std::string       | Must support construction from `const phantasma::Char*`
+// PHANTASMA_STRINGBUILDER| phantasma::StringBuilder| std::stringstream | 
+// PHANTASMA_VECTOR       |                         | std::vector       | Must support `push_back` and `size` members
+// PHANTASMA_JSONVALUE    | phantasma::JSONValue    | std::string_view  | See JSON section
+// PHANTASMA_JSONARRAY    | phantasma::JSONArray    | JSONValue         | See JSON section
+// PHANTASMA_JSONDOCUMENT | phantasma::JSONDocument | std::string       | See JSON section
+// PHANTASMA_JSONBUILDER  | phantasma::JSONBuilder  | std::stringstream*| See JSON section
+// PHANTASMA_HTTPCLIENT   | phantasma::HttpClient   |                   | See HTTP section
 //
 // The behavior of this header can further be modified by using the following 
 //  #defines (BEFORE including phantasma.h)
@@ -80,9 +81,10 @@
 //------------------------------------------------------------------------------
 // To build a wide-character version of the API, define the following before
 //  including phantasma.h:
-// #define PHANTASMA_CHAR       wchar_t
-// #define PHANTASMA_LITERAL(x) L ## x
-// #define PHANTASMA_STRING     std::wstring
+// #define PHANTASMA_CHAR          wchar_t
+// #define PHANTASMA_LITERAL(x)    L ## x
+// #define PHANTASMA_STRING        std::wstring
+// #define PHANTASMA_STRINGBUILDER std::wstringstream
 //
 // You should also provide a JSON and HTTP library with wide-character support.
 //
@@ -155,37 +157,67 @@
 //------------------------------------------------------------------------------
 
 #if !defined(PHANTASMA_STRING) || !defined(PHANTASMA_JSONDOCUMENT) || !defined(PHANTASMA_JSONVALUE)
-#include <string>
+# include <string>
 #endif
 
 #if !defined(PHANTASMA_JSONVALUE) && __cplusplus > 201402L
-#include <string_view>
+# include <string_view>
 #endif
 
-#if !defined(PHANTASMA_JSONBUILDER)
-#include <sstream>
+#if !defined(PHANTASMA_JSONBUILDER) || !defined(PHANTASMA_STRINGBUILDER)
+# include <sstream>
 #endif
 
 #if !defined(PHANTASMA_VECTOR)
 #define PHANTASMA_VECTOR std::vector
-#include <vector>
+# include <vector>
 #endif
 
 #if !defined(PHANTASMA_S32) || !defined(PHANTASMA_U32)
-#include <cstdint>
+# include <cstdint>
+#endif
+
+#if !defined(PHANTASMA_MAX) || !defined(PHANTASMA_COPY) || !defined(PHANTASMA_EQUAL) || !defined(PHANTASMA_SWAP)
+# include <algorithm>
+#endif
+
+#ifndef PHANTASMA_MAX
+# define PHANTASMA_MAX(a, b) std::max(a, b)
+#endif
+
+#ifndef PHANTASMA_SWAP
+# define PHANTASMA_SWAP(a, b) std::swap(a, b)
+#endif 
+
+#ifndef PHANTASMA_COPY
+# define PHANTASMA_COPY(a, b, c) std::copy(a, b, c)
+#endif
+
+#ifndef PHANTASMA_EQUAL
+# define PHANTASMA_EQUAL(a, b, c) std::equal(a, b, c)
 #endif
 
 #if !defined(PHANTASMA_EXCEPTION)
-#define PHANTASMA_EXCEPTION(literal)
-#define PHANTASMA_EXCEPTION_MESSAGE(literal, string)
+# define PHANTASMA_EXCEPTION(literal)
+# define PHANTASMA_EXCEPTION_MESSAGE(literal, string)
+#endif
+
+#if !defined(PHANTASMA_TRY)
+# if !defined(PHANTASMA_EXCEPTION)
+#  define PHANTASMA_TRY        if(true)
+#  define PHANTASMA_CATCH( x ) else
+# else
+#  define PHANTASMA_TRY		  try
+#  define PHANTASMA_CATCH( x )  catch(x)
+# endif
 #endif
 
 #if !defined(PHANTASMA_LITERAL)
-#define PHANTASMA_LITERAL(x) x
+# define PHANTASMA_LITERAL(x) x
 #endif
 
 #if !defined(PHANTASMA_FUNCTION)
-#define PHANTASMA_FUNCTION
+# define PHANTASMA_FUNCTION
 #endif
 
 namespace phantasma
@@ -212,6 +244,12 @@ typedef uint32_t UInt32;
 typedef PHANTASMA_STRING String;
 #else
 typedef std::string String;
+#endif
+
+#ifdef PHANTASMA_STRINGBUILDER
+typedef PHANTASMA_STRINGBUILDER StringBuilder;
+#else
+typedef std::stringstream StringBuilder;
 #endif
 
 #ifdef PHANTASMA_JSONVALUE
