@@ -24,17 +24,18 @@
 // As different C++ projects may use different primitive types, you can use the 
 //  following #defines (BEFORE including phantasma.h) to override the default types.
 //
-// #define               | typedef                | Default           | Notes
-// PHANTASMA_INT32       | phantasma::Int32       | int32_t           |
-// PHANTASMA_UINT32      | phantasma::UInt32      | uint32_t          |
-// PHANTASMA_CHAR        | phantasma::Char        | char              | See Unicode section
-// PHANTASMA_STRING      | phantasma::String      | std::string       | Must support construction from `const phantasma::Char*`
-// PHANTASMA_VECTOR      |                        | std::vector       | Must support `push_back` and `size` members
-// PHANTASMA_JSONVALUE   | phantasma::JSONValue   | std::string_view  | See JSON section
-// PHANTASMA_JSONARRAY   | phantasma::JSONArray   | JSONValue         | See JSON section
-// PHANTASMA_JSONDOCUMENT| phantasma::JSONDocument| std::string       | See JSON section
-// PHANTASMA_JSONBUILDER | phantasma::JSONBuilder | std::stringstream*| See JSON section
-// PHANTASMA_HTTPCLIENT  | phantasma::HttpClient  |                   | See HTTP section
+// #define                | typedef                 | Default           | Notes
+// PHANTASMA_INT32        | phantasma::Int32        | int32_t           |
+// PHANTASMA_UINT32       | phantasma::UInt32       | uint32_t          |
+// PHANTASMA_CHAR         | phantasma::Char         | char              | See Unicode section
+// PHANTASMA_STRING       | phantasma::String       | std::string       | Must support construction from `const phantasma::Char*`
+// PHANTASMA_STRINGBUILDER| phantasma::StringBuilder| std::stringstream | 
+// PHANTASMA_VECTOR       |                         | std::vector       | Must support `push_back` and `size` members
+// PHANTASMA_JSONVALUE    | phantasma::JSONValue    | std::string_view  | See JSON section
+// PHANTASMA_JSONARRAY    | phantasma::JSONArray    | JSONValue         | See JSON section
+// PHANTASMA_JSONDOCUMENT | phantasma::JSONDocument | std::string       | See JSON section
+// PHANTASMA_JSONBUILDER  | phantasma::JSONBuilder  | std::stringstream*| See JSON section
+// PHANTASMA_HTTPCLIENT   | phantasma::HttpClient   |                   | See HTTP section
 //
 // The behavior of this header can further be modified by using the following 
 //  #defines (BEFORE including phantasma.h)
@@ -80,9 +81,10 @@
 //------------------------------------------------------------------------------
 // To build a wide-character version of the API, define the following before
 //  including phantasma.h:
-// #define PHANTASMA_CHAR       wchar_t
-// #define PHANTASMA_LITERAL(x) L ## x
-// #define PHANTASMA_STRING     std::wstring
+// #define PHANTASMA_CHAR          wchar_t
+// #define PHANTASMA_LITERAL(x)    L ## x
+// #define PHANTASMA_STRING        std::wstring
+// #define PHANTASMA_STRINGBUILDER std::wstringstream
 //
 // You should also provide a JSON and HTTP library with wide-character support.
 //
@@ -107,6 +109,7 @@
 //
 //    JSONValue Parse(const JSONDocument&);
 //
+//    bool      LookupBool(   const JSONValue&, const Char* field, bool& out_error);
 //    Int32     LookupInt32(  const JSONValue&, const Char* field, bool& out_error);
 //    UInt32    LookupUInt32( const JSONValue&, const Char* field, bool& out_error);
 //    String    LookupString( const JSONValue&, const Char* field, bool& out_error);
@@ -115,6 +118,7 @@
 //    bool      HasField(     const JSONValue&, const Char* field, bool& out_error);
 //    bool      HasArrayField(const JSONValue&, const Char* field, bool& out_error);
 //
+//    bool      AsBool(       const JSONValue&,                    bool& out_error);
 //    Int32     AsInt32(      const JSONValue&,                    bool& out_error);
 //    UInt32    AsUInt32(     const JSONValue&,                    bool& out_error);
 //    String    AsString(     const JSONValue&,                    bool& out_error);
@@ -153,37 +157,67 @@
 //------------------------------------------------------------------------------
 
 #if !defined(PHANTASMA_STRING) || !defined(PHANTASMA_JSONDOCUMENT) || !defined(PHANTASMA_JSONVALUE)
-#include <string>
+# include <string>
 #endif
 
 #if !defined(PHANTASMA_JSONVALUE) && __cplusplus > 201402L
-#include <string_view>
+# include <string_view>
 #endif
 
-#if !defined(PHANTASMA_JSONBUILDER)
-#include <sstream>
+#if !defined(PHANTASMA_JSONBUILDER) || !defined(PHANTASMA_STRINGBUILDER)
+# include <sstream>
 #endif
 
 #if !defined(PHANTASMA_VECTOR)
 #define PHANTASMA_VECTOR std::vector
-#include <vector>
+# include <vector>
 #endif
 
 #if !defined(PHANTASMA_S32) || !defined(PHANTASMA_U32)
-#include <cstdint>
+# include <cstdint>
+#endif
+
+#if !defined(PHANTASMA_MAX) || !defined(PHANTASMA_COPY) || !defined(PHANTASMA_EQUAL) || !defined(PHANTASMA_SWAP)
+# include <algorithm>
+#endif
+
+#ifndef PHANTASMA_MAX
+# define PHANTASMA_MAX(a, b) std::max(a, b)
+#endif
+
+#ifndef PHANTASMA_SWAP
+# define PHANTASMA_SWAP(a, b) std::swap(a, b)
+#endif 
+
+#ifndef PHANTASMA_COPY
+# define PHANTASMA_COPY(a, b, c) std::copy(a, b, c)
+#endif
+
+#ifndef PHANTASMA_EQUAL
+# define PHANTASMA_EQUAL(a, b, c) std::equal(a, b, c)
 #endif
 
 #if !defined(PHANTASMA_EXCEPTION)
-#define PHANTASMA_EXCEPTION(literal)
-#define PHANTASMA_EXCEPTION_MESSAGE(literal, string)
+# define PHANTASMA_EXCEPTION(literal)
+# define PHANTASMA_EXCEPTION_MESSAGE(literal, string)
+#endif
+
+#if !defined(PHANTASMA_TRY)
+# if !defined(PHANTASMA_EXCEPTION)
+#  define PHANTASMA_TRY        if(true)
+#  define PHANTASMA_CATCH( x ) else
+# else
+#  define PHANTASMA_TRY		  try
+#  define PHANTASMA_CATCH( x )  catch(x)
+# endif
 #endif
 
 #if !defined(PHANTASMA_LITERAL)
-#define PHANTASMA_LITERAL(x) x
+# define PHANTASMA_LITERAL(x) x
 #endif
 
 #if !defined(PHANTASMA_FUNCTION)
-#define PHANTASMA_FUNCTION
+# define PHANTASMA_FUNCTION
 #endif
 
 namespace phantasma
@@ -210,6 +244,12 @@ typedef uint32_t UInt32;
 typedef PHANTASMA_STRING String;
 #else
 typedef std::string String;
+#endif
+
+#ifdef PHANTASMA_STRINGBUILDER
+typedef PHANTASMA_STRINGBUILDER StringBuilder;
+#else
+typedef std::stringstream StringBuilder;
 #endif
 
 #ifdef PHANTASMA_JSONVALUE
@@ -264,6 +304,7 @@ namespace json
 {
 #ifndef PHANTASMA_JSONBUILDER
     JSONValue Parse(const JSONDocument&);
+	bool LookupBool(const JSONValue&, const Char* field, bool& out_error);
 	Int32 LookupInt32(const JSONValue&, const Char* field, bool& out_error);
 	UInt32 LookupUInt32(const JSONValue&, const Char* field, bool& out_error);
 	String LookupString(const JSONValue&, const Char* field, bool& out_error);
@@ -271,6 +312,7 @@ namespace json
 	JSONArray LookupArray(const JSONValue&, const Char* field, bool& out_error);
 	bool HasField(const JSONValue&, const Char* field, bool& out_error);
 	bool HasArrayField(const JSONValue&, const Char* field, bool& out_error);
+	bool   AsBool(const JSONValue&, bool& out_error);
 	Int32  AsInt32(const JSONValue&, bool& out_error);
 	UInt32 AsUInt32(const JSONValue&, bool& out_error);
 	String AsString(const JSONValue&, bool& out_error);
@@ -314,6 +356,8 @@ private:
 	static JSONValue CheckResponse(JSONValue response, bool& out_error);
 	{{#each types}}static {{#fix-type Key}} Deserialize{{#fix-type Key}}(const JSONValue& json, bool& out_error);
 	{{/each}}
+
+	static bool Deserializebool(const JSONValue& json, bool& out_error);
 };
 
 #if defined(PHANTASMA_HTTPCLIENT)
@@ -333,6 +377,11 @@ private:
 #endif
 	
 #if defined(PHANTASMA_IMPLEMENTATION)
+PHANTASMA_FUNCTION bool PhantasmaJsonAPI::Deserializebool(const JSONValue& value, bool& err)
+{
+	return json::AsBool(value, err);
+}
+
 {{#each types}}
 PHANTASMA_FUNCTION {{#fix-type Key}} PhantasmaJsonAPI::Deserialize{{#fix-type Key}}(const JSONValue& value, bool& err)
 { {{#parse-lines false}}
@@ -371,6 +420,9 @@ PHANTASMA_FUNCTION {{#fix-type Key}} PhantasmaJsonAPI::Deserialize{{#fix-type Ke
 {{#if FieldType.Name contains '[]'}}
 		{{Name}}Vector
 {{#else}}
+{{#if FieldType.Name=='bool'}}
+		json::LookupBool(value, PHANTASMA_LITERAL("{{Name}}"), err)
+{{#else}}
 {{#if FieldType.Name=='UInt32'}}
 		json::LookupUInt32(value, PHANTASMA_LITERAL("{{Name}}"), err)
 {{#else}}
@@ -384,6 +436,7 @@ PHANTASMA_FUNCTION {{#fix-type Key}} PhantasmaJsonAPI::Deserialize{{#fix-type Ke
 		json::LookupValue(value, PHANTASMA_LITERAL("result"), err)
 {{#else}}
 		(err=true, "Variable type {{FieldType.Name}} isnt currently handled by the template system")
+{{/if}}
 {{/if}}
 {{/if}}
 {{/if}}
@@ -627,6 +680,7 @@ namespace json
 		return i == JSONValue::npos ? i : i+1;
 	}
 
+	PHANTASMA_FUNCTION bool LookupBool(const JSONValue& v, const Char* field, bool& out_error)       { return AsBool( LookupValue(v, field, out_error), out_error); }
 	PHANTASMA_FUNCTION Int32 LookupInt32(const JSONValue& v, const Char* field, bool& out_error)     { return AsInt32( LookupValue(v, field, out_error), out_error); }
 	PHANTASMA_FUNCTION UInt32 LookupUInt32(const JSONValue& v, const Char* field, bool& out_error)   { return AsUInt32(LookupValue(v, field, out_error), out_error); }
 	PHANTASMA_FUNCTION String LookupString(const JSONValue& v, const Char* field, bool& out_error)   { return AsString(LookupValue(v, field, out_error), out_error); }
@@ -661,6 +715,16 @@ namespace json
 			}
 		}
 		return "";
+	}
+	PHANTASMA_FUNCTION bool AsBool(const JSONValue& v, bool& out_error)
+	{
+		if( v.length() < 1 ) { out_error = true; return false; }
+		switch(v[0])
+		{
+		default: PHANTASMA_EXCEPTION("Casting non-bool value to bool"); out_error = true;
+		case 'f': return false;
+		case 't': return true;
+		}
 	}
 	PHANTASMA_FUNCTION Int32  AsInt32(const JSONValue& v, bool& out_error)
 	{
