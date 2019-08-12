@@ -237,7 +237,7 @@ namespace phantasma
 			if (_data.empty())
 				return 0;
 
-			int result = (int)_data[0];
+			int result = (int)(_data[0] & 0x7FFFFFFF);
 
 			if (_sign < 0)
 				result *= -1;
