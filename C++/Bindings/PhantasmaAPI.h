@@ -25,8 +25,11 @@
 //  following #defines (BEFORE including phantasma.h) to override the default types.
 //
 // #define                | typedef                 | Default           | Notes
+// PHANTASMA_BYTE         | phantasma::Byte         | uint8_t           |
 // PHANTASMA_INT32        | phantasma::Int32        | int32_t           |
 // PHANTASMA_UINT32       | phantasma::UInt32       | uint32_t          |
+// PHANTASMA_INT64        | phantasma::Int64        | int64_t           |
+// PHANTASMA_UINT64       | phantasma::UInt64       | uint64_t          |
 // PHANTASMA_CHAR         | phantasma::Char         | char              | See Unicode section
 // PHANTASMA_STRING       | phantasma::String       | std::string       | Must support construction from `const phantasma::Char*`
 // PHANTASMA_STRINGBUILDER| phantasma::StringBuilder| std::stringstream | 
@@ -228,6 +231,12 @@ typedef PHANTASMA_CHAR Char;
 typedef char Char;
 #endif
 
+#ifdef PHANTASMA_BYTE
+typedef PHANTASMA_BYTE Byte;
+#else
+typedef uint8_t Byte;
+#endif
+
 #ifdef PHANTASMA_INT32
 typedef PHANTASMA_INT32 Int32;
 #else
@@ -238,6 +247,18 @@ typedef int32_t Int32;
 typedef PHANTASMA_UINT32 UInt32;
 #else
 typedef uint32_t UInt32;
+#endif
+
+#ifdef PHANTASMA_INT64
+typedef PHANTASMA_INT64 Int64;
+#else
+typedef int64_t Int64;
+#endif
+
+#ifdef PHANTASMA_UINT64
+typedef PHANTASMA_UINT64 UInt64;
+#else
+typedef uint64_t UInt64;
 #endif
 
 #ifdef PHANTASMA_STRING

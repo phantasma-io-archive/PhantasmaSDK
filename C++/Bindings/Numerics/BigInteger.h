@@ -1,3 +1,4 @@
+#pragma once
 #include <ctype.h>
 #include <math.h>
 #include <utility>
@@ -14,16 +15,16 @@
  */
 namespace phantasma
 {
-    class BigInteger
-    {
+	class BigInteger
+	{
 	private:
-        int _sign = 0;
-		typedef PHANTASMA_VECTOR<uint32_t> Data;
-		typedef PHANTASMA_VECTOR<uint8_t> Bytes;
+		int _sign = 0;
+		typedef PHANTASMA_VECTOR<UInt32> Data;
+		typedef PHANTASMA_VECTOR<Byte> Bytes;
 		Data _data;
 
-        constexpr static int _Base = sizeof(uint32_t) * 8;    //number of bits required for shift operations
-		constexpr static uint32_t _MaxVal = 0xFFFFFFFFU;
+		constexpr static int _Base = sizeof(UInt32) * 8;    //number of bits required for shift operations
+		constexpr static UInt32 _MaxVal = 0xFFFFFFFFU;
 
 		void Trim()
 		{
@@ -34,21 +35,21 @@ namespace phantasma
 		}
 	public:
 		static const BigInteger Zero() { return BigInteger{0LL}; }
-		static const BigInteger One() { return BigInteger{1LL}; }
+		static const BigInteger One()  { return BigInteger{1LL}; }
 
 		BigInteger() {}
 
-        BigInteger(const BigInteger& other)
-        {
-            _sign = other._sign;
-            _data = other._data;
-        }
+		BigInteger(const BigInteger& other)
+		{
+			_sign = other._sign;
+			_data = other._data;
+		}
 
-        BigInteger(const uint32_t* words, int numWords, int sign = 1)
-        {
-            _sign = sign;
-            InitFromArray(words, numWords);
-        }
+		BigInteger(const UInt32* words, int numWords, int sign = 1)
+		{
+			_sign = sign;
+			InitFromArray(words, numWords);
+		}
 
 		BigInteger(Data&& buffer, int sign = 1)
 		{
@@ -62,16 +63,16 @@ namespace phantasma
 			InitFromArray(buffer.begin(), buffer.size());
 		}
 
-        BigInteger(int32_t val) : BigInteger((int64_t)val)
-        {
-        }
+		BigInteger(Int32 val) : BigInteger((Int64)val)
+		{
+		}
 
-        BigInteger(uint32_t val) : BigInteger((int64_t)val)
-        {
-        }
+		BigInteger(UInt32 val) : BigInteger((Int64)val)
+		{
+		}
 
-        BigInteger(const Bytes& bytes, bool twosComplementFormatFlag)
-        {
+		BigInteger(const Bytes& bytes, bool twosComplementFormatFlag)
+		{
 			if( bytes.empty() )
 			{
 				_sign = 0;
@@ -79,33 +80,33 @@ namespace phantasma
 				return;
 			}
 
-            int sign;
+			int sign;
 		
-            if (twosComplementFormatFlag)
-            {
-				uint8_t msb = bytes[bytes.size() - 1] >> 7;
-                sign = msb == 0 ? 1 : -1;
-            }
-            else
-                sign = 1;
+			if (twosComplementFormatFlag)
+			{
+				Byte msb = bytes[bytes.size() - 1] >> 7;
+				sign = msb == 0 ? 1 : -1;
+			}
+			else
+				sign = 1;
 		
-            Bytes buffer;
+			Bytes buffer;
 		
-            if (sign == -1)
-                buffer = ApplyTwosComplement(bytes);
-            else
-                buffer = bytes;
+			if (sign == -1)
+				buffer = ApplyTwosComplement(bytes);
+			else
+				buffer = bytes;
 		
-            *this = BigInteger(buffer, sign);
-        }
+			*this = BigInteger(buffer, sign);
+		}
 
-        BigInteger(const Bytes& bytes, int sign = 1)
-        {
-            _sign = sign;
+		BigInteger(const Bytes& bytes, int sign = 1)
+		{
+			_sign = sign;
 
 			if( (bytes.size() % 4) == 0 )
 			{
-				InitFromArray((uint32_t*)bytes.begin(), bytes.size()/4);
+				InitFromArray((UInt32*)bytes.begin(), bytes.size()/4);
 			}
 			else
 			{
@@ -118,34 +119,34 @@ namespace phantasma
 					bytePosition = i % 4;
 					if (bytePosition == 0)
 						j++;
-					uintArray[j] |= (uint32_t)(bytes[i] << (bytePosition * 8));
+					uintArray[j] |= (UInt32)(bytes[i] << (bytePosition * 8));
 				}
 		
 				InitFromArray(uintArray.begin(), uintArray.size());
 			}
-        }
+		}
 		
-        BigInteger(int64_t val)
-        {
-            if (val == 0)
-            {
-                _sign = 0;
-                _data.push_back(0);
-                return;
-            }
+		BigInteger(Int64 val)
+		{
+			if (val == 0)
+			{
+				_sign = 0;
+				_data.push_back(0);
+				return;
+			}
 		
-            _sign = val < 0 ? -1 : 1;
+			_sign = val < 0 ? -1 : 1;
 		
-            if (val < 0) val = -val;
+			if (val < 0) val = -val;
 		
-			uint32_t uintBytes[2];
+			UInt32 uintBytes[2];
 			memcpy(uintBytes, &val, 8);
 		
-            InitFromArray(uintBytes, 2);
-        }
+			InitFromArray(uintBytes, 2);
+		}
 		
 	private:
-		void InitFromArray(const uint32_t* digits, int length)
+		void InitFromArray(const UInt32* digits, int length)
 		{
 			int n = length;
 			for (int i = n - 1; i >= 0; i--)
@@ -174,17 +175,17 @@ namespace phantasma
 		}
 		
 	public:
-        BigInteger(const PHANTASMA_STRING& str, int radix, bool* out_error=0)
-        {
+		BigInteger(const String& str, int radix, bool* out_error=0)
+		{
 			BigInteger bigInteger = Zero();
 			BigInteger bi = One();
 		
-            if (0==str.compare(PHANTASMA_LITERAL("0")) || str.empty())
-            {
-                _sign = 0;
-                _data.push_back(0);
-                return;
-            }
+			if (0==str.compare(PHANTASMA_LITERAL("0")) || str.empty())
+			{
+				_sign = 0;
+				_data.push_back(0);
+				return;
+			}
 
 			const Char* first = str.c_str();
 			const Char* last = first + str.length() - 1;
@@ -203,12 +204,12 @@ namespace phantasma
 				_sign = 1;
 			}
 
-			int length = (int)(ptrdiff_t)(last+1 - first);
+			int length = (int)(last+1 - first);
 		
-            for (int i = 0; i < length; i++)
-            {
-                int val = toupper(last[-i]);
-                val = ((val >= '0' && val <= '9') ? (val - '0') : ((val < 'A' || val > 'Z') ? 9999999 : (val - 'A' + 10)));
+			for (int i = 0; i < length; i++)
+			{
+				int val = toupper(last[-i]);
+				val = ((val >= '0' && val <= '9') ? (val - '0') : ((val < 'A' || val > 'Z') ? 9999999 : (val - 'A' + 10)));
 				if( val >= radix )
 				{
 					if( out_error )
@@ -217,127 +218,127 @@ namespace phantasma
 					return;
 				}
 		
-                bigInteger += bi * val;
+				bigInteger += bi * val;
 		
-                if (i + 1 < length)
-                    bi *= radix;
-            }
+				if (i + 1 < length)
+					bi *= radix;
+			}
 		
-            InitFromArray(bigInteger._data.begin(), bigInteger._data.size());
-        }
+			InitFromArray(bigInteger._data.begin(), bigInteger._data.size());
+		}
 
-        static BigInteger FromHex(const PHANTASMA_STRING& p0)
-        {
-            return BigInteger(p0, 16);
-        }
+		static BigInteger FromHex(const String& p0)
+		{
+			return BigInteger(p0, 16);
+		}
 
-        explicit operator int() const
-        {
-            if (_data.empty())
-                return 0;
+		explicit operator int() const
+		{
+			if (_data.empty())
+				return 0;
 
-            int result = (int)_data[0];
+			int result = (int)_data[0];
 
-            if (_sign < 0)
-                result *= -1;
+			if (_sign < 0)
+				result *= -1;
 
-            return result;
-        }
+			return result;
+		}
 
-        explicit operator int64_t() const
-        {
-            if (_data.empty())
-                return 0;
+		explicit operator Int64() const
+		{
+			if (_data.empty())
+				return 0;
 
-			int64_t result = _data[0];
+			Int64 result = _data[0];
 
-            if(_data.size() > 1)
-                result |= (int64_t)(((uint64_t)_data[1]) << 32);
+			if(_data.size() > 1)
+				result |= (Int64)(((UInt64)_data[1]) << 32);
 
-            if (_sign < 0)
-                result *= -1;
+			if (_sign < 0)
+				result *= -1;
 
-            return result;
-        }
+			return result;
+		}
 
-        static BigInteger Abs(const BigInteger& x)
-        {
-            return BigInteger(x._data.begin(), x._data.size(), 1);
-        }
+		static BigInteger Abs(const BigInteger& x)
+		{
+			return BigInteger(x._data.begin(), x._data.size(), 1);
+		}
 
-        PHANTASMA_STRING ToString() const
-        {
-            return ToDecimal();
-        }
+		String ToString() const
+		{
+			return ToDecimal();
+		}
 
-		PHANTASMA_STRING ToDecimal() const
-        {
-            int radix = 10;
+		String ToDecimal() const
+		{
+			int radix = 10;
 			if( radix < 2 || radix > 36 )
 			{
 				PHANTASMA_EXCEPTION("Radix must be >= 2 and <= 36");
-				return PHANTASMA_STRING();
+				return String();
 			}
 
-            const Char* digits = PHANTASMA_LITERAL("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+			const Char* digits = PHANTASMA_LITERAL("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
 			BigInteger bi = BigInteger(radix);
-            if (_data.empty() || (_data.size() == 1 && _data[0] == 0))
-            {
-				return PHANTASMA_STRING(PHANTASMA_LITERAL("0"));
-            }
-            else
-            {
-				PHANTASMA_STRING text2;
+			if (_data.empty() || (_data.size() == 1 && _data[0] == 0))
+			{
+				return String(PHANTASMA_LITERAL("0"));
+			}
+			else
+			{
+				String text2;
 				BigInteger largeInteger = *this;
 				largeInteger._sign = 1;
 				BigInteger largeInteger2;
 				BigInteger largeInteger3;
-                while (largeInteger._data.size() > 1 || (largeInteger._data.size() == 1 && largeInteger._data[0] != 0))
-                {
-                    DivideAndModulus(largeInteger, bi, largeInteger2, largeInteger3);
-                    if (largeInteger3._data.size() == 0)
+				while (largeInteger._data.size() > 1 || (largeInteger._data.size() == 1 && largeInteger._data[0] != 0))
+				{
+					DivideAndModulus(largeInteger, bi, largeInteger2, largeInteger3);
+					if (largeInteger3._data.size() == 0)
 					{
-						PHANTASMA_STRING temp(PHANTASMA_LITERAL("0"));
+						String temp(PHANTASMA_LITERAL("0"));
 						temp.append(text2);
 						text2 = temp;
 					}
-                    else
+					else
 					{
 						int idx = largeInteger3._data[0];
-						PHANTASMA_STRING temp;
+						String temp;
 						temp.append(digits[idx]);
 						temp.append(text2);
 						text2 = temp;
 					}
-                    largeInteger = largeInteger2;
-                }
-                if (_sign < 1 && 0!=text2.compare(PHANTASMA_LITERAL("0")))
-                {
-					PHANTASMA_STRING temp(PHANTASMA_LITERAL("-"));
+					largeInteger = largeInteger2;
+				}
+				if (_sign < 1 && 0!=text2.compare(PHANTASMA_LITERAL("0")))
+				{
+					String temp(PHANTASMA_LITERAL("-"));
 					temp.append(text2);
-                    text2 = temp;
-                }
+					text2 = temp;
+				}
 
 				return text2;
-            }
-        }
+			}
+		}
 
-        PHANTASMA_STRING ToHex() const
-        {
+		String ToHex() const
+		{
 			StringBuilder builder;
 
-            for(uint32_t digit : _data)
-            {
+			for(UInt32 digit : _data)
+			{
 				Char buffer[10];
 				sprintf_s(buffer, "%08x", digit);
 				builder << buffer;
-            }
+			}
 
-			PHANTASMA_STRING result = PHANTASMA_STRING(builder.str());
+			String result = String(builder.str());
 
-            return result;
-        }
+			return result;
+		}
 
 	private: 
 		static Data Add(const Data& X, const Data& Y)
@@ -350,18 +351,18 @@ namespace phantasma
 				return r;
 			r.resize(longest+1);
 
-			uint32_t overflow = 0;
-			for (uint32_t i = 0; i < longest; i++)
+			UInt32 overflow = 0;
+			for (UInt32 i = 0; i < longest; i++)
 			{
-				uint32_t x = i < sizeX ? X[i] : 0;
-				uint32_t y = i < sizeY ? Y[i] : 0;
-				uint64_t sum = (uint64_t)overflow + x + y;
+				UInt32 x = i < sizeX ? X[i] : 0;
+				UInt32 y = i < sizeY ? Y[i] : 0;
+				UInt64 sum = (UInt64)overflow + x + y;
 
-				r[i] = (uint32_t)sum;
-				overflow = (uint32_t)(sum >> _Base);
+				r[i] = (UInt32)sum;
+				overflow = (UInt32)(sum >> _Base);
 			}
 
-			r[longest] = (uint8_t)overflow;
+			r[longest] = (Byte)overflow;
 			return r;
 		}
 		
@@ -375,14 +376,14 @@ namespace phantasma
 				return r;
 			r.resize(longest);
 
-			int64_t carry = 0;
+			Int64 carry = 0;
 
-			for (uint32_t i = 0; i < longest; i++)
+			for (UInt32 i = 0; i < longest; i++)
 			{
-				int64_t x = i < sizeX ? X[i] : 0;
-				int64_t y = i < sizeY ? Y[i] : 0;
-				int64_t tmpSub = x - y - carry;
-				r[i] = (uint32_t)(tmpSub & _MaxVal);
+				Int64 x = i < sizeX ? X[i] : 0;
+				Int64 y = i < sizeY ? Y[i] : 0;
+				Int64 tmpSub = x - y - carry;
+				r[i] = (UInt32)(tmpSub & _MaxVal);
 				carry = ((tmpSub >= 0) ? 0 : 1);
 			}
 
@@ -398,22 +399,22 @@ namespace phantasma
 				return output;
 			output.resize(sizeX + sizeY + 1);
 
-			for (uint32_t i = 0; i < sizeX; i++)
+			for (UInt32 i = 0; i < sizeX; i++)
 			{
 				if (X[i] == 0)
 					continue;
 
-				uint64_t carry = 0uL;
-				int32_t k = i;
+				UInt64 carry = 0uL;
+				Int32 k = i;
 
-				for (uint32_t j = 0; j < sizeY; j++, k++)
+				for (UInt32 j = 0; j < sizeY; j++, k++)
 				{
-					uint64_t tmp = (uint64_t)(X[i] * (int64_t)Y[j] + output[k] + (int64_t)carry);
-					output[k] = (uint32_t)(tmp);
+					UInt64 tmp = (UInt64)(X[i] * (Int64)Y[j] + output[k] + (Int64)carry);
+					output[k] = (UInt32)(tmp);
 					carry = tmp >> 32;
 				}
 
-				output[i + sizeY] = (uint32_t)carry;
+				output[i + sizeY] = (UInt32)carry;
 			}
 
 			return output;
@@ -434,34 +435,34 @@ namespace phantasma
 			}
 			else if (a._sign < 0)
 			{
-			    if (Abs(a) < b)
-			    {
-			        result = BigInteger(Subtract(b._data, a._data));
-			        result._sign = result == 0 ? 0 : 1;
-			    }
-			    else
-			    {
-			        result = BigInteger(Subtract(a._data, b._data));
-			        result._sign = result == 0 ? 0 : -1;
-			    }
+				if (Abs(a) < b)
+				{
+					result = BigInteger(Subtract(b._data, a._data));
+					result._sign = result == 0 ? 0 : 1;
+				}
+				else
+				{
+					result = BigInteger(Subtract(a._data, b._data));
+					result._sign = result == 0 ? 0 : -1;
+				}
 			}
 			else if (b._sign < 0)
 			{
-			    if (a < Abs(b))
-			    {
-			        result = BigInteger(Subtract(b._data, a._data));
-			        result._sign = result == 0 ? 0 : -1;
-			    }
-			    else
-			    {
-			        result = BigInteger(Subtract(a._data, b._data));
-			        result._sign = result == 0 ? 0 : 1;
-			    }
+				if (a < Abs(b))
+				{
+					result = BigInteger(Subtract(b._data, a._data));
+					result._sign = result == 0 ? 0 : -1;
+				}
+				else
+				{
+					result = BigInteger(Subtract(a._data, b._data));
+					result._sign = result == 0 ? 0 : 1;
+				}
 			}
 			else
 			{
-			    result = BigInteger(Add(b._data, a._data));
-			    result._sign = result == 0 ? 0 : 1;
+				result = BigInteger(Add(b._data, a._data));
+				result._sign = result == 0 ? 0 : 1;
 			}
 
 			result.Trim();
@@ -482,40 +483,40 @@ namespace phantasma
 			//allowing the large int operations to deal only in the scope of unsigned numbers
 			if (a._sign < 0 && b._sign < 0)
 			{
-			    if (Abs(a) < Abs(b))
-			    {
-			        result = BigInteger(Subtract(b._data, a._data));
-			        result._sign = result == 0 ? 0 : 1;
-			    }
-			    else
-			    {
-			        result = BigInteger(Subtract(a._data, b._data));
-			        result._sign = result == 0 ? 0 : -1;
-			    }
+				if (Abs(a) < Abs(b))
+				{
+					result = BigInteger(Subtract(b._data, a._data));
+					result._sign = result == 0 ? 0 : 1;
+				}
+				else
+				{
+					result = BigInteger(Subtract(a._data, b._data));
+					result._sign = result == 0 ? 0 : -1;
+				}
 			}
 			else
 			if (a._sign < 0)
 			{
-			    result = BigInteger(Add(a._data, b._data));
-			    result._sign = result == 0 ? 0 : -1;
+				result = BigInteger(Add(a._data, b._data));
+				result._sign = result == 0 ? 0 : -1;
 			}
 			else if (b._sign < 0)
 			{
-			    result = BigInteger(Add(a._data, b._data));
-			    result._sign = result == 0 ? 0 : 1;
+				result = BigInteger(Add(a._data, b._data));
+				result._sign = result == 0 ? 0 : 1;
 			}
 			else
 			{
-			    if (a < b)
-			    {
-			        result = BigInteger(Subtract(b._data, a._data));
-			        result._sign = result == 0 ? 0 : -1;
-			    }
-			    else
-			    {
-			        result = BigInteger(Subtract(a._data, b._data));
-			        result._sign = result == 0 ? 0 : 1;
-			    }
+				if (a < b)
+				{
+					result = BigInteger(Subtract(b._data, a._data));
+					result._sign = result == 0 ? 0 : -1;
+				}
+				else
+				{
+					result = BigInteger(Subtract(a._data, b._data));
+					result._sign = result == 0 ? 0 : 1;
+				}
 			}
 			
 			return result;
@@ -565,33 +566,33 @@ namespace phantasma
 		}
 		
 		static void DivideAndModulus(const BigInteger& a, const BigInteger& b, BigInteger& quot, BigInteger& rem)
-        {
-            if ((int)b == 0)
-            {
-                quot = Zero();
-                rem = Zero();
-                return;
-            }
+		{
+			if ((int)b == 0)
+			{
+				quot = Zero();
+				rem = Zero();
+				return;
+			}
 
-            if (a._data.size() < b._data.size())
-            {
-                quot = Zero();
-                rem = BigInteger(a);
-                return;
-            }
+			if (a._data.size() < b._data.size())
+			{
+				quot = Zero();
+				rem = BigInteger(a);
+				return;
+			}
 
-            if (b._data.size() == 1)
-                SingleDigitDivMod(a, b, quot, rem);
-            else
-                MultiDigitDivMod(a, b, quot, rem);
+			if (b._data.size() == 1)
+				SingleDigitDivMod(a, b, quot, rem);
+			else
+				MultiDigitDivMod(a, b, quot, rem);
 
 
-            rem._sign = a._sign;
-            rem = (int)a >= 0 ? rem : b + rem;
+			rem._sign = a._sign;
+			rem = (int)a >= 0 ? rem : b + rem;
 
-            quot._sign = quot.GetBitLength() == 0 ? 0 : a._sign * b._sign;
-            rem._sign = rem.GetBitLength() == 0 ? 0 : rem._sign;
-        }
+			quot._sign = quot.GetBitLength() == 0 ? 0 : a._sign * b._sign;
+			rem._sign = rem.GetBitLength() == 0 ? 0 : rem._sign;
+		}
 
 	private:
 		//do not access this function directly under any circumstances, always go through DivideAndModulus
@@ -607,25 +608,25 @@ namespace phantasma
 			}
 
 			int quotIter = 0;   //quotient array iterator index
-			uint64_t quickDen = denominator._data[0];  //quick denominator
+			UInt64 quickDen = denominator._data[0];  //quick denominator
 			int remIter = remArray.size() - 1;  //remainder array iterator index
-			uint64_t tmpRem = remArray[remIter];   //temporary remainder digit
+			UInt64 tmpRem = remArray[remIter];   //temporary remainder digit
 
 			if (tmpRem >= quickDen)
 			{
-				uint64_t tmpQuot = tmpRem / quickDen;
-				tmpQuotArray[quotIter++] = (uint32_t)tmpQuot;
-				remArray[remIter] = (uint32_t)(tmpRem % quickDen);
+				UInt64 tmpQuot = tmpRem / quickDen;
+				tmpQuotArray[quotIter++] = (UInt32)tmpQuot;
+				remArray[remIter] = (UInt32)(tmpRem % quickDen);
 			}
 
 			remIter--;
 			while (remIter >= 0)
 			{
-				tmpRem = ((uint64_t)remArray[remIter + 1] << 32) + remArray[remIter];
-				uint64_t tmpQuot = tmpRem / quickDen;
-				tmpQuotArray[quotIter++] = (uint32_t)tmpQuot;
+				tmpRem = ((UInt64)remArray[remIter + 1] << 32) + remArray[remIter];
+				UInt64 tmpQuot = tmpRem / quickDen;
+				tmpQuotArray[quotIter++] = (UInt32)tmpQuot;
 				remArray[remIter + 1] = 0u;
-				remArray[remIter--] = (uint32_t)(tmpRem % quickDen);
+				remArray[remIter--] = (UInt32)(tmpRem % quickDen);
 			}
 
 			Data quotArray;
@@ -651,8 +652,8 @@ namespace phantasma
 			quotArray.resize(numerator._data.size() - denominator._data.size() + 1);
 			remArray.resize(numerator._data.size() + 1);
 
-			uint32_t tmp = 0x80000000u;
-			uint32_t tmp2 = denominator._data[denominator._data.size() - 1];    //denominator most significant digit
+			UInt32 tmp = 0x80000000u;
+			UInt32 tmp2 = denominator._data[denominator._data.size() - 1];    //denominator most significant digit
 			int shiftCount = 0;
 
 			while (tmp != 0 && (tmp2 & tmp) == 0)
@@ -670,8 +671,8 @@ namespace phantasma
 
 			int j = numerator._data.size() - denominator._data.size() + 1;
 			int remIter = numerator._data.size(); //yes, numerator, not remArray
-			uint64_t denMsd = denominator._data[denominator._data.size() - 1];       //denominator most significant digit
-			uint64_t denSubMsd = denominator._data[denominator._data.size() - 2];    //denominator second most significant digit
+			UInt64 denMsd = denominator._data[denominator._data.size() - 1];       //denominator most significant digit
+			UInt64 denSubMsd = denominator._data[denominator._data.size() - 2];    //denominator second most significant digit
 			int denSize = denominator._data.size() + 1;
 
 			Data tmpRemSubArray;
@@ -679,9 +680,9 @@ namespace phantasma
 
 			while (j > 0)
 			{
-				uint64_t quickDenominator = ((uint64_t)remArray[remIter] << 32) + remArray[remIter - 1];
-				uint64_t tmpQuot = quickDenominator / denMsd;
-				uint64_t tmpRem = quickDenominator % denMsd;
+				UInt64 quickDenominator = ((UInt64)remArray[remIter] << 32) + remArray[remIter - 1];
+				UInt64 tmpQuot = quickDenominator / denMsd;
+				UInt64 tmpRem = quickDenominator % denMsd;
 				bool flag = false;
 				while (!flag)
 				{
@@ -703,7 +704,7 @@ namespace phantasma
 				}
 
 				BigInteger tmpRemBigInt(tmpRemSubArray);
-				BigInteger estimNumBigInt = denominator * (int64_t)tmpQuot;  //current numerator estimate
+				BigInteger estimNumBigInt = denominator * (Int64)tmpQuot;  //current numerator estimate
 				while (estimNumBigInt > tmpRemBigInt)
 				{
 					tmpQuot--;
@@ -720,7 +721,7 @@ namespace phantasma
 
 				remIter--;
 				j--;
-				quotArray[j] = (uint32_t)tmpQuot;
+				quotArray[j] = (UInt32)tmpQuot;
 			}
 
 			quot = BigInteger(quotArray);
@@ -734,24 +735,24 @@ namespace phantasma
 		}
 	
 	public:
-        static BigInteger DivideAndRoundToClosest(const BigInteger& numerator, const BigInteger& denominator)
-        {
-            //from https://stackoverflow.com/a/2422723
-            return (numerator + (denominator / 2)) / denominator;
-        }
+		static BigInteger DivideAndRoundToClosest(const BigInteger& numerator, const BigInteger& denominator)
+		{
+			//from https://stackoverflow.com/a/2422723
+			return (numerator + (denominator / 2)) / denominator;
+		}
 
-        BigInteger operator >>(int bits) const
-        {
+		BigInteger operator >>(int bits) const
+		{
 			if (_data.empty())
 				return *this;
-            bits = bits < 0 ? -bits : bits;
+			bits = bits < 0 ? -bits : bits;
 			BigInteger r = *this;
-            ShiftRight(r._data, bits);
-            if (r._data[0] == 0 && r._data.size() == 1)
-                r._sign = 0;
+			ShiftRight(r._data, bits);
+			if (r._data[0] == 0 && r._data.size() == 1)
+				r._sign = 0;
 			r.Trim();
-            return r;
-        }
+			return r;
+		}
 		BigInteger& operator >>=(int bits)
 		{
 			if (_data.empty())
@@ -775,7 +776,7 @@ namespace phantasma
 			int quickShiftAmount = shiftBitCount % 32;
 
 
-			uint32_t msd = buffer[length - 1] >> quickShiftAmount;  //shifts the most significant digit
+			UInt32 msd = buffer[length - 1] >> quickShiftAmount;  //shifts the most significant digit
 			int extraShrinkage = (msd == 0) ? 1 : 0;    //if that shift goes to 0, it means we need to cut
 														//an extra position of the array to account for an MSD == 0
 
@@ -798,10 +799,10 @@ namespace phantasma
 
 			for (int i = length - (1 + extraShrinkage), j = newLength - 1; j >= 1; i--, j--)
 			{
-				uint64_t upshiftedVal = (uint64_t)buffer[i] << quickShiftAmount;
+				UInt64 upshiftedVal = (UInt64)buffer[i] << quickShiftAmount;
 
-				uint32_t shiftMsd = (uint32_t)(upshiftedVal >> 32);
-				uint32_t shiftLsd = (uint32_t)upshiftedVal;
+				UInt32 shiftMsd = (UInt32)(upshiftedVal >> 32);
+				UInt32 shiftLsd = (UInt32)upshiftedVal;
 
 				newBuffer[j] |= shiftMsd;
 				newBuffer[j - 1] |= shiftLsd;
@@ -812,15 +813,15 @@ namespace phantasma
 			PHANTASMA_SWAP(buffer, newBuffer);
 		}
 	public:
-        BigInteger operator <<(int bits) const
-        {
+		BigInteger operator <<(int bits) const
+		{
 			if (_data.empty())
 				return *this;
-            bits = bits < 0 ? -bits : bits;
+			bits = bits < 0 ? -bits : bits;
 			BigInteger r = *this;
-            ShiftLeft(r._data, bits);
-            return r;
-        }
+			ShiftLeft(r._data, bits);
+			return r;
+		}
 		BigInteger& operator <<=(int bits)
 		{
 			if (_data.empty())
@@ -840,20 +841,20 @@ namespace phantasma
 			int amountOfZeros = shiftBitCount / 32;  //amount of least significant digit zero padding we need
 			int quickShiftAmount = shiftBitCount % 32;
 
-			int64_t msd = ((int64_t)buffer[length - 1]) << quickShiftAmount;  //shifts the most significant digit
+			Int64 msd = ((Int64)buffer[length - 1]) << quickShiftAmount;  //shifts the most significant digit
 
-			int extraDigit = (msd != (uint32_t)msd) ? 1 : 0;  //if it goes above the uint32_t range, we need to add
+			int extraDigit = (msd != (UInt32)msd) ? 1 : 0;  //if it goes above the UInt32 range, we need to add
 															  //a new position for the new MSD
 
 			Data newBuffer;
 			newBuffer.resize(length + amountOfZeros + extraDigit);
 
-			for (uint32_t i = 0, j = amountOfZeros; i < length; i++, j++)
+			for (UInt32 i = 0, j = amountOfZeros; i < length; i++, j++)
 			{
-				uint64_t shiftedVal = ((uint64_t)buffer[i]) << quickShiftAmount;
+				UInt64 shiftedVal = ((UInt64)buffer[i]) << quickShiftAmount;
 
-				uint32_t shiftLsd = (uint32_t)shiftedVal;
-				uint32_t shiftMsd = (uint32_t)(shiftedVal >> 32);
+				UInt32 shiftLsd = (UInt32)shiftedVal;
+				UInt32 shiftMsd = (UInt32)(shiftedVal >> 32);
 
 				newBuffer[j] |= shiftLsd;
 
@@ -887,22 +888,22 @@ namespace phantasma
 			return pre;
 		}
 
-        BigInteger operator -()
-        {
+		BigInteger operator -()
+		{
 			BigInteger n = *this;
-            n._sign = -n._sign;
-            return n;
-        }
+			n._sign = -n._sign;
+			return n;
+		}
 
-        bool operator ==(const BigInteger& b) const
-        {
-            return _data.size() == b._data.size() && _sign == b._sign && PHANTASMA_EQUAL(_data.begin(), _data.end(), b._data.begin());
-        }
+		bool operator ==(const BigInteger& b) const
+		{
+			return _data.size() == b._data.size() && _sign == b._sign && PHANTASMA_EQUAL(_data.begin(), _data.end(), b._data.begin());
+		}
 
-        bool operator !=(const BigInteger& b) const
-        {
+		bool operator !=(const BigInteger& b) const
+		{
 			return _data.size() != b._data.size() || _sign != b._sign || !PHANTASMA_EQUAL(_data.begin(), _data.end(), b._data.begin());
-        }
+		}
 
 	private:
 		static bool LogicalCompare(const BigInteger& a, const BigInteger& b, bool op)
@@ -931,8 +932,8 @@ namespace phantasma
 			const Data& B = b._data;
 			for (int i = A.size() - 1; i >= 0; i--)
 			{
-				uint32_t x = A[i];
-				uint32_t y = B[i];
+				UInt32 x = A[i];
+				UInt32 y = B[i];
 				if (x < y)
 				{
 					return op;
@@ -948,30 +949,30 @@ namespace phantasma
 		}
 	
 	public:
-        bool operator <(const BigInteger& b) const
-        {
-            return LogicalCompare(*this, b, true);
-        }
+		bool operator <(const BigInteger& b) const
+		{
+			return LogicalCompare(*this, b, true);
+		}
 
-        bool operator >(const BigInteger& b) const
-        {
-            return LogicalCompare(*this, b, false);
-        }
+		bool operator >(const BigInteger& b) const
+		{
+			return LogicalCompare(*this, b, false);
+		}
 
-        bool operator <=(const BigInteger& b) const
-        {
+		bool operator <=(const BigInteger& b) const
+		{
 			const BigInteger& a = *this;
-            return (a == b || a < b);
-        }
+			return (a == b || a < b);
+		}
 
-        bool operator >=(const BigInteger& b) const
-        {
+		bool operator >=(const BigInteger& b) const
+		{
 			const BigInteger& a = *this;
-            return (a == b || a > b);
-        }
+			return (a == b || a > b);
+		}
 
-        BigInteger operator ^(const BigInteger& b) const
-        {
+		BigInteger operator ^(const BigInteger& b) const
+		{
 			const BigInteger& a = *this;
 			auto aSize = a._data.size();
 			auto bSize = b._data.size();
@@ -979,18 +980,18 @@ namespace phantasma
 			Data temp;
 			temp.resize(len);
 
-            for (uint32_t i = 0; i < len; i++)
-            {
-				uint32_t A = i < aSize ? a._data[i] : 0;
-				uint32_t B = i < bSize ? b._data[i] : 0;
-                temp[i] = (A ^ B);
-            }
+			for (UInt32 i = 0; i < len; i++)
+			{
+				UInt32 A = i < aSize ? a._data[i] : 0;
+				UInt32 B = i < bSize ? b._data[i] : 0;
+				temp[i] = (A ^ B);
+			}
 
 			return BigInteger(std::move(temp));
-        }
+		}
 
-        BigInteger operator |(const BigInteger& b) const
-        {
+		BigInteger operator |(const BigInteger& b) const
+		{
 			const BigInteger& a = *this;
 			auto aSize = a._data.size();
 			auto bSize = b._data.size();
@@ -998,30 +999,30 @@ namespace phantasma
 			Data temp;
 			temp.resize(len);
 
-            for (uint32_t i = 0; i < len; i++)
-            {
-				uint32_t A = i < aSize ? a._data[i] : 0;
-				uint32_t B = i < bSize ? b._data[i] : 0;
-                temp[i] = A | B;
-            }
+			for (UInt32 i = 0; i < len; i++)
+			{
+				UInt32 A = i < aSize ? a._data[i] : 0;
+				UInt32 B = i < bSize ? b._data[i] : 0;
+				temp[i] = A | B;
+			}
 
-            return BigInteger(std::move(temp));
-        }
+			return BigInteger(std::move(temp));
+		}
 
-        BigInteger operator ~() const
-        {
+		BigInteger operator ~() const
+		{
 			Data buffer;
 			buffer.resize(_data.size());
-            for (int i = 0, end = (int)buffer.size(); i < end; i++)
-            {
-                buffer[i] = ~_data[i];
-            }
+			for (int i = 0, end = (int)buffer.size(); i < end; i++)
+			{
+				buffer[i] = ~_data[i];
+			}
 
-            return BigInteger(std::move(buffer));
-        }
+			return BigInteger(std::move(buffer));
+		}
 
-        BigInteger operator &(const BigInteger& b) const
-        {
+		BigInteger operator &(const BigInteger& b) const
+		{
 			const BigInteger& a = *this;
 			auto aSize = a._data.size();
 			auto bSize = b._data.size();
@@ -1029,134 +1030,134 @@ namespace phantasma
 			Data temp;
 			temp.resize(len);
 
-            for (uint32_t i = 0; i < len; i++)
-            {
-                uint32_t A = i < aSize ? a._data[i] : 0;
-                uint32_t B = i < bSize ? b._data[i] : 0;
-                temp[i] = A & B;
-            }
+			for (UInt32 i = 0; i < len; i++)
+			{
+				UInt32 A = i < aSize ? a._data[i] : 0;
+				UInt32 B = i < bSize ? b._data[i] : 0;
+				temp[i] = A & B;
+			}
 
-            return BigInteger(std::move(temp));
-        }
+			return BigInteger(std::move(temp));
+		}
 
-        bool Equals(BigInteger other) const
-        {
+		bool Equals(BigInteger other) const
+		{
 			//BH!!!
 			//this doesn't compare _signs!?!?!?!
-            if (other._data.size() != _data.size())
-            {
-                return false;
-            }
+			if (other._data.size() != _data.size())
+			{
+				return false;
+			}
 
 			return PHANTASMA_EQUAL(_data.begin(), _data.end(), other._data.begin());
-        }
+		}
 
-        int CompareTo(const BigInteger& other) const
-        {
-            if (Equals(other))
-            {
-                return 0;
-            }
+		int CompareTo(const BigInteger& other) const
+		{
+			if (Equals(other))
+			{
+				return 0;
+			}
 
-            if (*this < other)
-            {
-                return -1;
-            }
+			if (*this < other)
+			{
+				return -1;
+			}
 
-            return 1;
-        }
+			return 1;
+		}
 
-        static BigInteger Pow(BigInteger powBase, BigInteger powExp)
-        {
+		static BigInteger Pow(BigInteger powBase, BigInteger powExp)
+		{
 			BigInteger val = One();
 			BigInteger i = Zero();
 
-            while (i < powExp)
-            {
-                val *= powBase;
-                i = i + One();
-            }
-            return val;
-        }
+			while (i < powExp)
+			{
+				val *= powBase;
+				i = i + One();
+			}
+			return val;
+		}
 
-        static BigInteger ModPow(BigInteger b, BigInteger exp, BigInteger mod)
-        {
-            return b.ModPow(exp, mod);
-        }
+		static BigInteger ModPow(BigInteger b, BigInteger exp, BigInteger mod)
+		{
+			return b.ModPow(exp, mod);
+		}
 
-        /// <summary>
-        /// Modulo Exponentiation
-        /// Ported from http://developer.classpath.org/doc/java/math/BigInteger-source.html
-        /// </summary>
-        /// <param name="exp">Exponential</param>
-        /// <param name="mod">Modulo</param>
-        /// <returns>BigInteger result of raising this to the power of exp and then modulo n </returns>
-        BigInteger ModPow(BigInteger exp, BigInteger mod)
-        {
+		/// <summary>
+		/// Modulo Exponentiation
+		/// Ported from http://developer.classpath.org/doc/java/math/BigInteger-source.html
+		/// </summary>
+		/// <param name="exp">Exponential</param>
+		/// <param name="mod">Modulo</param>
+		/// <returns>BigInteger result of raising this to the power of exp and then modulo n </returns>
+		BigInteger ModPow(BigInteger exp, BigInteger mod)
+		{
 			if( mod._sign == -1 || mod == 0 )
 			{
 				PHANTASMA_EXCEPTION("Non-positive modulo");
 				return Zero();
 			}
 
-            if (exp._sign < 0)
-                return ModInverse(mod).ModPow(-exp, mod);
+			if (exp._sign < 0)
+				return ModInverse(mod).ModPow(-exp, mod);
 
-            if (exp == 1)
-                return *this % mod;
+			if (exp == 1)
+				return *this % mod;
 
-            BigInteger s = One();
-            BigInteger t = *this;
+			BigInteger s = One();
+			BigInteger t = *this;
 
-            while (exp != Zero())
-            {
-                if ((exp & One()) == One())
-                    s = (s * t) % mod;
+			while (exp != Zero())
+			{
+				if ((exp & One()) == One())
+					s = (s * t) % mod;
 
-                exp = exp >> 1;
-                t = (t * t) % mod;
-            }
+				exp = exp >> 1;
+				t = (t * t) % mod;
+			}
 
-            return s;
-        }
+			return s;
+		}
 
-        BigInteger ModInverse(BigInteger modulus)
-        {
-            BigInteger array[2] =
+		BigInteger ModInverse(BigInteger modulus)
+		{
+			BigInteger array[2] =
 			{
 				Zero(),
 				One()
-            };
+			};
 			BigInteger array2[2] = {};
-            BigInteger array3[2] = 
-            {
+			BigInteger array3[2] = 
+			{
 				Zero(),
 				Zero()
-            };
-            int num = 0;
-            BigInteger bi = modulus;
-            BigInteger bigInteger = *this;
-            while (bigInteger._data.size() > 1 || (bigInteger._data.size() == 1 && bigInteger._data[0] != 0))
-            {
-                BigInteger bigInteger2;
-                BigInteger bigInteger3;
-                if (num > 1)
-                {
-                    BigInteger bigInteger4 = (array[0] - array[1] * array2[0]) % modulus;
-                    array[0] = array[1];
-                    array[1] = bigInteger4;
-                }
+			};
+			int num = 0;
+			BigInteger bi = modulus;
+			BigInteger bigInteger = *this;
+			while (bigInteger._data.size() > 1 || (bigInteger._data.size() == 1 && bigInteger._data[0] != 0))
+			{
+				BigInteger bigInteger2;
+				BigInteger bigInteger3;
+				if (num > 1)
+				{
+					BigInteger bigInteger4 = (array[0] - array[1] * array2[0]) % modulus;
+					array[0] = array[1];
+					array[1] = bigInteger4;
+				}
 
-                DivideAndModulus(bi, bigInteger, bigInteger2, bigInteger3);
+				DivideAndModulus(bi, bigInteger, bigInteger2, bigInteger3);
 
-                array2[0] = array2[1];
-                array3[0] = array3[1];
-                array2[1] = bigInteger2;
-                array3[1] = bigInteger3;
-                bi = bigInteger;
-                bigInteger = bigInteger3;
-                num++;
-            }
+				array2[0] = array2[1];
+				array3[0] = array3[1];
+				array2[1] = bigInteger2;
+				array3[1] = bigInteger3;
+				bi = bigInteger;
+				bigInteger = bigInteger3;
+				num++;
+			}
 
 			if( array3[0]._data.size() > 1 || (array3[0]._data.size() == 1 && array3[0]._data[0] != 1) )
 			{
@@ -1164,213 +1165,213 @@ namespace phantasma
 				return Zero();
 			}
 
-            BigInteger bigInteger5 = (array[0] - array[1] * array2[0]) % modulus;
-            if (bigInteger5._sign < 0)
-            {
-                bigInteger5 += modulus;
-            }
-            return bigInteger5;
-        }
+			BigInteger bigInteger5 = (array[0] - array[1] * array2[0]) % modulus;
+			if (bigInteger5._sign < 0)
+			{
+				bigInteger5 += modulus;
+			}
+			return bigInteger5;
+		}
 
-        bool TestBit(int index)
-        {
-            return (*this & (One() << index)) > Zero();
-        }
+		bool TestBit(int index)
+		{
+			return (*this & (One() << index)) > Zero();
+		}
 
-        int GetLowestSetBit()
-        {
-            if (_sign == 0)
-                return -1;
+		int GetLowestSetBit()
+		{
+			if (_sign == 0)
+				return -1;
 
-            Bytes b = ToByteArray();
-            int w = 0;
-            while (b[w] == 0)
-                w++;
-            for (int x = 0; x < 8; x++)
-                if ((b[w] & 1 << x) > 0)
-                    return x + w * 8;
+			Bytes b = ToByteArray();
+			int w = 0;
+			while (b[w] == 0)
+				w++;
+			for (int x = 0; x < 8; x++)
+				if ((b[w] & 1 << x) > 0)
+					return x + w * 8;
 			PHANTASMA_EXCEPTION("GetLowestSetBit error");
 			return -1;
-        }
+		}
 
-        static BigInteger Parse(const PHANTASMA_STRING& input, int radix = 10)
-        {
-            return BigInteger(input, radix);
-        }
+		static BigInteger Parse(const String& input, int radix = 10)
+		{
+			return BigInteger(input, radix);
+		}
 
-        static bool TryParse(const PHANTASMA_STRING& input, BigInteger& output)
-        {
+		static bool TryParse(const String& input, BigInteger& output)
+		{
 			PHANTASMA_TRY
-            {
+			{
 				bool error = false;
-                output = BigInteger(input, 10, &error);
-                return error;
-            }
+				output = BigInteger(input, 10, &error);
+				return error;
+			}
 			PHANTASMA_CATCH(...)
-            {
-                output = Zero();
-                return false;
-            }
-        }
+			{
+				output = Zero();
+				return false;
+			}
+		}
 
-        int GetBitLength()
-        {
-            if (_data.empty() || (_data.size() == 1 && _data[0] == 0))
-                return 0;
+		int GetBitLength()
+		{
+			if (_data.empty() || (_data.size() == 1 && _data[0] == 0))
+				return 0;
 
 			auto result = (_data.size() - 1) * 32;
 
-            result += (int) log2(_data[_data.size() - 1]) + 1;
+			result += (int) log2(_data[_data.size() - 1]) + 1;
 
-            return (int)result;
-        }
+			return (int)result;
+		}
 
-        Data ToUintArray()
-        {
-            return _data;
-        }
+		Data ToUintArray()
+		{
+			return _data;
+		}
 
-        bool CalcIsEven()
-        {
+		bool CalcIsEven()
+		{
 			BigInteger tmp = *this % 2;
-            return tmp == 0;
-        }
+			return tmp == 0;
+		}
 
-        BigInteger Sqrt()
-        {
+		BigInteger Sqrt()
+		{
 			if( *this < 0 )
 			{
 				PHANTASMA_EXCEPTION("cannot be negative");
 				return Zero();
 			}
 
-            if (*this == 0)
-            {
-                return Zero();
-            }
+			if (*this == 0)
+			{
+				return Zero();
+			}
 
-            uint32_t bitLength = (uint32_t)GetBitLength();
+			UInt32 bitLength = (UInt32)GetBitLength();
 
-            bitLength = (((bitLength & 1) == 0) ? (bitLength >> 1) : ((bitLength >> 1) + 1));
-            uint32_t num2 = bitLength >> 5;
-            uint8_t b = (uint8_t)(bitLength & 0x1F);
+			bitLength = (((bitLength & 1) == 0) ? (bitLength >> 1) : ((bitLength >> 1) + 1));
+			UInt32 num2 = bitLength >> 5;
+			Byte b = (Byte)(bitLength & 0x1F);
 
-            uint32_t num3;
+			UInt32 num3;
 
-            if (b == 0)
-            {
-                num3 = 0x80000000u;
-            }
-            else
-            {
-                num3 = (uint32_t)(1 << (int)b);
-                num2++;
-            }
+			if (b == 0)
+			{
+				num3 = 0x80000000u;
+			}
+			else
+			{
+				num3 = (UInt32)(1 << (int)b);
+				num2++;
+			}
 
-            Data sqrtArray;
+			Data sqrtArray;
 			sqrtArray.resize(num2);
-            for (int num4 = (int)(num2 - 1); num4 >= 0; num4--)
-            {
-                while (num3 != 0)
-                {
-                    sqrtArray[num4] ^= num3;
+			for (int num4 = (int)(num2 - 1); num4 >= 0; num4--)
+			{
+				while (num3 != 0)
+				{
+					sqrtArray[num4] ^= num3;
 					BigInteger tmp(sqrtArray);
-                    if (tmp * tmp > *this)
-                    {
-                        sqrtArray[num4] ^= num3;
-                    }
-                    num3 >>= 1;
-                }
-                num3 = 0x80000000u;
-            }
-            return BigInteger(std::move(sqrtArray));
-        }
+					if (tmp * tmp > *this)
+					{
+						sqrtArray[num4] ^= num3;
+					}
+					num3 >>= 1;
+				}
+				num3 = 0x80000000u;
+			}
+			return BigInteger(std::move(sqrtArray));
+		}
 
 		Bytes ToByteArray(bool includeSignInArray = false)
-        {
-            int bitLength = GetBitLength();
-			uint32_t byteArraySize = (bitLength / 8) + (uint32_t)((bitLength % 8 > 0) ? 1 : 0) + (includeSignInArray ? 1 : 0);
+		{
+			int bitLength = GetBitLength();
+			UInt32 byteArraySize = (bitLength / 8) + (UInt32)((bitLength % 8 > 0) ? 1 : 0) + (includeSignInArray ? 1 : 0);
 			Bytes result;
 			result.resize(byteArraySize);
 
-            bool applyTwosComplement = includeSignInArray && (_sign == -1);    //only apply two's complement if this number is negative
+			bool applyTwosComplement = includeSignInArray && (_sign == -1);    //only apply two's complement if this number is negative
 
-            for (uint32_t i = 0, j = 0, end = (uint32_t)_data.size(); i < end; i++, j += 4)
-            {
-				uint8_t bytes[4];
+			for (UInt32 i = 0, j = 0, end = (UInt32)_data.size(); i < end; i++, j += 4)
+			{
+				Byte bytes[4];
 				memcpy(bytes, &_data[i], 4);
-                for (int k = 0; k < 4; k++)
-                {
-                    if (!applyTwosComplement && bytes[k] == 0)
-                        continue;
-                    if (applyTwosComplement && j + k >= byteArraySize)
-                        continue;
+				for (int k = 0; k < 4; k++)
+				{
+					if (!applyTwosComplement && bytes[k] == 0)
+						continue;
+					if (applyTwosComplement && j + k >= byteArraySize)
+						continue;
 
-                    if (applyTwosComplement)
-                        result[j + k] = (uint8_t)(bytes[k] ^ 0xFF);
-                    else
-                        result[j + k] = bytes[k];
-                }
-            }
+					if (applyTwosComplement)
+						result[j + k] = (Byte)(bytes[k] ^ 0xFF);
+					else
+						result[j + k] = bytes[k];
+				}
+			}
 
-            //this could be optimized if needed, but likely not worth it for now
-            if (applyTwosComplement)
-            {
+			//this could be optimized if needed, but likely not worth it for now
+			if (applyTwosComplement)
+			{
 				BigInteger tmp = BigInteger(result, 1) + 1; //create a biginteger with the inverted bits but with positive sign, and add 1.
 
-                result = tmp.ToByteArray(true);     //when we call the ToByteArray asking to include sign, we will get an extra uint8_t on the array to keep sign information while in uint8_t[] format
-                                                    //but the twos complement logic won't get applied again given the bigint has positive sign.
+				result = tmp.ToByteArray(true);     //when we call the ToByteArray asking to include sign, we will get an extra Byte on the array to keep sign information while in Byte[] format
+													//but the twos complement logic won't get applied again given the bigint has positive sign.
 
-                result[result.size() - 1] = 0xFF;      //force the MSB to 1's, as this array represents a negative number.
-            }
+				result[result.size() - 1] = 0xFF;      //force the MSB to 1's, as this array represents a negative number.
+			}
 
-            return result;
-        }
+			return result;
+		}
 
-        static Bytes ApplyTwosComplement(const Bytes& bytes)
-        {
+		static Bytes ApplyTwosComplement(const Bytes& bytes)
+		{
 			Bytes buffer;
 			buffer.resize(bytes.size());
 			
-            for (int i = 0, end = (int)bytes.size(); i < end; i++)
-            {
-                buffer[i] = (uint8_t)~bytes[i];
-            }
+			for (int i = 0, end = (int)bytes.size(); i < end; i++)
+			{
+				buffer[i] = (Byte)~bytes[i];
+			}
 
 			BigInteger tmp = BigInteger(buffer, 1) + 1; //create a biginteger with the inverted bits but with positive sign, and add 1. result will remain with positive sign
 
-            buffer = tmp.ToByteArray(true); //when we call the ToByteArray asking to include sign, we will get an extra uint8_t on the array to make sure sign is correct 
-            //but the twos complement logic won't get applied again given the bigint has positive sign.
+			buffer = tmp.ToByteArray(true); //when we call the ToByteArray asking to include sign, we will get an extra Byte on the array to make sure sign is correct 
+			//but the twos complement logic won't get applied again given the bigint has positive sign.
 
-            return buffer;
-        }
+			return buffer;
+		}
 
-        //TODO: this probably needs looking into..
-        int GetHashCode() const
-        {
-            int64_t hashCode = -1521134295 * _sign;
+		//TODO: this probably needs looking into..
+		int GetHashCode() const
+		{
+			Int64 hashCode = -1521134295 * _sign;
 
-            // Rotate by 3 bits and XOR the new value
-            for (uint32_t word : _data)
-            {
-                hashCode = (int)((hashCode << 3) | (hashCode >> (29)) ^ word);
-            }
+			// Rotate by 3 bits and XOR the new value
+			for (UInt32 word : _data)
+			{
+				hashCode = (int)((hashCode << 3) | (hashCode >> (29)) ^ word);
+			}
 
-            return (int)hashCode;
-        }
+			return (int)hashCode;
+		}
 
-        BigInteger Mod(const BigInteger& b) const
-        {
-            return *this % b;
-        }
+		BigInteger Mod(const BigInteger& b) const
+		{
+			return *this % b;
+		}
 
-        BigInteger FlipBit(int bit) const
-        {
-            return *this ^ (One() << bit);
-        }
-    };
+		BigInteger FlipBit(int bit) const
+		{
+			return *this ^ (One() << bit);
+		}
+	};
 
-	inline PHANTASMA_STRING DecimalConversion( BigInteger value, UInt32 decimals, Char decimalPoint='.', bool alwaysShowDecimalPoint=false )
+	inline String DecimalConversion( BigInteger value, UInt32 decimals, Char decimalPoint='.', bool alwaysShowDecimalPoint=false )
 	{
 		//todo - is it better to just convert value to text, and then insert the decimal point in the right place? :D
 		if( decimals > 0 || alwaysShowDecimalPoint )
@@ -1388,7 +1389,7 @@ namespace phantasma
 			}
 			if( alwaysShowDecimalPoint || r != BigInteger::Zero() )
 			{
-				PHANTASMA_STRING result = q.ToString();
+				String result = q.ToString();
 				result.append(decimalPoint);
 				result.append(r.ToString());
 				return result;
