@@ -9,7 +9,8 @@
 /*
  * Implementation of BigInteger class, written for Phantasma project
  * Author: Simão Pavlovich
- * Ported from C# to C++ by Brooke Hodgman
+ * Ported from C# to C++ by Brooke Hodgman.
+ * I've left all declarations in the same order as the C# code for maintainability, so it jumps between private/public sections like this as a deliberate choice :)
  */
 namespace phantasma
 {
@@ -24,6 +25,13 @@ namespace phantasma
         constexpr static int _Base = sizeof(uint32_t) * 8;    //number of bits required for shift operations
 		constexpr static uint32_t _MaxVal = 0xFFFFFFFFU;
 
+		void Trim()
+		{
+			while( _data.size() > 1 && _data.back() == 0 )
+				_data.pop_back();
+			if( _data.empty() || (_data.size() == 1 && _data.back() == 0) )
+				_sign = 0;
+		}
 	public:
 		static const BigInteger Zero() { return BigInteger{0LL}; }
 		static const BigInteger One() { return BigInteger{1LL}; }
@@ -203,6 +211,8 @@ namespace phantasma
                 val = ((val >= '0' && val <= '9') ? (val - '0') : ((val < 'A' || val > 'Z') ? 9999999 : (val - 'A' + 10)));
 				if( val >= radix )
 				{
+					if( out_error )
+						*out_error = true;
 					PHANTASMA_EXCEPTION("Invalid string in constructor.");
 					return;
 				}
@@ -454,6 +464,8 @@ namespace phantasma
 			    result._sign = result == 0 ? 0 : 1;
 			}
 
+			result.Trim();
+
 			return result;
 		}
 		BigInteger& operator +=(const BigInteger& b)
@@ -519,6 +531,7 @@ namespace phantasma
 			BigInteger result;
 			result._data = BigInteger::Multiply(a._data, b._data);
 			result._sign = a._sign * b._sign;
+			result.Trim();
 			return result;
 		}
 		BigInteger& operator *=(const BigInteger& b)
@@ -626,6 +639,9 @@ namespace phantasma
 			quotient._sign = 1;
 			remainder._data = remArray;
 			remainder._sign = 1;
+
+			quotient.Trim();
+			remainder.Trim();
 		}
 
 		//do not access this function directly under any circumstances, always go through DivideAndModulus
@@ -633,7 +649,7 @@ namespace phantasma
 		{
 			Data quotArray, remArray;
 			quotArray.resize(numerator._data.size() - denominator._data.size() + 1);
-			remArray.resize(numerator._data.size());
+			remArray.resize(numerator._data.size() + 1);
 
 			uint32_t tmp = 0x80000000u;
 			uint32_t tmp2 = denominator._data[denominator._data.size() - 1];    //denominator most significant digit
@@ -712,6 +728,9 @@ namespace phantasma
 			ShiftRight(remArray, shiftCount);
 
 			rem = BigInteger(remArray);
+
+			quot.Trim();
+			rem.Trim();
 		}
 	
 	public:
@@ -730,6 +749,7 @@ namespace phantasma
             ShiftRight(r._data, bits);
             if (r._data[0] == 0 && r._data.size() == 1)
                 r._sign = 0;
+			r.Trim();
             return r;
         }
 		BigInteger& operator >>=(int bits)
@@ -740,6 +760,7 @@ namespace phantasma
 			ShiftRight(_data, bits);
 			if (_data[0] == 0 && _data.size() == 1)
 				_sign = 0;
+			Trim();
 			return *this;
 		}
 	private:
@@ -1348,4 +1369,34 @@ namespace phantasma
             return *this ^ (One() << bit);
         }
     };
+
+	inline PHANTASMA_STRING DecimalConversion( BigInteger value, UInt32 decimals, Char decimalPoint='.', bool alwaysShowDecimalPoint=false )
+	{
+		//todo - is it better to just convert value to text, and then insert the decimal point in the right place? :D
+		if( decimals > 0 || alwaysShowDecimalPoint )
+		{
+			BigInteger q, r;
+			if( decimals > 0 )
+			{
+				BigInteger radix = BigInteger::Pow(10, decimals);
+				BigInteger::DivideAndModulus( value, radix, q, r );
+			}
+			else
+			{
+				q = value;
+				r = BigInteger::Zero();
+			}
+			if( alwaysShowDecimalPoint || r != BigInteger::Zero() )
+			{
+				PHANTASMA_STRING result = q.ToString();
+				result.append(decimalPoint);
+				result.append(r.ToString());
+				return result;
+			}
+			else
+				return q.ToString();
+		}
+		else
+			return value.ToString();
+	}
 }
