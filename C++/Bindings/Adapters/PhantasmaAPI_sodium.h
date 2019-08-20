@@ -12,6 +12,7 @@ namespace phantasma {
 static_assert(crypto_sign_ed25519_SEEDBYTES      == 32, "Mismatch with the reference implementation");
 static_assert(crypto_sign_ed25519_PUBLICKEYBYTES == 32, "Mismatch with the reference implementation");
 static_assert(crypto_sign_ed25519_SECRETKEYBYTES == 64, "Mismatch with the reference implementation");
+static_assert(crypto_sign_ed25519_BYTES          == 64, "Mismatch with the reference implementation");
 
 void Ed25519_PublicKeyFromSeed(uint8_t* output, int outputLength, const uint8_t* seed, int seedLength)
 {
@@ -32,20 +33,61 @@ void Ed25519_PrivateKeyFromSeed(uint8_t* output, int outputLength, const uint8_t
 	crypto_sign_ed25519_seed_keypair(publik, output, seed);
 }
 
-uint64_t Ed25519_Sign( uint8_t* output, int outputLength, const uint8_t* message, int messageLength, const uint8_t* privateKey, int privateKeyLength )
+uint64_t Ed25519_SignAttached( uint8_t* output, int outputLength, const uint8_t* message, int messageLength, const uint8_t* privateKey, int privateKeyLength )
 {
 	if( ((uint32)outputLength < crypto_sign_ed25519_BYTES + messageLength) ||
-		((uint32)privateKeyLength != crypto_sign_ed25519_SECRETKEYBYTES) )
+		((uint32)privateKeyLength != crypto_sign_ed25519_SECRETKEYBYTES) ||
+		messageLength < 0 )
 		return 0;
 	uint64_t signed_message_len = 0;
 	crypto_sign_ed25519(output, &signed_message_len, message, messageLength, privateKey);
 	return signed_message_len;
 }
 
-#define PHANTASMA_RANDOMBYTES(buffer, size)                                                                randombytes_buf(buffer, size)
-#define PHANTASMA_WIPEMEM(buffer, size)                                                                    sodium_memzero(buffer, size)
-#define PHANTASMA_Ed25519_PublicKeyFromSeed(output, outputLength, seed, seedLength)                        Ed25519_PublicKeyFromSeed(output, outputLength, seed, seedLength)
-#define PHANTASMA_Ed25519_PrivateKeyFromSeed(output, outputLength, seed, seedLength)                       Ed25519_PrivateKeyFromSeed(output, outputLength, seed, seedLength)
-#define PHANTASMA_Ed25519_Sign(output, outputLength, message, messageLength, privateKey, privateKeyLength) Ed25519_Sign(output, outputLength, message, messageLength, privateKey, privateKeyLength)
+uint64_t Ed25519_SignDetached( uint8_t* output, int outputLength, const uint8_t* message, int messageLength, const uint8_t* privateKey, int privateKeyLength )
+{
+	if( ((uint32)outputLength != crypto_sign_ed25519_BYTES) ||
+		((uint32)privateKeyLength != crypto_sign_ed25519_SECRETKEYBYTES) ||
+		messageLength < 0)
+		return 0;
+	uint64_t signed_message_len = 0;
+	crypto_sign_ed25519_detached(output, &signed_message_len, message, messageLength, privateKey);
+	return signed_message_len;
+}
+
+bool Ed25519_ValidateAttached( const uint8_t* message, int messageLength, const uint8_t* publicKey, int publicKeyLength )
+{
+	if( ((uint32)messageLength < crypto_sign_ed25519_BYTES) ||
+		((uint32)publicKeyLength != crypto_sign_ed25519_PUBLICKEYBYTES) )
+		return false;
+	return 0 == crypto_sign_ed25519_open(0, 0, message, messageLength, publicKey);
+}
+
+bool Ed25519_ValidateDetached( const uint8_t* signature, int signatureLength, const uint8_t* message, int messageLength, const uint8_t* publicKey, int publicKeyLength )
+{
+	if( ((uint32)signatureLength != crypto_sign_ed25519_BYTES) ||
+		((uint32)publicKeyLength != crypto_sign_ed25519_PUBLICKEYBYTES) ||
+		messageLength < 0 )
+		return false;
+	return 0 == crypto_sign_ed25519_verify_detached(signature, message, messageLength, publicKey);
+}
+
+//todo - hook up secure memory allocations, locking/unlocking
+
+#define PHANTASMA_RANDOMBYTES(buffer, size) randombytes_buf(buffer, size)
+#define PHANTASMA_WIPEMEM(buffer, size)     sodium_memzero(buffer, size)
+
+#define PHANTASMA_Ed25519_PublicKeyFromSeed(output, outputLength, seed, seedLength)                                        \
+                  Ed25519_PublicKeyFromSeed(output, outputLength, seed, seedLength)
+#define PHANTASMA_Ed25519_PrivateKeyFromSeed(output, outputLength, seed, seedLength)                                       \
+                  Ed25519_PrivateKeyFromSeed(output, outputLength, seed, seedLength)
+#define PHANTASMA_Ed25519_SignAttached(output, outputLength, message, messageLength, privateKey, privateKeyLength)         \
+                  Ed25519_SignAttached(output, outputLength, message, messageLength, privateKey, privateKeyLength)
+#define PHANTASMA_Ed25519_SignDetached(output, outputLength, message, messageLength, privateKey, privateKeyLength)         \
+                  Ed25519_SignDetached(output, outputLength, message, messageLength, privateKey, privateKeyLength)
+#define PHANTASMA_Ed25519_ValidateAttached(message, messageLength, publicKey, publicKeyLength)                             \
+                  Ed25519_ValidateAttached(message, messageLength, publicKey, publicKeyLength)
+#define PHANTASMA_Ed25519_ValidateDetached(signature, signatureLength, message, messageLength, publicKey, publicKeyLength) \
+                  Ed25519_ValidateDetached(signature, signatureLength, message, messageLength, publicKey, publicKeyLength)
 
 }
