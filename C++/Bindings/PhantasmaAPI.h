@@ -1,4 +1,6 @@
 #pragma once
+#ifndef PHANTASMA_API_INCLUDED
+#define PHANTASMA_API_INCLUDED
 //------------------------------------------------------------------------------
 // Low-level API
 //------------------------------------------------------------------------------
@@ -184,6 +186,11 @@
 # include <algorithm>
 #endif
 
+#if defined(_UNICODE) && !defined(PHANTASMA_EXCEPTION) && defined(PHANTASMA_EXCEPTION_ENABLE)
+# include <locale>
+# include <codecvt>
+#endif
+
 #ifndef PHANTASMA_MAX
 # define PHANTASMA_MAX(a, b) std::max(a, b)
 #endif
@@ -193,16 +200,31 @@
 #endif 
 
 #ifndef PHANTASMA_COPY
-# define PHANTASMA_COPY(a, b, c) std::copy(a, b, c)
+# define PHANTASMA_COPY(src, src_end, dst) std::copy(src, src_end, dst)
 #endif
 
 #ifndef PHANTASMA_EQUAL
 # define PHANTASMA_EQUAL(a, b, c) std::equal(a, b, c)
 #endif
 
+#ifndef PHANTASMA_WIPEMEM
+# define PHANTASMA_WIPEMEM(buffer, size) memset(buffer, 0, size)
+#endif
+
+
 #if !defined(PHANTASMA_EXCEPTION)
-# define PHANTASMA_EXCEPTION(literal)
-# define PHANTASMA_EXCEPTION_MESSAGE(literal, string)
+# ifdef PHANTASMA_EXCEPTION_ENABLE
+#  ifdef _UNICODE
+#   define PHANTASMA_EXCEPTION(literal)                 throw std::runtime_error(literal)
+#   define PHANTASMA_EXCEPTION_MESSAGE(literal, string) throw std::runtime_error(std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(string))
+#  else
+#   define PHANTASMA_EXCEPTION(literal)                 throw std::runtime_error(literal)
+#   define PHANTASMA_EXCEPTION_MESSAGE(literal, string) throw std::runtime_error(string)
+#  endif
+# else
+#   define PHANTASMA_EXCEPTION(literal)                
+#   define PHANTASMA_EXCEPTION_MESSAGE(literal, string)
+# endif
 #endif
 
 #if !defined(PHANTASMA_TRY)
@@ -216,7 +238,11 @@
 #endif
 
 #if !defined(PHANTASMA_LITERAL)
-# define PHANTASMA_LITERAL(x) x
+# ifdef _UNICODE
+#  define PHANTASMA_LITERAL(x) L ## x
+# else
+#  define PHANTASMA_LITERAL(x) x
+# endif
 #endif
 
 #if !defined(PHANTASMA_FUNCTION)
@@ -228,7 +254,11 @@ namespace phantasma
 #ifdef PHANTASMA_CHAR
 typedef PHANTASMA_CHAR Char;
 #else
+# ifdef _UNICODE
+typedef wchar_t Char;
+# else
 typedef char Char;
+# endif
 #endif
 
 #ifdef PHANTASMA_BYTE
@@ -264,21 +294,33 @@ typedef uint64_t UInt64;
 #ifdef PHANTASMA_STRING
 typedef PHANTASMA_STRING String;
 #else
+# ifdef _UNICODE
+typedef std::wstring String;
+# else
 typedef std::string String;
+# endif
 #endif
 
 #ifdef PHANTASMA_STRINGBUILDER
 typedef PHANTASMA_STRINGBUILDER StringBuilder;
 #else
+# ifdef _UNICODE
+typedef std::wstringstream StringBuilder;
+# else
 typedef std::stringstream StringBuilder;
+# endif
 #endif
 
 #ifdef PHANTASMA_JSONVALUE
 typedef PHANTASMA_JSONVALUE JSONValue;
 #elif __cplusplus > 201402L
+# ifdef _UNICODE
+typedef std::wstring_view JSONValue;
+# else
 typedef std::string_view JSONValue;
+# endif
 #else
-typedef std::string JSONValue;
+typedef String JSONValue;
 #endif
 
 #ifdef PHANTASMA_JSONARRAY
@@ -290,7 +332,7 @@ typedef JSONValue JSONArray;
 #ifdef PHANTASMA_JSONDOCUMENT
 typedef PHANTASMA_JSONDOCUMENT JSONDocument;
 #else
-typedef std::string JSONDocument;
+typedef String JSONDocument;
 #endif
 
 
@@ -299,9 +341,9 @@ typedef PHANTASMA_JSONBUILDER JSONBuilder;
 #else
 struct JSONBuilder // A VERY simple json string builder. Highly recommended that you provide a real JSON library instead!
 {
-	std::stringstream s;
+	StringBuilder s;
 	bool empty = true;
-	operator std::stringstream&() { return s; }
+	operator StringBuilder&() { return s; }
 	void AddKey(const Char* key) { if(!empty) { s << ", "; } empty = false; s << '"' << key << "\": "; }
 	void AddValues() {}
 	void AddValues(const char* arg) { s << '"' << arg << '"'; }
@@ -833,3 +875,5 @@ namespace json
 }
 #endif
 }
+
+#endif
