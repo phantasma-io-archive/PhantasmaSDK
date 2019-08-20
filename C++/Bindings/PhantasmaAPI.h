@@ -207,11 +207,6 @@
 # define PHANTASMA_EQUAL(a, b, c) std::equal(a, b, c)
 #endif
 
-#ifndef PHANTASMA_WIPEMEM
-# define PHANTASMA_WIPEMEM(buffer, size) memset(buffer, 0, size)
-#endif
-
-
 #if !defined(PHANTASMA_EXCEPTION)
 # ifdef PHANTASMA_EXCEPTION_ENABLE
 #  ifdef _UNICODE

@@ -1,6 +1,6 @@
 #pragma once
 #ifdef PHANTASMA_API_INCLUDED
-#error "Include API adaptors before including PhantasmaAPI.h"
+#error "Include JSON API adaptors immediately before including PhantasmaAPI.h"
 #endif 
 //------------------------------------------------------------------------------
 // This header supplies the Phantasma API with JSON features provided by the 

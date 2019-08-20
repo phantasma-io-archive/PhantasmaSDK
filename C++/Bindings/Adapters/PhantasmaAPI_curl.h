@@ -1,6 +1,6 @@
 #pragma once
 #ifdef PHANTASMA_API_INCLUDED
-#error "Include API adaptors before including PhantasmaAPI.h"
+#error "Include HTTP API adaptors immediately before including PhantasmaAPI.h"
 #endif 
 //------------------------------------------------------------------------------
 // This header supplies the Phantasma API with HTTP features provided by the 
