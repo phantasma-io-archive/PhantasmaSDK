@@ -3,29 +3,25 @@
 #include "Address.h"
 #include "Entropy.h"
 #include "EdDSA/Ed25519Signature.h"
+#include "../Security/SecureMemory.h"
 
 namespace phantasma {
 
 class PrivateKey
 {
 public:
-	PrivateKey( const Byte* privateKey, int privateKeyLength )
-	{
-		if(privateKeyLength == Length)
-			PHANTASMA_COPY(privateKey, privateKey+Length, bytes);
-		else
-		{
-			PHANTASMA_EXCEPTION("privateKey should have length 32");
-			Byte null[Length] = {};
-			PHANTASMA_COPY(null, null+Length, bytes);
-		}
-
-	}
-	const Byte* Bytes() const { return bytes; }
-
 	constexpr static int Length = 32;
+
+	PrivateKey( const Byte* privateKey, int privateKeyLength )
+		: m_data(Length, privateKeyLength == Length ? privateKey : 0)
+	{
+		if(privateKeyLength != Length)
+			PHANTASMA_EXCEPTION("privateKey should have length 32");
+	}
+
+	SecureByteReader Read() const { return m_data.Read(); }
 private:
-	Byte bytes[Length]; // todo - secure memory array
+	SecureByteArray m_data;
 };
 
 class KeyPair
@@ -47,9 +43,9 @@ public:
 
 	static KeyPair Generate()
 	{
-		Byte privateKey[PrivateKey::Length];
-		Entropy::GetRandomBytes( privateKey, PrivateKey::Length );
-		return KeyPair( privateKey, PrivateKey::Length );
+		PinnedBytes<PrivateKey::Length> privateKey;
+		Entropy::GetRandomBytes( privateKey.bytes, PrivateKey::Length );
+		return KeyPair( privateKey.bytes, PrivateKey::Length );
 	}
 
 	static KeyPair FromWIF( const String& wif ) // todo - secure memory string
@@ -61,33 +57,44 @@ public:
 			return KeyPair( nullKey, PrivateKey::Length );
 		}
 
-		PHANTASMA_VECTOR<Byte> data = Base58::Decode(wif); // todo - secure memory vector
-		if( data.size() != 34 || data[0] != 0x80 || data[33] != 0x01 )
+		PinnedBytes<34> data;
+		int size = Base58::DecodeSecure(data.bytes, 34, wif);
+		if( size != 34 || data.bytes[0] != 0x80 || data.bytes[33] != 0x01 )
 		{
 			PHANTASMA_EXCEPTION( "Invalid WIF format" );
 			Byte nullKey[PrivateKey::Length] = {};
 			return KeyPair( nullKey, PrivateKey::Length );
 		}
-		KeyPair kp( &data[1], 32 );
-		PHANTASMA_WIPEMEM(&data[0], 34);
+		KeyPair kp( &data.bytes[1], 32 );
 		return kp;
 	}
 
 	String ToWIF() const // todo - secure memory string
 	{
-		Byte data[34];// todo - secure memory array
+		static_assert( PrivateKey::Length == 32, "uh oh" );
+		PinnedBytes<34> temp;
+		Byte* data = temp.bytes;
 		data[0] = 0x80;
 		data[33] = 0x01;
-		PHANTASMA_COPY(privateKey.Bytes(), privateKey.Bytes()+32, data);
-		String wif = Base58::Encode(data, 34);
-		PHANTASMA_WIPEMEM(data, 34);
+		SecureByteReader read = privateKey.Read();
+		PHANTASMA_COPY(read.Bytes(), read.Bytes()+32, data+1);
+		String wif = Base58::Encode(data, 34);// todo - secure memory string
 		return wif;
 	}
 
 	Ed25519Signature Sign( const PHANTASMA_VECTOR<Byte>& message ) const
 	{
-		const auto& sign = Ed25519::Sign( message, Ed25519::ExpandedPrivateKeyFromSeed( privateKey.Bytes(), privateKey.Length ) );
-		return Ed25519Signature( sign );
+		if(message.empty())
+		{
+			PHANTASMA_EXCEPTION("Can't sign an empty message");
+			return Ed25519Signature();
+		}
+		PinnedBytes<64> expandedPrivateKey;
+		{
+			SecureByteReader read = privateKey.Read();
+			Ed25519::ExpandedPrivateKeyFromSeed( expandedPrivateKey.bytes, 64, read.Bytes(), PrivateKey::Length );
+		}
+		return Ed25519Signature( Ed25519::Sign( &message.front(), message.size(), expandedPrivateKey.bytes, 64 ) );
 	}
 };
 

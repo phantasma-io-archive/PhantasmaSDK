@@ -15,11 +15,24 @@
  */
 namespace phantasma {
 
-class BigInteger
+template<bool B, class True, class False> struct SelectType                   { typedef True  Type; };
+template<        class True, class False> struct SelectType<false,True,False> { typedef False Type; };
+
+template<class T> class SecureVector;
+template<bool S> class TBigInteger;
+
+typedef TBigInteger<false> BigInteger;
+typedef TBigInteger<true> SecureBigInteger;
+
+template<bool UseSecureMemory=false>
+class TBigInteger
 {
 private:
 	int _sign = 0;
-	typedef PHANTASMA_VECTOR<UInt32> Data;
+	typedef PHANTASMA_VECTOR<UInt32> Data_Fast;
+	typedef SecureVector<UInt32>     Data_Secure;
+
+	typedef typename SelectType<UseSecureMemory, Data_Secure, Data_Fast>::Type Data;
 	typedef PHANTASMA_VECTOR<Byte> Bytes;
 	Data _data;
 
@@ -34,44 +47,57 @@ private:
 			_sign = 0;
 	}
 public:
-	static const BigInteger Zero() { return BigInteger{0LL}; }
-	static const BigInteger One()  { return BigInteger{1LL}; }
+	static const TBigInteger Zero() { return TBigInteger{0LL}; }
+	static const TBigInteger One()  { return TBigInteger{1LL}; }
 
-	BigInteger() {}
+	TBigInteger() {}
 
-	BigInteger(const BigInteger& other)
+	TBigInteger(TBigInteger&& other)
+		: _sign(other._sign)
+		, _data(other._data)
+	{
+	}
+
+	TBigInteger(const TBigInteger& other)
+		: _sign(other._sign)
+		, _data(other._data)
+	{
+	}
+
+	TBigInteger& operator=(const TBigInteger& other)
 	{
 		_sign = other._sign;
 		_data = other._data;
+		return *this;
 	}
 
-	BigInteger(const UInt32* words, int numWords, int sign = 1)
+	TBigInteger(const UInt32* words, int numWords, int sign = 1)
 	{
 		_sign = sign;
 		InitFromArray(words, numWords);
 	}
 
-	BigInteger(Data&& buffer, int sign = 1)
+	TBigInteger(Data&& buffer, int sign = 1)
 	{
 		_sign = sign;
 		InitFromArray(buffer.begin(), buffer.size());
 	}
 
-	BigInteger(Data& buffer, int sign = 1)
+	TBigInteger(const Data& buffer, int sign = 1)
 	{
 		_sign = sign;
 		InitFromArray(buffer.begin(), buffer.size());
 	}
 
-	BigInteger(Int32 val) : BigInteger((Int64)val)
+	TBigInteger(Int32 val) : TBigInteger((Int64)val)
 	{
 	}
 
-	BigInteger(UInt32 val) : BigInteger((Int64)val)
+	TBigInteger(UInt32 val) : TBigInteger((Int64)val)
 	{
 	}
 
-	BigInteger(const Bytes& bytes, bool twosComplementFormatFlag)
+	TBigInteger(const Bytes& bytes, bool twosComplementFormatFlag)
 	{
 		if( bytes.empty() )
 		{
@@ -97,10 +123,10 @@ public:
 		else
 			buffer = bytes;
 		
-		*this = BigInteger(buffer, sign);
+		*this = TBigInteger(buffer, sign);
 	}
 
-	BigInteger(const Bytes& bytes, int sign = 1)
+	TBigInteger(const Bytes& bytes, int sign = 1)
 	{
 		_sign = sign;
 
@@ -126,7 +152,7 @@ public:
 		}
 	}
 		
-	BigInteger(Int64 val)
+	TBigInteger(Int64 val)
 	{
 		if (val == 0)
 		{
@@ -170,15 +196,15 @@ private:
 		else
 		{
 			_data.resize(n);
-			PHANTASMA_COPY(digits, digits+n, _data.begin());
+			PHANTASMA_COPY(digits, digits+n, &_data.front());
 		}
 	}
 		
 public:
-	BigInteger(const String& str, int radix, bool* out_error=0)
+	TBigInteger(const String& str, int radix, bool* out_error=0)
 	{
-		BigInteger bigInteger = Zero();
-		BigInteger bi = One();
+		TBigInteger bigInteger = Zero();
+		TBigInteger bi = One();
 		
 		if (0==str.compare(PHANTASMA_LITERAL("0")) || str.empty())
 		{
@@ -224,12 +250,12 @@ public:
 				bi *= radix;
 		}
 		
-		InitFromArray(bigInteger._data.begin(), bigInteger._data.size());
+		InitFromArray(&bigInteger._data.front(), bigInteger._data.size());
 	}
 
-	static BigInteger FromHex(const String& p0)
+	static TBigInteger FromHex(const String& p0)
 	{
-		return BigInteger(p0, 16);
+		return TBigInteger(p0, 16);
 	}
 
 	explicit operator int() const
@@ -261,9 +287,9 @@ public:
 		return result;
 	}
 
-	static BigInteger Abs(const BigInteger& x)
+	static TBigInteger Abs(const TBigInteger& x)
 	{
-		return BigInteger(x._data.begin(), x._data.size(), 1);
+		return TBigInteger(&x._data.front(), x._data.size(), 1);
 	}
 
 	String ToString() const
@@ -282,7 +308,7 @@ public:
 
 		const Char* digits = PHANTASMA_LITERAL("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
-		BigInteger bi = BigInteger(radix);
+		TBigInteger bi = TBigInteger(radix);
 		if (_data.empty() || (_data.size() == 1 && _data[0] == 0))
 		{
 			return String(PHANTASMA_LITERAL("0"));
@@ -290,10 +316,10 @@ public:
 		else
 		{
 			String text2;
-			BigInteger largeInteger = *this;
+			TBigInteger largeInteger = *this;
 			largeInteger._sign = 1;
-			BigInteger largeInteger2;
-			BigInteger largeInteger3;
+			TBigInteger largeInteger2;
+			TBigInteger largeInteger3;
 			while (largeInteger._data.size() > 1 || (largeInteger._data.size() == 1 && largeInteger._data[0] != 0))
 			{
 				DivideAndModulus(largeInteger, bi, largeInteger2, largeInteger3);
@@ -421,10 +447,10 @@ private:
 	}
 		
 public: 
-	BigInteger operator+(const BigInteger& b) const
+	TBigInteger operator+(const TBigInteger& b) const
 	{
-		const BigInteger& a = *this;
-		BigInteger result;
+		const TBigInteger& a = *this;
+		TBigInteger result;
 
 		//all these if-else's are to make sure we don't attempt operations that would give a negative result,
 		//allowing the large int operations to deal only in the scope of unsigned numbers
@@ -437,12 +463,12 @@ public:
 		{
 			if (Abs(a) < b)
 			{
-				result = BigInteger(Subtract(b._data, a._data));
+				result = TBigInteger(Subtract(b._data, a._data));
 				result._sign = result == 0 ? 0 : 1;
 			}
 			else
 			{
-				result = BigInteger(Subtract(a._data, b._data));
+				result = TBigInteger(Subtract(a._data, b._data));
 				result._sign = result == 0 ? 0 : -1;
 			}
 		}
@@ -450,18 +476,18 @@ public:
 		{
 			if (a < Abs(b))
 			{
-				result = BigInteger(Subtract(b._data, a._data));
+				result = TBigInteger(Subtract(b._data, a._data));
 				result._sign = result == 0 ? 0 : -1;
 			}
 			else
 			{
-				result = BigInteger(Subtract(a._data, b._data));
+				result = TBigInteger(Subtract(a._data, b._data));
 				result._sign = result == 0 ? 0 : 1;
 			}
 		}
 		else
 		{
-			result = BigInteger(Add(b._data, a._data));
+			result = TBigInteger(Add(b._data, a._data));
 			result._sign = result == 0 ? 0 : 1;
 		}
 
@@ -469,15 +495,15 @@ public:
 
 		return result;
 	}
-	BigInteger& operator +=(const BigInteger& b)
+	TBigInteger& operator +=(const TBigInteger& b)
 	{
 		return (*this = *this + b);
 	}
 
-	BigInteger operator -(const BigInteger& b) const
+	TBigInteger operator -(const TBigInteger& b) const
 	{
-		const BigInteger& a = *this;
-		BigInteger result;
+		const TBigInteger& a = *this;
+		TBigInteger result;
 
 		//all these if-else's are to make sure we don't attempt operations that would give a negative result,
 		//allowing the large int operations to deal only in the scope of unsigned numbers
@@ -485,87 +511,87 @@ public:
 		{
 			if (Abs(a) < Abs(b))
 			{
-				result = BigInteger(Subtract(b._data, a._data));
+				result = TBigInteger(Subtract(b._data, a._data));
 				result._sign = result == 0 ? 0 : 1;
 			}
 			else
 			{
-				result = BigInteger(Subtract(a._data, b._data));
+				result = TBigInteger(Subtract(a._data, b._data));
 				result._sign = result == 0 ? 0 : -1;
 			}
 		}
 		else
 		if (a._sign < 0)
 		{
-			result = BigInteger(Add(a._data, b._data));
+			result = TBigInteger(Add(a._data, b._data));
 			result._sign = result == 0 ? 0 : -1;
 		}
 		else if (b._sign < 0)
 		{
-			result = BigInteger(Add(a._data, b._data));
+			result = TBigInteger(Add(a._data, b._data));
 			result._sign = result == 0 ? 0 : 1;
 		}
 		else
 		{
 			if (a < b)
 			{
-				result = BigInteger(Subtract(b._data, a._data));
+				result = TBigInteger(Subtract(b._data, a._data));
 				result._sign = result == 0 ? 0 : -1;
 			}
 			else
 			{
-				result = BigInteger(Subtract(a._data, b._data));
+				result = TBigInteger(Subtract(a._data, b._data));
 				result._sign = result == 0 ? 0 : 1;
 			}
 		}
 			
 		return result;
 	}
-	BigInteger& operator -=(const BigInteger& b)
+	TBigInteger& operator -=(const TBigInteger& b)
 	{
 		return (*this = *this - b);
 	}
 
-	BigInteger operator *(const BigInteger& b) const
+	TBigInteger operator *(const TBigInteger& b) const
 	{
-		const BigInteger& a = *this;
-		BigInteger result;
-		result._data = BigInteger::Multiply(a._data, b._data);
+		const TBigInteger& a = *this;
+		TBigInteger result;
+		result._data = TBigInteger::Multiply(a._data, b._data);
 		result._sign = a._sign * b._sign;
 		result.Trim();
 		return result;
 	}
-	BigInteger& operator *=(const BigInteger& b)
+	TBigInteger& operator *=(const TBigInteger& b)
 	{
 		return (*this = *this * b);
 	}
 
-	BigInteger operator /(const BigInteger& b) const
+	TBigInteger operator /(const TBigInteger& b) const
 	{
-		const BigInteger& a = *this;
-		BigInteger quot, rem;
-		BigInteger::DivideAndModulus(Abs(a), Abs(b), quot, rem);
+		const TBigInteger& a = *this;
+		TBigInteger quot, rem;
+		TBigInteger::DivideAndModulus(Abs(a), Abs(b), quot, rem);
 		quot._sign = quot._sign == 0 ? 0 : a._sign * b._sign;
 		return quot;
 	}
-	BigInteger& operator /=(const BigInteger& b)
+	TBigInteger& operator /=(const TBigInteger& b)
 	{
 		return (*this = *this / b);
 	}
 
-	BigInteger operator %(const BigInteger& b) const
+	TBigInteger operator %(const TBigInteger& b) const
 	{
-		const BigInteger& a = *this;
-		BigInteger quot, rem;
-		BigInteger::DivideAndModulus(a, b, quot, rem);
+		const TBigInteger& a = *this;
+		TBigInteger quot, rem;
+		TBigInteger::DivideAndModulus(a, b, quot, rem);
 		return rem;
 	}
-	BigInteger& operator %=(const BigInteger& b)
+	TBigInteger& operator %=(const TBigInteger& b)
 	{
 		return (*this = *this % b);
 	}
 		
-	static void DivideAndModulus(const BigInteger& a, const BigInteger& b, BigInteger& quot, BigInteger& rem)
+	static void DivideAndModulus(const TBigInteger& a, const TBigInteger& b, TBigInteger& quot, TBigInteger& rem)
 	{
 		if ((int)b == 0)
 		{
@@ -577,7 +603,7 @@ public:
 		if (a._data.size() < b._data.size())
 		{
 			quot = Zero();
-			rem = BigInteger(a);
+			rem = TBigInteger(a);
 			return;
 		}
 
@@ -596,7 +622,7 @@ public:
 
 private:
 	//do not access this function directly under any circumstances, always go through DivideAndModulus
-	static void SingleDigitDivMod(const BigInteger& numerator, const BigInteger& denominator, BigInteger& quotient, BigInteger& remainder)
+	static void SingleDigitDivMod(const TBigInteger& numerator, const TBigInteger& denominator, TBigInteger& quotient, TBigInteger& remainder)
 	{
 		Data tmpQuotArray, remArray;
 		tmpQuotArray.resize(numerator._data.size() - denominator._data.size() + 1);
@@ -646,7 +672,7 @@ private:
 	}
 
 	//do not access this function directly under any circumstances, always go through DivideAndModulus
-	static void MultiDigitDivMod(const BigInteger& numerator, BigInteger denominator, BigInteger& quot, BigInteger& rem)
+	static void MultiDigitDivMod(const TBigInteger& numerator, TBigInteger denominator, TBigInteger& quot, TBigInteger& rem)
 	{
 		Data quotArray, remArray;
 		quotArray.resize(numerator._data.size() - denominator._data.size() + 1);
@@ -703,14 +729,14 @@ private:
 				tmpRemSubArray[(tmpRemSubArray.size() - 1) - k] = remArray[remIter - k];
 			}
 
-			BigInteger tmpRemBigInt(tmpRemSubArray);
-			BigInteger estimNumBigInt = denominator * (Int64)tmpQuot;  //current numerator estimate
+			TBigInteger tmpRemBigInt(tmpRemSubArray);
+			TBigInteger estimNumBigInt = denominator * (Int64)tmpQuot;  //current numerator estimate
 			while (estimNumBigInt > tmpRemBigInt)
 			{
 				tmpQuot--;
 				estimNumBigInt -= denominator;
 			}
-			BigInteger estimRemBigInt = tmpRemBigInt - estimNumBigInt;    //current remainder estimate
+			TBigInteger estimRemBigInt = tmpRemBigInt - estimNumBigInt;    //current remainder estimate
 			for (int k = 0; k < denSize; k++)
 			{
 				tmp = denominator._data.size() - k < estimRemBigInt._data.size()
@@ -724,36 +750,36 @@ private:
 			quotArray[j] = (UInt32)tmpQuot;
 		}
 
-		quot = BigInteger(quotArray);
+		quot = TBigInteger(quotArray);
 
 		ShiftRight(remArray, shiftCount);
 
-		rem = BigInteger(remArray);
+		rem = TBigInteger(remArray);
 
 		quot.Trim();
 		rem.Trim();
 	}
 	
 public:
-	static BigInteger DivideAndRoundToClosest(const BigInteger& numerator, const BigInteger& denominator)
+	static TBigInteger DivideAndRoundToClosest(const TBigInteger& numerator, const TBigInteger& denominator)
 	{
 		//from https://stackoverflow.com/a/2422723
 		return (numerator + (denominator / 2)) / denominator;
 	}
 
-	BigInteger operator >>(int bits) const
+	TBigInteger operator >>(int bits) const
 	{
 		if (_data.empty())
 			return *this;
 		bits = bits < 0 ? -bits : bits;
-		BigInteger r = *this;
+		TBigInteger r = *this;
 		ShiftRight(r._data, bits);
 		if (r._data[0] == 0 && r._data.size() == 1)
 			r._sign = 0;
 		r.Trim();
 		return r;
 	}
-	BigInteger& operator >>=(int bits)
+	TBigInteger& operator >>=(int bits)
 	{
 		if (_data.empty())
 			return *this;
@@ -813,16 +839,16 @@ private:
 		PHANTASMA_SWAP(buffer, newBuffer);
 	}
 public:
-	BigInteger operator <<(int bits) const
+	TBigInteger operator <<(int bits) const
 	{
 		if (_data.empty())
 			return *this;
 		bits = bits < 0 ? -bits : bits;
-		BigInteger r = *this;
+		TBigInteger r = *this;
 		ShiftLeft(r._data, bits);
 		return r;
 	}
-	BigInteger& operator <<=(int bits)
+	TBigInteger& operator <<=(int bits)
 	{
 		if (_data.empty())
 			return *this;
@@ -866,47 +892,47 @@ private:
 	}
 		
 public:
-	BigInteger& operator ++()
+	TBigInteger& operator ++()
 	{
 		return (*this = *this + 1);
 	}
-	BigInteger operator ++(int)
+	TBigInteger operator ++(int)
 	{
-		BigInteger pre = *this;
+		TBigInteger pre = *this;
 		*this = *this + 1;
 		return pre;
 	}
 
-	BigInteger& operator --()
+	TBigInteger& operator --()
 	{
 		return (*this = *this - 1);
 	}
-	BigInteger operator --(int)
+	TBigInteger operator --(int)
 	{
-		BigInteger pre = *this;
+		TBigInteger pre = *this;
 		*this = *this - 1;
 		return pre;
 	}
 
-	BigInteger operator -()
+	TBigInteger operator -()
 	{
-		BigInteger n = *this;
+		TBigInteger n = *this;
 		n._sign = -n._sign;
 		return n;
 	}
 
-	bool operator ==(const BigInteger& b) const
+	bool operator ==(const TBigInteger& b) const
 	{
 		return _data.size() == b._data.size() && _sign == b._sign && PHANTASMA_EQUAL(_data.begin(), _data.end(), b._data.begin());
 	}
 
-	bool operator !=(const BigInteger& b) const
+	bool operator !=(const TBigInteger& b) const
 	{
 		return _data.size() != b._data.size() || _sign != b._sign || !PHANTASMA_EQUAL(_data.begin(), _data.end(), b._data.begin());
 	}
 
 private:
-	static bool LogicalCompare(const BigInteger& a, const BigInteger& b, bool op)
+	static bool LogicalCompare(const TBigInteger& a, const TBigInteger& b, bool op)
 	{
 		if (a._sign < b._sign)
 		{
@@ -949,31 +975,31 @@ private:
 	}
 	
 public:
-	bool operator <(const BigInteger& b) const
+	bool operator <(const TBigInteger& b) const
 	{
 		return LogicalCompare(*this, b, true);
 	}
 
-	bool operator >(const BigInteger& b) const
+	bool operator >(const TBigInteger& b) const
 	{
 		return LogicalCompare(*this, b, false);
 	}
 
-	bool operator <=(const BigInteger& b) const
+	bool operator <=(const TBigInteger& b) const
 	{
-		const BigInteger& a = *this;
+		const TBigInteger& a = *this;
 		return (a == b || a < b);
 	}
 
-	bool operator >=(const BigInteger& b) const
+	bool operator >=(const TBigInteger& b) const
 	{
-		const BigInteger& a = *this;
+		const TBigInteger& a = *this;
 		return (a == b || a > b);
 	}
 
-	BigInteger operator ^(const BigInteger& b) const
+	TBigInteger operator ^(const TBigInteger& b) const
 	{
-		const BigInteger& a = *this;
+		const TBigInteger& a = *this;
 		auto aSize = a._data.size();
 		auto bSize = b._data.size();
 		auto len = PHANTASMA_MAX(aSize, bSize);
@@ -987,12 +1013,12 @@ public:
 			temp[i] = (A ^ B);
 		}
 
-		return BigInteger(std::move(temp));
+		return TBigInteger(std::move(temp));
 	}
 
-	BigInteger operator |(const BigInteger& b) const
+	TBigInteger operator |(const TBigInteger& b) const
 	{
-		const BigInteger& a = *this;
+		const TBigInteger& a = *this;
 		auto aSize = a._data.size();
 		auto bSize = b._data.size();
 		auto len = PHANTASMA_MAX(aSize, bSize);
@@ -1006,10 +1032,10 @@ public:
 			temp[i] = A | B;
 		}
 
-		return BigInteger(std::move(temp));
+		return TBigInteger(std::move(temp));
 	}
 
-	BigInteger operator ~() const
+	TBigInteger operator ~() const
 	{
 		Data buffer;
 		buffer.resize(_data.size());
@@ -1018,12 +1044,12 @@ public:
 			buffer[i] = ~_data[i];
 		}
 
-		return BigInteger(std::move(buffer));
+		return TBigInteger(std::move(buffer));
 	}
 
-	BigInteger operator &(const BigInteger& b) const
+	TBigInteger operator &(const TBigInteger& b) const
 	{
-		const BigInteger& a = *this;
+		const TBigInteger& a = *this;
 		auto aSize = a._data.size();
 		auto bSize = b._data.size();
 		auto len = PHANTASMA_MAX(aSize, bSize);
@@ -1037,10 +1063,10 @@ public:
 			temp[i] = A & B;
 		}
 
-		return BigInteger(std::move(temp));
+		return TBigInteger(std::move(temp));
 	}
 
-	bool Equals(BigInteger other) const
+	bool Equals(TBigInteger other) const
 	{
 		//BH!!!
 		//this doesn't compare _signs!?!?!?!
@@ -1052,7 +1078,7 @@ public:
 		return PHANTASMA_EQUAL(_data.begin(), _data.end(), other._data.begin());
 	}
 
-	int CompareTo(const BigInteger& other) const
+	int CompareTo(const TBigInteger& other) const
 	{
 		if (Equals(other))
 		{
@@ -1067,10 +1093,10 @@ public:
 		return 1;
 	}
 
-	static BigInteger Pow(BigInteger powBase, BigInteger powExp)
+	static TBigInteger Pow(TBigInteger powBase, TBigInteger powExp)
 	{
-		BigInteger val = One();
-		BigInteger i = Zero();
+		TBigInteger val = One();
+		TBigInteger i = Zero();
 
 		while (i < powExp)
 		{
@@ -1080,19 +1106,19 @@ public:
 		return val;
 	}
 
-	static BigInteger ModPow(BigInteger b, BigInteger exp, BigInteger mod)
+	static TBigInteger ModPow(TBigInteger b, TBigInteger exp, TBigInteger mod)
 	{
 		return b.ModPow(exp, mod);
 	}
 
 	/// <summary>
 	/// Modulo Exponentiation
-	/// Ported from http://developer.classpath.org/doc/java/math/BigInteger-source.html
+	/// Ported from http://developer.classpath.org/doc/java/math/TBigInteger-source.html
 	/// </summary>
 	/// <param name="exp">Exponential</param>
 	/// <param name="mod">Modulo</param>
-	/// <returns>BigInteger result of raising this to the power of exp and then modulo n </returns>
-	BigInteger ModPow(BigInteger exp, BigInteger mod)
+	/// <returns>TBigInteger result of raising this to the power of exp and then modulo n </returns>
+	TBigInteger ModPow(TBigInteger exp, TBigInteger mod)
 	{
 		if( mod._sign == -1 || mod == 0 )
 		{
@@ -1106,8 +1132,8 @@ public:
 		if (exp == 1)
 			return *this % mod;
 
-		BigInteger s = One();
-		BigInteger t = *this;
+		TBigInteger s = One();
+		TBigInteger t = *this;
 
 		while (exp != Zero())
 		{
@@ -1121,29 +1147,29 @@ public:
 		return s;
 	}
 
-	BigInteger ModInverse(BigInteger modulus)
+	TBigInteger ModInverse(TBigInteger modulus)
 	{
-		BigInteger array[2] =
+		TBigInteger array[2] =
 		{
 			Zero(),
 			One()
 		};
-		BigInteger array2[2] = {};
-		BigInteger array3[2] = 
+		TBigInteger array2[2] = {};
+		TBigInteger array3[2] = 
 		{
 			Zero(),
 			Zero()
 		};
 		int num = 0;
-		BigInteger bi = modulus;
-		BigInteger bigInteger = *this;
+		TBigInteger bi = modulus;
+		TBigInteger bigInteger = *this;
 		while (bigInteger._data.size() > 1 || (bigInteger._data.size() == 1 && bigInteger._data[0] != 0))
 		{
-			BigInteger bigInteger2;
-			BigInteger bigInteger3;
+			TBigInteger bigInteger2;
+			TBigInteger bigInteger3;
 			if (num > 1)
 			{
-				BigInteger bigInteger4 = (array[0] - array[1] * array2[0]) % modulus;
+				TBigInteger bigInteger4 = (array[0] - array[1] * array2[0]) % modulus;
 				array[0] = array[1];
 				array[1] = bigInteger4;
 			}
@@ -1165,7 +1191,7 @@ public:
 			return Zero();
 		}
 
-		BigInteger bigInteger5 = (array[0] - array[1] * array2[0]) % modulus;
+		TBigInteger bigInteger5 = (array[0] - array[1] * array2[0]) % modulus;
 		if (bigInteger5._sign < 0)
 		{
 			bigInteger5 += modulus;
@@ -1194,17 +1220,17 @@ public:
 		return -1;
 	}
 
-	static BigInteger Parse(const String& input, int radix = 10)
+	static TBigInteger Parse(const String& input, int radix = 10)
 	{
-		return BigInteger(input, radix);
+		return TBigInteger(input, radix);
 	}
 
-	static bool TryParse(const String& input, BigInteger& output)
+	static bool TryParse(const String& input, TBigInteger& output)
 	{
 		PHANTASMA_TRY
 		{
 			bool error = false;
-			output = BigInteger(input, 10, &error);
+			output = TBigInteger(input, 10, &error);
 			return error;
 		}
 		PHANTASMA_CATCH(...)
@@ -1233,11 +1259,11 @@ public:
 
 	bool CalcIsEven()
 	{
-		BigInteger tmp = *this % 2;
+		TBigInteger tmp = *this % 2;
 		return tmp == 0;
 	}
 
-	BigInteger Sqrt()
+	TBigInteger Sqrt()
 	{
 		if( *this < 0 )
 		{
@@ -1275,7 +1301,7 @@ public:
 			while (num3 != 0)
 			{
 				sqrtArray[num4] ^= num3;
-				BigInteger tmp(sqrtArray);
+				TBigInteger tmp(sqrtArray);
 				if (tmp * tmp > *this)
 				{
 					sqrtArray[num4] ^= num3;
@@ -1284,7 +1310,37 @@ public:
 			}
 			num3 = 0x80000000u;
 		}
-		return BigInteger(std::move(sqrtArray));
+		return TBigInteger(std::move(sqrtArray));
+	}
+
+	int ToByteArray(Byte* result, int resultSize)
+	{
+		UInt32 byteArraySize = _data.size() * 4;
+		if(!result)
+			return (int)byteArraySize;
+		if(resultSize < 0 || (int)byteArraySize > resultSize )
+		{
+			PHANTASMA_EXCEPTION("invalid argument");
+			return 0;
+		}
+
+		Byte bytes[4];
+		if( UseSecureMemory )
+		{
+			PHANTASMA_LOCKMEM(bytes, 4);
+		}
+		for (UInt32 i = 0, j = 0, end = (UInt32)_data.size(); i < end; i++, j += 4)
+		{
+			memcpy(bytes, &_data[i], 4);
+			for (int k = 0; k < 4; k++)
+				result[j + k] = bytes[k];
+		}
+		if( UseSecureMemory )
+		{
+			PHANTASMA_UNLOCKMEM(bytes, 4);
+		}
+
+		return (int)byteArraySize;
 	}
 
 	Bytes ToByteArray(bool includeSignInArray = false)
@@ -1317,7 +1373,7 @@ public:
 		//this could be optimized if needed, but likely not worth it for now
 		if (applyTwosComplement)
 		{
-			BigInteger tmp = BigInteger(result, 1) + 1; //create a biginteger with the inverted bits but with positive sign, and add 1.
+			TBigInteger tmp = TBigInteger(result, 1) + 1; //create a biginteger with the inverted bits but with positive sign, and add 1.
 
 			result = tmp.ToByteArray(true);     //when we call the ToByteArray asking to include sign, we will get an extra Byte on the array to keep sign information while in Byte[] format
 												//but the twos complement logic won't get applied again given the bigint has positive sign.
@@ -1338,7 +1394,7 @@ public:
 			buffer[i] = (Byte)~bytes[i];
 		}
 
-		BigInteger tmp = BigInteger(buffer, 1) + 1; //create a biginteger with the inverted bits but with positive sign, and add 1. result will remain with positive sign
+		TBigInteger tmp = TBigInteger(buffer, 1) + 1; //create a biginteger with the inverted bits but with positive sign, and add 1. result will remain with positive sign
 
 		buffer = tmp.ToByteArray(true); //when we call the ToByteArray asking to include sign, we will get an extra Byte on the array to make sure sign is correct 
 		//but the twos complement logic won't get applied again given the bigint has positive sign.
@@ -1360,34 +1416,35 @@ public:
 		return (int)hashCode;
 	}
 
-	BigInteger Mod(const BigInteger& b) const
+	TBigInteger Mod(const TBigInteger& b) const
 	{
 		return *this % b;
 	}
 
-	BigInteger FlipBit(int bit) const
+	TBigInteger FlipBit(int bit) const
 	{
 		return *this ^ (One() << bit);
 	}
 };
 
-inline String DecimalConversion( BigInteger value, UInt32 decimals, Char decimalPoint='.', bool alwaysShowDecimalPoint=false )
+template<bool S>
+String DecimalConversion( const TBigInteger<S>& value, UInt32 decimals, Char decimalPoint='.', bool alwaysShowDecimalPoint=false )
 {
 	//todo - is it better to just convert value to text, and then insert the decimal point in the right place? :D
 	if( decimals > 0 || alwaysShowDecimalPoint )
 	{
-		BigInteger q, r;
+		TBigInteger<S> q, r;
 		if( decimals > 0 )
 		{
-			BigInteger radix = BigInteger::Pow(10, decimals);
-			BigInteger::DivideAndModulus( value, radix, q, r );
+			TBigInteger<S> radix = TBigInteger<S>::Pow(10, decimals);
+			TBigInteger<S>::DivideAndModulus( value, radix, q, r );
 		}
 		else
 		{
 			q = value;
-			r = BigInteger::Zero();
+			r = TBigInteger<S>::Zero();
 		}
-		if( alwaysShowDecimalPoint || r != BigInteger::Zero() )
+		if( alwaysShowDecimalPoint || r != TBigInteger<S>::Zero() )
 		{
 			String result = q.ToString();
 			result.append(decimalPoint);

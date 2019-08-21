@@ -1,8 +1,6 @@
 #pragma once
 
-#ifndef PHANTASMA_API_INCLUDED
-#error "Configure and include PhantasmaAPI.h first"
-#endif 
+#include "../../Security/SecureMemory.h"
 
 #if !defined(PHANTASMA_Ed25519_PublicKeyFromSeed) || !defined(PHANTASMA_Ed25519_PrivateKeyFromSeed) || !defined(PHANTASMA_Ed25519_SignDetached) || !defined(PHANTASMA_Ed25519_ValidateDetached)
 #error "You must supply a Ed25519 implementation"
@@ -21,18 +19,14 @@ PHANTASMA_VECTOR<Byte> PublicKeyFromSeed( const Byte* bytes, int length )
 	return publicKey;
 }
 
-PHANTASMA_VECTOR<Byte> ExpandedPrivateKeyFromSeed( const Byte* bytes, int length )
+void ExpandedPrivateKeyFromSeed( Byte* output, int outputSize, const Byte* seed, int seedLength )
 {
-	if( !bytes )
-		return PHANTASMA_VECTOR<Byte>{};
-	PHANTASMA_VECTOR<Byte> privateKey;
-	privateKey.resize(64);
-	PHANTASMA_Ed25519_PrivateKeyFromSeed(&privateKey.front(), privateKey.size(), bytes, length);
-	return privateKey;
-}
-PHANTASMA_VECTOR<Byte> ExpandedPrivateKeyFromSeed( const PHANTASMA_VECTOR<Byte>& bytes )
-{
-	return ExpandedPrivateKeyFromSeed(&bytes.front(), bytes.size());
+	if(!output || !seed || outputSize != 64 || seedLength != 32 )
+	{
+		PHANTASMA_EXCEPTION("Invalid arguments");
+		return;
+	}
+	PHANTASMA_Ed25519_PrivateKeyFromSeed(output, 64, seed, 32);
 }
 
 PHANTASMA_VECTOR<Byte> Sign( const Byte* message, int messageLength, const Byte* expandedPrivateKey, int expandedPrivateKeyLength )
@@ -45,20 +39,12 @@ PHANTASMA_VECTOR<Byte> Sign( const Byte* message, int messageLength, const Byte*
 	signed_message.resize((uint32_t)size);
 	return signed_message;
 }
-PHANTASMA_VECTOR<Byte> Sign( const PHANTASMA_VECTOR<Byte>& message, const PHANTASMA_VECTOR<Byte>& expandedPrivateKey )
-{
-	return Sign(&message.front(), message.size(), &expandedPrivateKey.front(), expandedPrivateKey.size());
-}
 
 bool Verify( const Byte* signature, int signatureLength, const Byte* message, int messageLength, const Byte* publicKey, int publicKeyLength )
 {
 	if( !signature || !message || !publicKey )
 		return false;
 	return PHANTASMA_Ed25519_ValidateDetached(signature, signatureLength, message, messageLength, publicKey, publicKeyLength);
-}
-bool Verify(const PHANTASMA_VECTOR<Byte>& signature, const PHANTASMA_VECTOR<Byte>& message, const PHANTASMA_VECTOR<Byte>& publicKey)
-{
-	return Verify(&signature.front(), signature.size(), &message.front(), message.size(), &publicKey.front(), publicKey.size());
 }
 
 }}

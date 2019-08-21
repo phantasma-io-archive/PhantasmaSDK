@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "BigInteger.h"
+#include "../Security/SecureVector.h"
+#include "../Security/SecureByteArray.h"
 
 namespace phantasma {
 
@@ -8,6 +10,13 @@ void ArrayReverse(PHANTASMA_VECTOR<T>& vec)
 {
 	int last = vec.size()-1;
 	for( int i=0, end=(int)vec.size()/2; i!=end; ++i )
+		PHANTASMA_SWAP( vec[i], vec[last-i] );
+}
+template<class T>
+void ArrayReverse(T* vec, int size)
+{
+	int last = size-1;
+	for( int i=0, end=size/2; i!=end; ++i )
 		PHANTASMA_SWAP( vec[i], vec[last-i] );
 }
 
@@ -55,6 +64,57 @@ namespace Base58
 		tmp.resize(bytes.size() + leadingZeros);
 		PHANTASMA_COPY(bytes.begin(), bytes.end(), tmp.begin() + leadingZeros);
 		return tmp;
+	}
+
+	inline int DecodeSecure(Byte* output, int outputSize, const String& input)//todo - secure string
+	{
+		if((!output && outputSize > 0) || outputSize < 0)
+		{
+			PHANTASMA_EXCEPTION("invalid argument");
+			return 0;
+		}
+		if(input.empty())
+			return 0;
+
+		SecureBigInteger bi = SecureBigInteger::Zero();
+		for (int i = input.length() - 1; i >= 0; i--)
+		{
+			int index = AlphabetIndexOf(input[i]);
+			if(index < 0)
+			{
+				PHANTASMA_EXCEPTION("invalid character");
+				return 0;
+			}
+
+			bi += SecureBigInteger(index) * SecureBigInteger::Pow(58, input.length() - 1 - i);
+		}
+
+		int numBytes = bi.ToByteArray(0, 0);
+		SecureByteArray byteAllocation(numBytes, 0, false);
+		SecureByteWriter byteWriter = byteAllocation.Write();
+		Byte* bytes = byteWriter.Bytes();
+
+		bi.ToByteArray(bytes, numBytes);
+
+		ArrayReverse(bytes, numBytes);
+
+		int leadingZeros = 0;
+		for (int i = 0; i < input.length() && input[i] == Alphabet[0]; i++)
+		{
+			if( leadingZeros < outputSize )
+				output[leadingZeros] = 0;
+			leadingZeros++;
+		}
+
+		int resultSize = numBytes + leadingZeros;
+
+		int canWrite = PHANTASMA_MIN( outputSize - leadingZeros, numBytes );
+		if( canWrite > 0 )
+		{
+			PHANTASMA_COPY(bytes, bytes + canWrite, output + leadingZeros);
+		}
+
+		return resultSize;
 	}
 
 	inline String Encode(const Byte* input, int length)
