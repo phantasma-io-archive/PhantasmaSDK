@@ -25,12 +25,15 @@ public:
 	
 	//public override SignatureKind Kind => SignatureKind::Ed25519;
 	
-	template<class Enumerable>
-	bool Verify(const PHANTASMA_VECTOR<Byte>& message, Enumerable& addresses)
+	bool Verify(const PHANTASMA_VECTOR<Byte>& message, const Address* addresses, int numAddresses)
 	{
-		for(const Address& address : addresses)
+		if( bytes.empty() || message.empty() )
+			return false;
+
+		for(int i=0; i<numAddresses; ++i)
 		{
-			if (Ed25519::Verify(bytes, message, address.PublicKey()))
+			const Address& address = addresses[i];
+			if (Ed25519::Verify(&bytes.front(), bytes.size(), &message.front(), message.size(), address.PublicKey(), Address::PublicKeyLength))
 			{
 				return true;
 			}
