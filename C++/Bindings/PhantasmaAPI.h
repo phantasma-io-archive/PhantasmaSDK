@@ -36,11 +36,11 @@
 // PHANTASMA_STRING       | phantasma::String       | std::string       | Must support construction from `const phantasma::Char*`
 // PHANTASMA_STRINGBUILDER| phantasma::StringBuilder| std::stringstream | 
 // PHANTASMA_VECTOR       |                         | std::vector       | Must support `push_back` and `size` members
-// PHANTASMA_JSONVALUE    | phantasma::JSONValue    | std::string_view  | See JSON section
-// PHANTASMA_JSONARRAY    | phantasma::JSONArray    | JSONValue         | See JSON section
-// PHANTASMA_JSONDOCUMENT | phantasma::JSONDocument | std::string       | See JSON section
-// PHANTASMA_JSONBUILDER  | phantasma::JSONBuilder  | std::stringstream*| See JSON section
-// PHANTASMA_HTTPCLIENT   | phantasma::HttpClient   |                   | See HTTP section
+// PHANTASMA_JSONVALUE    | phantasma::JSONValue    | std::string_view  | See JSON and Adaptors section
+// PHANTASMA_JSONARRAY    | phantasma::JSONArray    | JSONValue         | See JSON and Adaptors section
+// PHANTASMA_JSONDOCUMENT | phantasma::JSONDocument | std::string       | See JSON and Adaptors section
+// PHANTASMA_JSONBUILDER  | phantasma::JSONBuilder  | std::stringstream*| See JSON and Adaptors section
+// PHANTASMA_HTTPCLIENT   | phantasma::HttpClient   |                   | See HTTP and Adaptors section
 //
 // The behavior of this header can further be modified by using the following 
 //  #defines (BEFORE including phantasma.h)
@@ -55,10 +55,14 @@
 //------------------------------------------------------------------------------
 // Integration
 //------------------------------------------------------------------------------
-// This API is provided in the "single header" style to support simple and flexible
-//  integration into your project (see https://github.com/nothings/single_file_libs).
-//  The implementation of function bodies will be excluded unless you define
+// The core of API is provided in the "single header" style to support simple and 
+//  flexible integration into your project 
+//  (see https://github.com/nothings/single_file_libs).
+// The implementation of function bodies will be excluded unless you define
 //  PHANTASMA_IMPLEMENTATION before including phantasma.h.
+//
+// See the "Extended/Advanced usage" section, below for details on what is excluded
+//  from this single header file.
 //
 // Typical linking:
 //  In one CPP file, before including phantasma.h:
@@ -76,8 +80,13 @@
 //------------------------------------------------------------------------------
 // Exceptions
 //------------------------------------------------------------------------------
-// Support for C++ exceptions is opt-in. Define the following (or an alternative
-//  based on your own exception classes) before including phantasma.h:
+// Support for C++ exceptions is opt-in. Before including phantasma.h, define
+//  the following to enable exceptions:
+//
+// #define PHANTASMA_EXCEPTION_ENABLE
+//
+// Alternatively, you can customize the exact type that is thrown by defining:
+//
 // #define PHANTASMA_EXCEPTION(message)                 throw std::runtime_error(message)
 // #define PHANTASMA_EXCEPTION_MESSAGE(message, string) throw std::runtime_error(string)
 //
@@ -86,12 +95,33 @@
 //------------------------------------------------------------------------------
 // To build a wide-character version of the API, define the following before
 //  including phantasma.h:
+//
 // #define PHANTASMA_CHAR          wchar_t
 // #define PHANTASMA_LITERAL(x)    L ## x
 // #define PHANTASMA_STRING        std::wstring
 // #define PHANTASMA_STRINGBUILDER std::wstringstream
 //
+// Alternatively, if '_UNICODE' is defined, then the above macros will be defined
+//  automatically.
+//
 // You should also provide a JSON and HTTP library with wide-character support.
+//
+//------------------------------------------------------------------------------
+// Adaptors
+//------------------------------------------------------------------------------
+// Parts of the Phantasma SDK are designed to plug into external features, such
+//  as HTTP communications, JSON encoding and advanced cryptography.
+// You can configure the SDK to connect to your own implemenations, or existing
+//  libraries.
+// To make integration easier, we provide several "adaptor" header files that 
+//  contain the required configuration to connect the Phantasma SDK to existing
+//  popular open source libraries for different features:
+//
+// Library   | Features     | #include file                     | Library URL
+// C++ REST  | HTTP + JSON  | Adapters/PhantasmaAPI_cpprest.h   | https://github.com/microsoft/cpprestsdk 
+// libcurl   | HTTP         | Adapters/PhantasmaAPI_curl.h      | https://curl.haxx.se/libcurl/        
+// RapidJSON | JSON         | Adapters/PhantasmaAPI_rapidjson.h | http://rapidjson.org/ 
+// Sodium    | Cryptography | Adapters/PhantasmaAPI_sodium.h    | https://libsodium.org
 //
 //------------------------------------------------------------------------------
 // JSON
@@ -99,6 +129,8 @@
 // This header contains JSON parsing and building code, but it is written to be
 //  as simple as possible (approx 200 lines of code) and is not high-performance
 //  or highly robust.
+//
+// The CPP REST and RapidJSON adaptors implement these macros.
 //
 // It is recommended that you supply another JSON-parsing API, by defining the
 //  following macros before including phantasma.h:
@@ -146,6 +178,7 @@
 // This header does not contain a HTTP client, nor a dependency on any specific
 //  HTTP client library. If you do not supply a HTTP client library, then only
 //  the Low-level phantasma API (PhantasmaJsonAPI) is available.
+// The CPP REST and libcurl adaptors implement these macros.
 //
 // To enable the PhantasmaAPI class, defining the following macro before 
 //  including phantasma.h:
@@ -160,6 +193,56 @@
 // }
 //
 //------------------------------------------------------------------------------
+// Extended/Advanced usage
+//------------------------------------------------------------------------------
+// This header file contains the entirety of the RPC API requried to communicate 
+//  with a Phantasma node. If you are not trying to create and transactions, this 
+//  may be enough for you.
+// However, for advanced usage, such as creating and signing transactions, much
+//  more code is required, including cryptography, N-bit ingeger arithmetic, etc.
+// The other header files that are included in this distribution, in sub-folders
+//  provide these extra features, listed below:
+//
+//  Directory     | Features
+//   Adapters     | Configuration for this library to communicate with 3rd party libraries
+//   Blockchain   | Transactions
+//   Cryptography | Public/Private keys, Signatures, Random numbers, Encryption
+//   Numerics     | N-bit integer implementation. Base58 ASCII encoding.
+//   Security     | Practical memory protection.
+//
+//------------------------------------------------------------------------------
+// - Extended/Advanced usage - Security configuration
+//------------------------------------------------------------------------------
+//   To securely process transactions and private keys, it is strongly advised to 
+//   pair the PhantasmaAPI with strong 3rd party security library.
+//   The libSodium adaptor implements these macros.
+//   
+//   #define                    | 
+//   PHANTASMA_RANDOMBYTES      | Fill a memory range with cryptographically secure pseudo-random numbers
+//   PHANTASMA_WIPEMEM          | Fill a memory range with 0's in a way that won't be "optimized away"
+//                              | 
+//   PHANTASMA_LOCKMEM          | Pin the memory pages containing this range, and otherwise inform the OS that it contains secrets.
+//   PHANTASMA_UNLOCKMEM        | Undo the actions of PHANTASMA_LOCKMEM, but also fill the memory range with 0's as with PHANTASMA_WIPEMEM.
+//                              | 
+//   PHANTASMA_SECURE_ALLOC     | Similar to malloc, but should return dedicated pages that can have their access permissions modified.
+//   PHANTASMA_SECURE_FREE      | Similar to free - used with allocations returned from PHANTASMA_SECURE_ALLOC
+//   PHANTASMA_SECURE_NOACCESS  | Used with allocations returned from PHANTASMA_SECURE_ALLOC. Mark the pages as non-readable.
+//   PHANTASMA_SECURE_READONLY  | Used with allocations returned from PHANTASMA_SECURE_ALLOC. Mark the pages as read only.
+//   PHANTASMA_SECURE_READWRITE | Used with allocations returned from PHANTASMA_SECURE_ALLOC. Mark the pages as writable.
+//
+//------------------------------------------------------------------------------
+// - Extended/Advanced usage - Cryptography configuration
+//------------------------------------------------------------------------------
+//  To create or validate transactions, an EdDSA Ed25519 implementation is requied.
+//   The libSodium adaptor implements these macros.
+//   
+//   #define                              | 
+//   PHANTASMA_Ed25519_PublicKeyFromSeed  | Generate a 32 byte public key from a 32 byte seed.
+//   PHANTASMA_Ed25519_PrivateKeyFromSeed | Generate a 64 byte public key from a 32 byte seed.
+//   PHANTASMA_Ed25519_SignDetached       | Generate a 64 byte signature from a message and a private key.
+//   PHANTASMA_Ed25519_ValidateDetached   | Validate a 64 byte signature using a public key.
+//
+//
 
 #if !defined(PHANTASMA_STRING) || !defined(PHANTASMA_JSONDOCUMENT) || !defined(PHANTASMA_JSONVALUE)
 # include <string>

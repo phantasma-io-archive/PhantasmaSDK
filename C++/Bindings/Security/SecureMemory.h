@@ -3,8 +3,6 @@
 #error "Configure and include PhantasmaAPI.h first"
 #endif 
 
-#include <type_traits>
-
 #if !defined(PHANTASMA_SECURE_ALLOC) || !defined(PHANTASMA_SECURE_FREE)
 # include <cstdlib>
 #endif
@@ -52,11 +50,11 @@ public:
 		: pointer(pointer)
 		, size(size)
 	{
-		PHANTASMA_LOCKMEM(pointer, size);
+		PHANTASMA_LOCKMEM(pointer, size); // pins the pages
 	}
 	~MemoryPin()
 	{
-		PHANTASMA_UNLOCKMEM(pointer, size);
+		PHANTASMA_UNLOCKMEM(pointer, size); // unpins AND also wipes this range with zero!
 	}
 private:
 	MemoryPin(const MemoryPin&);

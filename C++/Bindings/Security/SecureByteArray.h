@@ -3,58 +3,15 @@
 
 namespace phantasma {
 
-class SecureByteArray;
+class SecureByteReader;
+class SecureByteWriter;
 
-class SecureByteReader
-{
-public:
-	~SecureByteReader();
-	SecureByteReader( SecureByteReader& other )
-		: data( other.data )
-		, owner( other.owner )
-		, size( other.size )
-	{
-		other.data = 0;
-		other.owner = 0;
-	}
-
-	int         Size()  const { return size; }
-	const Byte* Bytes() const { return data; }
-private:
-	friend class SecureByteArray;
-	SecureByteReader( const Byte* data, const SecureByteArray* owner, int size )
-		: data( data ), owner( owner ), size( size ) {}
-	void operator=(const SecureByteReader&);
-	const Byte* data;
-	const SecureByteArray* owner;
-	int size;
-};
-
-class SecureByteWriter
-{
-public:
-	~SecureByteWriter();
-	SecureByteWriter( SecureByteWriter& other )
-		: data( other.data )
-		, owner( other.owner )
-		, size( other.size )
-	{
-		other.data = 0;
-		other.owner = 0;
-	}
-
-	int   Size()  const { return size; }
-	Byte* Bytes() const { return data; }
-private:
-	friend class SecureByteArray;
-	SecureByteWriter( Byte* data, SecureByteArray* owner, int size )
-		: data( data ), owner( owner ), size( size ) {}
-	void operator=(const SecureByteWriter&);
-	Byte* data;
-	SecureByteArray* owner;
-	int size;
-};
-
+// This is a simple array of bytes, designed to store secret/private data that should never be leaked.
+// If the data is intended to only be accessed rarely, then the 'protectAccess' option (defaults to true)
+//  will mark the pages as non-readable to prevent accidental (or malicious) copying of the data.
+// The Read and Write methods will temporarilly transition the array to a readable or writable state, and 
+//  then automatically transition it back to a non-readable state when the user completes their read/write
+//  operations.
 class SecureByteArray
 {
 public:
@@ -129,21 +86,9 @@ public:
 			PHANTASMA_SECURE_NOACCESS(m_data);
 	}
 
-	SecureByteReader Read() const
-	{
-		if( m_protectAccess && m_readers == 0 && m_writers == 0 )
-			PHANTASMA_SECURE_READONLY(m_data);
-		++m_readers;
-		return { m_data, this, m_size };
-	}
-
-	SecureByteWriter Write()
-	{
-		if( m_protectAccess && m_writers == 0 )
-			PHANTASMA_SECURE_READWRITE(m_data);
-		++m_writers;
-		return { m_data, this, m_size };
-	}
+	UInt32           Size() const { return (UInt32)m_size; }
+	SecureByteReader Read() const;
+	SecureByteWriter Write();
 private:
 	friend class SecureByteReader;
 	friend class SecureByteWriter;
@@ -177,16 +122,78 @@ private:
 	bool m_protectAccess = true;
 };
 
-inline SecureByteReader::~SecureByteReader()
+class SecureByteReader
 {
-	if( owner )
-		owner->UnlockReader(data);
+public:
+	SecureByteReader( SecureByteReader& other )
+		: data( other.data )
+		, owner( other.owner )
+		, size( other.size )
+	{
+		other.data = 0;
+		other.owner = 0;
+	}
+	~SecureByteReader()
+	{
+		if( owner )
+			owner->UnlockReader(data);
+	}
+
+	int         Size()  const { return size; }
+	const Byte* Bytes() const { return data; }
+private:
+	friend class SecureByteArray;
+	SecureByteReader( const Byte* data, const SecureByteArray* owner, int size )
+		: data( data ), owner( owner ), size( size ) {}
+	void operator=(const SecureByteReader&);
+	const Byte* data;
+	const SecureByteArray* owner;
+	int size;
+};
+
+class SecureByteWriter
+{
+public:
+	SecureByteWriter( SecureByteWriter& other )
+		: data( other.data )
+		, owner( other.owner )
+		, size( other.size )
+	{
+		other.data = 0;
+		other.owner = 0;
+	}
+	~SecureByteWriter()
+	{
+		if( owner )
+			owner->UnlockWriter(data);
+	}
+
+	int   Size()  const { return size; }
+	Byte* Bytes() const { return data; }
+private:
+	friend class SecureByteArray;
+	SecureByteWriter( Byte* data, SecureByteArray* owner, int size )
+		: data( data ), owner( owner ), size( size ) {}
+	void operator=(const SecureByteWriter&);
+	Byte* data;
+	SecureByteArray* owner;
+	int size;
+};
+
+inline SecureByteReader SecureBytArray::Read() const
+{
+	if( m_protectAccess && m_readers == 0 && m_writers == 0 )
+		PHANTASMA_SECURE_READONLY(m_data);
+	++m_readers;
+	return { m_data, this, m_size };
 }
 
-inline SecureByteWriter::~SecureByteWriter()
+inline SecureByteWriter SecureBytArray::Write()
 {
-	if( owner )
-		owner->UnlockWriter(data);
+	if( m_protectAccess && m_writers == 0 )
+		PHANTASMA_SECURE_READWRITE(m_data);
+	++m_writers;
+	return { m_data, this, m_size };
 }
 
 }
