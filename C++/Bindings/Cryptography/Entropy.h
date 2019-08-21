@@ -1,13 +1,12 @@
 ﻿#pragma once
+#ifndef PHANTASMA_API_INCLUDED
+#error "Configure and include PhantasmaAPI.h first"
+#endif 
 
 namespace phantasma {
 
 namespace Entropy
 {
-#ifndef PHANTASMA_WIPEMEM
-# define PHANTASMA_WIPEMEM(buffer, size) memset(buffer, 0, size)
-#endif
-
 	void GetRandomBytes( Byte* output, int length )
 	{
 #ifdef PHANTASMA_RANDOMBYTES

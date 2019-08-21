@@ -77,6 +77,15 @@ bool Ed25519_ValidateDetached( const uint8_t* signature, int signatureLength, co
 #define PHANTASMA_RANDOMBYTES(buffer, size) randombytes_buf(buffer, size)
 #define PHANTASMA_WIPEMEM(buffer, size)     sodium_memzero(buffer, size)
 
+#define PHANTASMA_LOCKMEM(  pointer, size)     sodium_mlock(  pointer, size)
+#define PHANTASMA_UNLOCKMEM(pointer, size)     sodium_munlock(pointer, size)
+
+#define PHANTASMA_SECURE_ALLOC(size)       sodium_malloc(size)
+#define PHANTASMA_SECURE_FREE(ptr)         sodium_free(ptr)
+#define PHANTASMA_SECURE_NOACCESS(ptr)     sodium_mprotect_noaccess(ptr)
+#define PHANTASMA_SECURE_READONLY(ptr)     sodium_mprotect_readonly(ptr)
+#define PHANTASMA_SECURE_READWRITE(ptr)    sodium_mprotect_readwrite(ptr)
+
 #define PHANTASMA_Ed25519_PublicKeyFromSeed(output, outputLength, seed, seedLength)                                        \
                   Ed25519_PublicKeyFromSeed(output, outputLength, seed, seedLength)
 #define PHANTASMA_Ed25519_PrivateKeyFromSeed(output, outputLength, seed, seedLength)                                       \

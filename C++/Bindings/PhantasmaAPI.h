@@ -191,6 +191,10 @@
 # include <codecvt>
 #endif
 
+#ifndef PHANTASMA_MIN
+# define PHANTASMA_MIN(a, b) std::min(a, b)
+#endif
+
 #ifndef PHANTASMA_MAX
 # define PHANTASMA_MAX(a, b) std::max(a, b)
 #endif
