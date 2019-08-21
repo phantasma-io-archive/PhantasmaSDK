@@ -476,6 +476,9 @@ namespace json
 #endif
 }
 
+namespace rpc
+{
+
 {{#each types}}
 struct {{#fix-type Key}}{{#parse-lines false}}{{#new-line}}
 {
@@ -736,6 +739,7 @@ PHANTASMA_FUNCTION {{#if Info.ReturnType.IsArray}}PHANTASMA_VECTOR<{{/if}}{{#fix
 }
 {{/each}}
 #endif
+}
 
 namespace json
 {
