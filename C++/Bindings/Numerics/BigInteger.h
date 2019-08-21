@@ -1315,7 +1315,8 @@ public:
 
 	int ToByteArray(Byte* result, int resultSize)
 	{
-		UInt32 byteArraySize = _data.size() * 4;
+		int bitLength = GetBitLength();
+		UInt32 byteArraySize = (bitLength / 8) + (UInt32)((bitLength % 8 > 0) ? 1 : 0);
 		if(!result)
 			return (int)byteArraySize;
 		if(resultSize < 0 || (int)byteArraySize > resultSize )
@@ -1333,7 +1334,11 @@ public:
 		{
 			memcpy(bytes, &_data[i], 4);
 			for (int k = 0; k < 4; k++)
+			{
+				if (j + k >= byteArraySize)
+					break;
 				result[j + k] = bytes[k];
+			}
 		}
 		if( UseSecureMemory )
 		{
@@ -1360,8 +1365,8 @@ public:
 			{
 				if (!applyTwosComplement && bytes[k] == 0)
 					continue;
-				if (applyTwosComplement && j + k >= byteArraySize)
-					continue;
+				if (j + k >= byteArraySize)
+					break;
 
 				if (applyTwosComplement)
 					result[j + k] = (Byte)(bytes[k] ^ 0xFF);

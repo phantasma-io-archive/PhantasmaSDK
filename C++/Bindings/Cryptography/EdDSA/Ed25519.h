@@ -9,13 +9,20 @@
 namespace phantasma {
 namespace Ed25519 {
 
-PHANTASMA_VECTOR<Byte> PublicKeyFromSeed( const Byte* bytes, int length )
+void PublicKeyFromSeed( Byte* output, int outputSize, const Byte* seed, int seedLength )
 {
-	if( !bytes )
-		return PHANTASMA_VECTOR<Byte>{};
+	if(!output || !seed || outputSize != 32 || seedLength != 32 )
+	{
+		PHANTASMA_EXCEPTION("Invalid arguments");
+		return;
+	}
+	PHANTASMA_Ed25519_PublicKeyFromSeed(output, 32, seed, 32);
+}
+PHANTASMA_VECTOR<Byte> PublicKeyFromSeed( const Byte* seed, int seedLength )
+{
 	PHANTASMA_VECTOR<Byte> publicKey;
 	publicKey.resize(32);
-	PHANTASMA_Ed25519_PublicKeyFromSeed(&publicKey.front(), publicKey.size(), bytes, length);
+	PublicKeyFromSeed(&publicKey.front(), publicKey.size(), seed, seedLength);
 	return publicKey;
 }
 

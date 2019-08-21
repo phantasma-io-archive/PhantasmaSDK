@@ -63,28 +63,7 @@ public:
 		m_size = other.m_size;
 		other.m_data = 0;
 	}
-	SecureByteArray& operator=( const SecureByteArray& other )
-	{
-		if( m_data )
-			PHANTASMA_SECURE_FREE(m_data);
-
-		int size = other.m_size;
-		bool protectAccess = other.m_protectAccess;
-		m_protectAccess = protectAccess;
-		m_size = size;
-		m_data = (Byte*)PHANTASMA_SECURE_ALLOC(size);
-		if( other.m_data )
-		{
-			SecureByteReader read = other.Read();
-			PHANTASMA_COPY(read.Bytes(), read.Bytes()+size, m_data);
-		}
-		else
-		{
-			PHANTASMA_WIPEMEM(m_data, size);
-		}
-		if( protectAccess )
-			PHANTASMA_SECURE_NOACCESS(m_data);
-	}
+	SecureByteArray& operator=( const SecureByteArray& other );
 
 	UInt32           Size() const { return (UInt32)m_size; }
 	SecureByteReader Read() const;
@@ -180,7 +159,30 @@ private:
 	int size;
 };
 
-inline SecureByteReader SecureBytArray::Read() const
+inline SecureByteArray& SecureByteArray::operator=( const SecureByteArray& other )
+{
+	if( m_data )
+		PHANTASMA_SECURE_FREE(m_data);
+
+	int size = other.m_size;
+	bool protectAccess = other.m_protectAccess;
+	m_protectAccess = protectAccess;
+	m_size = size;
+	m_data = (Byte*)PHANTASMA_SECURE_ALLOC(size);
+	if( other.m_data )
+	{
+		SecureByteReader read = other.Read();
+		PHANTASMA_COPY(read.Bytes(), read.Bytes()+size, m_data);
+	}
+	else
+	{
+		PHANTASMA_WIPEMEM(m_data, size);
+	}
+	if( protectAccess )
+		PHANTASMA_SECURE_NOACCESS(m_data);
+}
+
+inline SecureByteReader SecureByteArray::Read() const
 {
 	if( m_protectAccess && m_readers == 0 && m_writers == 0 )
 		PHANTASMA_SECURE_READONLY(m_data);
@@ -188,7 +190,7 @@ inline SecureByteReader SecureBytArray::Read() const
 	return { m_data, this, m_size };
 }
 
-inline SecureByteWriter SecureBytArray::Write()
+inline SecureByteWriter SecureByteArray::Write()
 {
 	if( m_protectAccess && m_writers == 0 )
 		PHANTASMA_SECURE_READWRITE(m_data);

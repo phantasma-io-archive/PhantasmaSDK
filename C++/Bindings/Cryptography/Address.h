@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "../Numerics/Base58.h"
+#include "EdDSA/Ed25519.h"
 
 namespace phantasma {
 
@@ -41,12 +42,6 @@ public:
 	Address(const PHANTASMA_VECTOR<Byte>& publicKey)
 		: Address(&publicKey.front(), publicKey.size())
 	{}
-
-	Address(PHANTASMA_VECTOR<Byte>&& publicKey)
-		: Address(&publicKey.front(), publicKey.size())
-	{
-		PHANTASMA_WIPEMEM(&publicKey.front(), publicKey.size());
-	}
 	
 	bool operator ==( const Address& B ) const { return  PHANTASMA_EQUAL(_publicKey, _publicKey + PublicKeyLength, B._publicKey); }
 	bool operator !=( const Address& B ) const { return !PHANTASMA_EQUAL(_publicKey, _publicKey + PublicKeyLength, B._publicKey); }
@@ -60,11 +55,25 @@ public:
 		return Text();
 	}
 
-	template<class KeyPair>//TODO (tricking compiler into accepting this code...)
-	static Address FromWIF(const String& WIF)
+	static Address FromWIF(const String& wif)//todo - secure memory string
 	{
-		var keyPair = KeyPair::FromWIF(WIF);
-		return keyPair.Address;
+		if( wif.empty() )
+		{
+			PHANTASMA_EXCEPTION( "WIF required" );
+			return Address();
+		}
+		Byte publicKey[32];
+		{
+			PinnedBytes<34> data;
+			int size = Base58::DecodeSecure(data.bytes, 34, wif);
+			if( size != 34 || data.bytes[0] != 0x80 || data.bytes[33] != 0x01 )
+			{
+				PHANTASMA_EXCEPTION( "Invalid WIF format" );
+				return Address();
+			}
+			Ed25519::PublicKeyFromSeed( publicKey, 32, &data.bytes[1], 32 );
+		}
+		return Address( publicKey, 32 );
 	}
 
 	static Address FromText(const String& text, bool* out_error=0)

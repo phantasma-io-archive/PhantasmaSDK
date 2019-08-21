@@ -32,6 +32,7 @@ public:
 		Unlock();
 		data = other.data;
 		Lock();
+		return *this;
 	}
 
 	auto  begin()       { return data.begin(); }
@@ -44,7 +45,6 @@ public:
 	auto  empty() const { return data.empty(); }
 	auto& front()       { return data.front(); }
 	auto& front() const { return data.front(); }
-	void pop_back()     { data.pop_back(); }
 	auto& operator[](int i)       { return data[i]; }
 	auto& operator[](int i) const { return data[i]; }
 	
@@ -76,7 +76,10 @@ public:
 	{
 		if( data.capacity() > data.size() ) // relying on std C++ vector iterator invalidation rules here
 		{
+			bool wasEmpty = data.empty();
 			data.push_back(t);
+			if( wasEmpty )
+				PHANTASMA_LOCKMEM( &data.front(), data.capacity() * sizeof(T) );
 		}
 		else
 		{
@@ -86,6 +89,16 @@ public:
 			Unlock();
 			PHANTASMA_SWAP(data, clone);
 			Lock();
+		}
+	}
+
+	void pop_back() 
+	{ 
+		bool wasEmpty = data.empty();
+		data.pop_back();
+		if(!wasEmpty && data.empty())
+		{
+			PHANTASMA_UNLOCKMEM( &data.front(), data.capacity() * sizeof(T) );
 		}
 	}
 private:
