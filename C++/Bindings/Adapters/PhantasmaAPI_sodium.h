@@ -99,4 +99,6 @@ bool Ed25519_ValidateDetached( const uint8_t* signature, int signatureLength, co
 #define PHANTASMA_Ed25519_ValidateDetached(signature, signatureLength, message, messageLength, publicKey, publicKeyLength) \
                   Ed25519_ValidateDetached(signature, signatureLength, message, messageLength, publicKey, publicKeyLength)
 
+#define PHANTASMA_SHA256(output, outputSize, input, inputSize) crypto_hash_sha256(output, input, inputSize)
+
 }
