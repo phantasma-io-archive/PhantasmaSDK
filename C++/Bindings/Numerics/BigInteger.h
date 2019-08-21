@@ -151,6 +151,32 @@ public:
 			InitFromArray(uintArray.begin(), uintArray.size());
 		}
 	}
+
+	TBigInteger(const Byte* bytes, int numBytes, int sign = 1)
+	{
+		_sign = sign;
+
+		if( (numBytes % 4) == 0 )
+		{
+			InitFromArray((UInt32*)bytes, numBytes/4);
+		}
+		else
+		{
+			Data uintArray;
+			uintArray.resize((numBytes+3) / 4);
+
+			int bytePosition = 0;
+			for (int i = 0, j = -1, end = (int)numBytes; i < end; i++)
+			{
+				bytePosition = i % 4;
+				if (bytePosition == 0)
+					j++;
+				uintArray[j] |= (UInt32)(bytes[i] << (bytePosition * 8));
+			}
+
+			InitFromArray(uintArray.begin(), uintArray.size());
+		}
+	}
 		
 	TBigInteger(Int64 val)
 	{
@@ -914,7 +940,7 @@ public:
 		return pre;
 	}
 
-	TBigInteger operator -()
+	TBigInteger operator -() const
 	{
 		TBigInteger n = *this;
 		n._sign = -n._sign;
@@ -1118,7 +1144,7 @@ public:
 	/// <param name="exp">Exponential</param>
 	/// <param name="mod">Modulo</param>
 	/// <returns>TBigInteger result of raising this to the power of exp and then modulo n </returns>
-	TBigInteger ModPow(TBigInteger exp, TBigInteger mod)
+	TBigInteger ModPow(TBigInteger exp, TBigInteger mod) const
 	{
 		if( mod._sign == -1 || mod == 0 )
 		{
@@ -1147,7 +1173,7 @@ public:
 		return s;
 	}
 
-	TBigInteger ModInverse(TBigInteger modulus)
+	TBigInteger ModInverse(TBigInteger modulus) const
 	{
 		TBigInteger array[2] =
 		{
@@ -1199,12 +1225,12 @@ public:
 		return bigInteger5;
 	}
 
-	bool TestBit(int index)
+	bool TestBit(int index) const
 	{
 		return (*this & (One() << index)) > Zero();
 	}
 
-	int GetLowestSetBit()
+	int GetLowestSetBit() const
 	{
 		if (_sign == 0)
 			return -1;
@@ -1240,7 +1266,7 @@ public:
 		}
 	}
 
-	int GetBitLength()
+	int GetBitLength() const
 	{
 		if (_data.empty() || (_data.size() == 1 && _data[0] == 0))
 			return 0;
@@ -1252,18 +1278,18 @@ public:
 		return (int)result;
 	}
 
-	Data ToUintArray()
+	Data ToUintArray() const
 	{
 		return _data;
 	}
 
-	bool CalcIsEven()
+	bool CalcIsEven() const
 	{
 		TBigInteger tmp = *this % 2;
 		return tmp == 0;
 	}
 
-	TBigInteger Sqrt()
+	TBigInteger Sqrt() const
 	{
 		if( *this < 0 )
 		{
@@ -1313,7 +1339,7 @@ public:
 		return TBigInteger(std::move(sqrtArray));
 	}
 
-	int ToByteArray(Byte* result, int resultSize)
+	int ToByteArray(Byte* result, int resultSize) const
 	{
 		int bitLength = GetBitLength();
 		UInt32 byteArraySize = (bitLength / 8) + (UInt32)((bitLength % 8 > 0) ? 1 : 0);
@@ -1348,7 +1374,7 @@ public:
 		return (int)byteArraySize;
 	}
 
-	Bytes ToByteArray(bool includeSignInArray = false)
+	Bytes ToByteArray(bool includeSignInArray = false) const
 	{
 		int bitLength = GetBitLength();
 		UInt32 byteArraySize = (bitLength / 8) + (UInt32)((bitLength % 8 > 0) ? 1 : 0) + (includeSignInArray ? 1 : 0);
