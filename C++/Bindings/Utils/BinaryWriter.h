@@ -4,6 +4,9 @@
 #include "../Numerics/BigInteger.h"
 
 namespace phantasma {
+class Hash;
+class Address;
+class Signature;
 
 class BinaryWriter
 {
@@ -151,6 +154,25 @@ public:
 
 		WriteVarInt(numBytes);
 		Write(bytes, numBytes);
+	}
+
+
+	void WriteAddress(const Address& address)
+	{
+		WriteSerializable(address);
+	}
+	void WriteHash(const Hash& hash)
+	{
+		WriteSerializable(hash);
+	}
+	void WriteSignature(const Signature& hash)
+	{
+		WriteSerializable(hash);
+	}
+	template<class T, typename std::enable_if<std::is_base_of<Serializable, T>::value>::type* = nullptr>
+	void WriteSerializable(const T& s)
+	{
+		s.SerializeData(*this);
 	}
 };
 

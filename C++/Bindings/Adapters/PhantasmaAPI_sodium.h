@@ -5,6 +5,8 @@
 //------------------------------------------------------------------------------
 // This header supplies the Phantasma API with crypto features provided by the 
 //  libsodium library (https://libsodium.org) 
+//
+// Make sure you call sodium_init in your own application before using Phantasma!
 //------------------------------------------------------------------------------
 
 namespace phantasma { 
@@ -46,7 +48,7 @@ uint64_t Ed25519_SignAttached( uint8_t* output, int outputLength, const uint8_t*
 
 uint64_t Ed25519_SignDetached( uint8_t* output, int outputLength, const uint8_t* message, int messageLength, const uint8_t* privateKey, int privateKeyLength )
 {
-	if( ((uint32)outputLength != crypto_sign_ed25519_BYTES) ||
+	if( ((uint32)outputLength < crypto_sign_ed25519_BYTES) ||
 		((uint32)privateKeyLength != crypto_sign_ed25519_SECRETKEYBYTES) ||
 		messageLength < 0)
 		return 0;
@@ -77,14 +79,14 @@ bool Ed25519_ValidateDetached( const uint8_t* signature, int signatureLength, co
 #define PHANTASMA_RANDOMBYTES(buffer, size) randombytes_buf(buffer, size)
 #define PHANTASMA_WIPEMEM(buffer, size)     sodium_memzero(buffer, size)
 
-#define PHANTASMA_LOCKMEM(  pointer, size)     sodium_mlock(  pointer, size)
-#define PHANTASMA_UNLOCKMEM(pointer, size)     sodium_munlock(pointer, size)
+#define PHANTASMA_LOCKMEM(  pointer, size)  sodium_mlock(  pointer, size)
+#define PHANTASMA_UNLOCKMEM(pointer, size)  sodium_munlock(pointer, size)
 
-#define PHANTASMA_SECURE_ALLOC(size)       sodium_malloc(size)
-#define PHANTASMA_SECURE_FREE(ptr)         sodium_free(ptr)
-#define PHANTASMA_SECURE_NOACCESS(ptr)     sodium_mprotect_noaccess(ptr)
-#define PHANTASMA_SECURE_READONLY(ptr)     sodium_mprotect_readonly(ptr)
-#define PHANTASMA_SECURE_READWRITE(ptr)    sodium_mprotect_readwrite(ptr)
+#define PHANTASMA_SECURE_ALLOC(size)        sodium_malloc(size)
+#define PHANTASMA_SECURE_FREE(ptr)          sodium_free(ptr)
+#define PHANTASMA_SECURE_NOACCESS(ptr)      sodium_mprotect_noaccess(ptr)
+#define PHANTASMA_SECURE_READONLY(ptr)      sodium_mprotect_readonly(ptr)
+#define PHANTASMA_SECURE_READWRITE(ptr)     sodium_mprotect_readwrite(ptr)
 
 #define PHANTASMA_Ed25519_PublicKeyFromSeed(output, outputLength, seed, seedLength)                                        \
                   Ed25519_PublicKeyFromSeed(output, outputLength, seed, seedLength)

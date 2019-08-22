@@ -131,10 +131,10 @@ public:
 	ScriptBuilder& EmitLoad( Byte reg, const TSerializable& val )
 	{
 		BinaryWriter temp;
-		val.SerializeData( writer );
+		val.SerializeData( temp );
 
-		PHANTASMA_VECTOR<Byte> bytes = temp.ToArray();
-		EmitLoad( reg, &bytes.front(), bytes.size(), VMType::Bytes );
+		const PHANTASMA_VECTOR<Byte>& bytes = temp.ToArray();
+		EmitLoad( reg, bytes.empty() ? 0 : &bytes.front(), bytes.size(), VMType::Bytes );
 		return *this;
 	}
 

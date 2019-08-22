@@ -5,6 +5,7 @@
 #include "../Cryptography/Signature.h"
 #include "../Utils/Timestamp.h"
 #include "../utils/Serializable.h"
+#include "../utils/BinaryWriter.h"
 
 namespace phantasma
 {
@@ -37,15 +38,15 @@ public:
 	}
 
 	template<class BinaryReader>
-	static Transaction Unserialize( BinaryReader reader )
+	static Transaction Unserialize( BinaryReader& reader )
 	{
-		var tx = new Transaction();
+		Transaction tx;
 		tx.UnserializeData( reader );
 		return tx;
 	}
 
 	template<class BinaryWriter>
-	void Serialize( BinaryWriter writer, bool withSignature )
+	void Serialize( BinaryWriter& writer, bool withSignature ) const
 	{
 		writer.WriteVarString( m_nexusName );
 		writer.WriteVarString( m_chainName );
@@ -55,7 +56,7 @@ public:
 		if( withSignature )
 		{
 			writer.WriteVarInt( m_signatures.size() );
-			for( coinst auto& signature : m_signatures )
+			for( const auto& signature : m_signatures )
 			{
 				writer.WriteSignature( signature );
 			}
@@ -111,12 +112,12 @@ public:
 	{
 	}
 
-	Transaction( const String& nexusName, const String& chainName, const PHANTASMA_VECTOR<Byte>& script, Timestamp expiration, const PHANTASMA_VECTOR<Signature>& signatures )
+	Transaction( const Char* nexusName, const Char* chainName, const PHANTASMA_VECTOR<Byte>& script, Timestamp expiration, const PHANTASMA_VECTOR<Signature>* signatures = 0 )
 		: m_nexusName(nexusName)
 		, m_chainName(chainName)
 		, m_script(script)
 		, m_expiration(expiration)
-		, m_signatures(signatures)
+		, m_signatures(signatures ? *signatures : PHANTASMA_VECTOR<Signature>{})
 	{
 		if(script.empty())
 		{
@@ -126,13 +127,16 @@ public:
 		UpdateHash();
 	}
 
-	PHANTASMA_VECTOR<Byte> ToByteArray( bool withSignature )
+	PHANTASMA_VECTOR<Byte> ToByteArray( bool withSignature ) const
 	{
-		//todo 
-	//	BinaryWriter writer;
-	//	Serialize( writer, withSignature );
-	//	return writer.ToArray();
-		return PHANTASMA_VECTOR<Byte>{};
+		BinaryWriter writer;
+		Serialize( writer, withSignature );
+		return writer.ToArray();
+	}
+
+	String ToRawTransaction() const
+	{
+		return Base16::Encode(ToByteArray(true));
 	}
 
 	bool HasSignatures() const
@@ -242,8 +246,7 @@ private:
 	}
 public:
 
-	template<class BinaryWriter>
-	void SerializeData( BinaryWriter& writer )
+	void SerializeData( BinaryWriter& writer ) const
 	{
 		Serialize( writer, true );
 	}

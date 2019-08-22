@@ -180,6 +180,7 @@ inline SecureByteArray& SecureByteArray::operator=( const SecureByteArray& other
 	}
 	if( protectAccess )
 		PHANTASMA_SECURE_NOACCESS(m_data);
+	return *this;
 }
 
 inline SecureByteReader SecureByteArray::Read() const

@@ -58,15 +58,18 @@ public:
 		}
 
 		PinnedBytes<34> data;
-		int size = Base58::DecodeSecure(data.bytes, 34, wif);
+		int size;
+		if(wif.length() == 52)//todo - the C# code always does the check version...
+			size = Base58::CheckDecodeSecure(data.bytes, 34, wif);
+		else
+			size = Base58::DecodeSecure(data.bytes, 34, wif);
 		if( size != 34 || data.bytes[0] != 0x80 || data.bytes[33] != 0x01 )
 		{
 			PHANTASMA_EXCEPTION( "Invalid WIF format" );
 			Byte nullKey[PrivateKey::Length] = {};
 			return KeyPair( nullKey, PrivateKey::Length );
 		}
-		KeyPair kp( &data.bytes[1], 32 );
-		return kp;
+		return { &data.bytes[1], 32 };
 	}
 
 	String ToWIF() const // todo - secure memory string

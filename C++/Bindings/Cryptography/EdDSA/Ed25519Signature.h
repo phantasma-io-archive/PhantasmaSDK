@@ -17,7 +17,14 @@ public:
 	Ed25519Signature( const Byte* signature, int signatureLength )
 		: Ed25519Signature()
 	{
-		PHANTASMA_COPY(signature, signature+Length, bytes);
+		if( signatureLength == Length )
+		{
+			PHANTASMA_COPY(signature, signature+Length, bytes);
+		}
+		else if(signatureLength != 0)
+		{
+			PHANTASMA_EXCEPTION( "Invalid Ed25519 signature length, should be 64 bytes" );
+		}
 	}
 	Ed25519Signature( const PHANTASMA_VECTOR<Byte>& signature )
 			: Ed25519Signature(signature.empty() ? 0 : &signature.front(), signature.size())

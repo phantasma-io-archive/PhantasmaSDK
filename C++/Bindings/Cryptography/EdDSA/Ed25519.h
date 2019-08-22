@@ -41,7 +41,7 @@ PHANTASMA_VECTOR<Byte> Sign( const Byte* message, int messageLength, const Byte*
 	if( !message || !expandedPrivateKey )
 		return PHANTASMA_VECTOR<Byte>{};
 	PHANTASMA_VECTOR<Byte> signed_message;
-	signed_message.resize(64 + messageLength);
+	signed_message.resize(64);
 	UInt64 size = PHANTASMA_Ed25519_SignDetached(&signed_message.front(), signed_message.size(), message, messageLength, expandedPrivateKey, expandedPrivateKeyLength);
 	signed_message.resize((uint32_t)size);
 	return signed_message;

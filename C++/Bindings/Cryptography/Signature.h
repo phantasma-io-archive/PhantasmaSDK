@@ -38,7 +38,7 @@ public:
 	}
 
 private:
-	struct RingSignature { BigInteger Y0, S; constexpr static int Length = 42; bool operator==( const RingSignature& o ) const {return false;} bool Verify(...)const{return 0;} }; //todo
+	struct RingSignature { BigInteger Y0, S; constexpr static int Length = 42; bool operator==( const RingSignature& o ) const {return false;} bool Verify(...)const{return 0;} template<class T>void SerializeData(T&) const {} }; //todo
 
 	const SignatureKind m_kind;
 	//I'm implementing polymorphism via a union/switch so that Signatures can be copied around by value and stored in arrays without dynamic memory management
@@ -97,6 +97,7 @@ public:
 	template<class BinaryWriter>
 	void SerializeData(BinaryWriter& writer) const
 	{
+		writer.Write((Byte)m_kind);
 		switch(m_kind)
 		{
 		case SignatureKind::Ed25519: m_signature.ed25519.SerializeData(writer); break;
