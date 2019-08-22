@@ -261,6 +261,11 @@
 # include <vector>
 #endif
 
+#if !defined(PHANTASMA_MAP)
+#define PHANTASMA_MAP std::map
+# include <map>
+#endif
+
 #if !defined(PHANTASMA_S32) || !defined(PHANTASMA_U32)
 # include <cstdint>
 #endif

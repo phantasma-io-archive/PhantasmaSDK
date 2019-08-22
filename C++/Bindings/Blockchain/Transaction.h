@@ -3,14 +3,11 @@
 #include "../Cryptography/SHA.h"
 #include "../Cryptography/Hash.h"
 #include "../Cryptography/Signature.h"
+#include "../Utils/Timestamp.h"
 
 namespace phantasma
 {
 
-struct Timestamp//todo 
-{
-	int Value;
-};
 struct Chain {};//todo 
 
 class Transaction
