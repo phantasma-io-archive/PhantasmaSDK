@@ -2,24 +2,16 @@
 
 #include "../Cryptography/SHA.h"
 #include "../Cryptography/Hash.h"
+#include "../Cryptography/Signature.h"
 
 namespace phantasma
 {
-struct Signature
-{
-	Signature(Ed25519Signature){}
-	bool operator==( const Signature& o ) const { return false; }
 
-	bool Verify( const PHANTASMA_VECTOR<Byte>& msg, const Address* addresses, int numAddresses ) const
-	{
-		return true;
-	}
-};
 struct Timestamp//todo 
 {
 	int Value;
 };
-struct Chain {};
+struct Chain {};//todo 
 
 class Transaction
 {
@@ -184,7 +176,7 @@ public:
 
 		for(const auto& signature : m_signatures)
 		{
-			if(signature.Verify( msg, addresses, numAddresses ))
+			if(signature.Verify( &msg.front(), msg.size(), addresses, numAddresses ))
 			{
 				return true;
 			}

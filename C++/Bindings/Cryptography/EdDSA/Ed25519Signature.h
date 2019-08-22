@@ -11,29 +11,33 @@ class Ed25519Signature
 public:
 	Ed25519Signature()
 	{
+		for( int i=0; i!=Length; ++i )
+			bytes[i] = 0;
 	}
-	Ed25519Signature( PHANTASMA_VECTOR<Byte>&& signature )
-		: bytes(signature)
+	Ed25519Signature( const Byte* signature, int signatureLength )
+		: Ed25519Signature()
 	{
+		PHANTASMA_COPY(signature, signature+Length, bytes);
 	}
 	Ed25519Signature( const PHANTASMA_VECTOR<Byte>& signature )
-		: bytes(signature)
+			: Ed25519Signature(signature.empty() ? 0 : &signature.front(), signature.size())
 	{
 	}
 
-	const PHANTASMA_VECTOR<Byte>& Bytes() const { return bytes; }
+	constexpr static int Length = 64;
+	constexpr static SignatureKind Kind = SignatureKind::Ed25519;
+
+	const Byte* Bytes() const { return bytes; }
 	
-	//public override SignatureKind Kind => SignatureKind::Ed25519;
-	
-	bool Verify(const PHANTASMA_VECTOR<Byte>& message, const Address* addresses, int numAddresses)
+	bool Verify(const Byte* message, int messageLength, const Address* addresses, int numAddresses) const
 	{
-		if( bytes.empty() || message.empty() )
+		if( messageLength <= 0 )
 			return false;
 
 		for(int i=0; i<numAddresses; ++i)
 		{
 			const Address& address = addresses[i];
-			if (Ed25519::Verify(&bytes.front(), bytes.size(), &message.front(), message.size(), address.PublicKey(), Address::PublicKeyLength))
+			if (Ed25519::Verify(bytes, Length, message, messageLength, address.PublicKey(), Address::PublicKeyLength))
 			{
 				return true;
 			}
@@ -42,20 +46,24 @@ public:
 		return false;
 	}
 
-	template<class BinaryWriter>
-	void SerializeData(BinaryWriter& writer)
+	bool operator==( const Ed25519Signature& o ) const
 	{
-		writer.WriteByteArray(bytes);
+		return PHANTASMA_EQUAL( bytes, bytes+Length, o.bytes );
+	}
+
+	template<class BinaryWriter>
+	void SerializeData(BinaryWriter& writer) const
+	{
+		writer.WriteByteArray(bytes, Length);
 	}
 
 	template<class BinaryReader>
 	void UnserializeData(BinaryReader& reader)
 	{
-		bytes = reader.ReadByteArray();
+		reader.ReadByteArray(bytes, Length);
 	}
 private:
-	//todo - signatures are always 64 bytes
-	PHANTASMA_VECTOR<Byte> bytes;
+	Byte bytes[Length];
 };
 
 }
