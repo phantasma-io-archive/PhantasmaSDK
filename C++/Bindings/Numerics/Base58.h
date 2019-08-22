@@ -3,6 +3,7 @@
 #include "../Security/SecureVector.h"
 #include "../Security/SecureByteArray.h"
 #include "../Utils/ByteArrayUtils.h"
+#include "../Cryptography/SHA.h"
 
 namespace phantasma {
 namespace Base58 {
@@ -49,6 +50,31 @@ inline PHANTASMA_VECTOR<Byte> Decode(const String& input)
 	tmp.resize(bytes.size() + leadingZeros);
 	PHANTASMA_COPY(bytes.begin(), bytes.end(), tmp.begin() + leadingZeros);
 	return tmp;
+}
+
+inline PHANTASMA_VECTOR<Byte> CheckDecode(const String& input)
+{
+	PHANTASMA_VECTOR<Byte> buffer = Decode(input);
+	if (buffer.size() < 4)
+	{
+		PHANTASMA_EXCEPTION("Bad format");
+		return PHANTASMA_VECTOR<Byte>{};
+	}
+
+	Byte expected_checksum[32];
+	Byte expected_checksum_first[32];
+	SHA256( expected_checksum_first, 32,  &buffer.front(), buffer.size() - 4 );
+	SHA256( expected_checksum, 32, expected_checksum_first, 32 );
+	
+	const Byte* src_checksum = &buffer.front() + buffer.size() - 4;
+
+	if(!PHANTASMA_EQUAL( src_checksum, src_checksum+4, expected_checksum ))
+	{
+		PHANTASMA_EXCEPTION("WIF checksum failed");
+		return PHANTASMA_VECTOR<Byte>{};
+	}
+	buffer.resize(buffer.size() - 4);
+	return buffer;
 }
 
 inline int DecodeSecure(Byte* output, int outputSize, const String& input)//todo - secure string
@@ -99,6 +125,49 @@ inline int DecodeSecure(Byte* output, int outputSize, const String& input)//todo
 		PHANTASMA_COPY(bytes, bytes + canWrite, output + leadingZeros);
 	}
 
+	return resultSize;
+}
+inline int CheckDecodeSecure(Byte* output, int outputSize, const String& input)//todo - secure string input
+{
+	if( outputSize < 0 )
+	{
+		PHANTASMA_EXCEPTION("Invalid argument");
+		return 0;
+	}
+	int bufferSize = outputSize + 4;
+	SecureByteArray bufferAlloc(bufferSize, 0, false);
+	auto bufferAccess = bufferAlloc.Write();
+	Byte* buffer = bufferAccess.Bytes();
+	int decodedSize = DecodeSecure(buffer, bufferSize, input);
+	if (decodedSize < 4)
+	{
+		PHANTASMA_EXCEPTION("Bad format");
+		return 0;
+	}
+	if(decodedSize > bufferSize)
+	{
+		PHANTASMA_EXCEPTION("Insufficient buffer size");
+		return -decodedSize;
+	}
+
+	Byte expected_checksum[32];
+	Byte expected_checksum_first[32];
+	SHA256( expected_checksum_first, 32, buffer, decodedSize - 4 );
+	SHA256( expected_checksum, 32, expected_checksum_first, 32 );
+
+	const Byte* src_checksum = buffer + decodedSize - 4;
+
+	if(!PHANTASMA_EQUAL( src_checksum, src_checksum+4, expected_checksum ))
+	{
+		PHANTASMA_EXCEPTION("WIF checksum failed");
+		return 0;
+	}
+	int resultSize = decodedSize - 4;
+	int canWrite = PHANTASMA_MIN( outputSize, resultSize );
+	if( canWrite > 0 )
+	{
+		PHANTASMA_COPY(buffer, buffer + canWrite, output);
+	}
 	return resultSize;
 }
 

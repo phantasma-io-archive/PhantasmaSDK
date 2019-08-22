@@ -75,7 +75,7 @@ inline String Encode(const Byte* input, int length)
 	}
 
 	PHANTASMA_VECTOR<Char> c;
-	c.resize(length * 2);
+	c.resize(length * 2 + 1);
 	int b;
 	for(int i = 0; i < length; i++)
 	{
@@ -84,6 +84,7 @@ inline String Encode(const Byte* input, int length)
 		b = input[i] & 0xF;
 		c[i * 2 + 1] = (Char)(55 + b + (((b - 10) >> 31) & -7));
 	}
+	c[c.size()-1] = '\0';
 
 	return String(&c.front());
 }
