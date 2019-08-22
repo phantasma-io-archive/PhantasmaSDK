@@ -1,11 +1,12 @@
 ﻿#pragma once
 
+#include "../utils/Serializable.h"
 #include "../Numerics/Base58.h"
 #include "EdDSA/Ed25519.h"
 
 namespace phantasma {
 
-class Address
+class Address : public Serializable
 {
 public:
 	static constexpr int PublicKeyLength = 32;
@@ -127,13 +128,13 @@ public:
 	}
 
 	template<class BinaryWriter>//TODO (tricking compiler into accepting this code...)
-	void SerializeData(BinaryWriter writer)
+	void SerializeData(BinaryWriter& writer) const
 	{
 		writer.WriteByteArray(_publicKey);
 	}
 
 	template<class BinaryReader>//TODO (tricking compiler into accepting this code...)
-	void UnserializeData(BinaryReader reader)
+	void UnserializeData(BinaryReader& reader)
 	{
 		reader.ReadByteArray(_publicKey);
 		_text = "";

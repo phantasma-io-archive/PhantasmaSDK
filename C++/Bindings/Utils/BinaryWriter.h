@@ -18,17 +18,20 @@ public:
 
 	PHANTASMA_VECTOR<Byte> ToArray() { return PHANTASMA_VECTOR<Byte>{}; }
 
-	void Write(const Byte* b, int size) {};
-	void Write(const PHANTASMA_VECTOR<Byte>&) {};
-	void Write(uint8_t b) {};
-	void Write( int8_t b) {};
-	void Write(uint16_t b) {};
-	void Write( int16_t b) {};
-	void Write(uint32_t b) {};
-	void Write( int32_t b) {};
-	void Write(uint64_t b) {};
-	void Write( int64_t b) {};
-	void WriteVarInt( int i ) {};
+	void Write(const Byte* b, int size) {}
+	void Write(const PHANTASMA_VECTOR<Byte>&) {}
+	void Write(uint8_t b) {}
+	void Write( int8_t b) {}
+	void Write(uint16_t b) {}
+	void Write( int16_t b) {}
+	void Write(uint32_t b) {}
+	void Write( int32_t b) {}
+	void Write(uint64_t b) {}
+	void Write( int64_t b) {}
+	void WriteVarInt( int i ) {}
+	void WriteByteArray(const PHANTASMA_VECTOR<Byte>&) {}
+	template<int N> 
+	void WriteByteArray( const Byte(&bytes)[N] ) {}
 };
 
 }
