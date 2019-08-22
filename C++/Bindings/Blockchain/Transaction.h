@@ -4,13 +4,14 @@
 #include "../Cryptography/Hash.h"
 #include "../Cryptography/Signature.h"
 #include "../Utils/Timestamp.h"
+#include "../utils/Serializable.h"
 
 namespace phantasma
 {
 
 struct Chain {};//todo 
 
-class Transaction
+class Transaction : public Serializable
 {
 	Timestamp m_expiration;
 	PHANTASMA_VECTOR<Byte> m_script;

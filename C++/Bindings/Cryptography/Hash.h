@@ -1,12 +1,13 @@
 #pragma once
 
 #include "../Numerics/Base16.h"
+#include "../utils/Serializable.h"
 #include "SHA.h"
 
 namespace phantasma
 {
 
-class Hash
+class Hash : public Serializable
 {
 	Byte m_data[32];
 public:
