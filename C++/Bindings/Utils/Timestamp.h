@@ -7,6 +7,30 @@
 
 namespace phantasma {
 
+class Timespan
+{
+public:
+	const Int32 Value;
+
+	explicit Timespan( Int32 value = 0 )
+		: Value( value )
+	{
+	}
+
+	static Timespan FromSeconds( int seconds )
+	{
+		return Timespan{ (Int32)seconds };
+	}
+	static Timespan FromMinutes( int minutes )
+	{
+		return Timespan{ (Int32)(minutes * 60) };
+	}
+	static Timespan FromHours( int hours )
+	{
+		return Timespan{ (Int32)(hours * 60 * 60) };
+	}
+};
+
 class Timestamp
 {
 public:
@@ -70,7 +94,9 @@ public:
 
 	bool operator >=( Timestamp B ) const { return Value >= B.Value; }
 
-	UInt32 operator -( Timestamp B ) const { return Value - B.Value; }
+	Timespan operator -( Timestamp B ) const { return Timespan{(Int32)(Value - B.Value)}; }
+
+	Timestamp operator +( Timespan B ) const { return Timestamp{Value + B.Value}; }
 
 private:
 	static std::size_t StrFTime( char* str, std::size_t count, const char* format, const std::tm* time )
