@@ -5,8 +5,11 @@
 //------------------------------------------------------------------------------
 
 #define PHANTASMA_IMPLEMENTATION
-#include "PhantasmaAPI.h"
+#include "../../../Libs/PhantasmaAPI.h"
 #include <iostream>
+
+using namespace phantasma;
+using namespace phantasma::rpc;
 
 const char* DoHttpPost( const char* uri, const std::string& request )
 {
@@ -22,13 +25,13 @@ int main()
 
 	const char* wif = "NztsEZP7dtrzRBagogUYVp6mgEFbhjZfvHMVkd2bYWJfE";
 
-	phantasma::JSONBuilder json;
-	phantasma::PhantasmaJsonAPI::MakeGetAccountRequest(json, wif);
+	JSONBuilder json;
+	PhantasmaJsonAPI::MakeGetAccountRequest(json, wif);
 	
-	phantasma::JSONValue response = DoHttpPost(phantasma::PhantasmaJsonAPI::Uri(), json.s.str());
+	JSONValue response = DoHttpPost(PhantasmaJsonAPI::Uri(), json.s.str());
 
-	phantasma::Account account;
-	phantasma::PhantasmaJsonAPI::ParseGetAccountResponse(response, account);
+	Account account;
+	PhantasmaJsonAPI::ParseGetAccountResponse(response, account);
 
 	std::cout << "Balance description for address " << wif << std::endl;
 

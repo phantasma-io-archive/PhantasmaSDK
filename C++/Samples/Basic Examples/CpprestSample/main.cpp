@@ -1,12 +1,15 @@
 
 #define PHANTASMA_IMPLEMENTATION
-#include "cpprest_PhantasmaAPI.h"
+#include "../../../Libs/Adapters/PhantasmaAPI_cpprest.h"
+#include "../../../Libs/PhantasmaAPI.h"
+
+using namespace phantasma::rpc;
 
 int main()
 {
 	std::wstring host = L"http://localhost:7077";
 	web::http::client::http_client http(host);
-	phantasma::PhantasmaAPI api(http);
+	PhantasmaAPI api(http);
 
 	//std::wstring address = L"P2f7ZFuj6NfZ76ymNMnG3xRBT5hAMicDrQRHE4S7SoxEr";	//genesis address
 	//std::wstring address = L"NztsEZP7dtrzRBagogUYVp6mgEFbhjZfvHMVkd2bYWJfE";	//nft address
@@ -15,7 +18,7 @@ int main()
 
 	try
 	{
-		phantasma::Account account = api.GetAccount(wif);
+		Account account = api.GetAccount(wif);
 
 		std::wcout << L"Balance description for address " << wif << std::endl;
 

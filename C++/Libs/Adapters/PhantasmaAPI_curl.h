@@ -2,16 +2,18 @@
 #ifdef PHANTASMA_API_INCLUDED
 #error "Include HTTP API adaptors immediately before including PhantasmaAPI.h"
 #endif 
+#define PHANTASMA_CURL
 //------------------------------------------------------------------------------
 // This header supplies the Phantasma API with HTTP features provided by the 
 //  CURL library (https://curl.haxx.se/)
+// 
+// Include this file AFTER PhantasmaAPI_rapidjson.h to interop libCurl and RapidJSON.
 //------------------------------------------------------------------------------
 #include "curl/curl.h"
 #include "curl/easy.h"
 
-namespace phantasma { 
-
 #ifndef PHANTASMA_STRING
+# include <string>
 # ifdef _UNICODE
 #  define PHANTASMA_STRING std::wstring
 # else
@@ -19,14 +21,24 @@ namespace phantasma {
 # endif
 #endif
 
+#ifndef PHANTASMA_STRINGBUILDER
+# include <sstream>
+# ifdef _UNICODE
+#  define PHANTASMA_STRINGBUILDER std::wstringstream
+# else
+#  define PHANTASMA_STRINGBUILDER std::stringstream
+# endif
+#endif
+
 #ifndef PHANTASMA_CHAR
-#else
 # ifdef _UNICODE
 #  define PHANTASMA_CHAR wchar_t
 # else
 #  define PHANTASMA_CHAR char
 # endif
 #endif
+
+namespace phantasma { 
 
 class ReallocBuffer // buffer class for CURL to write responses into
 {
@@ -40,13 +52,16 @@ public:
 	char*  end() { return memory + size; }
 	size_t bytes() const { return size; }
 	size_t capacity() const { return capactiy; }
-	void append(const void* data, size_t dataSize)
+	char* append(const void* data, size_t dataSize)
 	{
 		size_t newCapacity = size + dataSize;
 		if (newCapacity > capactiy)
 			memory = (char*)realloc(memory, capactiy = newCapacity);
-		memcpy(end(), data, dataSize);
+		char* dst = end();
+		if( data )
+			memcpy(dst, data, dataSize);
 		size += dataSize;
+		return dst;
 	}
 	static size_t CurlWrite(void *contents, size_t size, size_t nmemb, void *userp)
 	{
@@ -65,8 +80,11 @@ class CurlClient // Very simple wrapper around CURL
 {
 	void* m_curl = 0;
 public:
-	rapidjson::Document doc;
+	const PHANTASMA_STRING host;
 	ReallocBuffer result;
+#ifdef PHANTASMA_RAPIDJSON
+	rapidjson::Document doc;
+#endif
 
 	CurlClient(const PHANTASMA_STRING& host = "http://localhost:7077")
 		: host(host)
@@ -81,16 +99,36 @@ public:
 	CURLcode Post(const char* data, size_t dataLen, const char* url)
 	{
 		result.clear();
-		std::string fullUrl = host + url;
+		PHANTASMA_STRING fullUrl = host + url;
 		curl_easy_setopt(m_curl, CURLOPT_URL, fullUrl.c_str());
 		curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, (void*)&result);
 		curl_easy_setopt(m_curl, CURLOPT_POST, 1);
 		curl_easy_setopt(m_curl, CURLOPT_POSTFIELDS, data);
 		curl_easy_setopt(m_curl, CURLOPT_POSTFIELDSIZE, dataLen);
-		CURLcode result = curl_easy_perform(m_curl);
-		return result;
+		CURLcode code = curl_easy_perform(m_curl);
+		return code;
 	}
 };
+
+#ifdef PHANTASMA_RAPIDJSON
+template<class CurlClient>
+static rapidjson::Document& HttpPost(CurlClient& client, const json::Char* uri, const RapidJsonBufferWriter& data)
+{
+	const char* request = data.buf.GetString();
+	client.Post(request, strlen(request), uri);
+	client.result.append("\0", 1);
+	return client.doc.ParseInsitu<0>(client.result.begin());
+}
+#else
+template<class CurlClient>
+static PHANTASMA_STRING HttpPost(CurlClient& client, const PHANTASMA_CHAR* uri, const PHANTASMA_STRINGBUILDER& data)
+{
+	const PHANTASMA_STRING& request = data.str();
+	client.Post(request.c_str(), request.length(), uri);
+	client.result.append("\0", 1);
+	return { client.result.begin() };
+}
+#endif
 
 #define PHANTASMA_HTTPCLIENT       CurlClient
 

@@ -2,17 +2,21 @@
 #ifdef PHANTASMA_API_INCLUDED
 #error "Include JSON API adaptors immediately before including PhantasmaAPI.h"
 #endif 
+#define PHANTASMA_RAPIDJSON
+#ifdef PHANTASMA_CURL
+#pragma message("Please include the libCurl adapter AFTER the RapidJSON adapter")
+#endif
 //------------------------------------------------------------------------------
 // This header supplies the Phantasma API with JSON features provided by the 
 //  rapidjson library (http://rapidjson.org/) 
 //------------------------------------------------------------------------------
-#include <rapidjson/document.h>
-#include <rapidjson/writer.h>
-#include <rapidjson/stringbuffer.h>
-
-namespace phantasma { 
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
 
 #ifndef PHANTASMA_STRING
+# include <string>
+# include <sstream>
 # ifdef _UNICODE
 #  define PHANTASMA_STRING std::wstring
 # else
@@ -27,6 +31,8 @@ namespace phantasma {
 #  define PHANTASMA_CHAR char
 # endif
 #endif
+
+namespace phantasma { 
 
 struct RapidJsonBufferWriter 
 {
@@ -78,16 +84,6 @@ namespace json {
 		AddValues(b, args...);
 		b.w.EndArray();
 	}
-}
-
-template<class CurlClient>
-static rapidjson::Document& HttpPost(CurlClient& client, const json::Char* uri, const RapidJsonBufferWriter& data)
-{
-	json::String url = client.host + uri;
-	const char* request = data.buf.GetString();
-	client.Post(request, strlen(request), url.c_str());
-	client.result.append("\0", 1);
-	return client.doc.ParseInsitu<0>(client.result.begin());
 }
 
 typedef const rapidjson::Value&    RapidJsonValueRef;
