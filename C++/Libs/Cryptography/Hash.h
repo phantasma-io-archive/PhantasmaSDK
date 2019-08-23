@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Numerics/Base16.h"
+#include "../Numerics/BigInteger.h"
 #include "../utils/Serializable.h"
 #include "SHA.h"
 
@@ -30,7 +31,7 @@ public:
 
 	String ToString() const
 	{
-		String result = String("0x");
+		String result = String(PHANTASMA_LITERAL("0x"));
 		PHANTASMA_VECTOR<Byte> temp;
 		temp.resize(Length);
 		PHANTASMA_COPY(m_data, m_data+Length, &temp.front());
@@ -64,7 +65,7 @@ public:
 			PHANTASMA_COPY(value, value+Length, m_data);
 	}
 	Hash(const PHANTASMA_VECTOR<Byte>& value)
-		: Hash(value.empty()?0:&value.front(), value.size())
+		: Hash(value.empty()?0:&value.front(), (int)value.size())
 	{
 	}
 

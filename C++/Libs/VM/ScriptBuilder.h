@@ -56,7 +56,7 @@ public:
 
 	ScriptBuilder& EmitLoad( Byte reg, const PHANTASMA_VECTOR<Byte>& bytes )
 	{
-		return EmitLoad( reg, bytes.empty()?0:&bytes.front(), bytes.size() );
+		return EmitLoad( reg, bytes.empty()?0:&bytes.front(), (int)bytes.size() );
 	}
 	ScriptBuilder& EmitLoad( Byte reg, const Byte* bytes, int numBytes, VMType type = VMType::Bytes )
 	{
@@ -97,7 +97,7 @@ public:
 	ScriptBuilder& EmitLoad( Byte reg, const BigInteger& val )
 	{
 		auto bytes = val.ToByteArray( true );
-		EmitLoad( reg, &bytes.front(), bytes.size(), VMType::Number );
+		EmitLoad( reg, bytes.empty()?0:&bytes.front(), (int)bytes.size(), VMType::Number );
 		return *this;
 	}
 
@@ -134,7 +134,7 @@ public:
 		val.SerializeData( temp );
 
 		const PHANTASMA_VECTOR<Byte>& bytes = temp.ToArray();
-		EmitLoad( reg, bytes.empty() ? 0 : &bytes.front(), bytes.size(), VMType::Bytes );
+		EmitLoad( reg, bytes.empty() ? 0 : &bytes.front(), (int)bytes.size(), VMType::Bytes );
 		return *this;
 	}
 
@@ -219,7 +219,7 @@ public:
 
 		Emit( opcode );
 		writer.Write( (Byte)src_reg );
-		writer.Write( (ushort)0 );
+		writer.Write( (uint16_t)0 );
 		_jumpLocations[ofs] = label;
 		return *this;
 	}
@@ -271,13 +271,13 @@ public:
 	
 	ScriptBuilder& AllowGas( const Address& from, const Address& to, const BigInteger& gasPrice, const BigInteger& gasLimit )
 	{
-		CallContract( "gas", "AllowGas", from, to, gasPrice, gasLimit );
+		CallContract( PHANTASMA_LITERAL("gas"), PHANTASMA_LITERAL("AllowGas"), from, to, gasPrice, gasLimit );
 		return *this;
 	}
 
 	ScriptBuilder& SpendGas( const Address& address )
 	{
-		CallContract( "gas", "SpendGas", address );
+		CallContract( PHANTASMA_LITERAL("gas"), PHANTASMA_LITERAL("SpendGas"), address );
 		return *this;
 	}
 
@@ -332,7 +332,7 @@ private:
 	static void LoadIntoReg( ScriptBuilder& sb, Byte target_reg, const PHANTASMA_VECTOR<T>& array )
 	{
 		// this cast is required to clear any previous value that might be stored at target_reg
-		Byte cast_bytes[3] = { target_reg, target_reg, (byte)VMType::None };
+		Byte cast_bytes[3] = { target_reg, target_reg, (Byte)VMType::None };
 		sb.Emit( Opcode.CAST, cast_bytes );
 		for(int j = 0, jend=(int)array.size(); j < jend; j++)
 		{
@@ -364,12 +364,12 @@ public:
 	template<class... Args>
 	ScriptBuilder& CallInterop( const Char* method, const Args&... args )
 	{
-		InsertMethodArgs( sb, args... );
+		InsertMethodArgs( *this, args... );
 
 		Byte dest_reg = 0;
-		sb.EmitLoad( dest_reg, method );
+		EmitLoad( dest_reg, method );
 
-		sb.Emit( VM.Opcode.EXTCALL, &dest_reg, 1 );
+		Emit( Opcode::EXTCALL, &dest_reg, 1 );
 		return *this;
 	}
 

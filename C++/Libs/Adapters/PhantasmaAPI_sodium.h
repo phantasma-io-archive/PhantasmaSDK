@@ -8,6 +8,11 @@
 //
 // Make sure you call sodium_init in your own application before using Phantasma!
 //------------------------------------------------------------------------------
+#include "sodium/core.h"
+#include "sodium/utils.h"
+#include "sodium/randombytes.h"
+#include "sodium/crypto_hash_sha256.h"
+#include "sodium/crypto_sign_ed25519.h"
 
 namespace phantasma { 
 
@@ -37,8 +42,8 @@ void Ed25519_PrivateKeyFromSeed(uint8_t* output, int outputLength, const uint8_t
 
 uint64_t Ed25519_SignAttached( uint8_t* output, int outputLength, const uint8_t* message, int messageLength, const uint8_t* privateKey, int privateKeyLength )
 {
-	if( ((uint32)outputLength < crypto_sign_ed25519_BYTES + messageLength) ||
-		((uint32)privateKeyLength != crypto_sign_ed25519_SECRETKEYBYTES) ||
+	if( ((UInt32)outputLength < crypto_sign_ed25519_BYTES + messageLength) ||
+		((UInt32)privateKeyLength != crypto_sign_ed25519_SECRETKEYBYTES) ||
 		messageLength < 0 )
 		return 0;
 	uint64_t signed_message_len = 0;
@@ -48,8 +53,8 @@ uint64_t Ed25519_SignAttached( uint8_t* output, int outputLength, const uint8_t*
 
 uint64_t Ed25519_SignDetached( uint8_t* output, int outputLength, const uint8_t* message, int messageLength, const uint8_t* privateKey, int privateKeyLength )
 {
-	if( ((uint32)outputLength < crypto_sign_ed25519_BYTES) ||
-		((uint32)privateKeyLength != crypto_sign_ed25519_SECRETKEYBYTES) ||
+	if( ((UInt32)outputLength < crypto_sign_ed25519_BYTES) ||
+		((UInt32)privateKeyLength != crypto_sign_ed25519_SECRETKEYBYTES) ||
 		messageLength < 0)
 		return 0;
 	uint64_t signed_message_len = 0;
@@ -59,16 +64,16 @@ uint64_t Ed25519_SignDetached( uint8_t* output, int outputLength, const uint8_t*
 
 bool Ed25519_ValidateAttached( const uint8_t* message, int messageLength, const uint8_t* publicKey, int publicKeyLength )
 {
-	if( ((uint32)messageLength < crypto_sign_ed25519_BYTES) ||
-		((uint32)publicKeyLength != crypto_sign_ed25519_PUBLICKEYBYTES) )
+	if( ((UInt32)messageLength < crypto_sign_ed25519_BYTES) ||
+		((UInt32)publicKeyLength != crypto_sign_ed25519_PUBLICKEYBYTES) )
 		return false;
 	return 0 == crypto_sign_ed25519_open(0, 0, message, messageLength, publicKey);
 }
 
 bool Ed25519_ValidateDetached( const uint8_t* signature, int signatureLength, const uint8_t* message, int messageLength, const uint8_t* publicKey, int publicKeyLength )
 {
-	if( ((uint32)signatureLength != crypto_sign_ed25519_BYTES) ||
-		((uint32)publicKeyLength != crypto_sign_ed25519_PUBLICKEYBYTES) ||
+	if( ((UInt32)signatureLength != crypto_sign_ed25519_BYTES) ||
+		((UInt32)publicKeyLength != crypto_sign_ed25519_PUBLICKEYBYTES) ||
 		messageLength < 0 )
 		return false;
 	return 0 == crypto_sign_ed25519_verify_detached(signature, message, messageLength, publicKey);

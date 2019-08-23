@@ -12,6 +12,10 @@ class PrivateKey
 public:
 	constexpr static int Length = 32;
 
+	PrivateKey()
+		: m_data(Length, 0)
+	{
+	}
 	PrivateKey( const Byte* privateKey, int privateKeyLength )
 		: m_data(Length, privateKeyLength == Length ? privateKey : 0)
 	{
@@ -26,14 +30,28 @@ private:
 
 class KeyPair
 {
+	PrivateKey privateKey;
+	Address    address;
 public:
-	const PrivateKey privateKey;
-	const Address address;
+	const PrivateKey& PrivateKey() const { return privateKey; }
+	const Address&    Address()    const { return address; }
 
+	KeyPair()
+		: privateKey()
+		, address()
+	{
+	}
 	KeyPair( const Byte* privateKey, int privateKeyLength )
 		: privateKey(privateKey, privateKeyLength)
 		, address( Ed25519::PublicKeyFromSeed( privateKey, privateKeyLength ) )
 	{
+	}
+
+	KeyPair& operator=( const KeyPair& other )
+	{
+		privateKey = other.privateKey;
+		address = other.address;
+		return *this;
 	}
 
 	String ToString() const
@@ -59,10 +77,10 @@ public:
 
 		PinnedBytes<34> data;
 		int size;
-		if(wif.length() == 52)//todo - the C# code always does the check version...
+		//if(wif.length() == 52)//todo - the C# code always does the check version...
 			size = Base58::CheckDecodeSecure(data.bytes, 34, wif);
-		else
-			size = Base58::DecodeSecure(data.bytes, 34, wif);
+		//else
+		//	size = Base58::DecodeSecure(data.bytes, 34, wif);
 		if( size != 34 || data.bytes[0] != 0x80 || data.bytes[33] != 0x01 )
 		{
 			PHANTASMA_EXCEPTION( "Invalid WIF format" );
@@ -97,7 +115,7 @@ public:
 			SecureByteReader read = privateKey.Read();
 			Ed25519::ExpandedPrivateKeyFromSeed( expandedPrivateKey.bytes, 64, read.Bytes(), PrivateKey::Length );
 		}
-		return Ed25519Signature( Ed25519::Sign( &message.front(), message.size(), expandedPrivateKey.bytes, 64 ) );
+		return Ed25519Signature( Ed25519::Sign( &message.front(), (int)message.size(), expandedPrivateKey.bytes, 64 ) );
 	}
 };
 

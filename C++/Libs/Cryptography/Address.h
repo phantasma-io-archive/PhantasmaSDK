@@ -41,8 +41,10 @@ public:
 	}
 
 	Address(const PHANTASMA_VECTOR<Byte>& publicKey)
-		: Address(&publicKey.front(), publicKey.size())
+		: Address(&publicKey.front(), (int)publicKey.size())
 	{}
+
+	bool IsNull() const { return  PHANTASMA_EQUAL(_publicKey, _publicKey + PublicKeyLength, NullKey); };
 	
 	bool operator ==( const Address& B ) const { return  PHANTASMA_EQUAL(_publicKey, _publicKey + PublicKeyLength, B._publicKey); }
 	bool operator !=( const Address& B ) const { return !PHANTASMA_EQUAL(_publicKey, _publicKey + PublicKeyLength, B._publicKey); }
@@ -98,13 +100,13 @@ public:
 			return Address();
 		}
 
-		return Address(&bytes.front()+1, bytes.size()-1);
+		return Address(&bytes.front()+1, (int)bytes.size()-1);
 	}
 
 	template<class ScriptBytes>//TODO (tricking compiler into accepting this code...)
 	static Address FromScript(const ScriptBytes& script)
 	{
-		var hash = script.SHA256();
+		auto hash = script.SHA256();
 		return Address(hash);
 	}
 

@@ -20,7 +20,7 @@ PHANTASMA_VECTOR<Byte> SHA256( const PHANTASMA_VECTOR<Byte>& input )
 {
 	PHANTASMA_VECTOR<Byte> result;
 	result.resize(32);
-	SHA256(&result.front(), 32, input.empty() ? 0 : &input.front(), input.size());
+	SHA256(&result.front(), 32, input.empty() ? 0 : &input.front(), (int)input.size());
 	return result;
 }
 

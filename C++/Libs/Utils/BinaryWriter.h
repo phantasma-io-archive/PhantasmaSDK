@@ -17,7 +17,7 @@ public:
 		stream.reserve(sizeHint);
 	}
 
-	UInt32 Position() const { return stream.size(); }
+	UInt32 Position() const { return (UInt32)stream.size(); }
 
 	const PHANTASMA_VECTOR<Byte>& ToArray() { return stream; }
 
@@ -67,7 +67,7 @@ public:
 	void Write( const PHANTASMA_VECTOR<Byte>& bytes )
 	{
 		if(!bytes.empty()) 
-			Write(&bytes.front(), bytes.size());
+			Write(&bytes.front(), (int)bytes.size());
 	}
 
 	void WriteVarInt(Int64 value)
@@ -101,7 +101,7 @@ public:
 	void WriteBigInteger(const BigInteger& n)
 	{
 		auto bytes = n.ToByteArray();
-		Write((byte)bytes.size());
+		Write((Byte)bytes.size());
 		Write(bytes);
 	}
 

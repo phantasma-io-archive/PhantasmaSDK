@@ -36,7 +36,9 @@ public:
 		}
 
 		if( protectAccess )
+		{
 			PHANTASMA_SECURE_NOACCESS(m_data);
+		}
 	}
 	SecureByteArray(SecureByteArray&& other)
 		: m_data(other.m_data) 
@@ -51,14 +53,21 @@ public:
 	~SecureByteArray()
 	{
 		if( m_data )
+		{
 			PHANTASMA_SECURE_FREE(m_data);
+		}
 		if( m_readers != 0 || m_writers != 0 )
-			PHANTASMA_EXCEPTION("Dangling pointer error");//make sure all read/write handles are destroyed before destorying the array!
+		{
+			//todo - You can't throw in destructors!! -- need PHANTASMA_ERROR / PHANTASMA_ASSERT macro?
+			//PHANTASMA_EXCEPTION("Dangling pointer error");//make sure all read/write handles are destroyed before destorying the array!
+		}
 	}
 	SecureByteArray& operator=( SecureByteArray&& other )
 	{
 		if( m_data )
+		{
 			PHANTASMA_SECURE_FREE(m_data);
+		}
 		m_data = other.m_data;
 		m_size = other.m_size;
 		other.m_data = 0;
@@ -74,24 +83,38 @@ private:
 	void UnlockReader(const Byte* data) const
 	{
 		if( data != m_data )
+		{
 			PHANTASMA_EXCEPTION("Internal secure memory error");
+		}
 		--m_readers;
 		if( m_protectAccess && m_readers == 0 && m_writers == 0 )
+		{
 			PHANTASMA_SECURE_NOACCESS(m_data);
+		}
 		if(m_readers < 0)
+		{
 			PHANTASMA_EXCEPTION("Internal secure memory error");
+		}
 	}
 	void UnlockWriter(Byte* data)
 	{
 		if( data != m_data )
+		{
 			PHANTASMA_EXCEPTION("Internal secure memory error");
+		}
 		--m_writers;
 		if( m_protectAccess && m_readers == 0 && m_writers == 0 )
+		{
 			PHANTASMA_SECURE_NOACCESS(m_data);
+		}
 		else if( m_protectAccess && m_writers == 0 )
+		{
 			PHANTASMA_SECURE_READONLY(m_data);
+		}
 		if(m_writers < 0)
+		{
 			PHANTASMA_EXCEPTION("Internal secure memory error");
+		}
 	}
 
 	Byte* m_data = 0;
@@ -104,7 +127,7 @@ private:
 class SecureByteReader
 {
 public:
-	SecureByteReader( SecureByteReader& other )
+	SecureByteReader( SecureByteReader&& other )
 		: data( other.data )
 		, owner( other.owner )
 		, size( other.size )
@@ -162,7 +185,9 @@ private:
 inline SecureByteArray& SecureByteArray::operator=( const SecureByteArray& other )
 {
 	if( m_data )
+	{
 		PHANTASMA_SECURE_FREE(m_data);
+	}
 
 	int size = other.m_size;
 	bool protectAccess = other.m_protectAccess;
@@ -171,7 +196,7 @@ inline SecureByteArray& SecureByteArray::operator=( const SecureByteArray& other
 	m_data = (Byte*)PHANTASMA_SECURE_ALLOC(size);
 	if( other.m_data )
 	{
-		SecureByteReader read = other.Read();
+		const auto& read = other.Read();
 		PHANTASMA_COPY(read.Bytes(), read.Bytes()+size, m_data);
 	}
 	else
@@ -179,14 +204,18 @@ inline SecureByteArray& SecureByteArray::operator=( const SecureByteArray& other
 		PHANTASMA_WIPEMEM(m_data, size);
 	}
 	if( protectAccess )
+	{
 		PHANTASMA_SECURE_NOACCESS(m_data);
+	}
 	return *this;
 }
 
 inline SecureByteReader SecureByteArray::Read() const
 {
 	if( m_protectAccess && m_readers == 0 && m_writers == 0 )
+	{
 		PHANTASMA_SECURE_READONLY(m_data);
+	}
 	++m_readers;
 	return { m_data, this, m_size };
 }
@@ -194,7 +223,9 @@ inline SecureByteReader SecureByteArray::Read() const
 inline SecureByteWriter SecureByteArray::Write()
 {
 	if( m_protectAccess && m_writers == 0 )
+	{
 		PHANTASMA_SECURE_READWRITE(m_data);
+	}
 	++m_writers;
 	return { m_data, this, m_size };
 }

@@ -26,7 +26,7 @@ inline PHANTASMA_VECTOR<Byte> Decode(const String& input)
 	}
 
 	BigInteger bi = BigInteger::Zero();
-	for (int i = input.length() - 1; i >= 0; i--)
+	for (int i = (int)input.length() - 1; i >= 0; i--)
 	{
 		int index = AlphabetIndexOf(input[i]);
 		if(index < 0)
@@ -35,14 +35,14 @@ inline PHANTASMA_VECTOR<Byte> Decode(const String& input)
 			return tmp;
 		}
 
-		bi += BigInteger(index) * BigInteger::Pow(58, input.length() - 1 - i);
+		bi += BigInteger(index) * BigInteger::Pow(58, (int)input.length() - 1 - i);
 	}
 
 	PHANTASMA_VECTOR<Byte> bytes = bi.ToByteArray();
 	ArrayReverse(bytes);
 
 	int leadingZeros = 0;
-	for (int i = 0; i < input.length() && input[i] == Alphabet[0]; i++)
+	for (int i = 0; i < (int)input.length() && input[i] == Alphabet[0]; i++)
 	{
 		leadingZeros++;
 	}
@@ -63,7 +63,7 @@ inline PHANTASMA_VECTOR<Byte> CheckDecode(const String& input)
 
 	Byte expected_checksum[32];
 	Byte expected_checksum_first[32];
-	SHA256( expected_checksum_first, 32,  &buffer.front(), buffer.size() - 4 );
+	SHA256( expected_checksum_first, 32,  &buffer.front(), (int)buffer.size() - 4 );
 	SHA256( expected_checksum, 32, expected_checksum_first, 32 );
 	
 	const Byte* src_checksum = &buffer.front() + buffer.size() - 4;
@@ -88,7 +88,7 @@ inline int DecodeSecure(Byte* output, int outputSize, const String& input)//todo
 		return 0;
 
 	SecureBigInteger bi = SecureBigInteger::Zero();
-	for (int i = input.length() - 1; i >= 0; i--)
+	for (int i = (int)input.length() - 1; i >= 0; i--)
 	{
 		int index = AlphabetIndexOf(input[i]);
 		if(index < 0)
@@ -97,12 +97,12 @@ inline int DecodeSecure(Byte* output, int outputSize, const String& input)//todo
 			return 0;
 		}
 
-		bi += SecureBigInteger(index) * SecureBigInteger::Pow(58, input.length() - 1 - i);
+		bi += SecureBigInteger(index) * SecureBigInteger::Pow(58, (int)input.length() - 1 - i);
 	}
 
 	int numBytes = bi.ToByteArray(0, 0);
 	SecureByteArray byteAllocation(numBytes, 0, false);
-	SecureByteWriter byteWriter = byteAllocation.Write();
+	const auto& byteWriter = byteAllocation.Write();
 	Byte* bytes = byteWriter.Bytes();
 
 	bi.ToByteArray(bytes, numBytes);
@@ -110,7 +110,7 @@ inline int DecodeSecure(Byte* output, int outputSize, const String& input)//todo
 	ArrayReverse(bytes, numBytes);
 
 	int leadingZeros = 0;
-	for (int i = 0; i < input.length() && input[i] == Alphabet[0]; i++)
+	for (int i = 0; i < (int)input.length() && input[i] == Alphabet[0]; i++)
 	{
 		if( leadingZeros < outputSize )
 			output[leadingZeros] = 0;
@@ -136,7 +136,7 @@ inline int CheckDecodeSecure(Byte* output, int outputSize, const String& input)/
 	}
 	int bufferSize = outputSize + 4;
 	SecureByteArray bufferAlloc(bufferSize, 0, false);
-	auto bufferAccess = bufferAlloc.Write();
+	const auto& bufferAccess = bufferAlloc.Write();
 	Byte* buffer = bufferAccess.Bytes();
 	int decodedSize = DecodeSecure(buffer, bufferSize, input);
 	if (decodedSize < 4)
@@ -185,7 +185,7 @@ inline String Encode(const Byte* input, int length)
 	temp[length] = 0;
 
 	BigInteger value(temp);
-	PHANTASMA_WIPEMEM(temp.begin(), temp.size());
+	PHANTASMA_WIPEMEM(&temp.front(), (int)temp.size());
 	PHANTASMA_VECTOR<Char> sb;
 	while (value >= 58)
 	{

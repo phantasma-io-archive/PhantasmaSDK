@@ -8,7 +8,7 @@ namespace phantasma {
 template<class T>
 void ArrayReverse(PHANTASMA_VECTOR<T>& vec)
 {
-	int last = vec.size()-1;
+	int last = (int)vec.size()-1;
 	for( int i=0, end=(int)vec.size()/2; i!=end; ++i )
 		PHANTASMA_SWAP( vec[i], vec[last-i] );
 }

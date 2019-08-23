@@ -4,6 +4,7 @@
 #endif 
 
 #include <ctime>
+#include <chrono>
 
 namespace phantasma {
 
@@ -45,10 +46,16 @@ public:
 	{
 		//todo - not technically defined as the 1970 unix epoch... but probably is in practice...
 		std::time_t value = (std::time_t)Value;
+#ifdef _MSC_VER
+		std::tm timeBuffer;
+		localtime_s(&timeBuffer, &value);
+		const std::tm* dateTime = &timeBuffer;
+#else
 		const std::tm* dateTime = std::localtime(&value);
+#endif
 		constexpr int BufferLength = 512;
 		Char buffer[BufferLength];
-		if(0 == StrFTime( buffer, BufferLength, "%c", dateTime ))
+		if(0 == StrFTime( buffer, BufferLength, PHANTASMA_LITERAL("%c"), dateTime ))
 		{
 			PHANTASMA_EXCEPTION("Could not format date/time");
 			buffer[0] = '\0';

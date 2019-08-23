@@ -3,6 +3,7 @@
 #include "../Cryptography/SHA.h"
 #include "../Cryptography/Hash.h"
 #include "../Cryptography/Signature.h"
+#include "../Cryptography/KeyPair.h"
 #include "../Utils/Timestamp.h"
 #include "../utils/Serializable.h"
 #include "../utils/BinaryWriter.h"
@@ -63,10 +64,10 @@ public:
 		}
 	}
 
-	String ToString()
-	{
-		return String("{Hash}");//todo
-	}
+	//String ToString()
+	//{
+	//	return String("{Hash}");//todo
+	//}
 
 private:
 	// TODO should run the script and return true if sucess or false if exception
@@ -178,7 +179,7 @@ public:
 
 		for(const auto& signature : m_signatures)
 		{
-			if(signature.Verify( &msg.front(), msg.size(), addresses, numAddresses ))
+			if(signature.Verify( &msg.front(), (int)msg.size(), addresses, numAddresses ))
 			{
 				return true;
 			}

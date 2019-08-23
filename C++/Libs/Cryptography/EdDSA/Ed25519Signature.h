@@ -27,7 +27,7 @@ public:
 		}
 	}
 	Ed25519Signature( const PHANTASMA_VECTOR<Byte>& signature )
-			: Ed25519Signature(signature.empty() ? 0 : &signature.front(), signature.size())
+			: Ed25519Signature(signature.empty() ? 0 : &signature.front(), (int)signature.size())
 	{
 	}
 

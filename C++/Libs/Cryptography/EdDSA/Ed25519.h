@@ -22,7 +22,7 @@ PHANTASMA_VECTOR<Byte> PublicKeyFromSeed( const Byte* seed, int seedLength )
 {
 	PHANTASMA_VECTOR<Byte> publicKey;
 	publicKey.resize(32);
-	PublicKeyFromSeed(&publicKey.front(), publicKey.size(), seed, seedLength);
+	PublicKeyFromSeed(&publicKey.front(), (int)publicKey.size(), seed, seedLength);
 	return publicKey;
 }
 
@@ -42,7 +42,7 @@ PHANTASMA_VECTOR<Byte> Sign( const Byte* message, int messageLength, const Byte*
 		return PHANTASMA_VECTOR<Byte>{};
 	PHANTASMA_VECTOR<Byte> signed_message;
 	signed_message.resize(64);
-	UInt64 size = PHANTASMA_Ed25519_SignDetached(&signed_message.front(), signed_message.size(), message, messageLength, expandedPrivateKey, expandedPrivateKeyLength);
+	UInt64 size = PHANTASMA_Ed25519_SignDetached(&signed_message.front(), (int)signed_message.size(), message, messageLength, expandedPrivateKey, expandedPrivateKeyLength);
 	signed_message.resize((uint32_t)size);
 	return signed_message;
 }

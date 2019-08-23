@@ -79,7 +79,8 @@ inline web::json::value HttpPost(web::http::client::http_client& client, const j
 		const auto statusCode = response.status_code();
 		if (statusCode != 200)
 		{
-			utility::stringstream_t msg{U("Malformed RPC request or endpoint: response status = ")};
+			utility::stringstream_t msg;
+			msg << U("Malformed RPC request or endpoint: response status = ");
 			msg << statusCode;
 			throw web::http::http_exception(msg.str());
 		}

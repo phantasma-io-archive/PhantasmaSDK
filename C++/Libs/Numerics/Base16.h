@@ -96,7 +96,7 @@ inline String Encode(const PHANTASMA_VECTOR<Byte>& input)
 		PHANTASMA_EXCEPTION("invalid argument");
 		return String();
 	}
-	return Encode(&input.front(), input.size());
+	return Encode(&input.front(), (int)input.size());
 }
 
 }}
