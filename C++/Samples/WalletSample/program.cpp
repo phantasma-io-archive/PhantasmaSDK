@@ -329,7 +329,7 @@ public:
 	static bool HaveTokenBalanceToTransfer(const BigInteger& amount = 0)
 	{
 		return true;
-		//asdfasdf
+		//TODO!!!!!!
 	//	var test = _account.Tokens.Where(p => decimal.Parse(p.Amount) > amount);
 	//	return test.Any();
 	}
@@ -423,6 +423,7 @@ public:
 
 		const auto& script = ScriptBuilder::BeginScript()
 			.AllowGas(_key.Address(), Address(), 1, 9999)
+			//TODO!!!!!!
 //asdf			.TransferTokens(tokenSymbol, _key.Address, destinationAddress, bigIntAmount)
 			.SpendGas(_key.Address())
 			.EndScript();
@@ -455,7 +456,7 @@ public:
 
 		auto script = ScriptBuilder::BeginScript()
 			.AllowGas(_key.Address(), Address(), 1, 9999)
-		//asdf
+		//TODO!!!!!!
 		//	.CrossTransferToken(Address::FromText(toChain.address), symbol, _key.Address,
 		//		_key.Address, fee)
 		//	.CrossTransferToken(Address::FromText(toChain.address), symbol, _key.Address,

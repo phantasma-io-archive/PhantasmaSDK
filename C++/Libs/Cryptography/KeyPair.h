@@ -76,11 +76,7 @@ public:
 		}
 
 		PinnedBytes<34> data;
-		int size;
-		//if(wif.length() == 52)//todo - the C# code always does the check version...
-			size = Base58::CheckDecodeSecure(data.bytes, 34, wif);
-		//else
-		//	size = Base58::DecodeSecure(data.bytes, 34, wif);
+		int size = Base58::CheckDecodeSecure(data.bytes, 34, wif);
 		if( size != 34 || data.bytes[0] != 0x80 || data.bytes[33] != 0x01 )
 		{
 			PHANTASMA_EXCEPTION( "Invalid WIF format" );
@@ -99,6 +95,7 @@ public:
 		data[33] = 0x01;
 		SecureByteReader read = privateKey.Read();
 		PHANTASMA_COPY(read.Bytes(), read.Bytes()+32, data+1);
+		//TODO this should be CheckEncode, not Encode!!!
 		String wif = Base58::Encode(data, 34);// todo - secure memory string
 		return wif;
 	}

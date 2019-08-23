@@ -68,6 +68,7 @@ public:
 		Byte publicKey[32];
 		{
 			PinnedBytes<34> data;
+			//TODO this should be CheckDecodeSecure, not DecodeSecure!!!
 			int size = Base58::DecodeSecure(data.bytes, 34, wif);
 			if( size != 34 || data.bytes[0] != 0x80 || data.bytes[33] != 0x01 )
 			{
