@@ -290,6 +290,10 @@ private:
 	{
 		sb.EmitLoad( target_reg, arg );
 	}
+	static void LoadIntoReg( ScriptBuilder& sb, Byte target_reg, const Char* arg )
+	{
+		sb.EmitLoad( target_reg, arg );
+	}
 	static void LoadIntoReg( ScriptBuilder& sb, Byte target_reg, Int32 arg )
 	{
 		sb.EmitLoad( target_reg, BigInteger( arg ) );
