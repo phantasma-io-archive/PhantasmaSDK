@@ -6,102 +6,105 @@
 //------------------------------------------------------------------------------
 //  The PhantasmaJsonAPI namespace can construct JSON requests and parse JSON responses,
 //   but you are responsible for sending/receiving these messages via HTTP on your own.
-//   You can call PhantasmaJsonAPI::Uri() to determine where to send them.
+//   You can call `PhantasmaJsonAPI::Uri()` to determine where to send them.
 //
-// void PhantasmaJsonAPI::Make{Message}Request(JSONBuilder&, {Parameters});
-// bool PhantasmaJsonAPI::Parse{Message}Response(const JSONValue&, {Output});
-//
+{{#each methods}}//     void PhantasmaJsonAPI::Make{{Info.Name}}Request(JSONBuilder{{#each Info.Parameters}}, {{Name}}{{/each}});
+//     bool PhantasmaJsonAPI::Parse{{Info.Name}}Response(JSONValue, {{#if Info.ReturnType.IsArray}}vector<{{/if}}{{#fix-type Info.ReturnType.Name}}{{#if Info.ReturnType.IsArray}}>{{/if}});
+{{/each}}//
 //------------------------------------------------------------------------------
 // High-level API
 //------------------------------------------------------------------------------
-//  If you have defined PHANTASMA_HTTPCLIENT, then you can construct a PhantasmaAPI object,
-//   which provides a simplified API that hides the internal JSON messaging.
+//  If you have defined `PHANTASMA_HTTPCLIENT`, then you can construct a 
+//   PhantasmaAPI object, which provides a simplified API that hides the 
+//   internal JSON messaging.
 //
-// PhantasmaAPI phantasmaAPI(httpClient);
-// {Output} phantasmaAPI->{Message}({Parameters});
-//
+//     PhantasmaAPI phantasmaAPI(httpClient);
+{{#each methods}}//     {{#if Info.ReturnType.IsArray}}vector<{{/if}}{{#fix-type Info.ReturnType.Name}}{{#if Info.ReturnType.IsArray}}>{{/if}} = phantasmaAPI.{{Info.Name}}({{#each Info.Parameters}}{{Name}}, {{/each}}error);
+{{/each}}//
 //------------------------------------------------------------------------------
 // API configuration
 //------------------------------------------------------------------------------
 // As different C++ projects may use different primitive types, you can use the 
-//  following #defines (BEFORE including phantasma.h) to override the default types.
+//  following #defines (BEFORE including `phantasma.h`) to override the default types.
 //
-// #define                | typedef                 | Default           | Notes
-// PHANTASMA_BYTE         | phantasma::Byte         | uint8_t           |
-// PHANTASMA_INT32        | phantasma::Int32        | int32_t           |
-// PHANTASMA_UINT32       | phantasma::UInt32       | uint32_t          |
-// PHANTASMA_INT64        | phantasma::Int64        | int64_t           |
-// PHANTASMA_UINT64       | phantasma::UInt64       | uint64_t          |
-// PHANTASMA_CHAR         | phantasma::Char         | char              | See Unicode section
-// PHANTASMA_STRING       | phantasma::String       | std::string       | Must support construction from `const phantasma::Char*`
-// PHANTASMA_STRINGBUILDER| phantasma::StringBuilder| std::stringstream | 
-// PHANTASMA_VECTOR       |                         | std::vector       | Must support `push_back` and `size` members
-// PHANTASMA_JSONVALUE    | phantasma::JSONValue    | std::string_view  | See JSON and Adaptors section
-// PHANTASMA_JSONARRAY    | phantasma::JSONArray    | JSONValue         | See JSON and Adaptors section
-// PHANTASMA_JSONDOCUMENT | phantasma::JSONDocument | std::string       | See JSON and Adaptors section
-// PHANTASMA_JSONBUILDER  | phantasma::JSONBuilder  | std::stringstream*| See JSON and Adaptors section
-// PHANTASMA_HTTPCLIENT   | phantasma::HttpClient   |                   | See HTTP and Adaptors section
+// |#define                  | typedef                   | Default             | Notes                                                  |
+// |-------------------------|---------------------------|---------------------|--------------------------------------------------------|
+// |`PHANTASMA_BYTE`         | `phantasma::Byte`         | `uint8_t`           |                                                        |
+// |`PHANTASMA_INT32`        | `phantasma::Int32`        | `int32_t`           |                                                        |
+// |`PHANTASMA_UINT32`       | `phantasma::UInt32`       | `uint32_t`          |                                                        |
+// |`PHANTASMA_INT64`        | `phantasma::Int64`        | `int64_t`           |                                                        |
+// |`PHANTASMA_UINT64`       | `phantasma::UInt64`       | `uint64_t`          |                                                        |
+// |`PHANTASMA_CHAR`         | `phantasma::Char`         | `char`              | See Unicode section                                    |
+// |`PHANTASMA_STRING`       | `phantasma::String`       | `std::string`       | Must support construction from `const phantasma::Char*`|
+// |`PHANTASMA_STRINGBUILDER`| `phantasma::StringBuilder`| `std::stringstream` |                                                        |
+// |`PHANTASMA_VECTOR`       |                           | `std::vector`       | Must support `push_back` and `size` members            |
+// |`PHANTASMA_JSONVALUE`    | `phantasma::JSONValue`    | `std::string_view`  | See JSON and Adaptors section                          |
+// |`PHANTASMA_JSONARRAY`    | `phantasma::JSONArray`    | `JSONValue`         | See JSON and Adaptors section                          |
+// |`PHANTASMA_JSONDOCUMENT` | `phantasma::JSONDocument` | `std::string`       | See JSON and Adaptors section                          |
+// |`PHANTASMA_JSONBUILDER`  | `phantasma::JSONBuilder`  | `std::stringstream`*| See JSON and Adaptors section                          |
+// |`PHANTASMA_HTTPCLIENT`   | `phantasma::HttpClient`   |                     | See HTTP and Adaptors section                          |
 //
 // The behavior of this header can further be modified by using the following 
-//  #defines (BEFORE including phantasma.h)
+//  `#defines` (BEFORE including `phantasma.h`)
 // 
-// #define                                      | Notes                   
-// PHANTASMA_EXCEPTION(message)                 | See Exceptions section
-// PHANTASMA_EXCEPTION_MESSAGE(message, String) | See Exceptions section
-// PHANTASMA_LITERAL(x)                         | See Unicode section
-// PHANTASMA_FUNCTION                           | See Integration section         
-// PHANTASMA_IMPLEMENTATION                     | See Integration section
+// |#define                                        | Notes                   |
+// |-----------------------------------------------|-------------------------|
+// |`PHANTASMA_EXCEPTION(message)`                 | See Exceptions section  |
+// |`PHANTASMA_EXCEPTION_MESSAGE(message, String)` | See Exceptions section  |
+// |`PHANTASMA_LITERAL(x)`                         | See Unicode section     |
+// |`PHANTASMA_FUNCTION`                           | See Integration section |        
+// |`PHANTASMA_IMPLEMENTATION`                     | See Integration section |
 //
 //------------------------------------------------------------------------------
 // Integration
 //------------------------------------------------------------------------------
 // The core of API is provided in the "single header" style to support simple and 
 //  flexible integration into your project 
-//  (see https://github.com/nothings/single_file_libs).
+//  (see https://github.com/nothings/single_file_libs / https://en.wikipedia.org/wiki/Header-only).
 // The implementation of function bodies will be excluded unless you define
-//  PHANTASMA_IMPLEMENTATION before including phantasma.h.
+//  `PHANTASMA_IMPLEMENTATION` before including `phantasma.h`.
 //
 // See the "Extended/Advanced usage" section, below for details on what is excluded
 //  from this single header file.
 //
 // Typical linking:
-//  In one CPP file, before including phantasma.h:
-//   #define PHANTASMA_IMPLEMENTATION
+//  In one CPP file, before including `phantasma.h`:
+//   `#define PHANTASMA_IMPLEMENTATION`
 // 
 // Inline linking:
-//  In every CPP file that uses the API, before including phantasma.h:
-//   #define PHANTASMA_IMPLEMENTATION
-//   #define PHANTASMA_FUNCTION inline
+//  In every CPP file that uses the API, before including `phantasma.h`:
+//   `#define PHANTASMA_IMPLEMENTATION`
+//   `#define PHANTASMA_FUNCTION inline`
 //
-// Aside from PHANTASMA_IMPLEMENTATION / PHANTASMA_FUNCTION, you should take care
-//  to ensure that every other PHANTASMA_* macro is defined to the same value in
-//  all of yoru CPP files that use the phantasma API.
+// Aside from `PHANTASMA_IMPLEMENTATION` / `PHANTASMA_FUNCTION`, you should take 
+//  care to ensure that every other PHANTASMA_* macro is defined to the same value
+//  in all of your CPP files that use the phantasma API.
 //
 //------------------------------------------------------------------------------
 // Exceptions
 //------------------------------------------------------------------------------
-// Support for C++ exceptions is opt-in. Before including phantasma.h, define
+// Support for C++ exceptions is opt-in. Before including `phantasma.h`, define
 //  the following to enable exceptions:
 //
-// #define PHANTASMA_EXCEPTION_ENABLE
+// `#define PHANTASMA_EXCEPTION_ENABLE`
 //
 // Alternatively, you can customize the exact type that is thrown by defining:
 //
-// #define PHANTASMA_EXCEPTION(message)                 throw std::runtime_error(message)
-// #define PHANTASMA_EXCEPTION_MESSAGE(message, string) throw std::runtime_error(string)
+// `#define PHANTASMA_EXCEPTION(message)                 throw std::runtime_error(message)`
+// `#define PHANTASMA_EXCEPTION_MESSAGE(message, string) throw std::runtime_error(string)`
 //
 //------------------------------------------------------------------------------
 // Unicode
 //------------------------------------------------------------------------------
 // To build a wide-character version of the API, define the following before
-//  including phantasma.h:
+//  including `phantasma.h`:
 //
-// #define PHANTASMA_CHAR          wchar_t
-// #define PHANTASMA_LITERAL(x)    L ## x
-// #define PHANTASMA_STRING        std::wstring
-// #define PHANTASMA_STRINGBUILDER std::wstringstream
+// `#define PHANTASMA_CHAR          wchar_t`
+// `#define PHANTASMA_LITERAL(x)    L ## x`
+// `#define PHANTASMA_STRING        std::wstring`
+// `#define PHANTASMA_STRINGBUILDER std::wstringstream`
 //
-// Alternatively, if '_UNICODE' is defined, then the above macros will be defined
+// Alternatively, if `_UNICODE` is defined, then the above macros will be defined
 //  automatically.
 //
 // You should also provide a JSON and HTTP library with wide-character support.
@@ -117,11 +120,12 @@
 //  contain the required configuration to connect the Phantasma SDK to existing
 //  popular open source libraries for different features:
 //
-// Library   | Features     | #include file                     | Library URL
-// C++ REST  | HTTP + JSON  | Adapters/PhantasmaAPI_cpprest.h   | https://github.com/microsoft/cpprestsdk 
-// libcurl   | HTTP         | Adapters/PhantasmaAPI_curl.h      | https://curl.haxx.se/libcurl/        
-// RapidJSON | JSON         | Adapters/PhantasmaAPI_rapidjson.h | http://rapidjson.org/ 
-// Sodium    | Cryptography | Adapters/PhantasmaAPI_sodium.h    | https://libsodium.org
+// |Library   | Features     | #include file                       | Library URL                             |
+// |----------|--------------|-------------------------------------|-----------------------------------------|
+// |C++ REST  | HTTP + JSON  | `Adapters/PhantasmaAPI_cpprest.h`   | https://github.com/microsoft/cpprestsdk |
+// |libcurl   | HTTP         | `Adapters/PhantasmaAPI_curl.h`      | https://curl.haxx.se/libcurl/           |
+// |RapidJSON | JSON         | `Adapters/PhantasmaAPI_rapidjson.h` | http://rapidjson.org/                   |
+// |Sodium    | Cryptography | `Adapters/PhantasmaAPI_sodium.h`    | https://libsodium.org                   |
 //
 //------------------------------------------------------------------------------
 // JSON
@@ -130,105 +134,108 @@
 //  as simple as possible (approx 200 lines of code) and is not high-performance
 //  or highly robust.
 //
-// The CPP REST and RapidJSON adaptors implement these macros.
-//
 // It is recommended that you supply another JSON-parsing API, by defining the
-//  following macros before including phantasma.h:
-// #define PHANTASMA_JSONVALUE    Your_Json_Value_Type
-// #define PHANTASMA_JSONARRAY    Your_Json_Array_Type
-// #define PHANTASMA_JSONDOCUMENT Your_JSON_Document_Type
-// #define PHANTASMA_JSONBUILDER  Your_Json_Serializer_Type
+//  following macros before including `phantasma.h`:
+//  `#define PHANTASMA_JSONVALUE    Your_Json_Value_Type`
+//  `#define PHANTASMA_JSONARRAY    Your_Json_Array_Type`
+//  `#define PHANTASMA_JSONDOCUMENT Your_JSON_Document_Type`
+//  `#define PHANTASMA_JSONBUILDER  Your_Json_Serializer_Type`
+//
+// **The CPP REST and RapidJSON adaptors implement these macros.**
 //
 // Also, this header uses the following procedural API to interact with these types.
 // If you have supplied your own JSON types, you must implement the following functions:
 //
-// namespace phantasma { namespace json {
-//
-//    JSONValue Parse(const JSONDocument&);
-//
-//    bool      LookupBool(   const JSONValue&, const Char* field, bool& out_error);
-//    Int32     LookupInt32(  const JSONValue&, const Char* field, bool& out_error);
-//    UInt32    LookupUInt32( const JSONValue&, const Char* field, bool& out_error);
-//    String    LookupString( const JSONValue&, const Char* field, bool& out_error);
-//    JSONValue LookupValue(  const JSONValue&, const Char* field, bool& out_error);
-//    JSONArray LookupArray(  const JSONValue&, const Char* field, bool& out_error);
-//    bool      HasField(     const JSONValue&, const Char* field, bool& out_error);
-//    bool      HasArrayField(const JSONValue&, const Char* field, bool& out_error);
-//
-//    bool      AsBool(       const JSONValue&,                    bool& out_error);
-//    Int32     AsInt32(      const JSONValue&,                    bool& out_error);
-//    UInt32    AsUInt32(     const JSONValue&,                    bool& out_error);
-//    String    AsString(     const JSONValue&,                    bool& out_error);
-//    JSONArray AsArray(      const JSONValue&,                    bool& out_error);
-//    bool      IsArray(      const JSONValue&,                    bool& out_error);
-//    bool      IsObject(     const JSONValue&,                    bool& out_error);
-//    
-//    int       ArraySize(    const JSONArray&,                    bool& out_error);
-//    JSONValue IndexArray(   const JSONArray&, int index,         bool& out_error);
-//
-//                           void BeginObject(JSONBuilder&);
-//                           void AddString  (JSONBuilder&, const Char* key, const Char* value);
-//   template<class... Args> void AddArray   (JSONBuilder&, const Char* key, Args...);
-//                           void EndObject  (JSONBuilder&);
-// }}
+//     namespace phantasma { namespace json {
+//     
+//        JSONValue Parse(const JSONDocument&);
+//     
+//        bool      LookupBool(   const JSONValue&, const Char* field, bool& out_error);
+//        Int32     LookupInt32(  const JSONValue&, const Char* field, bool& out_error);
+//        UInt32    LookupUInt32( const JSONValue&, const Char* field, bool& out_error);
+//        String    LookupString( const JSONValue&, const Char* field, bool& out_error);
+//        JSONValue LookupValue(  const JSONValue&, const Char* field, bool& out_error);
+//        JSONArray LookupArray(  const JSONValue&, const Char* field, bool& out_error);
+//        bool      HasField(     const JSONValue&, const Char* field, bool& out_error);
+//        bool      HasArrayField(const JSONValue&, const Char* field, bool& out_error);
+//     
+//        bool      AsBool(       const JSONValue&,                    bool& out_error);
+//        Int32     AsInt32(      const JSONValue&,                    bool& out_error);
+//        UInt32    AsUInt32(     const JSONValue&,                    bool& out_error);
+//        String    AsString(     const JSONValue&,                    bool& out_error);
+//        JSONArray AsArray(      const JSONValue&,                    bool& out_error);
+//        bool      IsArray(      const JSONValue&,                    bool& out_error);
+//        bool      IsObject(     const JSONValue&,                    bool& out_error);
+//        
+//        int       ArraySize(    const JSONArray&,                    bool& out_error);
+//        JSONValue IndexArray(   const JSONArray&, int index,         bool& out_error);
+//     
+//                               void BeginObject(JSONBuilder&);
+//                               void AddString  (JSONBuilder&, const Char* key, const Char* value);
+//       template<class... Args> void AddArray   (JSONBuilder&, const Char* key, Args...);
+//                               void EndObject  (JSONBuilder&);
+//     }}
 //
 //------------------------------------------------------------------------------
 // HTTP
 //------------------------------------------------------------------------------
 // This header does not contain a HTTP client, nor a dependency on any specific
 //  HTTP client library. If you do not supply a HTTP client library, then only
-//  the Low-level phantasma API (PhantasmaJsonAPI) is available.
-// The CPP REST and libcurl adaptors implement these macros.
+//  the Low-level phantasma API (`PhantasmaJsonAPI`) is available.
 //
-// To enable the PhantasmaAPI class, defining the following macro before 
-//  including phantasma.h:
-// #define PHANTASMA_HTTPCLIENT   Your_HTTP_Client_Type
+// To enable the `PhantasmaAPI` class, defining the following macro before 
+//  including `phantasma.h`:
+// `#define PHANTASMA_HTTPCLIENT   Your_HTTP_Client_Type`
+//
+// **The CPP REST and libcurl adaptors implement this macro.**
 //
 // Also, this header uses the following procedural API to interact with this type.
-// If you have defined PHANTASMA_HTTPCLIENT, you must implement the following,
+// If you have defined `PHANTASMA_HTTPCLIENT`, you must implement the following,
 //  function, which should perform a HTTP POST request and return the result:
 //
-// namespace phantasma {
-//  JSONDocument HttpPost(HttpClient&, const Char* uri, const JSONBuilder&);
-// }
+//     namespace phantasma {
+//      JSONDocument HttpPost(HttpClient&, const Char* uri, const JSONBuilder&);
+//     }
 //
 //------------------------------------------------------------------------------
 // Extended/Advanced usage
 //------------------------------------------------------------------------------
 // This header file contains the entirety of the RPC API requried to communicate 
-//  with a Phantasma node. If you are not trying to create and transactions, this 
+//  with a Phantasma node. If you are not trying to create transactions, this 
 //  may be enough for you.
+//
 // However, for advanced usage, such as creating and signing transactions, much
 //  more code is required, including cryptography, N-bit ingeger arithmetic, etc.
 // The other header files that are included in this distribution, in sub-folders
-//  provide these extra features, listed below:
+//  listed below, provide these extra features:
 //
-//  Directory     | Features
-//   Adapters     | Configuration for this library to communicate with 3rd party libraries
-//   Blockchain   | Transactions
-//   Cryptography | Public/Private keys, Signatures, Random numbers, Encryption
-//   Numerics     | N-bit integer implementation. Base58 ASCII encoding.
-//   Security     | Practical memory protection.
+//  |Directory     | Features                                                              |
+//  |--------------|-----------------------------------------------------------------------|
+//  | Adapters     | Configuration for this library to communicate with 3rd party libraries|
+//  | Blockchain   | Transactions                                                          |
+//  | Cryptography | Public/Private keys, Signatures, Random numbers, Encryption           |
+//  | Numerics     | N-bit integer implementation. Base 16/58 ASCII encoding.              |
+//  | Security     | Practical memory protection.                                          |
 //
 //------------------------------------------------------------------------------
 // - Extended/Advanced usage - Security configuration
 //------------------------------------------------------------------------------
 //   To securely process transactions and private keys, it is strongly advised to 
 //   pair the PhantasmaAPI with strong 3rd party security library.
-//   The libSodium adaptor implements these macros.
+//
+//   **The Sodium adaptor implements these macros.**
 //   
-//   #define                    | 
-//   PHANTASMA_RANDOMBYTES      | Fill a memory range with cryptographically secure pseudo-random numbers
-//   PHANTASMA_WIPEMEM          | Fill a memory range with 0's in a way that won't be "optimized away"
-//                              | 
-//   PHANTASMA_LOCKMEM          | Pin the memory pages containing this range, and otherwise inform the OS that it contains secrets.
-//   PHANTASMA_UNLOCKMEM        | Undo the actions of PHANTASMA_LOCKMEM, but also fill the memory range with 0's as with PHANTASMA_WIPEMEM.
-//                              | 
-//   PHANTASMA_SECURE_ALLOC     | Similar to malloc, but should return dedicated pages that can have their access permissions modified.
-//   PHANTASMA_SECURE_FREE      | Similar to free - used with allocations returned from PHANTASMA_SECURE_ALLOC
-//   PHANTASMA_SECURE_NOACCESS  | Used with allocations returned from PHANTASMA_SECURE_ALLOC. Mark the pages as non-readable.
-//   PHANTASMA_SECURE_READONLY  | Used with allocations returned from PHANTASMA_SECURE_ALLOC. Mark the pages as read only.
-//   PHANTASMA_SECURE_READWRITE | Used with allocations returned from PHANTASMA_SECURE_ALLOC. Mark the pages as writable.
+//  |#define                      |                                                                                                              |
+//  |-----------------------------|--------------------------------------------------------------------------------------------------------------|
+//  |`PHANTASMA_RANDOMBYTES`      | Fill a memory range with cryptographically secure pseudo-random numbers                                      |
+//  |`PHANTASMA_WIPEMEM`          | Fill a memory range with 0's in a way that won't be "optimized away"                                         |
+//  |`PHANTASMA_LOCKMEM`          | Pin the memory pages containing this range, and otherwise inform the OS that it contains secrets.            |
+//  |`PHANTASMA_UNLOCKMEM`        | Undo the actions of `PHANTASMA_LOCKMEM`, but also fill the memory range with 0's as with `PHANTASMA_WIPEMEM`.|
+//  |`PHANTASMA_SECURE_ALLOC`     | Similar to malloc, but should return dedicated pages that can have their access permissions modified.        |
+//  |`PHANTASMA_SECURE_FREE`      | Similar to free - used with allocations returned from `PHANTASMA_SECURE_ALLOC`                               |
+//  |`PHANTASMA_SECURE_NOACCESS`  | Used with allocations returned from `PHANTASMA_SECURE_ALLOC`. Mark the pages as non-readable.                |
+//  |`PHANTASMA_SECURE_READONLY`  | Used with allocations returned from `PHANTASMA_SECURE_ALLOC`. Mark the pages as read only.                   |
+//  |`PHANTASMA_SECURE_READWRITE` | Used with allocations returned from `PHANTASMA_SECURE_ALLOC`. Mark the pages as writable.                    |
 //
 //------------------------------------------------------------------------------
 // - Extended/Advanced usage - Cryptography configuration
@@ -236,13 +243,19 @@
 //  To create or validate transactions, an EdDSA Ed25519 implementation is requied.
 //   The libSodium adaptor implements these macros.
 //   
-//   #define                              | 
-//   PHANTASMA_Ed25519_PublicKeyFromSeed  | Generate a 32 byte public key from a 32 byte seed.
-//   PHANTASMA_Ed25519_PrivateKeyFromSeed | Generate a 64 byte public key from a 32 byte seed.
-//   PHANTASMA_Ed25519_SignDetached       | Generate a 64 byte signature from a message and a private key.
-//   PHANTASMA_Ed25519_ValidateDetached   | Validate a 64 byte signature using a public key.
+//  |#define                                |                                                               |
+//  |---------------------------------------|---------------------------------------------------------------|
+//  |`PHANTASMA_Ed25519_PublicKeyFromSeed`  | Generate a 32 byte public key from a 32 byte seed.            |
+//  |`PHANTASMA_Ed25519_PrivateKeyFromSeed` | Generate a 64 byte public key from a 32 byte seed.            |
+//  |`PHANTASMA_Ed25519_SignDetached`       | Generate a 64 byte signature from a message and a private key.|
+//  |`PHANTASMA_Ed25519_ValidateDetached`   | Validate a 64 byte signature using a public key.              |
 //
 //
+
+
+//------------------------------------------------------------------------------
+// API configuration section:
+//------------------------------------------------------------------------------
 
 #if !defined(PHANTASMA_STRING) || !defined(PHANTASMA_JSONDOCUMENT) || !defined(PHANTASMA_JSONVALUE)
 # include <string>
@@ -483,6 +496,9 @@ namespace json
 
 namespace rpc
 {
+//------------------------------------------------------------------------------
+// RPC structures:
+//------------------------------------------------------------------------------
 
 {{#each types}}
 struct {{#fix-type Key}}{{#parse-lines false}}{{#new-line}}
@@ -494,6 +510,10 @@ struct {{#fix-type Key}}{{#parse-lines false}}{{#new-line}}
 {{/each}}
 {{#parse-lines true}}};
 {{/each}}
+
+//------------------------------------------------------------------------------
+// Low level RPC API:
+//------------------------------------------------------------------------------
 
 class PhantasmaJsonAPI
 {
@@ -514,6 +534,9 @@ private:
 };
 
 #if defined(PHANTASMA_HTTPCLIENT)
+//------------------------------------------------------------------------------
+// High level RPC API:
+//------------------------------------------------------------------------------
 class PhantasmaAPI
 {
 public:
@@ -530,6 +553,9 @@ private:
 #endif
 	
 #if defined(PHANTASMA_IMPLEMENTATION)
+//------------------------------------------------------------------------------
+// RPC API implementation details:
+//------------------------------------------------------------------------------
 PHANTASMA_FUNCTION bool PhantasmaJsonAPI::Deserializebool(const JSONValue& value, bool& err)
 {
 	return json::AsBool(value, err);
@@ -749,6 +775,9 @@ PHANTASMA_FUNCTION {{#if Info.ReturnType.IsArray}}PHANTASMA_VECTOR<{{/if}}{{#fix
 namespace json
 {
 #ifndef PHANTASMA_JSONVALUE
+//------------------------------------------------------------------------------
+// Built-in JSON parsing library:
+//------------------------------------------------------------------------------
     JSONValue Parse(const JSONDocument& doc) { return doc; }
 
 	inline size_t SkipNumber(const JSONValue& v, size_t i, bool& out_error)
