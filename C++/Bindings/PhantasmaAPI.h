@@ -637,7 +637,18 @@ PHANTASMA_FUNCTION JSONValue PhantasmaJsonAPI::CheckResponse(JSONValue response,
 	}
 	if( json::HasField(response, PHANTASMA_LITERAL("error"), out_error) )
 	{
-		String msg = json::LookupString(response, PHANTASMA_LITERAL("error"), out_error);
+		const JSONValue& error = json::LookupValue(response, PHANTASMA_LITERAL("error"), out_error);
+		int code = 0;
+		String msg = PHANTASMA_LITERAL("???");
+		if(json::IsObject(error, out_error))
+		{
+			msg = json::LookupString(error, PHANTASMA_LITERAL("message"), out_error);
+			code = json::LookupInt32(error, PHANTASMA_LITERAL("code"), out_error);
+		}
+		else
+		{
+			msg = json::LookupString(response, PHANTASMA_LITERAL("error"), out_error);
+		}
 		PHANTASMA_EXCEPTION_MESSAGE("Server returned error: %s", msg);
 		out_error = true;
 		return response;
