@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Storage", "..\..\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.VM", "..\..\PhantasmaChain\Phantasma.VM\Phantasma.VM.csproj", "{3E99832E-6EC8-4B87-822E-5F65474BEBF5}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.P2P", "..\..\PhantasmaChain\Phantasma.P2P\Phantasma.P2P.csproj", "{F1AB383F-4A8E-41F3-B8C3-A39862832657}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{3E99832E-6EC8-4B87-822E-5F65474BEBF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3E99832E-6EC8-4B87-822E-5F65474BEBF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3E99832E-6EC8-4B87-822E-5F65474BEBF5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1AB383F-4A8E-41F3-B8C3-A39862832657}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1AB383F-4A8E-41F3-B8C3-A39862832657}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1AB383F-4A8E-41F3-B8C3-A39862832657}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1AB383F-4A8E-41F3-B8C3-A39862832657}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
