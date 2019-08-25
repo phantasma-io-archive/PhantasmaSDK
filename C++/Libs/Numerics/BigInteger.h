@@ -97,7 +97,8 @@ public:
 	{
 	}
 
-	TBigInteger(const Bytes& bytes, bool twosComplementFormatFlag)
+    //this constructor assumes that the byte array is in Two's complement notation
+	TBigInteger(const Bytes& bytes)
 	{
 		if( bytes.empty() )
 		{
@@ -106,16 +107,25 @@ public:
 			return;
 		}
 
-		int sign;
+		Byte msb = bytes[bytes.size() - 1];
 
-		if (twosComplementFormatFlag)
-		{
-			Byte msb = bytes[bytes.size() - 1] >> 7;
-			sign = msb == 0 ? 1 : -1;
-		}
-		else
-			sign = 1;
+		int sign = 0;
 
+        switch (msb)
+        {
+            case 0xFF:
+                sign = -1;
+                break;
+
+            case 0x00:
+                sign = 1;
+                break;
+
+            default:
+                PHANTASMA_EXCEPTION("unexpected sign byte value");
+				break;
+        }
+		
 		Bytes buffer;
 
 		if (sign == -1)
@@ -126,7 +136,8 @@ public:
 		*this = TBigInteger(buffer, sign);
 	}
 
-	TBigInteger(const Bytes& bytes, int sign = 1)
+private:
+	TBigInteger(const Bytes& bytes, int sign)
 	{
 		_sign = sign;
 
@@ -151,6 +162,7 @@ public:
 			InitFromArray(&uintArray.front(), (int)uintArray.size());
 		}
 	}
+public:
 
 	TBigInteger(const Byte* bytes, int numBytes, int sign = 1)
 	{
@@ -1235,7 +1247,7 @@ public:
 		if (_sign == 0)
 			return -1;
 
-		Bytes b = ToByteArray();
+		Bytes b = ToSignedByteArray();
 		int w = 0;
 		while (b[w] == 0)
 			w++;
@@ -1339,7 +1351,16 @@ public:
 		return TBigInteger(std::move(sqrtArray));
 	}
 
-	int ToByteArray(Byte* result, int resultSize) const
+    /// <summary>
+    /// IF YOU USE THIS METHOD, DON'T FEED THE RESULTING BYTE ARRAY TO THE BigInteger(byte[] array) CONSTRUCTOR
+    /// That constructor depends on having a byte array using the Two's Complement convention, where the MSB is either 0 or FF
+    /// This method does not produce an extra byte for the sign, that only happens on the ToSignedByteArray method.
+    ///
+    /// tl;dr:  if the byte array will be used to reconstruct a bigint, use ToSignedByteArray
+    ///         if you just need to manipulate the raw byte array without having to reconstruct a bigint, AND you don't care about sign, use ToUnsignedByteArray.
+    /// </summary>
+    /// <returns></returns>
+	int ToUnsignedByteArray(Byte* result, int resultSize) const
 	{
 		int bitLength = GetBitLength();
 		UInt32 byteArraySize = (bitLength / 8) + (UInt32)((bitLength % 8 > 0) ? 1 : 0);
@@ -1373,15 +1394,49 @@ public:
 
 		return (int)byteArraySize;
 	}
-
-	Bytes ToByteArray(bool includeSignInArray = false) const
+	
+    /// <summary>
+    /// IF YOU USE THIS METHOD, DON'T FEED THE RESULTING BYTE ARRAY TO THE BigInteger(byte[] array) CONSTRUCTOR
+    /// That constructor depends on having a byte array using the Two's Complement convention, where the MSB is either 0 or FF
+    /// This method does not produce an extra byte for the sign, that only happens on the ToSignedByteArray method.
+    ///
+    /// tl;dr:  if the byte array will be used to reconstruct a bigint, use ToSignedByteArray
+    ///         if you just need to manipulate the raw byte array without having to reconstruct a bigint, AND you don't care about sign, use ToUnsignedByteArray.
+    /// </summary>
+    /// <returns></returns>
+	Bytes ToUnsignedByteArray() const
 	{
 		int bitLength = GetBitLength();
-		UInt32 byteArraySize = (bitLength / 8) + (UInt32)((bitLength % 8 > 0) ? 1 : 0) + (includeSignInArray ? 1 : 0);
+		UInt32 byteArraySize = (bitLength / 8) + (UInt32)((bitLength % 8 > 0) ? 1 : 0);
 		Bytes result;
 		result.resize(byteArraySize);
 
-		bool applyTwosComplement = includeSignInArray && (_sign == -1);    //only apply two's complement if this number is negative
+		for (UInt32 i = 0, j = 0, end = (UInt32)_data.size(); i < end; i++, j += 4)
+		{
+			Byte bytes[4];
+			memcpy(bytes, &_data[i], 4);
+			for (int k = 0; k < 4; k++)
+			{
+				if (bytes[k] == 0)
+					continue;
+
+				result[j + k] = bytes[k];
+			}
+		}
+
+		return result;
+	}
+	
+
+    //The returned byte array is signed by applying the Two's complement technique for negative numbers
+	Bytes ToSignedByteArray() const
+	{
+		int bitLength = GetBitLength();
+		UInt32 byteArraySize = (bitLength / 8) + (UInt32)((bitLength % 8 > 0) ? 1 : 0) + 1; //the extra byte is for sign carrying purposes
+		Bytes result;
+		result.resize(byteArraySize);
+
+		bool applyTwosComplement = _sign == -1;    //only apply two's complement if this number is negative
 
 		for (UInt32 i = 0, j = 0, end = (UInt32)_data.size(); i < end; i++, j += 4)
 		{
@@ -1395,7 +1450,7 @@ public:
 					break;
 
 				if (applyTwosComplement)
-					result[j + k] = (Byte)(bytes[k] ^ 0xFF);
+					result[j + k] = (Byte) ~bytes[k];
 				else
 					result[j + k] = bytes[k];
 			}
@@ -1406,10 +1461,10 @@ public:
 		{
 			TBigInteger tmp = TBigInteger(result, 1) + 1; //create a biginteger with the inverted bits but with positive sign, and add 1.
 
-			result = tmp.ToByteArray(true);     //when we call the ToByteArray asking to include sign, we will get an extra Byte on the array to keep sign information while in Byte[] format
+			result = tmp.ToSignedByteArray();     //when we call the ToByteArray, we will get an extra byte on the array to keep sign information while in byte[] format
 												//but the twos complement logic won't get applied again given the bigint has positive sign.
 
-			result[result.size() - 1] = 0xFF;      //force the MSB to 1's, as this array represents a negative number.
+			result[result.size() - 1] = 0xFF;      //sets the MSB to 1's, as this array represents a negative number.
 		}
 
 		return result;
@@ -1427,7 +1482,7 @@ public:
 
 		TBigInteger tmp = TBigInteger(buffer, 1) + 1; //create a biginteger with the inverted bits but with positive sign, and add 1. result will remain with positive sign
 
-		buffer = tmp.ToByteArray(true); //when we call the ToByteArray asking to include sign, we will get an extra Byte on the array to make sure sign is correct 
+		buffer = tmp.ToSignedByteArray(); //when we call the ToByteArray asking to include sign, we will get an extra Byte on the array to make sure sign is correct 
 										//but the twos complement logic won't get applied again given the bigint has positive sign.
 
 		return buffer;
@@ -1549,7 +1604,7 @@ TBigInteger<S> _DecimalConversion( const String& value, UInt32 decimals, Char de
 		else // we shifted everything down one place, so insert a new null terminator in the last place
 			copy[value.length()-1] = '\0';
 
-		TBigInteger<S> parsed = TBigInteger<S>::Parse(&copy.front());
+		TBigInteger<S> parsed = TBigInteger<S>::Parse(String(&copy.front()));
 		if( decimals == fractionalDecimals )//easy case, the user input had the exact right number of decimal places! (or too many, but we truncated)
 			return parsed;
 		TBigInteger<S> multiplier = TBigInteger<S>::Pow(10, decimals-fractionalDecimals);

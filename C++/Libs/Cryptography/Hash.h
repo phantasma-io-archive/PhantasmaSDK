@@ -166,7 +166,7 @@ public:
 	// If necessary pads the number to 32 bytes with zeros 
 	Hash(const BigInteger& val)
 	{
-		auto src = val.ToByteArray();
+		auto src = val.ToSignedByteArray();
 		if(src.size() > Length)
 		{
 			PHANTASMA_EXCEPTION("number is too large");

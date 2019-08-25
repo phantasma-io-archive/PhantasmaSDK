@@ -100,7 +100,7 @@ public:
 
 	void WriteBigInteger(const BigInteger& n)
 	{
-		auto bytes = n.ToByteArray();
+		auto bytes = n.ToSignedByteArray();
 		Write((Byte)bytes.size());
 		Write(bytes);
 	}

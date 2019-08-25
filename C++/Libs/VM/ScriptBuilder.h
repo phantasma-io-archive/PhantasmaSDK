@@ -96,7 +96,7 @@ public:
 
 	ScriptBuilder& EmitLoad( Byte reg, const BigInteger& val )
 	{
-		auto bytes = val.ToByteArray( true );
+		auto bytes = val.ToSignedByteArray();
 		EmitLoad( reg, bytes.empty()?0:&bytes.front(), (int)bytes.size(), VMType::Number );
 		return *this;
 	}

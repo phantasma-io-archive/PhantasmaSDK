@@ -38,7 +38,7 @@ inline PHANTASMA_VECTOR<Byte> Decode(const String& input)
 		bi += BigInteger(index) * BigInteger::Pow(58, (int)input.length() - 1 - i);
 	}
 
-	PHANTASMA_VECTOR<Byte> bytes = bi.ToByteArray();
+	PHANTASMA_VECTOR<Byte> bytes = bi.ToUnsignedByteArray();
 	ArrayReverse(bytes);
 
 	int leadingZeros = 0;
@@ -100,12 +100,12 @@ inline int DecodeSecure(Byte* output, int outputSize, const String& input)//todo
 		bi += SecureBigInteger(index) * SecureBigInteger::Pow(58, (int)input.length() - 1 - i);
 	}
 
-	int numBytes = bi.ToByteArray(0, 0);
+	int numBytes = bi.ToUnsignedByteArray(0, 0);
 	SecureByteArray byteAllocation(numBytes, 0, false);
 	const auto& byteWriter = byteAllocation.Write();
 	Byte* bytes = byteWriter.Bytes();
 
-	bi.ToByteArray(bytes, numBytes);
+	bi.ToUnsignedByteArray(bytes, numBytes);
 
 	ArrayReverse(bytes, numBytes);
 
