@@ -2,6 +2,7 @@
 
 #include "../utils/Serializable.h"
 #include "../Numerics/Base58.h"
+#include "../Security/SecureString.h"
 #include "EdDSA/Ed25519.h"
 
 namespace phantasma {
@@ -58,9 +59,13 @@ public:
 		return Text();
 	}
 
-	static Address FromWIF(const String& wif)//todo - secure memory string
+	static Address FromWIF(const SecureString& wif)
 	{
-		if( wif.empty() )
+		return FromWIF(wif.c_str(), wif.length());
+	}
+	static Address FromWIF(const Char* wif, int wifStringLength)
+	{
+		if( !wif || wif[0] == '\0' || wifStringLength <= 0 )
 		{
 			PHANTASMA_EXCEPTION( "WIF required" );
 			return Address();
@@ -68,8 +73,7 @@ public:
 		Byte publicKey[32];
 		{
 			PinnedBytes<34> data;
-			//TODO this should be CheckDecodeSecure, not DecodeSecure!!!
-			int size = Base58::DecodeSecure(data.bytes, 34, wif);
+			int size = Base58::CheckDecodeSecure(data.bytes, 34, wif, wifStringLength);
 			if( size != 34 || data.bytes[0] != 0x80 || data.bytes[33] != 0x01 )
 			{
 				PHANTASMA_EXCEPTION( "Invalid WIF format" );
@@ -104,11 +108,9 @@ public:
 		return Address(&bytes.front()+1, (int)bytes.size()-1);
 	}
 
-	template<class ScriptBytes>//TODO (tricking compiler into accepting this code...)
-	static Address FromScript(const ScriptBytes& script)
+	static Address FromScript(const ByteArray& script)
 	{
-		auto hash = script.SHA256();
-		return Address(hash);
+		return Address(SHA256(script));
 	}
 
 	int GetSize() const
@@ -130,13 +132,13 @@ public:
 		}
 	}
 
-	template<class BinaryWriter>//TODO (tricking compiler into accepting this code...)
+	template<class BinaryWriter>
 	void SerializeData(BinaryWriter& writer) const
 	{
 		writer.WriteByteArray(_publicKey);
 	}
 
-	template<class BinaryReader>//TODO (tricking compiler into accepting this code...)
+	template<class BinaryReader>
 	void UnserializeData(BinaryReader& reader)
 	{
 		reader.ReadByteArray(_publicKey);

@@ -14,9 +14,6 @@ class Hash : public Serializable
 public:
 	constexpr static int Length = 32;
 
-	//todo static readonly Hash Null = Hash.FromBytes(new Byte[Length]);
-	//todo static constexpr Hash Zero = Hash();
-
 	bool operator==(const Hash& other) const
 	{
 		if( this == &other )

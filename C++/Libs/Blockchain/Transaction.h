@@ -11,8 +11,6 @@
 namespace phantasma
 {
 
-struct Chain {};//todo 
-
 class Transaction : public Serializable
 {
 	Timestamp m_expiration;
@@ -71,11 +69,11 @@ public:
 
 private:
 	// TODO should run the script and return true if sucess or false if exception
-	bool Validate( Chain chain, BigInteger& fee )
-	{
-		fee = BigInteger::Zero();
-		return true;
-	}
+	//bool Validate( Chain chain, BigInteger& fee )
+	//{
+	//	fee = BigInteger::Zero();
+	//	return true;
+	//}
 
 	//bool Execute( Chain chain, Epoch epoch, Block block, StorageChangeSetContext changeSet, Action<Hash, Event> onNotify, OracleReaderDelegate oracleReader, ByteArray& result )
 	//{
@@ -188,8 +186,8 @@ public:
 		return false;
 	}
 
-	bool IsValid( Chain chain )
-	{
+	//bool IsValid( Chain chain )
+	//{
 		//todo
 		//if(chain.Name != this.ChainName)
 		//{
@@ -213,12 +211,12 @@ public:
 				return false;
 			}*/
 
-		BigInteger cost;
-		bool validation = Validate( chain, cost );
-		if(!validation)
-		{
-			return false;
-		}
+	//	BigInteger cost;
+	//	bool validation = Validate( chain, cost );
+	//	if(!validation)
+	//	{
+	//		return false;
+	//	}
 
 		/*if (chain.NativeTokenAddress != null)
 		{
@@ -235,8 +233,8 @@ public:
 			}
 		}*/
 
-		return true;
-	}
+	//	return true;
+	//}
 
 private:
 	void UpdateHash()

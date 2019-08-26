@@ -66,9 +66,13 @@ public:
 		return KeyPair( privateKey.bytes, PrivateKey::Length );
 	}
 
-	static KeyPair FromWIF( const String& wif ) // todo - secure memory string
+	static KeyPair FromWIF(const SecureString& wif)
 	{
-		if( wif.empty() )
+		return FromWIF(wif.c_str(), wif.length());
+	}
+	static KeyPair FromWIF(const Char* wif, int wifStringLength)
+	{
+		if( !wif || wif[0] == '\0' || wifStringLength <= 0 )
 		{
 			PHANTASMA_EXCEPTION( "WIF required" );
 			Byte nullKey[PrivateKey::Length] = {};
@@ -76,7 +80,7 @@ public:
 		}
 
 		PinnedBytes<34> data;
-		int size = Base58::CheckDecodeSecure(data.bytes, 34, wif);
+		int size = Base58::CheckDecodeSecure(data.bytes, 34, wif, wifStringLength);
 		if( size != 34 || data.bytes[0] != 0x80 || data.bytes[33] != 0x01 )
 		{
 			PHANTASMA_EXCEPTION( "Invalid WIF format" );
@@ -86,7 +90,7 @@ public:
 		return { &data.bytes[1], 32 };
 	}
 
-	String ToWIF() const // todo - secure memory string
+	SecureString ToWIF() const
 	{
 		static_assert( PrivateKey::Length == 32, "uh oh" );
 		PinnedBytes<34> temp;
@@ -95,9 +99,7 @@ public:
 		data[33] = 0x01;
 		SecureByteReader read = privateKey.Read();
 		PHANTASMA_COPY(read.Bytes(), read.Bytes()+32, data+1);
-		//TODO this should be CheckEncode, not Encode!!!
-		String wif = Base58::Encode(data, 34);// todo - secure memory string
-		return wif;
+		return Base58::CheckEncodeSecure(data, 34);
 	}
 
 	Ed25519Signature Sign( const ByteArray& message ) const
