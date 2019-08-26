@@ -254,6 +254,60 @@ public:
 		return script;
 	}
 
+	//--------------------------------------------------------------
+	// ScriptBuilderExtensions.cs port:
+	//--------------------------------------------------------------
+	constexpr static const Char* NexusContract = PHANTASMA_LITERAL("nexus");
+	constexpr static const Char* TokenContract = PHANTASMA_LITERAL("token");
+	constexpr static const Char* EnergyContract = PHANTASMA_LITERAL("energy");
+	constexpr static const Char* SwapContract = PHANTASMA_LITERAL("swap");
+
+
+	ScriptBuilder& MintTokens(const String& tokenSymbol, const Address& target, const BigInteger& amount)
+	{
+		return CallContract(TokenContract, PHANTASMA_LITERAL("MintTokens"), tokenSymbol, target, amount);
+	}
+
+	ScriptBuilder& TransferTokens(const String& tokenSymbol, const Address& from, const String& to, const BigInteger& amount)
+	{
+		return CallContract(TokenContract, PHANTASMA_LITERAL("TransferTokens"), from, to, tokenSymbol, amount);
+	}
+
+	ScriptBuilder& TransferTokens(const String& tokenSymbol, const Address& from, const Address& to, const BigInteger& amount)
+	{
+		return CallContract(TokenContract, PHANTASMA_LITERAL("TransferTokens"), from, to, tokenSymbol, amount);
+	}
+
+	ScriptBuilder& TransferNFT(const String& tokenSymbol, const Address& from, const Address& to, const BigInteger& tokenId)//todo check if this is valid
+	{
+		return CallContract(TokenContract, PHANTASMA_LITERAL("TransferToken"), from, to, tokenSymbol, tokenId);
+	}
+
+	ScriptBuilder& TransferNFT(const String& tokenSymbol, const Address& from, const String& to, const BigInteger& tokenId)//todo check if this is valid
+	{
+		return CallContract(TokenContract, PHANTASMA_LITERAL("TransferToken"), from, to, tokenSymbol, tokenId);
+	}
+
+	ScriptBuilder& CrossTransferToken(const Address& destinationChain, const String& tokenSymbol, const Address& from, const Address& to, const BigInteger& amount)
+	{
+		return CallContract(TokenContract, PHANTASMA_LITERAL("SendTokens"), destinationChain, from, to, tokenSymbol, amount);
+	}
+
+	ScriptBuilder& CrossTransferToken(const Address& destinationChain, const String& tokenSymbol, const Address& from, const String& to, const BigInteger& amount)
+	{
+		return CallContract(TokenContract, PHANTASMA_LITERAL("SendTokens"), destinationChain, from, to, tokenSymbol, amount);
+	}
+
+	ScriptBuilder& CrossTransferNFT(const Address& destinationChain, const String& tokenSymbol, const Address& from, const Address& to, const BigInteger& tokenId)
+	{
+		return CallContract(TokenContract, PHANTASMA_LITERAL("SendToken"), destinationChain, from, to, tokenSymbol, tokenId);
+	}
+
+	ScriptBuilder& CrossTransferNFT(const Address& destinationChain, const String& tokenSymbol, const Address& from, const String& to, const BigInteger& tokenId)
+	{
+		return CallContract(TokenContract, PHANTASMA_LITERAL("SendToken"), destinationChain, from, to, tokenSymbol, tokenId);
+	}
+
 //--------------------------------------------------------------
 // ScriptUtils.cs port:
 //--------------------------------------------------------------
