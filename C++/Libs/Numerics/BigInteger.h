@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <utility>
+#include "../Security/SecureString.h"
 
 /*
 * Implementation of BigInteger class, written for Phantasma project
@@ -33,7 +34,6 @@ private:
 	typedef SecureVector<UInt32>     Data_Secure;
 
 	typedef typename SelectType<UseSecureMemory, Data_Secure, Data_Fast>::Type Data;
-	typedef ByteArray Bytes;
 	Data _data;
 
 	constexpr static int _Base = sizeof(UInt32) * 8;    //number of bits required for shift operations
@@ -98,6 +98,7 @@ public:
 	}
 
     //this constructor assumes that the byte array is in Two's complement notation
+	template<class Bytes>
 	TBigInteger(const Bytes& bytes)
 	{
 		if( bytes.empty() )
@@ -126,17 +127,18 @@ public:
 				break;
         }
 		
-		Bytes buffer;
-
 		if (sign == -1)
-			buffer = ApplyTwosComplement(bytes);
+		{
+			*this = TBigInteger(ApplyTwosComplement(bytes), sign);
+		}
 		else
-			buffer = bytes;
-
-		*this = TBigInteger(buffer, sign);
+		{
+			*this = TBigInteger(bytes, sign);
+		}
 	}
 
 private:
+	template<class Bytes>
 	TBigInteger(const Bytes& bytes, int sign)
 	{
 		_sign = sign;
@@ -240,19 +242,27 @@ private:
 
 public:
 	TBigInteger(const String& str, int radix, bool* out_error=0)
+		:TBigInteger(str.c_str(), str.length(), radix, out_error)
+	{
+	}
+	TBigInteger(const SecureString& str, int radix, bool* out_error=0)
+		:TBigInteger(str.c_str(), str.length(), radix, out_error)
+	{
+	}
+	TBigInteger(const Char* str, int strLength, int radix, bool* out_error=0)
 	{
 		TBigInteger bigInteger = Zero();
 		TBigInteger bi = One();
 
-		if (0==str.compare(PHANTASMA_LITERAL("0")) || str.empty())
+		if (strLength == 0 || str[0] == '\0' || (strLength == 1 && str[0] == '0'))
 		{
 			_sign = 0;
 			_data.push_back(0);
 			return;
 		}
 
-		const Char* first = str.c_str();
-		const Char* last = first + str.length() - 1;
+		const Char* first = str;
+		const Char* last = first + strLength - 1;
 		while( *first == '\r' || *first == '\n' )
 			++first;
 		while( last >= first && (*last == '\r' || *last == '\n') )
@@ -1247,7 +1257,7 @@ public:
 		if (_sign == 0)
 			return -1;
 
-		Bytes b = ToSignedByteArray();
+		ByteArray b = ToSignedByteArray();
 		int w = 0;
 		while (b[w] == 0)
 			w++;
@@ -1258,6 +1268,7 @@ public:
 		return -1;
 	}
 
+	template<class String>
 	static TBigInteger Parse(const String& input, int radix = 10)
 	{
 		return TBigInteger(input, radix);
@@ -1404,11 +1415,11 @@ public:
     ///         if you just need to manipulate the raw byte array without having to reconstruct a bigint, AND you don't care about sign, use ToUnsignedByteArray.
     /// </summary>
     /// <returns></returns>
-	Bytes ToUnsignedByteArray() const
+	ByteArray ToUnsignedByteArray() const
 	{
 		int bitLength = GetBitLength();
 		UInt32 byteArraySize = (bitLength / 8) + (UInt32)((bitLength % 8 > 0) ? 1 : 0);
-		Bytes result;
+		ByteArray result;
 		result.resize(byteArraySize);
 
 		for (UInt32 i = 0, j = 0, end = (UInt32)_data.size(); i < end; i++, j += 4)
@@ -1429,11 +1440,11 @@ public:
 	
 
     //The returned byte array is signed by applying the Two's complement technique for negative numbers
-	Bytes ToSignedByteArray() const
+	ByteArray ToSignedByteArray() const
 	{
 		int bitLength = GetBitLength();
 		UInt32 byteArraySize = (bitLength / 8) + (UInt32)((bitLength % 8 > 0) ? 1 : 0) + 1; //the extra byte is for sign carrying purposes
-		Bytes result;
+		ByteArray result;
 		result.resize(byteArraySize);
 
 		bool applyTwosComplement = _sign == -1;    //only apply two's complement if this number is negative
@@ -1470,9 +1481,10 @@ public:
 		return result;
 	}
 
-	static Bytes ApplyTwosComplement(const Bytes& bytes)
+	template<class Bytes>
+	static ByteArray ApplyTwosComplement(const Bytes& bytes)
 	{
-		Bytes buffer;
+		ByteArray buffer;
 		buffer.resize(bytes.size());
 
 		for (int i = 0, end = (int)bytes.size(); i < end; i++)
@@ -1544,7 +1556,7 @@ String DecimalConversion( const TBigInteger<S>& value, UInt32 decimals, Char dec
 		return value.ToString();
 }
 
-template<bool S, class String>
+template<bool S, class CharArray, class String>
 TBigInteger<S> _DecimalConversion( const String& value, UInt32 decimals, Char decimalPoint='.', Char toleratedSeparator='\0' )
 {
 	int decimalIdx = -1;
@@ -1584,7 +1596,7 @@ TBigInteger<S> _DecimalConversion( const String& value, UInt32 decimals, Char de
 	else
 	{
 		//shift the fractional part over the decimal point
-		PHANTASMA_VECTOR<Char> copy;
+		CharArray copy;
 		copy.resize(value.length());
 		for( int i=0; i<decimalIdx; ++i )
 		{
@@ -1595,16 +1607,20 @@ TBigInteger<S> _DecimalConversion( const String& value, UInt32 decimals, Char de
 			copy[i] = value[i+1];
 		}
 
+		int newLength;
 		if(fractionalDecimals > decimals)//user has provided a value that is too precise. Truncate their input.
 		{
 			int excess = fractionalDecimals - decimals;
 			fractionalDecimals = decimals;
-			copy[value.length()-(excess+1)] = '\0';
+			newLength = value.length()-(excess+1);
 		}
 		else // we shifted everything down one place, so insert a new null terminator in the last place
-			copy[value.length()-1] = '\0';
+		{
+			newLength = value.length()-1;
+		}
+		copy[newLength] = '\0';
 
-		TBigInteger<S> parsed = TBigInteger<S>::Parse(String(&copy.front()));
+		TBigInteger<S> parsed = TBigInteger<S>::Parse(String(&copy.front(), newLength));
 		if( decimals == fractionalDecimals )//easy case, the user input had the exact right number of decimal places! (or too many, but we truncated)
 			return parsed;
 		TBigInteger<S> multiplier = TBigInteger<S>::Pow(10, decimals-fractionalDecimals);
@@ -1614,12 +1630,12 @@ TBigInteger<S> _DecimalConversion( const String& value, UInt32 decimals, Char de
 
 BigInteger DecimalConversion( const String& value, UInt32 decimals, Char decimalPoint='.', Char toleratedSeparator='\0' )
 {
-	return _DecimalConversion<false>( value, decimals, decimalPoint, toleratedSeparator );
+	return _DecimalConversion<false, PHANTASMA_VECTOR<Char>>( value, decimals, decimalPoint, toleratedSeparator );
 }
 
-//SecureBigInteger DecimalConversion( const String& value, UInt32 decimals, Char decimalPoint='.', Char toleratedSeparator='\0' )//todo - secure string class
-//{
-//	return _DecimalConversion<true>( value, decimals, decimalPoint, toleratedSeparator );
-//}
+SecureBigInteger DecimalConversion( const SecureString& value, UInt32 decimals, Char decimalPoint='.', Char toleratedSeparator='\0' )
+{
+	return _DecimalConversion<true, SecureVector<Char>>( value, decimals, decimalPoint, toleratedSeparator );
+}
 
 }
