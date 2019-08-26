@@ -6,6 +6,7 @@
 #include "../../Libs/PhantasmaAPI.h"
 #include "../../Libs/Adapters/PhantasmaAPI_sodium.h"
 #include "../../Libs/Blockchain/Transaction.h"
+#include "../../Libs/Blockchain/Event.h"
 #include "../../Libs/Cryptography/KeyPair.h"
 #include "../../Libs/VM/ScriptBuilder.h"
 
@@ -98,73 +99,65 @@ static String GetTxDescription(const rpc::Transaction& tx, const vector<rpc::Cha
 
 	for(const auto& evt : tx.events) //todo move this
 	{
-		//Event nativeEvent;
-		//if (evt.Data != null)
-		//{
-		//	nativeEvent = new Event((Phantasma.Blockchain.Contracts.EventKind)evt.EventKind,
-		//		Address.FromText(evt.EventAddress), evt.Data.Decode());
-		//}
-		//else
-		//{
-		//	nativeEvent =
-		//		new Event((Phantasma.Blockchain.Contracts.EventKind)evt.EventKind, Address.FromText(evt.EventAddress));
-		//}
+		Event nativeEvent(evt.kind, evt.address, evt.data);
 
-		//switch (evt.EventKind)
-		//{
-		//case Phantasma.RpcClient.DTOs.EventKind.TokenSend:
-		//{
-		//	var data = nativeEvent.GetContent<TokenEventData>();
+		switch (nativeEvent.kind)
+		{
+		case EventKind::TokenSend:
+		{
+		//	TokenEventData data = nativeEvent.GetContent<TokenEventData>();
 		//	amount = data.value;
-		//	senderAddress = nativeEvent.Address;
+		//	senderAddress = nativeEvent.address;
 		//	senderToken = (data.symbol);
-		//}
-		//break;
-		//
-		//case Phantasma.RpcClient.DTOs.EventKind.TokenReceive:
-		//{
-		//	var data = nativeEvent.GetContent<TokenEventData>();
+		}
+		break;
+		
+		case EventKind::TokenReceive:
+		{
+		//	TokenEventData data = nativeEvent.GetContent<TokenEventData>();
 		//	amount = data.value;
-		//	receiverAddress = nativeEvent.Address;
+		//	receiverAddress = nativeEvent.address;
 		//	receiverChain = data.chainAddress;
 		//	receiverToken = data.symbol;
-		//}
-		//break;
-		//
-		//case Phantasma.RpcClient.DTOs.EventKind.TokenEscrow:
-		//{
-		//	var data = nativeEvent.GetContent<TokenEventData>();
-		//	amount = data.value;
-		//	var amountDecimal = UnitConversion.ToDecimal(amount,
-		//		phantasmaTokens.SingleOrDefault(p => p.Symbol == data.symbol).Decimals);
-		//	receiverAddress = nativeEvent.Address;
-		//	receiverChain = data.chainAddress;
-		//	var chain = GetChainName(receiverChain.Text, phantasmaChains);
-		//	description =
-		//		$"{amountDecimal} {data.symbol} tokens escrowed for address {receiverAddress} in {chain}";
-		//}
-		//break;
-		//case Phantasma.RpcClient.DTOs.EventKind.AddressRegister:
-		//{
-		//	var name = nativeEvent.GetContent<string>();
+		}
+		break;
+		
+		case EventKind::TokenEscrow:
+		{
+			//TokenEventData data = nativeEvent.GetContent<TokenEventData>();
+			//amount = data.value;
+			//BigInteger amountDecimal = DecimalConversion( const String& value, UInt32 decimals, Char decimalPoint='.', Char toleratedSeparator='\0' )
+			//
+			//	UnitConversion.ToDecimal(amount,
+			//	phantasmaTokens.SingleOrDefault(p => p.Symbol == data.symbol).Decimals);
+			//receiverAddress = nativeEvent.address;
+			//receiverChain = data.chainAddress;
+			//String chain = GetChainName(receiverChain.Text, phantasmaChains);
+			//description =
+			//	$"{amountDecimal} {data.symbol} tokens escrowed for address {receiverAddress} in {chain}";
+		}
+		break;
+		case EventKind::AddressRegister:
+		{
+		//	String name = nativeEvent.GetContent<String>();
 		//	description = $"{nativeEvent.Address} registered the name '{name}'";
-		//}
-		//break;
-		//
-		//case Phantasma.RpcClient.DTOs.EventKind.AddFriend:
-		//{
-		//	var address = nativeEvent.GetContent<Address>();
+		}
+		break;
+		
+		case EventKind::AddFriend:
+		{
+		//	Address address = nativeEvent.GetContent<Address>();
 		//	description = $"{nativeEvent.Address} added '{address} to friends.'";
-		//}
-		//break;
-		//
-		//case Phantasma.RpcClient.DTOs.EventKind.RemoveFriend:
-		//{
-		//	var address = nativeEvent.GetContent<Address>();
+		}
+		break;
+		
+		case EventKind::RemoveFriend:
+		{
+		//	Address address = nativeEvent.GetContent<Address>();
 		//	description = $"{nativeEvent.Address} removed '{address} from friends.'";
-		//}
-		//break;
-		//}
+		}
+		break;
+		}
 	}
 
 	if (description.empty())
