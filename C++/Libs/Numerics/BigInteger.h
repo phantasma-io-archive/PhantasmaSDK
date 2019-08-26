@@ -242,11 +242,11 @@ private:
 
 public:
 	TBigInteger(const String& str, int radix, bool* out_error=0)
-		:TBigInteger(str.c_str(), str.length(), radix, out_error)
+		:TBigInteger(str.c_str(), (int)str.length(), radix, out_error)
 	{
 	}
 	TBigInteger(const SecureString& str, int radix, bool* out_error=0)
-		:TBigInteger(str.c_str(), str.length(), radix, out_error)
+		:TBigInteger(str.c_str(), (int)str.length(), radix, out_error)
 	{
 	}
 	TBigInteger(const Char* str, int strLength, int radix, bool* out_error=0)
@@ -1612,11 +1612,11 @@ TBigInteger<S> _DecimalConversion( const String& value, UInt32 decimals, Char de
 		{
 			int excess = fractionalDecimals - decimals;
 			fractionalDecimals = decimals;
-			newLength = value.length()-(excess+1);
+			newLength = (int)value.length()-(excess+1);
 		}
 		else // we shifted everything down one place, so insert a new null terminator in the last place
 		{
-			newLength = value.length()-1;
+			newLength = (int)value.length()-1;
 		}
 		copy[newLength] = '\0';
 

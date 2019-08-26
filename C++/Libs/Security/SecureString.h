@@ -14,7 +14,8 @@ public:
 		: data(o.data)
 	{
 	}
-	SecureString(const Char* source, int length)
+	typedef SecureVector<Char>::size_type size_type;
+	SecureString(const Char* source, size_type length)
 	{
 		if( source && length > 0 )
 		{
@@ -42,7 +43,7 @@ public:
 		return &data.front();
 	}
 
-	UInt32 length() const { return data.empty() ? 0 : data.size() - 1; }
+	UInt32 length() const { return data.empty() ? 0 : (UInt32)data.size() - 1; }
 
 private:
 	SecureVector<Char> data;

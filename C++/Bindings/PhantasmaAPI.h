@@ -361,6 +361,22 @@ typedef char Char;
 # endif
 #endif
 
+#ifndef PHANTASMA_STRLEN
+# ifdef _UNICODE
+#  define PHANTASMA_STRLEN(x) wcslen(x)
+# else
+#  define PHANTASMA_STRLEN(x) strlen(x)
+# endif
+#endif
+
+#ifndef PHANTASMA_STRTOINT
+# ifdef _UNICODE
+#  define PHANTASMA_STRTOINT(x) std::wcstol(x, 0, 10)
+# else
+#  define PHANTASMA_STRTOINT(x) std::strtol(x, 0, 10)
+# endif
+#endif
+
 #ifdef PHANTASMA_BYTE
 typedef PHANTASMA_BYTE Byte;
 #else
@@ -795,7 +811,7 @@ namespace json
 
 	inline size_t SkipNumber(const JSONValue& v, size_t i, bool& out_error)
 	{
-		size_t j = v.find_first_not_of("+-0123456789.eE", i);
+		size_t j = v.find_first_not_of(PHANTASMA_LITERAL("+-0123456789.eE"), i);
 		if( i==j ) { PHANTASMA_EXCEPTION("Invalid Number"); out_error = true; return i+1; }
 		return j;
 	}
@@ -804,7 +820,7 @@ namespace json
 		if( v[i] != '"' ) { PHANTASMA_EXCEPTION("Invalid String"); out_error = true; return i+1; }
 		for(++i; i<v.size();)
 		{
-			i =  v.find_first_of("\"\\", i);
+			i =  v.find_first_of(PHANTASMA_LITERAL("\"\\"), i);
 			if( i == JSONValue::npos ) { PHANTASMA_EXCEPTION("Unterminated String"); out_error = true; return i; }
 			if( v[i] == '"' ) { break; }
 			if( i+1 < v.size() )
@@ -823,9 +839,9 @@ namespace json
 	{
 		switch(v[i])
 		{
-		case 'f': if(v.compare(i, 5, "false")) { break; } return i+5;
-		case 't': if(v.compare(i, 4, "true"))  { break; } return i+4;
-		case 'n': if(v.compare(i, 4, "null"))  { break; } return i+4;
+		case 'f': if(v.compare(i, 5, PHANTASMA_LITERAL("false"))) { break; } return i+5;
+		case 't': if(v.compare(i, 4, PHANTASMA_LITERAL("true")))  { break; } return i+4;
+		case 'n': if(v.compare(i, 4, PHANTASMA_LITERAL("null")))  { break; } return i+4;
 		}
 		PHANTASMA_EXCEPTION("Invalid Value"); out_error = true; return i+1;
 	}
@@ -836,7 +852,7 @@ namespace json
 		++i;
 		for(; i<v.size();)
 		{
-			i = v.find_first_not_of(", \t\r\n\f\b", i);
+			i = v.find_first_not_of(PHANTASMA_LITERAL(", \t\r\n\f\b"), i);
 			if( i == JSONValue::npos ) { PHANTASMA_EXCEPTION("Unterminated array"); out_error = true; return i; }
 			switch( v[i] )
 			{
@@ -857,13 +873,13 @@ namespace json
 		if( v[i] != '{' ) { PHANTASMA_EXCEPTION("Invalid object"); out_error = true; return i+1; }
 		for(; i<v.size();)
 		{
-			size_t keyBegin = v.find_first_of("\"}", i);
+			size_t keyBegin = v.find_first_of(PHANTASMA_LITERAL("\"}"), i);
 			if( keyBegin == JSONValue::npos || v[keyBegin] == '}' ) { break; }//no more keys
 			size_t keyEnd = v.find_first_of('"', keyBegin+1);
 			if( keyEnd == JSONValue::npos ) { PHANTASMA_EXCEPTION("Unterminated string"); out_error = true; break; }
-			size_t valueBegin = v.find_first_not_of(" \t\r\n\f\b:", keyEnd+1);
+			size_t valueBegin = v.find_first_not_of(PHANTASMA_LITERAL(" \t\r\n\f\b:"), keyEnd+1);
 			if( valueBegin == JSONValue::npos ) { PHANTASMA_EXCEPTION("No value following object key"); out_error = true; break; }
-			char value0 = v[valueBegin];
+			Char value0 = v[valueBegin];
 			switch(value0)
 			{
 			case '{': i = SkipObject(v, valueBegin, out_error); break;
@@ -881,26 +897,26 @@ namespace json
 	PHANTASMA_FUNCTION UInt32 LookupUInt32(const JSONValue& v, const Char* field, bool& out_error)   { return AsUInt32(LookupValue(v, field, out_error), out_error); }
 	PHANTASMA_FUNCTION String LookupString(const JSONValue& v, const Char* field, bool& out_error)   { return AsString(LookupValue(v, field, out_error), out_error); }
 	PHANTASMA_FUNCTION JSONArray LookupArray(const JSONValue& v, const Char* field, bool& out_error) { return AsArray(LookupValue(v, field, out_error), out_error); }
-	PHANTASMA_FUNCTION bool HasField(const JSONValue& v, const Char* field, bool& out_error)         { return "" != LookupValue(v, field, out_error); }
+	PHANTASMA_FUNCTION bool HasField(const JSONValue& v, const Char* field, bool& out_error)         { return JSONValue() != LookupValue(v, field, out_error); }
 	PHANTASMA_FUNCTION bool HasArrayField(const JSONValue& v, const Char* field, bool& out_error)    { return IsArray(LookupValue(v, field, out_error), out_error); }
 	PHANTASMA_FUNCTION JSONValue LookupValue(const JSONValue& v, const Char* field, bool& out_error)
 	{
-		if( v.length() < 1 || v[0] != '{' ) { out_error = true; return ""; }
-		size_t fieldLen = strlen(field);
+		if( v.length() < 1 || v[0] != '{' ) { out_error = true; return JSONValue(); }
+		size_t fieldLen = PHANTASMA_STRLEN(field);
 		for(size_t i=0; i<v.size();)
 		{
-			size_t keyBegin = v.find_first_of("\"}", i);
+			size_t keyBegin = v.find_first_of(PHANTASMA_LITERAL("\"}"), i);
 			if( keyBegin == JSONValue::npos || v[keyBegin] == '}' ) { break; }//no more keys
 			++keyBegin;
 			size_t keyEnd = v.find_first_of('"', keyBegin);
 			if( keyEnd == JSONValue::npos ) { PHANTASMA_EXCEPTION("Unterminated string"); out_error = true; break; }
-			size_t valueBegin = v.find_first_not_of(" \t\r\n\f\b:", keyEnd+1);
+			size_t valueBegin = v.find_first_not_of(PHANTASMA_LITERAL(" \t\r\n\f\b:"), keyEnd+1);
 			if( valueBegin == JSONValue::npos ) { PHANTASMA_EXCEPTION("No value following object key"); out_error = true; break; }
 			size_t keyLen = keyEnd-keyBegin;
 			bool correctKey = fieldLen == keyLen && 0==v.compare(keyBegin, keyLen, field);
 			if( correctKey )
 				return v.substr(valueBegin);//should really be using string views if this was a serious json parser...
-			char value0 = v[valueBegin];
+			Char value0 = v[valueBegin];
 			switch(value0)
 			{
 			case '{': i = SkipObject(v, valueBegin, out_error); break;
@@ -910,7 +926,7 @@ namespace json
 			default:  i = SkipNumber(v, valueBegin, out_error); break;
 			}
 		}
-		return "";
+		return JSONValue();
 	}
 	PHANTASMA_FUNCTION bool AsBool(const JSONValue& v, bool& out_error)
 	{
@@ -924,20 +940,20 @@ namespace json
 	}
 	PHANTASMA_FUNCTION Int32  AsInt32(const JSONValue& v, bool& out_error)
 	{
-		const char* numeric = "-0123456789";
+		const Char* numeric = PHANTASMA_LITERAL("-0123456789");
 		size_t begin = v.find_first_of(numeric, 0);
 		if( begin != 0 ) { PHANTASMA_EXCEPTION("Invalid number"); out_error = true; return 0; }
 		size_t pos = v.find_first_not_of(numeric, 0);
 		if( pos == 0 ) { PHANTASMA_EXCEPTION("Invalid number"); out_error = true; return 0; }
 		JSONValue n = pos == JSONValue::npos ? v : v.substr(0, pos);
-		return (Int32)std::strtol(n.data(), 0, 10);
+		return (Int32)PHANTASMA_STRTOINT(n.data());
 	}
 	PHANTASMA_FUNCTION UInt32 AsUInt32(const JSONValue& v, bool& out_error) { return (UInt32)AsInt32(v, out_error); }
 	PHANTASMA_FUNCTION String AsString(const JSONValue& v, bool& out_error)
 	{
-		if( v.length() < 1 || v[0] != '"' ) { PHANTASMA_EXCEPTION("Casting non-string value to string"); out_error = true; return String(""); }
+		if( v.length() < 1 || v[0] != '"' ) { PHANTASMA_EXCEPTION("Casting non-string value to string"); out_error = true; return String(); }
 		size_t pos = v.find('"', 1);
-		if( pos == JSONValue::npos ) { PHANTASMA_EXCEPTION("Unterminated string"); out_error = true; return String(""); }
+		if( pos == JSONValue::npos ) { PHANTASMA_EXCEPTION("Unterminated string"); out_error = true; return String(); }
 		return String(v.substr(1, pos-1));
 	}
 	PHANTASMA_FUNCTION JSONArray AsArray(const JSONValue& v, bool& out_error) { if(!IsArray(v, out_error)) { PHANTASMA_EXCEPTION("Casting non-array value to array"); out_error = true; } return v; }
@@ -958,7 +974,7 @@ namespace json
 		int count = 0;
 		for(size_t i=1; i<v.size();)
 		{
-			i = v.find_first_not_of(", \t\r\n\f\b", i);
+			i = v.find_first_not_of(PHANTASMA_LITERAL(", \t\r\n\f\b"), i);
 			if( i == JSONValue::npos ) { PHANTASMA_EXCEPTION("Unterminated array"); out_error = true; return count; }
 			switch( v[i] )
 			{
@@ -974,12 +990,12 @@ namespace json
 	}
 	PHANTASMA_FUNCTION JSONValue IndexArray(const JSONArray& v, int index, bool& out_error)
 	{
-		if( v[0] != '[' ) { PHANTASMA_EXCEPTION("Invalid Array"); out_error = true; return ""; }
+		if( v[0] != '[' ) { PHANTASMA_EXCEPTION("Invalid Array"); out_error = true; return JSONValue(); }
 		int count = 0;
 		for(size_t i=1; i<v.size();)
 		{
-			i = v.find_first_not_of(", \t\r\n\f\b", i);
-			if( i == JSONValue::npos ) { PHANTASMA_EXCEPTION("Unterminated array"); out_error = true; return ""; }
+			i = v.find_first_not_of(PHANTASMA_LITERAL(", \t\r\n\f\b"), i);
+			if( i == JSONValue::npos ) { PHANTASMA_EXCEPTION("Unterminated array"); out_error = true; return JSONValue(); }
 			if( count == index )
 				return v.substr(i);
 			switch( v[i] )
@@ -995,7 +1011,7 @@ namespace json
 	err:
 		PHANTASMA_EXCEPTION("Array index out of bounds"); 
 		out_error = true;
-		return "";
+		return JSONValue();
 	}
 #endif
 #ifndef PHANTASMA_JSONBUILDER

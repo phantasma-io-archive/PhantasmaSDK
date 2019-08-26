@@ -205,7 +205,7 @@ String TEncode(const Byte* input, int length)
 	}
 	ArrayReverse(sb);
 
-	return { &sb.front(), (int)sb.size() };
+	return { &sb.front(), (typename String::size_type)sb.size() };
 }
 
 inline String Encode(const Byte* input, int length)
@@ -233,7 +233,7 @@ String TCheckEncode(const Byte* input, int length)
 	PHANTASMA_COPY(input, input+length, &buffer[0]);
 	PHANTASMA_COPY(checksum2, checksum2+4, &buffer[length]);
 
-	return TEncode<String, ByteArray, BigInteger, CharArray>(&buffer.front(), buffer.size());
+	return TEncode<String, ByteArray, BigInteger, CharArray>(&buffer.front(), (int)buffer.size());
 }
 
 inline String CheckEncode(const Byte* input, int length)

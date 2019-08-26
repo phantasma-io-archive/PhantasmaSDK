@@ -35,6 +35,8 @@ public:
 		return *this;
 	}
 
+	typedef typename PHANTASMA_VECTOR<T>::size_type size_type;
+
 	auto  begin()       { return data.begin(); }
 	auto  begin() const { return data.begin(); }
 	auto    end()       { return data.end(); }
@@ -45,11 +47,11 @@ public:
 	auto  empty() const { return data.empty(); }
 	auto& front()       { return data.front(); }
 	auto& front() const { return data.front(); }
-	auto& operator[](int i)       { return data[i]; }
-	auto& operator[](int i) const { return data[i]; }
+	auto& operator[](size_type i)       { return data[i]; }
+	auto& operator[](size_type i) const { return data[i]; }
 
-	void reserve( UInt32 size ) { data.reserve(size); }
-	void resize( UInt32 size )
+	void reserve( size_type size ) { data.reserve(size); }
+	void resize( size_type size )
 	{
 		if(data.capacity() >= size) // relying on std C++ vector iterator invalidation rules here
 		{
