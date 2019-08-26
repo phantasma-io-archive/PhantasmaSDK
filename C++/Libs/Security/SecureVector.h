@@ -47,7 +47,8 @@ public:
 	auto& front() const { return data.front(); }
 	auto& operator[](int i)       { return data[i]; }
 	auto& operator[](int i) const { return data[i]; }
-	
+
+	void reserve( UInt32 size ) { data.reserve(size); }
 	void resize( UInt32 size )
 	{
 		if(data.capacity() >= size) // relying on std C++ vector iterator invalidation rules here

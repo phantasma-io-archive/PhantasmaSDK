@@ -79,8 +79,6 @@ bool Ed25519_ValidateDetached( const uint8_t* signature, int signatureLength, co
 	return 0 == crypto_sign_ed25519_verify_detached(signature, message, messageLength, publicKey);
 }
 
-//todo - hook up secure memory allocations, locking/unlocking
-
 #define PHANTASMA_RANDOMBYTES(buffer, size) randombytes_buf(buffer, size)
 #define PHANTASMA_WIPEMEM(buffer, size)     sodium_memzero(buffer, size)
 
