@@ -18,9 +18,9 @@ void PublicKeyFromSeed( Byte* output, int outputSize, const Byte* seed, int seed
 	}
 	PHANTASMA_Ed25519_PublicKeyFromSeed(output, 32, seed, 32);
 }
-PHANTASMA_VECTOR<Byte> PublicKeyFromSeed( const Byte* seed, int seedLength )
+ByteArray PublicKeyFromSeed( const Byte* seed, int seedLength )
 {
-	PHANTASMA_VECTOR<Byte> publicKey;
+	ByteArray publicKey;
 	publicKey.resize(32);
 	PublicKeyFromSeed(&publicKey.front(), (int)publicKey.size(), seed, seedLength);
 	return publicKey;
@@ -36,11 +36,11 @@ void ExpandedPrivateKeyFromSeed( Byte* output, int outputSize, const Byte* seed,
 	PHANTASMA_Ed25519_PrivateKeyFromSeed(output, 64, seed, 32);
 }
 
-PHANTASMA_VECTOR<Byte> Sign( const Byte* message, int messageLength, const Byte* expandedPrivateKey, int expandedPrivateKeyLength )
+ByteArray Sign( const Byte* message, int messageLength, const Byte* expandedPrivateKey, int expandedPrivateKeyLength )
 {
 	if( !message || !expandedPrivateKey )
-		return PHANTASMA_VECTOR<Byte>{};
-	PHANTASMA_VECTOR<Byte> signed_message;
+		return ByteArray{};
+	ByteArray signed_message;
 	signed_message.resize(64);
 	UInt64 size = PHANTASMA_Ed25519_SignDetached(&signed_message.front(), (int)signed_message.size(), message, messageLength, expandedPrivateKey, expandedPrivateKeyLength);
 	signed_message.resize((uint32_t)size);

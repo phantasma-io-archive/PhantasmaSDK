@@ -16,9 +16,9 @@ void SHA256( Byte* output, int outputSize, const Byte* input, int inputSize )
 	PHANTASMA_SHA256(output, outputSize, input, inputSize);
 }
 
-PHANTASMA_VECTOR<Byte> SHA256( const PHANTASMA_VECTOR<Byte>& input )
+ByteArray SHA256( const ByteArray& input )
 {
-	PHANTASMA_VECTOR<Byte> result;
+	ByteArray result;
 	result.resize(32);
 	SHA256(&result.front(), 32, input.empty() ? 0 : &input.front(), (int)input.size());
 	return result;

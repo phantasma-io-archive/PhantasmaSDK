@@ -32,7 +32,7 @@ public:
 	String ToString() const
 	{
 		String result = String(PHANTASMA_LITERAL("0x"));
-		PHANTASMA_VECTOR<Byte> temp;
+		ByteArray temp;
 		temp.resize(Length);
 		PHANTASMA_COPY(m_data, m_data+Length, &temp.front());
 		ArrayReverse(temp);
@@ -64,7 +64,7 @@ public:
 		else
 			PHANTASMA_COPY(value, value+Length, m_data);
 	}
-	Hash(const PHANTASMA_VECTOR<Byte>& value)
+	Hash(const ByteArray& value)
 		: Hash(value.empty()?0:&value.front(), (int)value.size())
 	{
 	}
@@ -176,7 +176,7 @@ public:
 			*this = FromBytes(src);
 	}
 
-	static Hash FromBytes(const PHANTASMA_VECTOR<Byte>& input)
+	static Hash FromBytes(const ByteArray& input)
 	{
 		if( input.empty() )
 			return Hash();

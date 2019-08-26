@@ -17,9 +17,9 @@ inline int AlphabetIndexOf( Char in )
 	return -1;
 }
 
-inline PHANTASMA_VECTOR<Byte> Decode(const String& input)
+inline ByteArray Decode(const String& input)
 {
-	PHANTASMA_VECTOR<Byte> tmp;
+	ByteArray tmp;
 	if(input.empty())
 	{
 		return tmp;
@@ -38,7 +38,7 @@ inline PHANTASMA_VECTOR<Byte> Decode(const String& input)
 		bi += BigInteger(index) * BigInteger::Pow(58, (int)input.length() - 1 - i);
 	}
 
-	PHANTASMA_VECTOR<Byte> bytes = bi.ToUnsignedByteArray();
+	ByteArray bytes = bi.ToUnsignedByteArray();
 	ArrayReverse(bytes);
 
 	int leadingZeros = 0;
@@ -52,13 +52,13 @@ inline PHANTASMA_VECTOR<Byte> Decode(const String& input)
 	return tmp;
 }
 
-inline PHANTASMA_VECTOR<Byte> CheckDecode(const String& input)
+inline ByteArray CheckDecode(const String& input)
 {
-	PHANTASMA_VECTOR<Byte> buffer = Decode(input);
+	ByteArray buffer = Decode(input);
 	if (buffer.size() < 4)
 	{
 		PHANTASMA_EXCEPTION("Bad format");
-		return PHANTASMA_VECTOR<Byte>{};
+		return ByteArray{};
 	}
 
 	Byte expected_checksum[32];
@@ -71,7 +71,7 @@ inline PHANTASMA_VECTOR<Byte> CheckDecode(const String& input)
 	if(!PHANTASMA_EQUAL( src_checksum, src_checksum+4, expected_checksum ))
 	{
 		PHANTASMA_EXCEPTION("WIF checksum failed");
-		return PHANTASMA_VECTOR<Byte>{};
+		return ByteArray{};
 	}
 	buffer.resize(buffer.size() - 4);
 	return buffer;
@@ -176,7 +176,7 @@ inline String Encode(const Byte* input, int length)
 	if( length == 0 )
 		return String();
 
-	PHANTASMA_VECTOR<Byte> temp;
+	ByteArray temp;
 	temp.resize(length + 1);
 	for (int i=0; i<length; i++)
 	{

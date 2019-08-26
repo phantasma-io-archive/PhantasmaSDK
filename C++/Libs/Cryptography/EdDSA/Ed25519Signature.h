@@ -26,7 +26,7 @@ public:
 			PHANTASMA_EXCEPTION( "Invalid Ed25519 signature length, should be 64 bytes" );
 		}
 	}
-	Ed25519Signature( const PHANTASMA_VECTOR<Byte>& signature )
+	Ed25519Signature( const ByteArray& signature )
 			: Ed25519Signature(signature.empty() ? 0 : &signature.front(), (int)signature.size())
 	{
 	}

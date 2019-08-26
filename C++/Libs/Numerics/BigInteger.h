@@ -33,7 +33,7 @@ private:
 	typedef SecureVector<UInt32>     Data_Secure;
 
 	typedef typename SelectType<UseSecureMemory, Data_Secure, Data_Fast>::Type Data;
-	typedef PHANTASMA_VECTOR<Byte> Bytes;
+	typedef ByteArray Bytes;
 	Data _data;
 
 	constexpr static int _Base = sizeof(UInt32) * 8;    //number of bits required for shift operations

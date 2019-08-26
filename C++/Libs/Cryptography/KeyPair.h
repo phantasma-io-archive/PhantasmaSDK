@@ -100,7 +100,7 @@ public:
 		return wif;
 	}
 
-	Ed25519Signature Sign( const PHANTASMA_VECTOR<Byte>& message ) const
+	Ed25519Signature Sign( const ByteArray& message ) const
 	{
 		if(message.empty())
 		{

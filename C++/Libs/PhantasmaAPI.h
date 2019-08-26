@@ -461,6 +461,8 @@ typedef PHANTASMA_BYTE Byte;
 typedef uint8_t Byte;
 #endif
 
+typedef PHANTASMA_VECTOR<Byte> ByteArray;
+
 #ifdef PHANTASMA_INT32
 typedef PHANTASMA_INT32 Int32;
 #else

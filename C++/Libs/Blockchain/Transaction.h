@@ -16,14 +16,14 @@ struct Chain {};//todo
 class Transaction : public Serializable
 {
 	Timestamp m_expiration;
-	PHANTASMA_VECTOR<Byte> m_script;
+	ByteArray m_script;
 	String m_nexusName;
 	String m_chainName;
 	PHANTASMA_VECTOR<Signature> m_signatures;
 	Hash m_hash;
 public:
 	const Timestamp Expiration() const { return m_expiration; }
-	const PHANTASMA_VECTOR<Byte> Script() const { return m_script; }
+	const ByteArray Script() const { return m_script; }
 
 	const String NexusName() const { return m_nexusName; }
 	const String ChainName() const { return m_chainName; }
@@ -77,9 +77,9 @@ private:
 		return true;
 	}
 
-	//bool Execute( Chain chain, Epoch epoch, Block block, StorageChangeSetContext changeSet, Action<Hash, Event> onNotify, OracleReaderDelegate oracleReader, PHANTASMA_VECTOR<byte>& result )
+	//bool Execute( Chain chain, Epoch epoch, Block block, StorageChangeSetContext changeSet, Action<Hash, Event> onNotify, OracleReaderDelegate oracleReader, ByteArray& result )
 	//{
-	//	result = PHANTASMA_VECTOR<byte>{};
+	//	result = ByteArray{};
 	//
 	//	var runtime = new RuntimeVM( this.Script, chain, epoch, block, this, changeSet, false );
 	//	runtime.ThrowOnFault = true;
@@ -113,7 +113,7 @@ public:
 	{
 	}
 
-	Transaction( const Char* nexusName, const Char* chainName, const PHANTASMA_VECTOR<Byte>& script, Timestamp expiration, const PHANTASMA_VECTOR<Signature>* signatures = 0 )
+	Transaction( const Char* nexusName, const Char* chainName, const ByteArray& script, Timestamp expiration, const PHANTASMA_VECTOR<Signature>* signatures = 0 )
 		: m_nexusName(nexusName)
 		, m_chainName(chainName)
 		, m_script(script)
@@ -128,7 +128,7 @@ public:
 		UpdateHash();
 	}
 
-	PHANTASMA_VECTOR<Byte> ToByteArray( bool withSignature ) const
+	ByteArray ToByteArray( bool withSignature ) const
 	{
 		BinaryWriter writer;
 		Serialize( writer, withSignature );

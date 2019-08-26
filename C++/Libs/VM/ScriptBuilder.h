@@ -54,7 +54,7 @@ public:
 		return *this;
 	}
 
-	ScriptBuilder& EmitLoad( Byte reg, const PHANTASMA_VECTOR<Byte>& bytes )
+	ScriptBuilder& EmitLoad( Byte reg, const ByteArray& bytes )
 	{
 		return EmitLoad( reg, bytes.empty()?0:&bytes.front(), (int)bytes.size() );
 	}
@@ -78,7 +78,7 @@ public:
 
 	ScriptBuilder& EmitLoad( Byte reg, const String& val )
 	{
-		ByteBuffer temp;
+		ByteArray temp;
 		int numBytes = 0;
 		const Byte* bytes = GetUTF8Bytes( val, temp, numBytes );
 		EmitLoad( reg, bytes, numBytes, VMType::String );
@@ -87,7 +87,7 @@ public:
 
 	ScriptBuilder& EmitLoad( Byte reg, const Char* val )
 	{
-		ByteBuffer temp;
+		ByteArray temp;
 		int numBytes = 0;
 		const Byte* bytes = GetUTF8Bytes( val, temp, numBytes );
 		EmitLoad( reg, bytes, numBytes, VMType::String );
@@ -133,7 +133,7 @@ public:
 		BinaryWriter temp;
 		val.SerializeData( temp );
 
-		const PHANTASMA_VECTOR<Byte>& bytes = temp.ToArray();
+		const ByteArray& bytes = temp.ToArray();
 		EmitLoad( reg, bytes.empty() ? 0 : &bytes.front(), (int)bytes.size(), VMType::Bytes );
 		return *this;
 	}
@@ -236,9 +236,9 @@ public:
 		return *this;
 	}
 
-	PHANTASMA_VECTOR<Byte> ToScript()
+	ByteArray ToScript()
 	{
-		PHANTASMA_VECTOR<Byte> script = writer.ToArray();
+		ByteArray script = writer.ToArray();
 
 		// resolve jump offsets
 		for(const auto& entry : _jumpLocations)
@@ -263,7 +263,7 @@ public:
 		return ScriptBuilder();
 	}
 
-	PHANTASMA_VECTOR<Byte> EndScript()
+	ByteArray EndScript()
 	{
 		Emit( Opcode::RET );
 		return ToScript();
@@ -310,7 +310,7 @@ private:
 	{
 		sb.EmitLoad( target_reg, arg );
 	}
-	static void LoadIntoReg( ScriptBuilder& sb, Byte target_reg, const PHANTASMA_VECTOR<Byte>& arg )
+	static void LoadIntoReg( ScriptBuilder& sb, Byte target_reg, const ByteArray& arg )
 	{
 		sb.EmitLoad( target_reg, arg );
 	}

@@ -9,15 +9,13 @@
 
 namespace phantasma {
 
-typedef PHANTASMA_VECTOR<Byte> ByteBuffer;
-
 #ifdef PHANTASMA_CONVERT_UTF8
-const Byte* GetUTF8Bytes( const String& string, ByteBuffer& temp, int& out_numBytes )
+const Byte* GetUTF8Bytes( const String& string, ByteArray& temp, int& out_numBytes )
 {
 	return PHANTASMA_CONVERT_UTF8(string, temp, out_numBytes);
 }
 #elif defined _UNICODE
-const Byte* GetUTF8Bytes( const String& string, ByteBuffer& temp, int& out_numBytes )
+const Byte* GetUTF8Bytes( const String& string, ByteArray& temp, int& out_numBytes )
 {
 	if( string.empty() )
 		return (Byte*)"";
@@ -41,7 +39,7 @@ const Byte* GetUTF8Bytes( const String& string, ByteBuffer& temp, int& out_numBy
 #endif
 	return result;
 }
-const Byte* GetUTF8Bytes( const Char* string, ByteBuffer& temp, int& out_numBytes )
+const Byte* GetUTF8Bytes( const Char* string, ByteArray& temp, int& out_numBytes )
 {
 	if( !string )
 		return 0;
@@ -65,12 +63,12 @@ const Byte* GetUTF8Bytes( const Char* string, ByteBuffer& temp, int& out_numByte
 	return result;
 }
 #else
-const Byte* GetUTF8Bytes( const String& string, ByteBuffer& temp, int& out_numBytes )
+const Byte* GetUTF8Bytes( const String& string, ByteArray& temp, int& out_numBytes )
 {
 	out_numBytes = string.length();
 	return (Byte*)string.c_str();
 }
-const Byte* GetUTF8Bytes( const Char* sz, ByteBuffer& temp, int& out_numBytes )
+const Byte* GetUTF8Bytes( const Char* sz, ByteArray& temp, int& out_numBytes )
 {
 	int length = 0;
 	for( const Char* c = sz; *c != '\0'; ++c )

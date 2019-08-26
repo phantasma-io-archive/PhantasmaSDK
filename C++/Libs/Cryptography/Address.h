@@ -40,7 +40,7 @@ public:
 			PHANTASMA_COPY(publicKey, publicKey+length, _publicKey);
 	}
 
-	Address(const PHANTASMA_VECTOR<Byte>& publicKey)
+	Address(const ByteArray& publicKey)
 		: Address(&publicKey.front(), (int)publicKey.size())
 	{}
 
