@@ -617,7 +617,7 @@ PHANTASMA_FUNCTION {{#fix-type Key}} PhantasmaJsonAPI::Deserialize{{#fix-type Ke
 {{#if FieldType.Name contains '[]'}}
 		{{Name}}Vector
 {{#else}}
-{{#if FieldType.Name=='bool'}}
+{{#if FieldType.Name=='Boolean'}}
 		json::LookupBool(value, PHANTASMA_LITERAL("{{Name}}"), err)
 {{#else}}
 {{#if FieldType.Name=='UInt32'}}
