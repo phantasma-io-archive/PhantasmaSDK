@@ -18,51 +18,74 @@ inline int AlphabetIndexOf( Char in )
 	return -1;
 }
 
-inline ByteArray Decode(const String& input)
+inline int Decode(Byte* output, int outputLength, const Char* sz, int inputLength=0)
 {
-	if( input.empty() )
+	if(!sz || inputLength < 0 || outputLength < 0)
 	{
-		PHANTASMA_EXCEPTION("string cannot be empty");
-		return ByteArray{};
+		PHANTASMA_EXCEPTION("invalid usage");
+		return 0;
 	}
 
-	auto length = input.length();
-	const Char* sz = input.c_str();
+	if(inputLength == 0)
+	{
+		inputLength = (int)PHANTASMA_STRLEN(sz);
+	}
 
-	if (length >= 2 && sz[0] == '0' && sz[1] == 'x')
+	if( inputLength == 0 )
+	{
+		PHANTASMA_EXCEPTION("string cannot be empty");
+		return 0;
+	}
+
+	if (inputLength >= 2 && sz[0] == '0' && sz[1] == 'x')
 	{
 		sz += 2;
-		length -= 2;
-		if( length == 0 )
+		inputLength -= 2;
+		if( inputLength == 0 )
 		{
 			PHANTASMA_EXCEPTION("string cannot be empty");
-			return ByteArray{};
+			return 0;
 		}
 	}
 
-	if( length % 2 == 1 )
+	if( inputLength % 2 == 1 )
 	{
 		PHANTASMA_EXCEPTION("string length must be even");
-		return ByteArray{};
+		return 0;
 	}
 
-	length /= 2;
-	ByteArray result;
-	result.resize(length);
+	int length = inputLength / 2;
+
+	if( !output )
+		return length;
+
+	length = PHANTASMA_MIN(length, outputLength);
+
 	for (int i = 0; i < length; i++)
 	{
-		int A = AlphabetIndexOf(toupper(input[i * 2 + 0]));
-		int B = AlphabetIndexOf(toupper(input[i * 2 + 1]));
+		int A = AlphabetIndexOf(toupper(sz[i * 2 + 0]));
+		int B = AlphabetIndexOf(toupper(sz[i * 2 + 1]));
 
 		if(A < 0 || B < 0)
 		{
 			PHANTASMA_EXCEPTION("invalid character");
-			return ByteArray{};
+			return i;
 		}
 
-		result[i] = (Byte)(A * 16 + B);
+		output[i] = (Byte)(A * 16 + B);
 	}
 
+	return length;
+}
+inline ByteArray Decode(const String& input)
+{
+	int length = Decode( 0, 0, input.c_str(), (int)input.length() );
+	ByteArray result;
+	if( length > 0 )
+	{
+		result.resize(length);
+		Decode( &result.front(), length, input.c_str(), (int)input.length() );
+	}
 	return result;
 }
 

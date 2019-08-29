@@ -17,6 +17,54 @@ inline int AlphabetIndexOf( Char in )
 	return -1;
 }
 
+inline int Decode(Byte* output, int outputLength, const Char* input, int inputLength)
+{
+	if(!input || inputLength < 0 || outputLength < 0)
+	{
+		PHANTASMA_EXCEPTION("Invalid usage");
+		return -1;
+	}
+	if(inputLength == 0)
+	{
+		inputLength = (int)PHANTASMA_STRLEN(input);
+		if( inputLength == 0 )
+			return 0;
+	}
+
+	BigInteger bi = BigInteger::Zero();
+	for (int i = inputLength - 1; i >= 0; i--)
+	{
+		int index = AlphabetIndexOf(input[i]);
+		if(index < 0)
+		{
+			PHANTASMA_EXCEPTION("invalid character");
+			return -1;
+		}
+
+		bi += BigInteger(index) * BigInteger::Pow(58, inputLength - 1 - i);
+	}
+
+	int leadingZeros = 0;
+	for (int i = 0; i < inputLength && input[i] == Alphabet[0]; i++)
+	{
+		leadingZeros++;
+	}
+
+	int bigIntBytes = bi.ToUnsignedByteArray(0, 0);
+	int bytesRequired = bigIntBytes + leadingZeros;
+	if( !output )
+		return bytesRequired;
+	if( bytesRequired > outputLength )
+		return -1;
+
+	for( int i=0; i<leadingZeros; ++i )
+		output[i] = 0;
+
+	bi.ToUnsignedByteArray(output+leadingZeros, outputLength-leadingZeros);
+	ArrayReverse(output+leadingZeros, bigIntBytes);
+	return bytesRequired;
+}
+
 inline ByteArray Decode(const String& input)
 {
 	ByteArray tmp;
