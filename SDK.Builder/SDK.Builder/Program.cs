@@ -379,9 +379,12 @@ namespace SDK.Builder
 
             GenerateBindings(inputPath + @"PhantasmaSDK\Docs\", tempPath + @"\Docs\");
 
+            Func<string, bool> ignoreVisualStudioFiles = x => !x.Contains("\\.vs\\");
+
             foreach (var lang in new[] { "C#", "JS", "PHP", "Python", "Go", "C++", "Java" })
             {
-                CopyFolder(inputPath + @"PhantasmaSDK\" + lang+ @"\Samples\", tempPath + lang + @"\Dapps\");
+                CopyFolder(inputPath + @"PhantasmaSDK\" + lang+ @"\Samples\", tempPath + lang + @"\Dapps\", ignoreVisualStudioFiles);
+                CopyFolder(inputPath + @"PhantasmaSDK\" + lang+ @"\Libs\", tempPath + lang + @"\Libs\");
                 GenerateBindings(inputPath + @"PhantasmaSDK\" + lang + @"\Bindings\", tempPath + lang + @"\Libs\");
             }
 

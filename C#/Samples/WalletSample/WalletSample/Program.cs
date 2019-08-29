@@ -107,6 +107,7 @@ namespace WalletSample
                         break;
                     case "6":
                         logout = true;
+                        _account = null;
                         break;
                 }
 
@@ -143,6 +144,12 @@ namespace WalletSample
                     Console.WriteLine($"Token: {balanceSheetDto.Symbol}");
                     Console.WriteLine($"Chain: {balanceSheetDto.ChainName}");
                     Console.WriteLine($"Amount: {UnitConversion.ToDecimal(BigInteger.Parse(balanceSheetDto.Amount), Helper.GetTokenDecimals(balanceSheetDto.Symbol, _tokens))}");
+                    
+                    foreach( var id in balanceSheetDto.Ids )
+                    {
+                        var tokenData = await _phantasmaApiService.GetTokenData.SendRequestAsync(balanceSheetDto.Symbol, id);
+                        Console.WriteLine($"\tID: {tokenData.Id} - RAM: {tokenData.Ram} ROM: {tokenData.Rom}");
+                    }
                     Console.WriteLine();
                 }
             }
@@ -156,6 +163,8 @@ namespace WalletSample
 
         private static async Task CrossChainTransfer()//todo
         {
+            if (_account == null)
+                _account = await _phantasmaApiService.GetAccount.SendRequestAsync(_key.Address.ToString());
             if (!HaveTokenBalanceToTransfer())
             {
                 Console.WriteLine("No tokens to tranfer");

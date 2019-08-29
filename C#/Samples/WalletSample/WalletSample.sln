@@ -13,11 +13,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Core", "..\..\..\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Cryptography", "..\..\..\..\PhantasmaChain\Phantasma.Cryptography\Phantasma.Cryptography.csproj", "{3A0C84DA-D306-4A13-8A94-8E8AD931EDEA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.IO", "..\..\..\..\PhantasmaChain\Phantasma.IO\Phantasma.IO.csproj", "{12F0BDD4-80F2-46DA-A12A-2D5728322DC0}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Numerics", "..\..\..\..\PhantasmaChain\Phantasma.Numerics\Phantasma.Numerics.csproj", "{1C81FED0-2E66-4150-973B-9F9E08B4B4F7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.VM", "..\..\..\..\PhantasmaChain\Phantasma.VM\Phantasma.VM.csproj", "{20979E6A-EDBC-49C5-AF9F-4A5B9D75A5C9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Storage", "..\..\..\..\PhantasmaChain\Phantasma.Storage\Phantasma.Storage.csproj", "{BEA1490F-F026-41A9-8E3A-41FABB46BDF8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,10 +45,6 @@ Global
 		{3A0C84DA-D306-4A13-8A94-8E8AD931EDEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A0C84DA-D306-4A13-8A94-8E8AD931EDEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A0C84DA-D306-4A13-8A94-8E8AD931EDEA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{12F0BDD4-80F2-46DA-A12A-2D5728322DC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{12F0BDD4-80F2-46DA-A12A-2D5728322DC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{12F0BDD4-80F2-46DA-A12A-2D5728322DC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{12F0BDD4-80F2-46DA-A12A-2D5728322DC0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1C81FED0-2E66-4150-973B-9F9E08B4B4F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1C81FED0-2E66-4150-973B-9F9E08B4B4F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C81FED0-2E66-4150-973B-9F9E08B4B4F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -57,6 +53,10 @@ Global
 		{20979E6A-EDBC-49C5-AF9F-4A5B9D75A5C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20979E6A-EDBC-49C5-AF9F-4A5B9D75A5C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{20979E6A-EDBC-49C5-AF9F-4A5B9D75A5C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BEA1490F-F026-41A9-8E3A-41FABB46BDF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEA1490F-F026-41A9-8E3A-41FABB46BDF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEA1490F-F026-41A9-8E3A-41FABB46BDF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEA1490F-F026-41A9-8E3A-41FABB46BDF8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
