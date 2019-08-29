@@ -13,6 +13,8 @@
 #include "sodium/randombytes.h"
 #include "sodium/crypto_hash_sha256.h"
 #include "sodium/crypto_sign_ed25519.h"
+#include "sodium/crypto_secretbox.h"
+#include "sodium/crypto_pwhash.h"
 
 namespace phantasma { 
 
