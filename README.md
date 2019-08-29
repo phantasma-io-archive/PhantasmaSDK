@@ -37,11 +37,12 @@ Language 		| Core Library	| Smart Compiler | Sample Dapps
 :---------------------- | :------------| :------------| :------------
 [.NET / C#](/C#) 		| Beta | In Development | Yes
 [PHP](/PHP) 		| Beta | N/A | Yes |
-[Python](/Python) 		| Beta | Planned | In Development |
-[Golang](/Go) 		| Beta | Planned | In Development |
-[Javascript](/JS) 		| Alpha | Planned | In Development |
-[C++](/C++) 		| Alpha | Planned | In Development |
-[Java](/Java) 		| Alpha | Planned | In Development |
+[Python](/Python) 		| Beta | Planned | Yes |
+[Solidity](/Solidity) 		| N/A | In Development | N/A |
+[Golang](/Go) 		| Alpha | N/A | Yes |
+[Javascript](/JS) 		| Alpha | N/A | Yes |
+[C++](/C++) 		| Beta | N/A | Yes |
+[Java](/Java) 		| Alpha | N/A | In Development |
 
 ## Developing
 
