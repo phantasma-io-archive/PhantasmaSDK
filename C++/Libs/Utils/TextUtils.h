@@ -10,11 +10,13 @@
 namespace phantasma {
 
 #ifdef PHANTASMA_CONVERT_UTF8
+template<class ByteArray>
 const Byte* GetUTF8Bytes( const String& string, ByteArray& temp, int& out_numBytes )
 {
 	return PHANTASMA_CONVERT_UTF8(string, temp, out_numBytes);
 }
 #elif defined _UNICODE
+template<class ByteArray>
 const Byte* GetUTF8Bytes( const String& string, ByteArray& temp, int& out_numBytes )
 {
 	if( string.empty() )
@@ -39,10 +41,23 @@ const Byte* GetUTF8Bytes( const String& string, ByteArray& temp, int& out_numByt
 #endif
 	return result;
 }
-const Byte* GetUTF8Bytes( const Char* string, ByteArray& temp, int& out_numBytes )
+template<class ByteArray>
+const Byte* GetUTF8Bytes( const Char* string, int length, ByteArray& temp, int& out_numBytes )
 {
 	if( !string )
 		return 0;
+	PHANTASMA_VECTOR<Char> truncated; 
+	if( length > 0 )
+	{
+		int actualLength = (int)PHANTASMA_STRLEN(string);
+		if( length < actualLength )
+		{
+			truncated.resize(length);
+			for( int i=0; i!=length; ++i )
+				truncated[i] = string[i];
+			string = &truncated.front();
+		}
+	}
 #ifdef _MSC_VER
 	size_t requiredSize=0;
 	mbstate_t state = {};
@@ -51,6 +66,7 @@ const Byte* GetUTF8Bytes( const Char* string, ByteArray& temp, int& out_numBytes
 	temp.resize(requiredSize+1);
 	Byte* result = &temp.front();
 	wcsrtombs_s( &requiredSize, (char*)result, requiredSize, &string, requiredSize, &state);
+	out_numBytes = (int)requiredSize;
 #else
 	std::mbstate_t state = {};
 	size_t requiredSize = 1 + std::wcsrtombs(0, &string, 0, &state);
@@ -59,20 +75,27 @@ const Byte* GetUTF8Bytes( const Char* string, ByteArray& temp, int& out_numBytes
 	temp.resize(requiredSize);
 	Byte* result = &temp.front();
 	std::wcsrtombs((char*)result, &string, requiredSize, &state);
+	out_numBytes = (int)requiredSize;
 #endif
 	return result;
 }
 #else
+template<class ByteArray>
 const Byte* GetUTF8Bytes( const String& string, ByteArray& temp, int& out_numBytes )
 {
 	out_numBytes = string.length();
 	return (Byte*)string.c_str();
 }
-const Byte* GetUTF8Bytes( const Char* sz, ByteArray& temp, int& out_numBytes )
+template<class ByteArray>
+const Byte* GetUTF8Bytes( const Char* sz, int length, ByteArray& temp, int& out_numBytes )
 {
-	int length = 0;
-	for( const Char* c = sz; *c != '\0'; ++c )
-		++length;
+	if( !sz )
+		return 0;
+	if( length <= 0 )
+	{
+		for( const Char* c = sz; *c != '\0'; ++c )
+			++length;
+	}
 	out_numBytes = length;
 	return (Byte*)sz;
 }

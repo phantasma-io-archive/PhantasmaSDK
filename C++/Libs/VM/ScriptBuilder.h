@@ -89,7 +89,7 @@ public:
 	{
 		ByteArray temp;
 		int numBytes = 0;
-		const Byte* bytes = GetUTF8Bytes( val, temp, numBytes );
+		const Byte* bytes = GetUTF8Bytes( val, 0, temp, numBytes );
 		EmitLoad( reg, bytes, numBytes, VMType::String );
 		return *this;
 	}

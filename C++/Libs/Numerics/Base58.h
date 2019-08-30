@@ -271,10 +271,10 @@ String TCheckEncode(const Byte* input, int length)
 {
 	if( length <= 0 )
 		return String();
-	Byte checksum1[32];
-	Byte checksum2[32];
-	SHA256(checksum1, 32, input, length);
-	SHA256(checksum2, 32, checksum1, 32);
+	Byte checksum1[PHANTASMA_SHA256_LENGTH];
+	Byte checksum2[PHANTASMA_SHA256_LENGTH];
+	SHA256(checksum1, PHANTASMA_SHA256_LENGTH, input, length);
+	SHA256(checksum2, PHANTASMA_SHA256_LENGTH, checksum1, PHANTASMA_SHA256_LENGTH);
 
 	ByteArray buffer;
 	buffer.resize(length + 4);

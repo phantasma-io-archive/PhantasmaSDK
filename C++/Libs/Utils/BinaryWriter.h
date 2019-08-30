@@ -150,7 +150,7 @@ public:
 
 		ByteArray temp;
 		int numBytes = 0;
-		const Byte* bytes = GetUTF8Bytes( text, temp, numBytes );
+		const Byte* bytes = GetUTF8Bytes( text, 0, temp, numBytes );
 
 		WriteVarInt(numBytes);
 		Write(bytes, numBytes);

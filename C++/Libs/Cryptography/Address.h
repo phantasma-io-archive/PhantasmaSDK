@@ -10,6 +10,7 @@ namespace phantasma {
 class Address : public Serializable
 {
 public:
+	static constexpr int TextLength = 45;
 	static constexpr int PublicKeyLength = 32;
 	static constexpr Byte NullKey[PublicKeyLength] = {};
 
@@ -86,26 +87,45 @@ public:
 
 	static Address FromText(const String& text, bool* out_error=0)
 	{
-		if(text.length() != 45)
+		return FromText(text.c_str(), (int)text.length(), out_error);
+	}
+	static Address FromText(const Char* text, int textLength=0, bool* out_error=0)
+	{
+		if(textLength == 0)
+		{
+			textLength = (int)PHANTASMA_STRLEN(text);
+		}
+
+		Byte bytes[PublicKeyLength+1];
+		int decoded = 1;
+		bool error = false;
+		if(textLength != TextLength)
 		{
 			PHANTASMA_EXCEPTION("Invalid address length");
-			if( out_error )
-				*out_error = true;
-			return Address();
+			error = true;
 		}
-
-		auto bytes = Base58::Decode(text);
-		Byte opcode = bytes[0];
-
-		if(opcode != 74)
+		else
 		{
-			PHANTASMA_EXCEPTION("Invalid address opcode");
+			decoded = Base58::Decode(bytes, PublicKeyLength+1, text, textLength);
+			if( decoded != PublicKeyLength+1 )
+			{
+				PHANTASMA_EXCEPTION("Invalid address encoding");
+				error = true;
+			}
+			Byte opcode = bytes[0];
+			if(opcode != 74)
+			{
+				PHANTASMA_EXCEPTION("Invalid address opcode");
+				error = true;
+			}
+		}
+		if( error )
+		{
 			if( out_error )
 				*out_error = true;
 			return Address();
 		}
-
-		return Address(&bytes.front()+1, (int)bytes.size()-1);
+		return Address(bytes+1, decoded-1);
 	}
 
 	static Address FromScript(const ByteArray& script)
