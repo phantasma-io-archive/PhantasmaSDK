@@ -22,6 +22,7 @@ public:
 			UInt32 size = (UInt32)length + 1;
 			data.resize(size);
 			PHANTASMA_COPY(source, source+size, &data.front());
+			data.back() = '\0';
 		}
 	}
 	SecureString(const String& o)

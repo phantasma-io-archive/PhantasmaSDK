@@ -92,6 +92,7 @@ public:
 			Unlock();
 			PHANTASMA_SWAP(data, clone);
 			Lock();
+			data.push_back(t);
 		}
 	}
 
