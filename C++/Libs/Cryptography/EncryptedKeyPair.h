@@ -5,7 +5,7 @@
 #include "AuthenticatedEncryption.h"
 #include "SHA.h"
 #include "../Utils/TextUtils.h"
-#include "../Numerics/Base16.h"
+#include "../Numerics/Base64.h"
 
 namespace phantasma {
 
@@ -24,22 +24,7 @@ public:
 	{
 	}
 
-	EncryptedKeyPair( const Address& address, const Byte* salt, const Byte* nonce, const Byte* secret, int secretSize )
-		: m_address( address )
-		, m_salt{}
-		, m_nonce{}
-	{
-		if( !salt || !nonce || !secret || secretSize <= 0 )
-		{
-			PHANTASMA_EXCEPTION("Invalid usage");
-			return;
-		}
-		PHANTASMA_COPY( salt, salt + PHANTASMA_PasswordSaltLength, m_salt );
-		PHANTASMA_COPY( nonce, nonce + PHANTASMA_AuthenticatedNonceLength, m_nonce );
-		m_encryptedSecret.resize(secretSize);
-		PHANTASMA_COPY( secret, secret + secretSize, &m_encryptedSecret.front() );
-	}
-
+	//Encrypt a private key with a password for safe keeping
 	EncryptedKeyPair( const Char* password, const Byte* privateKey, int privateKeyLength )
 		: m_address( Ed25519::PublicKeyFromSeed( privateKey, privateKeyLength ) )
 	{
@@ -66,7 +51,23 @@ public:
 		}
 	}
 
-	bool Decrypt( KeyPair& output, const Char* password ) const 
+	EncryptedKeyPair( const Address& address, const Byte* salt, const Byte* nonce, const Byte* secret, int secretSize )
+		: m_address( address )
+		, m_salt{}
+		, m_nonce{}
+	{
+		if( !salt || !nonce || !secret || secretSize <= 0 )
+		{
+			PHANTASMA_EXCEPTION("Invalid usage");
+			return;
+		}
+		PHANTASMA_COPY( salt, salt + PHANTASMA_PasswordSaltLength, m_salt );
+		PHANTASMA_COPY( nonce, nonce + PHANTASMA_AuthenticatedNonceLength, m_nonce );
+		m_encryptedSecret.resize(secretSize);
+		PHANTASMA_COPY( secret, secret + secretSize, &m_encryptedSecret.front() );
+	}
+
+	bool Decrypt( KeyPair& output, const Char* password, bool& out_tamperWarning ) const 
 	{
 		if( m_encryptedSecret.empty() )
 			return false;
@@ -83,8 +84,26 @@ public:
 			return false;
 
 		output = KeyPair( decrypted.bytes, PrivateKey::Length );
+		if( output.Address() != m_address )
+		{
+			out_tamperWarning = true;
+			PHANTASMA_EXCEPTION("Invalid EncryptedKeyPair");
+		}
 		return true;
 	}
+
+private:
+	constexpr static int headerChars = 5;
+	constexpr static int addressChars = Address::TextLength;
+	constexpr static int saltChars = Base64::RequiredCharacters(PHANTASMA_PasswordSaltLength);
+	constexpr static int nonceChars = Base64::RequiredCharacters(PHANTASMA_AuthenticatedNonceLength);
+	constexpr static int hashChars = Base64::RequiredCharacters(PHANTASMA_SHA256_LENGTH);
+	constexpr static int addressBytes = Address::PublicKeyLength;
+	constexpr static int saltBytes = PHANTASMA_PasswordSaltLength;
+	constexpr static int nonceBytes = PHANTASMA_AuthenticatedNonceLength;
+	constexpr static int secretHeaderBytes = 4;
+	constexpr static int hashBytes = PHANTASMA_SHA256_LENGTH;
+public:
 
 	static EncryptedKeyPair FromText( const String& text, bool* out_error=0 )
 	{
@@ -103,7 +122,8 @@ public:
 		{
 			textLength = (int)PHANTASMA_STRLEN(begin);
 		}
-		int minimumLength = 5 + Address::TextLength + PHANTASMA_PasswordSaltLength*2 + PHANTASMA_AuthenticatedNonceLength*2 + 2 + PHANTASMA_SHA256_LENGTH*2;
+		int secretChars = Base64::RequiredCharacters(1);
+		int minimumLength = headerChars + addressChars + saltChars + nonceChars + secretChars + hashChars;
 		while( textLength >= minimumLength )//just an if, but i'm using 'break' as "goto error" here:
 		{
 			const char* text = begin;
@@ -120,47 +140,45 @@ public:
 				break;
 			text += 1;
 			Byte salt[PHANTASMA_PasswordSaltLength];
-			int decoded = Base16::Decode(salt, PHANTASMA_PasswordSaltLength, text, PHANTASMA_PasswordSaltLength*2);
-			if( decoded != PHANTASMA_PasswordSaltLength )
+			int decodeError = Base64::Decode(salt, PHANTASMA_PasswordSaltLength, text, saltChars);
+			if( decodeError != 0 )
 				break;
-			text += PHANTASMA_PasswordSaltLength*2;
+			text += saltChars;
 
 			if( *text != 'N' )
 				break;
 			text += 1;
 			Byte nonce[PHANTASMA_AuthenticatedNonceLength];
-			decoded = Base16::Decode(nonce, PHANTASMA_AuthenticatedNonceLength, text, PHANTASMA_AuthenticatedNonceLength*2);
-			if( decoded != PHANTASMA_AuthenticatedNonceLength )
+			decodeError = Base64::Decode(nonce, PHANTASMA_AuthenticatedNonceLength, text, nonceChars);
+			if( decodeError != 0 )
 				break;
-			text += PHANTASMA_AuthenticatedNonceLength*2;
+			text += nonceChars;
 
 			if( *text != 'K' )
 				break;
 			text += 1;
 
 			const char* secretEnd;
-			for( secretEnd = text; *secretEnd != 'H' && (secretEnd-begin) < textLength; ++secretEnd )
+			for( secretEnd = text; *secretEnd != '_' && (secretEnd-begin) < textLength; ++secretEnd )
 			{}
-			int secretChars = (int)(secretEnd - text);
+			secretChars = (int)(secretEnd - text);
 
-			ByteArray secret;
-			secret.resize(secretChars/2);
-			decoded = Base16::Decode(&secret.front(), secretChars/2, text, secretChars);
+			ByteArray secret = Base64::Decode(text, secretChars);
 			text += secretChars;
 
-			int inputLengthNoHash = 5 + Address::TextLength + PHANTASMA_PasswordSaltLength*2 + PHANTASMA_AuthenticatedNonceLength*2 + secretChars;
-			int inputLength = inputLengthNoHash + PHANTASMA_SHA256_LENGTH*2;
+			int inputLengthNoHash = headerChars + addressChars + saltChars + nonceChars + secretChars;
+			int inputLength = inputLengthNoHash + hashChars;
 			if( textLength < inputLength )
 				break;
 
-			if( *text != 'H' )
+			if( *text != '_' )
 				break;
 			text += 1;
 
 			Byte storedHash[PHANTASMA_SHA256_LENGTH];
 			Byte computedHash[PHANTASMA_SHA256_LENGTH];
-			decoded = Base16::Decode(storedHash, PHANTASMA_SHA256_LENGTH, text, PHANTASMA_SHA256_LENGTH*2);
-			if( decoded != PHANTASMA_SHA256_LENGTH )
+			decodeError = Base64::Decode(storedHash, PHANTASMA_SHA256_LENGTH, text, hashChars);
+			if( decodeError != 0 )
 				break;
 
 			ByteArray temp;
@@ -173,10 +191,59 @@ public:
 
 			return EncryptedKeyPair(address, salt, nonce, &secret.front(), secret.size());
 		}
-		PHANTASMA_EXCEPTION("Invalid EncryptedKeyPair string");
 		if( out_error )
 			*out_error = true;
+		PHANTASMA_EXCEPTION("Invalid EncryptedKeyPair string");
 		return EncryptedKeyPair();
+	}
+	static EncryptedKeyPair FromBytes( const Byte* begin, int dataSize, bool* out_error=0 )
+	{
+		int secretBytes = 1;
+		if( dataSize < addressBytes + saltBytes + nonceBytes + secretHeaderBytes + secretBytes + hashBytes )
+		{
+			if( out_error )
+				*out_error = true;
+			PHANTASMA_EXCEPTION("Invalid EncryptedKeyPair bytes");
+			return EncryptedKeyPair();
+		}
+
+		const Byte* data = begin;
+		data += Address::PublicKeyLength;
+		const Byte* salt = data;
+		data += saltBytes;
+		const Byte* nonce = data;
+		data += nonceBytes;
+		const Byte* secretHeader = data;
+		data += secretHeaderBytes;
+		secretBytes = *secretHeader;
+		const Byte* secret = data;
+		data += secretBytes;
+		const Byte* hash = data;
+		data += hashBytes;
+
+		if( dataSize < addressBytes + saltBytes + nonceBytes + secretHeaderBytes + secretBytes + hashBytes )
+		{
+			if( out_error )
+				*out_error = true;
+			PHANTASMA_EXCEPTION("Invalid EncryptedKeyPair bytes");
+			return EncryptedKeyPair();
+		}
+
+		Byte rehash[hashBytes];
+		SHA256(rehash, hashBytes,  begin, addressBytes + saltBytes + nonceBytes + secretHeaderBytes + secretBytes);
+		if(!PHANTASMA_EQUAL( hash, hash + hashBytes, rehash ))
+		{
+			if( out_error )
+				*out_error = true;
+			PHANTASMA_EXCEPTION("Invalid EncryptedKeyPair bytes");
+			return EncryptedKeyPair();
+		}
+
+		return EncryptedKeyPair(Address(begin, Address::PublicKeyLength), salt, nonce, secret, secretBytes);
+	}
+	static EncryptedKeyPair FromBytes( const ByteArray& bytes, bool* out_error=0 )
+	{
+		return FromBytes( bytes.empty()?0:&bytes.front(), bytes.size(), out_error );
 	}
 
 	String ToText() const
@@ -187,20 +254,19 @@ public:
 			return String();
 		}
 		const String& address = m_address.Text();
-		String salt = Base16::Encode(m_salt, PHANTASMA_PasswordSaltLength);
-		String nonce = Base16::Encode(m_nonce, PHANTASMA_AuthenticatedNonceLength);
-		String secret = Base16::Encode(&m_encryptedSecret.front(), m_encryptedSecret.size());
+
+		Char salt[saltChars+1];
+		Char nonce[nonceChars+1];
+		Base64::Encode(salt, saltChars+1, m_salt, PHANTASMA_PasswordSaltLength);
+		Base64::Encode(nonce, nonceChars+1, m_nonce, PHANTASMA_AuthenticatedNonceLength);
+		String secret = Base64::Encode(m_encryptedSecret);
 
 		StringBuilder builder;
-		builder << "A";
-		builder << address;
-		builder << "S";
-		builder << salt;
-		builder << "N";
-		builder << nonce;
-		builder << "K";
-		builder << secret;
-		builder << "H";
+		builder << "A" << address;
+		builder << "S" << salt;
+		builder << "N" << nonce;
+		builder << "K" << secret;
+		builder << "_";
 
 		const String& result = builder.str();
 
@@ -209,9 +275,57 @@ public:
 		const Byte* utf8_result = GetUTF8Bytes( result, temp, utf8Length );
 		Byte hash[PHANTASMA_SHA256_LENGTH];
 		SHA256(hash, PHANTASMA_SHA256_LENGTH, utf8_result, utf8Length);
-		builder << Base16::Encode(hash, PHANTASMA_SHA256_LENGTH);
+		Char hash64[hashChars+1];
+		Base64::Encode(hash64, hashChars+1, hash, PHANTASMA_SHA256_LENGTH);
+		builder << hash64;
 
 		return builder.str();
+	}
+
+	ByteArray ToBytes() const
+	{
+		if(m_encryptedSecret.empty())
+		{
+			PHANTASMA_EXCEPTION("Empty EncryptedKeyPair");
+			return ByteArray();
+		}
+
+		Int32 secretBytes = m_encryptedSecret.size();
+
+		ByteArray result;
+		result.resize(addressBytes + saltBytes + nonceBytes + secretHeaderBytes + secretBytes + hashBytes);
+		Byte* output = &result.front();
+
+		const Byte* address = m_address.PublicKey();
+		PHANTASMA_COPY(address, address + addressBytes, output);
+		output += addressBytes;
+
+		PHANTASMA_COPY(m_salt, m_salt + saltBytes, output);
+		output += saltBytes;
+
+		PHANTASMA_COPY(m_nonce, m_nonce + nonceBytes, output);
+		output += nonceBytes;
+
+		Byte secretHeader[secretHeaderBytes];
+		memcpy(secretHeader, &secretBytes, secretHeaderBytes);
+		PHANTASMA_COPY(secretHeader, secretHeader+secretHeaderBytes, output);
+		output += secretHeaderBytes;
+
+		PHANTASMA_COPY(m_encryptedSecret.begin(), m_encryptedSecret.end(), output);
+		output += m_encryptedSecret.size();
+
+		int size = (int)(output - &result.front());
+
+		Byte hash[hashBytes];
+		SHA256(hash, hashBytes,  &result.front(), size);
+		PHANTASMA_COPY(hash, hash + hashBytes, output);
+		output += hashBytes;
+
+		if( result.size() != (int)(output - &result.front()) )
+		{
+			PHANTASMA_EXCEPTION("Internal error");
+		}
+		return result;
 	}
 	
 };
