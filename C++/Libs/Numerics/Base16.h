@@ -18,6 +18,11 @@ inline int AlphabetIndexOf( Char in )
 	return -1;
 }
 
+inline int RequiredCharacters( int numBytes )//does not include a null terminator
+{
+	return numBytes * 2;
+}
+
 inline int Decode(Byte* output, int outputLength, const Char* sz, int inputLength=0)
 {
 	if(!sz || inputLength < 0 || outputLength < 0)
