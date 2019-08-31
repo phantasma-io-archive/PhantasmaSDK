@@ -9,6 +9,18 @@
 
 namespace phantasma {
 
+//--------------------------------------------------------------
+// Private-keys should be kept as private as possible, so it's a
+//  good idea to never write them to disk, and even avoid 
+//  keeping them in memory longer than necessary.
+// This class is a simple way to encrypt a private-key using a 
+//  user-supplied password, converting it into a form that is
+//  safer to store on disk.
+// As long as the user has chosen a *strong* password (and you
+//  are compiling with a strong PHANTASMA_AuthenticatedEncrypt
+//  implementation) then the user's private key will be safe
+//  from digital theives.
+//--------------------------------------------------------------
 class EncryptedKeyPair
 {
 	Address   m_address;

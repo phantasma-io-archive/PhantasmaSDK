@@ -1,5 +1,9 @@
 #pragma once
 
+//--------------------------------------------------------------
+// Read the "Secure Memory" disclaimer in SecureMemory.h!
+//--------------------------------------------------------------
+
 #include "SecureMemory.h"
 #include <type_traits>
 
@@ -7,7 +11,7 @@ namespace phantasma {
 
 // This is a wrapper around the PHANTASMA_VECTOR type which adds pinning/unpinning/wiping behavior to 
 //  the memory allocations in order to prevent the data from being swapped out of RAM.
-// Data contained in these vectors is also always overwritted with zeros during deallocation.
+// Data contained in these vectors is also always overwritten with zeros during deallocation.
 template<class T>
 class SecureVector
 {

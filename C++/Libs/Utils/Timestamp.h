@@ -35,7 +35,7 @@ public:
 class Timestamp
 {
 public:
-	const UInt32 Value;
+	const UInt32 Value; // TODO - https://en.wikipedia.org/wiki/Year_2038_problem
 
 	explicit Timestamp( UInt32 value = 0 )
 		: Value( value )

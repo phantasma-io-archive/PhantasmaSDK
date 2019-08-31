@@ -1,9 +1,15 @@
 #pragma once
 
+//--------------------------------------------------------------
+// Read the "Secure Memory" disclaimer in SecureMemory.h!
+//--------------------------------------------------------------
+
 #include "SecureVector.h"
 
 namespace phantasma {
 
+// This is a wrapper around the SecureVector type to make it appear similar to the String type.
+// Use this when storing passwords, WIF's or other sensitive information in memory.
 class SecureString
 {
 public:
