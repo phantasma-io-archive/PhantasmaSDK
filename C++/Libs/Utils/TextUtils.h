@@ -10,12 +10,19 @@
 namespace phantasma {
 
 #ifdef PHANTASMA_CONVERT_UTF8
+//User-provided conversion function
 template<class ByteArray>
 const Byte* GetUTF8Bytes( const String& string, ByteArray& temp, int& out_numBytes )
 {
-	return PHANTASMA_CONVERT_UTF8(string, temp, out_numBytes);
+	return PHANTASMA_CONVERT_UTF8(string.c_str(), string.length(), temp, out_numBytes);
+}
+template<class ByteArray>
+const Byte* GetUTF8Bytes( const Char* sz, int length, ByteArray& temp, int& out_numBytes )
+{
+	return PHANTASMA_CONVERT_UTF8(sz, length, temp, out_numBytes);
 }
 #elif defined _UNICODE
+//Assume that the character encoding is UTF-16
 template<class ByteArray>
 const Byte* GetUTF8Bytes( const String& string, ByteArray& temp, int& out_numBytes )
 {
@@ -80,6 +87,7 @@ const Byte* GetUTF8Bytes( const Char* string, int length, ByteArray& temp, int& 
 	return result;
 }
 #else
+//Assume that the character encoding already is UTF-8
 template<class ByteArray>
 const Byte* GetUTF8Bytes( const String& string, ByteArray& temp, int& out_numBytes )
 {
@@ -89,9 +97,9 @@ const Byte* GetUTF8Bytes( const String& string, ByteArray& temp, int& out_numByt
 template<class ByteArray>
 const Byte* GetUTF8Bytes( const Char* sz, int length, ByteArray& temp, int& out_numBytes )
 {
-	if( !sz )
+	if( !sz || length < 0 )
 		return 0;
-	if( length <= 0 )
+	if( length == 0 )
 	{
 		for( const Char* c = sz; *c != '\0'; ++c )
 			++length;
