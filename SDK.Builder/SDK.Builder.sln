@@ -25,6 +25,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Pay", "..\..\Phan
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Neo", "..\..\PhantasmaChain\Phantasma.Neo\Phantasma.Neo.csproj", "{0CBACC03-7551-411C-9040-71D6BBCE80DF}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Contracts", "..\..\PhantasmaChain\Phantasma.Contracts\Phantasma.Contracts.csproj", "{FC95FCB3-34DD-46FE-87A8-AAAB57FDDB67}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Domain", "..\..\PhantasmaChain\Phantasma.Domain\Phantasma.Domain.csproj", "{D8A80A0F-F572-42B8-9783-21EE70639190}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +79,14 @@ Global
 		{0CBACC03-7551-411C-9040-71D6BBCE80DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0CBACC03-7551-411C-9040-71D6BBCE80DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0CBACC03-7551-411C-9040-71D6BBCE80DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC95FCB3-34DD-46FE-87A8-AAAB57FDDB67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC95FCB3-34DD-46FE-87A8-AAAB57FDDB67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC95FCB3-34DD-46FE-87A8-AAAB57FDDB67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC95FCB3-34DD-46FE-87A8-AAAB57FDDB67}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8A80A0F-F572-42B8-9783-21EE70639190}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8A80A0F-F572-42B8-9783-21EE70639190}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8A80A0F-F572-42B8-9783-21EE70639190}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8A80A0F-F572-42B8-9783-21EE70639190}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -9,6 +9,7 @@ using LunarLabs.Parser;
 using LunarLabs.Parser.JSON;
 
 using Phantasma.Numerics;
+using Phantasma.Cryptography;
 
 namespace Phantasma.SDK
 {

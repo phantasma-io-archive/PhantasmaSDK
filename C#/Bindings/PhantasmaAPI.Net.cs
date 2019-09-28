@@ -3,8 +3,8 @@ using System.Globalization;
 using System.Net;
 using LunarLabs.Parser;
 using LunarLabs.Parser.JSON;
-using Phantasma.Cryptography;
 using Phantasma.Numerics;
+using Phantasma.Cryptography;
 
 namespace Phantasma.SDK
 {
