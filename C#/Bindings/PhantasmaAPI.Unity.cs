@@ -34,9 +34,9 @@ namespace Phantasma.SDK
         }
     }
 
-    internal class JSONRPC_Client
+    public static class JSONRPC_Client
     {
-        internal IEnumerator SendRequest(string url, string method, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback, 
+        public static IEnumerator SendRequest(string url, string method, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback, 
                                             Action<DataNode> callback, params object[] parameters)
         {
             string contents;
@@ -109,6 +109,8 @@ namespace Phantasma.SDK
    }
    
    {{#each types}}
+	   {{#if Key=='PaginatedResult'}}
+	   {{#else}}
 	public struct {{#fix-type Key}} 
 	{
 {{#each Value}}		public {{#fix-type FieldType.Name}}{{#if FieldType.IsArray}}[]{{/if}} {{Name}}; //{{Key.Description}}
@@ -136,23 +138,22 @@ namespace Phantasma.SDK
 			return result;			
 		}
 	}
+		{{/if}}
 	{{/each}}
    
    public class API {	   
 		public readonly	string Host;
-		private static JSONRPC_Client _client;
 	   
 		public API(string host) 
 		{
 			this.Host = host;
-			_client = new JSONRPC_Client();
 		}
 	   
 		{{#each methods}}
 		//{{Info.Description}}{{#if Info.IsPaginated==true}}{{#new-line}}		//This api call is paginated, multiple calls might be required to obtain a complete result {{/if}}
 		public IEnumerator {{Info.Name}}({{#each Info.Parameters}}{{#fix-type Type.Name}} {{Name}}, {{/each}}Action<{{#fix-type Info.ReturnType.Name}}{{#if Info.ReturnType.IsArray}}[]{{/if}}{{#if Info.IsPaginated==true}}, int, int{{/if}}> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)  
 		{	   
-			yield return _client.SendRequest(Host, "{{#camel-case Info.Name}}", errorHandlingCallback, (node) => { 
+			yield return JSONRPC_Client.SendRequest(Host, "{{#camel-case Info.Name}}", errorHandlingCallback, (node) => { 
 {{#parse-lines false}}
 {{#if Info.IsPaginated}}
 				var currentPage = node.GetInt32("page");{{#new-line}}
@@ -182,7 +183,7 @@ namespace Phantasma.SDK
 		
 		{{/each}}
 		
-        public IEnumerator SignAndSendTransaction(KeyPair keys, byte[] script, string chain, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
+        public IEnumerator SignAndSendTransaction(PhantasmaKeys keys, byte[] script, string chain, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
         {
             Debug.Log("Sending transaction...");
 

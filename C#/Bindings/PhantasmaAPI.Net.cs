@@ -99,6 +99,8 @@ namespace Phantasma.SDK
    }
    
    {{#each types}}
+	   {{#if Key=='PaginatedResult'}}
+	   {{#else}}
 	public struct {{#fix-type Key}} 
 	{
 {{#each Value}}		public {{#fix-type FieldType.Name}}{{#if FieldType.IsArray}}[]{{/if}} {{Name}}; //{{Key.Description}}
@@ -126,6 +128,7 @@ namespace Phantasma.SDK
 			return result;			
 		}
 	}
+	{{/if}}
 	{{/each}}
    
    public class API {	   
@@ -172,7 +175,7 @@ namespace Phantasma.SDK
 		
 		{{/each}}
 		
-		public Hash SignAndSendTransaction(KeyPair keys, byte[] script, string chain, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
+		public Hash SignAndSendTransaction(PhantasmaKeys keys, byte[] script, string chain, Action<string> callback, Action<EPHANTASMA_SDK_ERROR_TYPE, string> errorHandlingCallback = null)
         {
             var tx = new Blockchain.Transaction("simnet", chain, script, DateTime.UtcNow + TimeSpan.FromHours(1));
             tx.Sign(keys);
