@@ -10,7 +10,7 @@
 
 /*
 * Implementation of BigInteger class, written for Phantasma project
-* Author: Simão Pavlovich
+* Author: Simão Pavlovich and Bernardo Pinho
 * Ported from C# to C++ by Brooke Hodgman.
 * I've left all declarations in the same order as the C# code for maintainability, so it jumps between private/public sections like this as a deliberate choice :)
 */
@@ -95,6 +95,18 @@ public:
 
 	TBigInteger(UInt32 val) : TBigInteger((Int64)val)
 	{
+	}
+
+	template<class Bytes>
+	static TBigInteger FromUnsignedArray(const Bytes& bytes, bool isPositive)
+	{
+		return BigInteger(unsignedArray, isPositive ? 1 : -1);
+	}
+
+	template<class Bytes>
+	static TBigInteger FromSignedArray(const Bytes& bytes)
+	{
+		return BigInteger(signedArray);
 	}
 
     //this constructor assumes that the byte array is in Two's complement notation
