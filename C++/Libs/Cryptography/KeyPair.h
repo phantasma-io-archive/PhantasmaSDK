@@ -66,7 +66,7 @@ public:
 			PinnedBytes<PrivateKey::Length> privateKey;
 			Entropy::GetRandomBytes( privateKey.bytes, PrivateKey::Length );
 			KeyPair pair( privateKey.bytes, PrivateKey::Length );
-			if (!pair.Address().IsInterop())
+			if (pair.Address().IsUser())
 			{
 				return pair;
 			}

@@ -42,7 +42,18 @@ public:
 		else
 		{
 			PHANTASMA_COPY(publicKey, publicKey+length, _publicKey);
-			_opcode = (Byte)(IsInterop() ? 102 : 74);
+			if (IsSystem)
+			{
+				_opcode = SystemOpcode;
+			}
+			else if (IsInterop)
+			{
+				_opcode = InteropOpcode;
+			}
+			else
+			{
+				_opcode = UserOpcode;
+			}
 		}
 	}
 
@@ -50,13 +61,33 @@ public:
 		: Address(&publicKey.front(), (int)publicKey.size())
 	{}
 
-	bool IsNull() const { return  PHANTASMA_EQUAL(_publicKey, _publicKey + PublicKeyLength, NullKey); };
+	static Address FromHash(const String& str)
+	{
+		ByteArray temp;
+		int numBytes = 0;
+		const Byte* bytes = GetUTF8Bytes( str, temp, numBytes );
+		return FromHash(bytes,numBytes);
+	}
 
+	static Address FromHash(const Byte* bytes, int length)
+	{
+		Byte hash[PHANTASMA_SHA256_LENGTH];
+		SHA256( hash, PHANTASMA_SHA256_LENGTH, bytes, length );
+		hash[0] = SystemOpcode;
+		return Address(hash, PHANTASMA_SHA256_LENGTH);
+	}
+
+	bool IsNull() const { return  PHANTASMA_EQUAL(_publicKey, _publicKey + PublicKeyLength, NullKey); };
+	bool IsSystem() const
+	{
+		return _publicKey[0] == (Byte)'!' || IsNull();
+	}
 	// NOTE currently we only support interop chain names with 3 chars, but this could be expanded to support up to 10 chars
 	bool IsInterop() const
 	{
 		return !IsNull() && _publicKey[0] == (Byte)'*';
 	}
+	bool IsUser() const { return !IsSystem() && !IsInterop(); }
 	
 	bool operator ==( const Address& B ) const { return  PHANTASMA_EQUAL(_publicKey, _publicKey + PublicKeyLength, B._publicKey); }
 	bool operator !=( const Address& B ) const { return !PHANTASMA_EQUAL(_publicKey, _publicKey + PublicKeyLength, B._publicKey); }
@@ -123,7 +154,7 @@ public:
 				error = true;
 			}
 			Byte opcode = bytes[0];
-			if(opcode != 74 && opcode != 102)
+			if(opcode != UserOpcode && opcode != SystemOpcode && opcode != InteropOpcode)
 			{
 				PHANTASMA_EXCEPTION("Invalid address opcode");
 				error = true;
@@ -268,6 +299,10 @@ public:
 	}
 
 private:
+	static constexpr Byte UserOpcode = 75;
+	static constexpr Byte SystemOpcode = 85;
+	static constexpr Byte InteropOpcode = 102;
+
 	Byte _opcode = 74;
 	Byte _publicKey[PublicKeyLength];
 	mutable String _text;
