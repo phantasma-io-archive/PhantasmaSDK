@@ -173,44 +173,29 @@ public:
 		reader.ReadByteArray(_publicKey);
 		_text = "";
 	}
-
-	String DecodeChainSymbol()
-	{
-		if (!IsInterop())
-		{
-			PHANTASMA_EXCEPTION("not an interop address");
-			return String{};
-		}
-
-		StringBuilder sb;
-		for (int i=1; i<PublicKeyLength; i++)
-		{
-			Char ch = (Char)_publicKey[i];
-			if (ch == '*')
-			{
-				const String& str = sb.str();
-				if (str.length() == 0)
-				{
-					PHANTASMA_EXCEPTION("invalid interop address");
-					return String{};
-				}
-
-				return str;
-			}
-
-			sb << ch;
-		}
-
-		PHANTASMA_EXCEPTION("error decoding interop address");
-		return String{};
-	}
 	
 	int DecodeInterop(String& chainName, Byte* data, int expectedDataLength)
 	{
+		if(expectedDataLength < 0)
+		{
+			PHANTASMA_EXCEPTION("invalid data length");
+			return -1;
+		}
+		if(!IsInterop())
+		{
+			PHANTASMA_EXCEPTION("must be an interop address");
+			return -1;
+		}
+
 		StringBuilder sb;
 		int i = 1;
-		while (i < PublicKeyLength)
+		while (true)
 		{
+			if (i >= PublicKeyLength)
+			{
+				PHANTASMA_EXCEPTION("invalid interop address");
+				return -1;
+			}
 			Char ch = (Char)_publicKey[i];
 			if (ch == '*')
 			{
@@ -221,15 +206,26 @@ public:
 			i++;
 		}
 
-		i++;
-		chainName = sb.str();
-
-		int n;
-		for (n=0; n<expectedDataLength && i+n < PublicKeyLength; n++)
+		const String& str = sb.str();
+		if (str.length() == 0)
 		{
-			data[n] = _publicKey[i+n];
+			PHANTASMA_EXCEPTION("invalid interop address");
+			return -1;
 		}
-		return n;
+
+		i++;
+		chainName = str;
+
+		if (expectedDataLength > 0)
+		{
+			int n;
+			for (n=0; n<expectedDataLength && i+n < PublicKeyLength; n++)
+			{
+				data[n] = _publicKey[i+n];
+			}
+			return n;
+		}
+		return 0;
 	}
 
 	static Address EncodeInterop(const String& chainSymbol, const Byte* data, int dataLength)
