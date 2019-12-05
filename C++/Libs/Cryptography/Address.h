@@ -39,7 +39,10 @@ public:
 			PHANTASMA_COPY(NullKey, NullKey+PublicKeyLength, _publicKey);
 		}
 		else
+		{
 			PHANTASMA_COPY(publicKey, publicKey+length, _publicKey);
+			_opcode = (Byte)(IsInterop() ? 102 : 74);
+		}
 	}
 
 	Address(const ByteArray& publicKey)
@@ -47,6 +50,12 @@ public:
 	{}
 
 	bool IsNull() const { return  PHANTASMA_EQUAL(_publicKey, _publicKey + PublicKeyLength, NullKey); };
+
+	// NOTE currently we only support interop chain names with 3 chars, but this could be expanded to support up to 10 chars
+	bool IsInterop() const
+	{
+		return !IsNull() && _publicKey[0] == (Byte)'*' && _publicKey[4] == (Byte)'*';
+	}
 	
 	bool operator ==( const Address& B ) const { return  PHANTASMA_EQUAL(_publicKey, _publicKey + PublicKeyLength, B._publicKey); }
 	bool operator !=( const Address& B ) const { return !PHANTASMA_EQUAL(_publicKey, _publicKey + PublicKeyLength, B._publicKey); }
@@ -113,7 +122,7 @@ public:
 				error = true;
 			}
 			Byte opcode = bytes[0];
-			if(opcode != 74)
+			if(opcode != 74 && opcode != 102)
 			{
 				PHANTASMA_EXCEPTION("Invalid address opcode");
 				error = true;

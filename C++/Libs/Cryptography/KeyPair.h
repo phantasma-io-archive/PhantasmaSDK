@@ -61,9 +61,16 @@ public:
 
 	static KeyPair Generate()
 	{
-		PinnedBytes<PrivateKey::Length> privateKey;
-		Entropy::GetRandomBytes( privateKey.bytes, PrivateKey::Length );
-		return KeyPair( privateKey.bytes, PrivateKey::Length );
+		do
+		{
+			PinnedBytes<PrivateKey::Length> privateKey;
+			Entropy::GetRandomBytes( privateKey.bytes, PrivateKey::Length );
+			KeyPair pair( privateKey.bytes, PrivateKey::Length );
+			if (!pair.Address().IsInterop())
+			{
+				return pair;
+			}
+		} while (true);
 	}
 
 	static KeyPair FromWIF(const SecureString& wif)
