@@ -15,16 +15,20 @@ class Transaction : public Serializable
 {
 	Timestamp m_expiration;
 	ByteArray m_script;
+	ByteArray m_payload;
 	String m_nexusName;
 	String m_chainName;
 	PHANTASMA_VECTOR<Signature> m_signatures;
 	Hash m_hash;
 public:
-	const Timestamp Expiration() const { return m_expiration; }
-	const ByteArray Script() const { return m_script; }
+	const ByteArray& Script() const { return m_script; }
 
 	const String NexusName() const { return m_nexusName; }
 	const String ChainName() const { return m_chainName; }
+
+	const Timestamp Expiration() const { return m_expiration; }
+
+	const ByteArray& Payload() const { return m_payload; }
 
 	const PHANTASMA_VECTOR<Signature> Signatures() const { return m_signatures; }
 	const Hash GetHash() const { return m_hash; }
@@ -51,6 +55,7 @@ public:
 		writer.WriteVarString( m_chainName );
 		writer.WriteByteArray( m_script );
 		writer.Write( m_expiration.Value );
+		writer.WriteByteArray( m_payload );
 
 		if( withSignature )
 		{
@@ -67,61 +72,32 @@ public:
 	//	return String("{Hash}");//todo
 	//}
 
-private:
-	// TODO should run the script and return true if sucess or false if exception
-	//bool Validate( Chain chain, BigInteger& fee )
-	//{
-	//	fee = BigInteger::Zero();
-	//	return true;
-	//}
 
-	//bool Execute( Chain chain, Epoch epoch, Block block, StorageChangeSetContext changeSet, Action<Hash, Event> onNotify, OracleReaderDelegate oracleReader, ByteArray& result )
-	//{
-	//	result = ByteArray{};
-	//
-	//	var runtime = new RuntimeVM( this.Script, chain, epoch, block, this, changeSet, false );
-	//	runtime.ThrowOnFault = true;
-	//	runtime.OracleReader = oracleReader;
-	//
-	//	var state = runtime.Execute();
-	//
-	//	if(state != ExecutionState.Halt)
-	//	{
-	//		return false;
-	//	}
-	//
-	//	var cost = runtime.UsedGas;
-	//
-	//	foreach ( var evt in runtime.Events )
-	//	{
-	//		onNotify( this.Hash, evt );
-	//	}
-	//
-	//	if(runtime.Stack.Count > 0)
-	//	{
-	//		var obj = runtime.Stack.Pop();
-	//		result = Serialization.Serialize( obj );
-	//	}
-	//
-	//	return true;
-	//}
-
-public:
 	Transaction()
 	{
 	}
 
-	Transaction( const Char* nexusName, const Char* chainName, const ByteArray& script, Timestamp expiration, const PHANTASMA_VECTOR<Signature>* signatures = 0 )
+	Transaction( const Char* nexusName, const Char* chainName, const ByteArray& script, Timestamp expiration, const String& payload )
+		: Transaction()
+	{
+	}
+	
+    // transactions are always created unsigned, call Sign() to generate signatures
+	Transaction( const Char* nexusName, const Char* chainName, const ByteArray& script, Timestamp expiration, const Byte* payload, int payloadLength )
 		: m_nexusName(nexusName)
 		, m_chainName(chainName)
 		, m_script(script)
 		, m_expiration(expiration)
-		, m_signatures(signatures ? *signatures : PHANTASMA_VECTOR<Signature>{})
 	{
 		if(script.empty())
 		{
 			PHANTASMA_EXCEPTION("null script in transaction");
 			return;
+		}
+		if(payload && payloadLength > 0)
+		{
+			m_payload.resize(payloadLength);
+			PHANTASMA_COPY( payload, payload+payloadLength, m_payload.begin() );
 		}
 		UpdateHash();
 	}
@@ -133,10 +109,10 @@ public:
 		return writer.ToArray();
 	}
 
-	String ToRawTransaction() const
-	{
-		return Base16::Encode(ToByteArray(true));
-	}
+//	String ToRawTransaction() const
+//	{
+//		return Base16::Encode(ToByteArray(true));
+//
 
 	bool HasSignatures() const
 	{
@@ -177,55 +153,11 @@ public:
 		return false;
 	}
 
-	//bool IsValid( Chain chain )
-	//{
-		//todo
-		//if(chain.Name != this.ChainName)
-		//{
-		//	return false;
-		//}
-		//
-		//if(chain.Nexus.Name != this.NexusName)
-		//{
-		//	return false;
-		//}
-
-		// TODO unsigned tx should be supported too
-		/* if (!IsSigned)
-			{
-				return false;
-			}
-
-			var data = ToArray(false);
-			if (!this.Signature.Verify(data, this.SourceAddress))
-			{
-				return false;
-			}*/
-
-	//	BigInteger cost;
-	//	bool validation = Validate( chain, cost );
-	//	if(!validation)
-	//	{
-	//		return false;
-	//	}
-
-		/*if (chain.NativeTokenAddress != null)
-		{
-			if (this.Fee < cost)
-			{
-				return false;
-			}
-
-			var balance = chain.GetTokenBalance(chain.NativeTokenAddress, this.SourceAddress);
-
-			if (balance < this.Fee)
-			{
-				return false;
-			}
-		}*/
-
-	//	return true;
-	//}
+	template<class Chain>
+	bool IsValid(const Chain& chain) const
+	{
+		return (chain.Name() == m_chainName && chain.Nexus().Name() == m_nexusName);
+	}
 
 private:
 	void UpdateHash()
@@ -248,6 +180,7 @@ public:
 		m_chainName = reader.ReadVarString();
 		reader.ReadByteArray(m_script);
 		m_expiration = reader.ReadUInt32();
+		reader.ReadByteArray(m_payload);
 
 		// check if we have some signatures attached
 		PHANTASMA_TRY
@@ -265,6 +198,53 @@ public:
 		}
 
 		UpdateHash();
+	}
+
+	template<class ProofOfWork>
+	void Mine( ProofOfWork targetDifficulty )
+	{
+		Mine( (int)targetDifficulty );
+	}
+
+	void Mine( int targetDifficulty )
+	{
+		if( targetDifficulty < 0 || targetDifficulty > 256 )
+			PHANTASMA_EXCEPTION( "invalid difficulty" );
+		if( m_signatures.size() > 0 )
+			PHANTASMA_EXCEPTION( "cannot be signed" );
+
+		if(targetDifficulty == 0)
+		{
+			return; // no mining necessary 
+		}
+
+		uint nonce = 0;
+
+		while(true)
+		{
+			PHANTASMA_EXCEPTION("todo - finish porting this");
+			//if(GetHash().GetDifficulty() >= targetDifficulty)
+			{
+				return;
+			}
+
+			if(nonce == 0)
+			{
+				m_payload = ByteArray(4);
+			}
+
+			nonce++;
+			if(nonce == 0)
+			{
+				PHANTASMA_EXCEPTION( "Transaction mining failed" );
+			}
+
+			m_payload[0] = (byte)((nonce >> 0) & 0xFF);
+			m_payload[1] = (byte)((nonce >> 8) & 0xFF);
+			m_payload[2] = (byte)((nonce >> 16) & 0xFF);
+			m_payload[3] = (byte)((nonce >> 24) & 0xFF);
+			UpdateHash();
+		}
 	}
 };
 

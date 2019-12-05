@@ -9,73 +9,113 @@ namespace phantasma {
 
 enum class EventKind
 {
-	ChainCreate = 0,
-	TokenCreate = 1,
-	TokenSend = 2,
-	TokenReceive = 3,
-	TokenMint = 4,
-	TokenBurn = 5,
-	TokenEscrow = 6,
+	Unknown = 0,
+	ChainCreate = 1,
+	TokenCreate = 2,
+	TokenSend = 3,
+	TokenReceive = 4,
+	TokenMint = 5,
+	TokenBurn = 6,
 	TokenStake = 7,
-	TokenUnstake = 8,
-	TokenClaim = 9,
-	MasterDemote = 10,
-	MasterPromote = 11,
-	AddressRegister = 12,
-	AddressAdd = 13,
-	AddressRemove = 14,
+	TokenClaim = 8,
+	AddressRegister = 9,
+	AddressLink = 10,
+	AddressUnlink = 11,
+	OrganizationCreate = 12,
+	OrganizationAdd = 13,
+	OrganizationRemove = 14,
 	GasEscrow = 15,
 	GasPayment = 16,
-	OrderCreated = 17,
-	OrderCancelled = 18,
-	OrderFilled = 19,
-	OrderClosed = 20,
-	AddFriend = 21,
-	RemoveFriend = 22,
-	FileCreate = 23,
-	FileDelete = 24,
-	ValidatorAdd = 25,
-	ValidatorRemove = 26,
-	ValidatorUpdate = 27,
-	Metadata = 31,
-	Custom = 32,
+	AddressUnregister = 17,
+	OrderCreated = 18,
+	OrderCancelled = 19,
+	OrderFilled = 20,
+	OrderClosed = 21,
+	FeedCreate = 22,
+	FeedUpdate = 23,
+	FileCreate = 24,
+	FileDelete = 25,
+	ValidatorPropose = 26,
+	ValidatorElect = 27,
+	ValidatorRemove = 28,
+	ValidatorSwitch = 29,
+	PackedNFT = 30,
+	ValueCreate = 31,
+	ValueUpdate = 32,
+	PollCreated = 33,
+	PollClosed = 34,
+	PollVote = 35,
+	ChannelCreate = 36,
+	ChannelRefill = 37,
+	ChannelSettle = 38,
+	LeaderboardCreate = 39,
+	LeaderboardInsert = 40,
+	LeaderboardReset = 41,
+	PlatformCreate = 42,
+	ChainSwap = 43,
+	ContractRegister = 44,
+	ContractDeploy = 45,
+	AddressMigration = 46,
+	ContractUpgrade = 47,
+	Log = 48,
+	Custom = 64,
 };
 
 const Char* EventKindToString(EventKind k)
 {
 	switch(k)
 	{
-	case EventKind::ChainCreate:	 return PHANTASMA_LITERAL("ChainCreate");
-	case EventKind::TokenCreate:	 return PHANTASMA_LITERAL("TokenCreate");
-	case EventKind::TokenSend:		 return PHANTASMA_LITERAL("TokenSend");
-	case EventKind::TokenReceive:	 return PHANTASMA_LITERAL("TokenReceive");
-	case EventKind::TokenMint:		 return PHANTASMA_LITERAL("TokenMint");
-	case EventKind::TokenBurn:		 return PHANTASMA_LITERAL("TokenBurn");
-	case EventKind::TokenEscrow:	 return PHANTASMA_LITERAL("TokenEscrow");
-	case EventKind::TokenStake:		 return PHANTASMA_LITERAL("TokenStake");
-	case EventKind::TokenUnstake:	 return PHANTASMA_LITERAL("TokenUnstake");
-	case EventKind::TokenClaim:		 return PHANTASMA_LITERAL("TokenClaim");
-	case EventKind::MasterDemote:	 return PHANTASMA_LITERAL("MasterDemote");
-	case EventKind::MasterPromote:	 return PHANTASMA_LITERAL("MasterPromote");
-	case EventKind::AddressRegister: return PHANTASMA_LITERAL("AddressRegister");
-	case EventKind::AddressAdd:		 return PHANTASMA_LITERAL("AddressAdd");
-	case EventKind::AddressRemove:	 return PHANTASMA_LITERAL("AddressRemove");
-	case EventKind::GasEscrow:		 return PHANTASMA_LITERAL("GasEscrow");
-	case EventKind::GasPayment:		 return PHANTASMA_LITERAL("GasPayment");
-	case EventKind::OrderCreated:	 return PHANTASMA_LITERAL("OrderCreated");
-	case EventKind::OrderCancelled:	 return PHANTASMA_LITERAL("OrderCancelled");
-	case EventKind::OrderFilled:	 return PHANTASMA_LITERAL("OrderFilled");
-	case EventKind::OrderClosed:	 return PHANTASMA_LITERAL("OrderClosed");
-	case EventKind::AddFriend:		 return PHANTASMA_LITERAL("AddFriend");
-	case EventKind::RemoveFriend:	 return PHANTASMA_LITERAL("RemoveFriend");
-	case EventKind::FileCreate:		 return PHANTASMA_LITERAL("FileCreate");
-	case EventKind::FileDelete:		 return PHANTASMA_LITERAL("FileDelete");
-	case EventKind::ValidatorAdd:	 return PHANTASMA_LITERAL("ValidatorAdd");
-	case EventKind::ValidatorRemove: return PHANTASMA_LITERAL("ValidatorRemove");
-	case EventKind::ValidatorUpdate: return PHANTASMA_LITERAL("ValidatorUpdate");
-	case EventKind::Metadata:		 return PHANTASMA_LITERAL("Metadata");
+	case EventKind::Unknown:			 return PHANTASMA_LITERAL("Unknown");
+	case EventKind::ChainCreate:		 return PHANTASMA_LITERAL("ChainCreate");
+	case EventKind::TokenCreate:		 return PHANTASMA_LITERAL("TokenCreate");
+	case EventKind::TokenSend:			 return PHANTASMA_LITERAL("TokenSend");
+	case EventKind::TokenReceive:		 return PHANTASMA_LITERAL("TokenReceive");
+	case EventKind::TokenMint:			 return PHANTASMA_LITERAL("TokenMint");
+	case EventKind::TokenBurn:			 return PHANTASMA_LITERAL("TokenBurn");
+	case EventKind::TokenStake:			 return PHANTASMA_LITERAL("TokenStake");
+	case EventKind::TokenClaim:			 return PHANTASMA_LITERAL("TokenClaim");
+	case EventKind::AddressRegister:	 return PHANTASMA_LITERAL("AddressRegister");
+	case EventKind::AddressLink:		 return PHANTASMA_LITERAL("AddressLink");
+	case EventKind::AddressUnlink:		 return PHANTASMA_LITERAL("AddressUnlink");
+	case EventKind::OrganizationCreate:	 return PHANTASMA_LITERAL("OrganizationCreate");
+	case EventKind::OrganizationAdd:	 return PHANTASMA_LITERAL("OrganizationAdd");
+	case EventKind::OrganizationRemove:	 return PHANTASMA_LITERAL("OrganizationRemove");
+	case EventKind::GasEscrow:			 return PHANTASMA_LITERAL("GasEscrow");
+	case EventKind::GasPayment:			 return PHANTASMA_LITERAL("GasPayment");
+	case EventKind::AddressUnregister:	 return PHANTASMA_LITERAL("AddressUnregister");
+	case EventKind::OrderCreated:		 return PHANTASMA_LITERAL("OrderCreated");
+	case EventKind::OrderCancelled:		 return PHANTASMA_LITERAL("OrderCancelled");
+	case EventKind::OrderFilled:		 return PHANTASMA_LITERAL("OrderFilled");
+	case EventKind::OrderClosed:		 return PHANTASMA_LITERAL("OrderClosed");
+	case EventKind::FeedCreate:			 return PHANTASMA_LITERAL("FeedCreate");
+	case EventKind::FeedUpdate:			 return PHANTASMA_LITERAL("FeedUpdate");
+	case EventKind::FileCreate:			 return PHANTASMA_LITERAL("FileCreate");
+	case EventKind::FileDelete:			 return PHANTASMA_LITERAL("FileDelete");
+	case EventKind::ValidatorPropose:	 return PHANTASMA_LITERAL("ValidatorPropose");
+	case EventKind::ValidatorElect:		 return PHANTASMA_LITERAL("ValidatorElect");
+	case EventKind::ValidatorRemove:	 return PHANTASMA_LITERAL("ValidatorRemove");
+	case EventKind::ValidatorSwitch:	 return PHANTASMA_LITERAL("ValidatorSwitch");
+	case EventKind::PackedNFT:			 return PHANTASMA_LITERAL("PackedNFT");
+	case EventKind::ValueCreate:		 return PHANTASMA_LITERAL("ValueCreate");
+	case EventKind::ValueUpdate:		 return PHANTASMA_LITERAL("ValueUpdate");
+	case EventKind::PollCreated:		 return PHANTASMA_LITERAL("PollCreated");
+	case EventKind::PollClosed:			 return PHANTASMA_LITERAL("PollClosed");
+	case EventKind::PollVote:			 return PHANTASMA_LITERAL("PollVote");
+	case EventKind::ChannelCreate:		 return PHANTASMA_LITERAL("ChannelCreate");
+	case EventKind::ChannelRefill:		 return PHANTASMA_LITERAL("ChannelRefill");
+	case EventKind::ChannelSettle:		 return PHANTASMA_LITERAL("ChannelSettle");
+	case EventKind::LeaderboardCreate:	 return PHANTASMA_LITERAL("LeaderboardCreate");
+	case EventKind::LeaderboardInsert:	 return PHANTASMA_LITERAL("LeaderboardInsert");
+	case EventKind::LeaderboardReset:	 return PHANTASMA_LITERAL("LeaderboardReset");
+	case EventKind::PlatformCreate:		 return PHANTASMA_LITERAL("PlatformCreate");
+	case EventKind::ChainSwap:			 return PHANTASMA_LITERAL("ChainSwap");
+	case EventKind::ContractRegister:	 return PHANTASMA_LITERAL("ContractRegister");
+	case EventKind::ContractDeploy:		 return PHANTASMA_LITERAL("ContractDeploy");
+	case EventKind::AddressMigration:	 return PHANTASMA_LITERAL("AddressMigration");
+	case EventKind::ContractUpgrade:	 return PHANTASMA_LITERAL("ContractUpgrade");
+	case EventKind::Log:				 return PHANTASMA_LITERAL("Log");
 	default:
-	case EventKind::Custom:			 return PHANTASMA_LITERAL("Custom");
+	case EventKind::Custom:				 return PHANTASMA_LITERAL("Custom");
 	}
 }
 
@@ -89,30 +129,85 @@ EventKind StringToEventKind(const String& k)
 	return EventKind::Custom;
 }
 
+class TokenEventData
+{
+public:
+	const String Symbol;
+	const BigInteger Value;
+	const String ChainName;
+
+	TokenEventData(const String& symbol, const BigInteger& value, const String& chainName)
+		: Symbol(symbol)
+		, Value(value)
+		, ChainName(chainName)
+	{
+	}
+}
+
+class ChainValueEventData
+{
+public:
+	String Name;
+	BigInteger Value;
+}
+
+class TransactionSettleEventData
+{
+public:
+	const Hash Hash;
+	const String Platform;
+	const String Chain;
+
+	TransactionSettleEventData(const Hash& hash, const String& platform, const String& chain)
+		: Hash(hash)
+		, Platform(platform)
+		, Chain(chain)
+	{
+	}
+}
+
+class GasEventData
+{
+public:
+	const Address address;
+	const BigInteger price;
+	const BigInteger amount;
+
+	GasEventData(const Address& address, const BigInteger& price, const BigInteger& amount)
+		: address(address)
+		, price(price)
+		, amount(amount)
+	{
+	}
+}
+
 class Event
 {
 public:
 	const EventKind kind;
 	const Address address;
+	const String contract;
 	const ByteArray data;
 
-	Event( EventKind kind, const Address& address, const ByteArray& data )
+	Event( EventKind kind, const Address& address, const String& contract, const ByteArray& data )
 		: kind( kind )
 		, address( address )
+		, contract( contract )
 		, data( data )
 	{
 	}
 
-	Event( const String& kind, const String& address, const String& data )
+	Event( const String& kind, const String& address, const String& contract, const String& data )
 		: kind( StringToEventKind(kind) )
 		, address( Address::FromText(address) )
+		, contract( contract )
 		, data( data.empty() ? ByteArray() : Base16::Decode(data) )
 	{
 	}
 
 	//String ToString()
 	//{
-	//	return $"{Kind} @ {Address}: {Base16.Encode(Data)}";
+	//	return $"{Kind}/{Contract} @ {Address}: {Base16.Encode(Data)}";
 	//}
 
 	template<class T, typename std::enable_if<std::is_enum<T>::value>::type* = nullptr>
@@ -134,6 +229,7 @@ public:
 		int n = (int)kind;
 		writer.Write( (Byte)n );
 		writer.WriteAddress( address );
+		writer.WriteVarString(contract);
 		writer.WriteByteArray( data );
 	}
 
@@ -142,8 +238,9 @@ public:
 	{
 		EventKind kind = (EventKind)reader.ReadByte();
 		Address address = reader.ReadAddress();
+		String contract = reader.ReadVarString();
 		ByteArray data = reader.ReadByteArray();
-		return Event( kind, address, data );
+		return Event( kind, address, contract, data );
 	}
 };
 
@@ -164,24 +261,5 @@ inline EventKind EncodeCustomEvent( T kind )
 {
 	return (EventKind)(EventKind::Custom + (int)kind);
 }
-
-struct TokenEventData
-{
-	String symbol;
-	BigInteger value;
-	Address chainAddress;
-};
-
-struct TokenMetadata
-{
-	String key;
-	ByteArray value;
-};
-
-struct MetadataEventData
-{
-	String symbol;
-	TokenMetadata metadata;
-};
 
 }
