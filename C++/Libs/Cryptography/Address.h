@@ -204,6 +204,55 @@ public:
 		PHANTASMA_EXCEPTION("error decoding interop address");
 		return String{};
 	}
+	
+	int DecodeInterop(String& chainName, Byte* data, int expectedDataLength)
+	{
+		StringBuilder sb;
+		int i = 1;
+		while (i < PublicKeyLength)
+		{
+			Char ch = (Char)_publicKey[i];
+			if (ch == '*')
+			{
+				break;
+			}
+
+			sb << ch;
+			i++;
+		}
+
+		i++;
+		chainName = sb.str();
+
+		int n;
+		for (n=0; n<expectedDataLength && i+n < PublicKeyLength; n++)
+		{
+			data[n] = _publicKey[i+n];
+		}
+		return n;
+	}
+
+	static Address EncodeInterop(const String& chainSymbol, const Byte* data, int dataLength)
+	{
+		Byte bytes[PublicKeyLength];
+		bytes[0] = (Byte)'*';
+		int i = 1;
+		for(Char ch : chainSymbol)
+		{
+			bytes[i] = (Byte)ch;
+			i++;
+		}
+		bytes[i] = (Byte)'*';
+		i++;
+
+		for(int j=0; j<dataLength; ++j)
+		{
+			bytes[i] = (Byte)data[j];
+			i++;
+		}
+
+		return Address(bytes, PublicKeyLength);
+	}
 
 private:
 	Byte _opcode = 74;
