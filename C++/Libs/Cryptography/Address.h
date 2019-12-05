@@ -18,7 +18,7 @@ enum class AddressKind
 class Address : public Serializable
 {
 public:
-	static constexpr int TextLength = 45;
+	static constexpr int TextLength = 46;
 	static constexpr int LengthInBytes = 34;
 	static constexpr int MaxPlatformNameLength = 10;
 	static constexpr Byte NullPublicKey[LengthInBytes] = {};
