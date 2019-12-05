@@ -18,7 +18,7 @@ enum class AddressKind
 class Address : public Serializable
 {
 public:
-	static constexpr int TextLength = 46;
+	static constexpr int TextLength = 47;
 	static constexpr int LengthInBytes = 34;
 	static constexpr int MaxPlatformNameLength = 10;
 	static constexpr Byte NullPublicKey[LengthInBytes] = {};
@@ -35,7 +35,7 @@ public:
 			default: prefix = 'S'; break;
 			}
 			_text.append(prefix);
-			_text.append(Base58::Encode(&_bytes[1], LengthInBytes-1));
+			_text.append(Base58::Encode(_bytes, LengthInBytes));
 		}
 		return _text;
 	}
@@ -169,17 +169,51 @@ public:
 		}
 		else
 		{
-			decoded = Base58::Decode(bytes, LengthInBytes+1, text, textLength);
+			Char prefix = text[0];
+			decoded = Base58::Decode(bytes, LengthInBytes+1, text+1, textLength-1);
 			if( decoded != LengthInBytes+1 )
 			{
 				PHANTASMA_EXCEPTION("Invalid address encoding");
 				error = true;
 			}
-			AddressKind kind = (AddressKind)bytes[0];
-			if(kind > AddressKind::Interop)
+			else
 			{
-				PHANTASMA_EXCEPTION("Invalid address opcode");
-				error = true;
+				AddressKind kind = (AddressKind)bytes[0];
+				switch (prefix)
+				{
+				case 'P':
+					if(kind != AddressKind::User)
+					{
+						PHANTASMA_EXCEPTION("address should be user");
+						error = true;
+					}
+					break;
+
+				case 'S':
+					if(kind != AddressKind::System)
+					{
+						PHANTASMA_EXCEPTION("address should be system");
+						error = true;
+					}
+					break;
+
+				case 'X':
+					if(kind >= AddressKind::Interop)
+					{
+						PHANTASMA_EXCEPTION("address should be interop");
+						error = true;
+					}
+					break;
+				default:
+					{
+						StringBuilder sb;
+						sb << "invalid address prefix: ";
+						sb << prefix;
+						PHANTASMA_EXCEPTION("invalid address prefix", sb.str());
+						error = true;
+					}
+					break;
+				}
 			}
 		}
 		if( error )
