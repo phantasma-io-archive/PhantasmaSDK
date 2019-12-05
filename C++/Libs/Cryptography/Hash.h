@@ -224,7 +224,7 @@ public:
 		const Byte* utf8 = GetUTF8Bytes(str, temp, utf8Length );
 		Byte bytes[PHANTASMA_SHA256_LENGTH];
 		SHA256( bytes, PHANTASMA_SHA256_LENGTH, utf8, utf8Length );
-		return Hash(bytes);
+		return Hash::FromBytes(bytes, PHANTASMA_SHA256_LENGTH);
 	}
 
 	static Hash FromUnpaddedHex(const String& hash)

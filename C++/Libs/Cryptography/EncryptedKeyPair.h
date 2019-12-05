@@ -110,7 +110,7 @@ private:
 	constexpr static int saltChars = Base64::RequiredCharacters(PHANTASMA_PasswordSaltLength);
 	constexpr static int nonceChars = Base64::RequiredCharacters(PHANTASMA_AuthenticatedNonceLength);
 	constexpr static int hashChars = Base64::RequiredCharacters(PHANTASMA_SHA256_LENGTH);
-	constexpr static int addressBytes = Address::PublicKeyLength;
+	constexpr static int addressBytes = Address::LengthInBytes;
 	constexpr static int saltBytes = PHANTASMA_PasswordSaltLength;
 	constexpr static int nonceBytes = PHANTASMA_AuthenticatedNonceLength;
 	constexpr static int secretHeaderBytes = 4;
@@ -220,7 +220,7 @@ public:
 		}
 
 		const Byte* data = begin;
-		data += Address::PublicKeyLength;
+		data += Address::LengthInBytes;
 		const Byte* salt = data;
 		data += saltBytes;
 		const Byte* nonce = data;
@@ -251,7 +251,7 @@ public:
 			return EncryptedKeyPair();
 		}
 
-		return EncryptedKeyPair(Address(begin, Address::PublicKeyLength), salt, nonce, secret, secretBytes);
+		return EncryptedKeyPair(Address(begin, Address::LengthInBytes), salt, nonce, secret, secretBytes);
 	}
 	static EncryptedKeyPair FromBytes( const ByteArray& bytes, bool* out_error=0 )
 	{
@@ -308,7 +308,7 @@ public:
 		result.resize(addressBytes + saltBytes + nonceBytes + secretHeaderBytes + secretBytes + hashBytes);
 		Byte* output = &result.front();
 
-		const Byte* address = m_address.PublicKey();
+		const Byte* address = m_address.ToByteArray();
 		PHANTASMA_COPY(address, address + addressBytes, output);
 		output += addressBytes;
 
