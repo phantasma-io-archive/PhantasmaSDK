@@ -87,7 +87,7 @@ public:
 	{
 		return !IsNull() && _publicKey[0] == InteropOpcode;
 	}
-	bool IsUser() const { return !IsSystem() && !IsInterop(); }
+	bool IsUser() const { return !IsNull() && !IsSystem() && !IsInterop(); }
 	
 	bool operator ==( const Address& B ) const { return  PHANTASMA_EQUAL(_publicKey, _publicKey + PublicKeyLength, B._publicKey); }
 	bool operator !=( const Address& B ) const { return !PHANTASMA_EQUAL(_publicKey, _publicKey + PublicKeyLength, B._publicKey); }
