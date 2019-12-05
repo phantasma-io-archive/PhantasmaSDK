@@ -174,6 +174,37 @@ public:
 		_text = "";
 	}
 
+	String DecodeChainSymbol()
+	{
+		if (!IsInterop())
+		{
+			PHANTASMA_EXCEPTION("not an interop address");
+			return String{};
+		}
+
+		StringBuilder sb;
+		for (int i=1; i<PublicKeyLength; i++)
+		{
+			Char ch = (Char)_publicKey[i];
+			if (ch == '*')
+			{
+				const String& str = sb.str();
+				if (str.length() == 0)
+				{
+					PHANTASMA_EXCEPTION("invalid interop address");
+					return String{};
+				}
+
+				return str;
+			}
+
+			sb << ch;
+		}
+
+		PHANTASMA_EXCEPTION("error decoding interop address");
+		return String{};
+	}
+
 private:
 	Byte _opcode = 74;
 	Byte _publicKey[PublicKeyLength];
