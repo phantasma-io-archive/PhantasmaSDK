@@ -12,6 +12,7 @@ class Address : public Serializable
 public:
 	static constexpr int TextLength = 45;
 	static constexpr int PublicKeyLength = 32;
+	static constexpr int MaxPlatformNameLength = 10;
 	static constexpr Byte NullKey[PublicKeyLength] = {};
 
 	const Byte* PublicKey() const
@@ -54,7 +55,7 @@ public:
 	// NOTE currently we only support interop chain names with 3 chars, but this could be expanded to support up to 10 chars
 	bool IsInterop() const
 	{
-		return !IsNull() && _publicKey[0] == (Byte)'*' && _publicKey[4] == (Byte)'*';
+		return !IsNull() && _publicKey[0] == (Byte)'*';
 	}
 	
 	bool operator ==( const Address& B ) const { return  PHANTASMA_EQUAL(_publicKey, _publicKey + PublicKeyLength, B._publicKey); }
@@ -174,11 +175,16 @@ public:
 		_text = "";
 	}
 	
-	int DecodeInterop(String& chainName, Byte* data, int expectedDataLength)
+	int DecodeInterop(String& platformName, Byte* data, int expectedDataLength)
 	{
 		if(expectedDataLength < 0)
 		{
 			PHANTASMA_EXCEPTION("invalid data length");
+			return -1;
+		}
+		if(expectedDataLength > 27)
+		{
+			PHANTASMA_EXCEPTION("data is too large");
 			return -1;
 		}
 		if(!IsInterop())
@@ -214,7 +220,7 @@ public:
 		}
 
 		i++;
-		chainName = str;
+		platformName = str;
 
 		if (expectedDataLength > 0)
 		{
@@ -228,12 +234,23 @@ public:
 		return 0;
 	}
 
-	static Address EncodeInterop(const String& chainSymbol, const Byte* data, int dataLength)
+	static Address EncodeInterop(const String& platformName, const Byte* data, int dataLength)
 	{
+		if(platformName.length() == 0)
+		{
+			PHANTASMA_EXCEPTION("platform name cant be null");
+			return {};
+		}
+		if(platformName.length() > MaxPlatformNameLength)
+		{
+			PHANTASMA_EXCEPTION("platform name is too big");
+			return {};
+		}
+
 		Byte bytes[PublicKeyLength];
 		bytes[0] = (Byte)'*';
 		int i = 1;
-		for(Char ch : chainSymbol)
+		for(Char ch : platformName)
 		{
 			bytes[i] = (Byte)ch;
 			i++;

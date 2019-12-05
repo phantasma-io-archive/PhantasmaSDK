@@ -3,6 +3,7 @@
 #include "../Numerics/Base16.h"
 #include "../Numerics/BigInteger.h"
 #include "../utils/Serializable.h"
+#include "../utils/TextUtils.h"
 #include "SHA.h"
 
 namespace phantasma
@@ -214,6 +215,35 @@ public:
 		PHANTASMA_COPY(A.m_data, A.m_data+Length, bytes);
 		PHANTASMA_COPY(B.m_data, B.m_data+Length, bytes+Length);
 		return FromBytes(bytes, Length * 2);
+	}
+
+	static Hash FromString(const String& str)
+	{
+		ByteArray temp;
+		int utf8Length = 0;
+		const Byte* utf8 = GetUTF8Bytes(str, temp, utf8Length );
+		Byte bytes[PHANTASMA_SHA256_LENGTH];
+		SHA256( bytes, PHANTASMA_SHA256_LENGTH, utf8, utf8Length );
+		return Hash(bytes);
+	}
+
+	static Hash FromUnpaddedHex(const String& hash)
+	{
+		const Char* szHash = hash.c_str();
+		if (hash.length() >= 2 && szHash[0] == '0' && szHash[1] == 'x')
+		{
+			szHash += 2;
+		}
+
+		StringBuilder sb;
+		sb << szHash;
+		while (sb.str().length() < 64)
+		{
+			sb << '0';
+			sb << '0';
+		}
+
+		return Hash::Parse(sb.str());
 	}
 };
 
