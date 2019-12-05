@@ -143,22 +143,13 @@ public:
 		return !m_signatures.empty();
 	}
 
-	void Sign( const Signature& signature )
-	{
-		for(const auto& existing : m_signatures)
-		{
-			if( existing == signature )
-				return;
-		}
-		m_signatures.push_back( signature );
-	}
-
-	void Sign( const KeyPair& owner )
+	template<class IKeyPair>
+	void Sign( const IKeyPair& keypair )
 	{
 		auto msg = ToByteArray( false );
 
 		m_signatures.clear();
-		m_signatures.push_back( Signature{owner.Sign( msg )} );
+		m_signatures.push_back( Signature{keypair.Sign( msg )} );
 	}
 
 	bool IsSignedBy( Address address )

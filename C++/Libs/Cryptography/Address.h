@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "../utils/Serializable.h"
+#include "../utils/TextUtils.h"
 #include "../Numerics/Base58.h"
 #include "../Security/SecureString.h"
 #include "EdDSA/Ed25519.h"
@@ -9,7 +10,7 @@ namespace phantasma {
 
 enum class AddressKind
 {
-	Null = 0,
+	Invalid = 0,
 	User = 1,
 	System = 2,
 	Interop = 3,
@@ -42,7 +43,7 @@ public:
 
 	Address()
 	{
-		PHANTASMA_COPY(NullPublicKey, NullPublicKey+PublicKeyLength, _bytes);
+		PHANTASMA_COPY(NullPublicKey, NullPublicKey+LengthInBytes, _bytes);
 	}
 
 	Address(const Byte* publicKey, int length)
@@ -50,11 +51,11 @@ public:
 		if(!publicKey || length != LengthInBytes)
 		{
 			PHANTASMA_EXCEPTION("Invalid public key length");
-			PHANTASMA_COPY(NullPublicKey, NullPublicKey+PublicKeyLength, _bytes);
+			PHANTASMA_COPY(NullPublicKey, NullPublicKey+LengthInBytes, _bytes);
 		}
 		else
 		{
-			PHANTASMA_COPY(publicKey, publicKey+length, _publicKey);
+			PHANTASMA_COPY(publicKey, publicKey+length, _bytes);
 		}
 	}
 
@@ -104,10 +105,10 @@ public:
 		return Address(bytes, 34);
 	}
 
-	AddressKind Kind() const { return (AddressKind)_bytes[0]; }
+	AddressKind Kind() const { return IsNull() ? AddressKind::System : (AddressKind)_bytes[0]; }
 
-	bool IsNull() const { return  PHANTASMA_EQUAL(_bytes, _bytes + LengthInBytes, NullPublicKey); };
-	bool IsSystem() const { auto kind = Kind(); return kind == AddressKind::Null || kind == AddressKind::System;; }
+	bool IsNull() const { return PHANTASMA_EQUAL(_bytes+1, _bytes + LengthInBytes - 1, NullPublicKey); };
+	bool IsSystem() const { return Kind() == AddressKind::System;; }
 	bool IsInterop() const { return Kind() == AddressKind::Interop; }
 	bool IsUser() const { return Kind() == AddressKind::User; }
 	
@@ -159,70 +160,63 @@ public:
 			textLength = (int)PHANTASMA_STRLEN(text);
 		}
 
+		Char prefix = text[0];
 		Byte bytes[LengthInBytes+1];
-		int decoded = 1;
-		bool error = false;
-		if(textLength != TextLength)
-		{
-			PHANTASMA_EXCEPTION("Invalid address length");
-			error = true;
-		}
-		else
-		{
-			Char prefix = text[0];
-			decoded = Base58::Decode(bytes, LengthInBytes+1, text+1, textLength-1);
-			if( decoded != LengthInBytes+1 )
-			{
-				PHANTASMA_EXCEPTION("Invalid address encoding");
-				error = true;
-			}
-			else
-			{
-				AddressKind kind = (AddressKind)bytes[0];
-				switch (prefix)
-				{
-				case 'P':
-					if(kind != AddressKind::User)
-					{
-						PHANTASMA_EXCEPTION("address should be user");
-						error = true;
-					}
-					break;
+		int decoded = Base58::Decode(bytes, LengthInBytes+1, text+1, textLength-1);
 
-				case 'S':
-					if(kind != AddressKind::System)
-					{
-						PHANTASMA_EXCEPTION("address should be system");
-						error = true;
-					}
-					break;
-
-				case 'X':
-					if(kind >= AddressKind::Interop)
-					{
-						PHANTASMA_EXCEPTION("address should be interop");
-						error = true;
-					}
-					break;
-				default:
-					{
-						StringBuilder sb;
-						sb << "invalid address prefix: ";
-						sb << prefix;
-						PHANTASMA_EXCEPTION("invalid address prefix", sb.str());
-						error = true;
-					}
-					break;
-				}
-			}
-		}
-		if( error )
+		if( decoded != LengthInBytes )
 		{
+			PHANTASMA_EXCEPTION("Invalid address data");
 			if( out_error )
 				*out_error = true;
-			return Address();
+			return {};
 		}
-		return Address(bytes+1, decoded-1);
+
+		Address addr(bytes, decoded);
+		switch (prefix)
+		{
+		case 'P':
+			if(addr.Kind() != AddressKind::User)
+			{
+				PHANTASMA_EXCEPTION("address should be user");
+				if( out_error )
+					*out_error = true;
+				return {};
+			}
+			break;
+
+		case 'S':
+			if(addr.Kind() != AddressKind::System)
+			{
+				PHANTASMA_EXCEPTION("address should be system");
+				if( out_error )
+					*out_error = true;
+				return {};
+			}
+			break;
+
+		case 'X':
+			if(addr.Kind() < AddressKind::Interop)
+			{
+				PHANTASMA_EXCEPTION("address should be interop");
+				if( out_error )
+					*out_error = true;
+				return {};
+			}
+			break;
+		default:
+			{
+				StringBuilder sb;
+				sb << "invalid address prefix: ";
+				sb << prefix;
+				PHANTASMA_EXCEPTION_MESSAGE("invalid address prefix", sb.str().c_str());
+				if( out_error )
+					*out_error = true;
+				return {};
+			}
+			break;
+		}
+		return addr;
 	}
 
 	static bool IsValidAddress(const String& text)

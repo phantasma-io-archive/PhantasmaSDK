@@ -28,7 +28,7 @@ private:
 	SecureByteArray m_data;
 };
 
-class KeyPair
+class PhantasmaKeys
 {
 	PrivateKey privateKey;
 	ByteArray  publicKey;
@@ -41,19 +41,19 @@ public:
 	const Byte*  PublicKeyBytes()  const { return publicKey.size() ? &publicKey.front() : 0; }
 	int          PublicKeyLength() const { return publicKey.size(); }
 
-	KeyPair()
+	PhantasmaKeys()
 		: privateKey()
 		, address()
 	{
 	}
-	KeyPair( const Byte* privateKey, int privateKeyLength )
+	PhantasmaKeys( const Byte* privateKey, int privateKeyLength )
 		: privateKey(privateKey, privateKeyLength)
 		, publicKey( Ed25519::PublicKeyFromSeed( privateKey, privateKeyLength ) )
 		, address( Address::FromKey(*this) )
 	{
 	}
 
-	KeyPair& operator=( const KeyPair& other )
+	PhantasmaKeys& operator=( const PhantasmaKeys& other )
 	{
 		privateKey = other.privateKey;
 		address = other.address;
@@ -65,24 +65,24 @@ public:
 		return address.Text();
 	}
 
-	static KeyPair Generate()
+	static PhantasmaKeys Generate()
 	{
 		PinnedBytes<PrivateKey::Length> privateKey;
 		Entropy::GetRandomBytes( privateKey.bytes, PrivateKey::Length );
 		return { privateKey.bytes, PrivateKey::Length };
 	}
 
-	static KeyPair FromWIF(const SecureString& wif)
+	static PhantasmaKeys FromWIF(const SecureString& wif)
 	{
 		return FromWIF(wif.c_str(), wif.length());
 	}
-	static KeyPair FromWIF(const Char* wif, int wifStringLength)
+	static PhantasmaKeys FromWIF(const Char* wif, int wifStringLength)
 	{
 		if( !wif || wif[0] == '\0' || wifStringLength <= 0 )
 		{
 			PHANTASMA_EXCEPTION( "WIF required" );
 			Byte nullKey[PrivateKey::Length] = {};
-			return KeyPair( nullKey, PrivateKey::Length );
+			return PhantasmaKeys( nullKey, PrivateKey::Length );
 		}
 
 		PinnedBytes<34> data;
@@ -91,7 +91,7 @@ public:
 		{
 			PHANTASMA_EXCEPTION( "Invalid WIF format" );
 			Byte nullKey[PrivateKey::Length] = {};
-			return KeyPair( nullKey, PrivateKey::Length );
+			return PhantasmaKeys( nullKey, PrivateKey::Length );
 		}
 		return { &data.bytes[1], 32 };
 	}
@@ -110,17 +110,7 @@ public:
 
 	Ed25519Signature Sign( const ByteArray& message ) const
 	{
-		if(message.empty())
-		{
-			PHANTASMA_EXCEPTION("Can't sign an empty message");
-			return Ed25519Signature();
-		}
-		PinnedBytes<64> expandedPrivateKey;
-		{
-			SecureByteReader read = privateKey.Read();
-			Ed25519::ExpandedPrivateKeyFromSeed( expandedPrivateKey.bytes, 64, read.Bytes(), PrivateKey::Length );
-		}
-		return Ed25519Signature( Ed25519::Sign( &message.front(), (int)message.size(), expandedPrivateKey.bytes, 64 ) );
+		return Ed25519Signature::Generate(*this, message);
 	}
 };
 

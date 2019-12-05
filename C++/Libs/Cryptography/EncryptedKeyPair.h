@@ -79,7 +79,7 @@ public:
 		PHANTASMA_COPY( secret, secret + secretSize, &m_encryptedSecret.front() );
 	}
 
-	bool Decrypt( KeyPair& output, const Char* password, bool& out_tamperWarning ) const 
+	bool Decrypt( PhantasmaKeys& output, const Char* password, bool& out_tamperWarning ) const 
 	{
 		if( m_encryptedSecret.empty() )
 			return false;
@@ -95,7 +95,7 @@ public:
 		if( result != 0 )
 			return false;
 
-		output = KeyPair( decrypted.bytes, PrivateKey::Length );
+		output = { decrypted.bytes, PrivateKey::Length };
 		if( output.Address() != m_address )
 		{
 			out_tamperWarning = true;

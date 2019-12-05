@@ -74,6 +74,23 @@ public:
 	{
 		reader.ReadByteArray(bytes, Length);
 	}
+	
+	template<class IKeyPair>
+	static Ed25519Signature Generate(const IKeyPair& keypair, const ByteArray& message)
+	{
+		if(message.empty())
+		{
+			PHANTASMA_EXCEPTION("Can't sign an empty message");
+			return Ed25519Signature();
+		}
+		PinnedBytes<64> expandedPrivateKey;
+		{
+			SecureByteReader read = keypair.PrivateKey().Read();
+			Ed25519::ExpandedPrivateKeyFromSeed( expandedPrivateKey.bytes, 64, read.Bytes(), PrivateKey::Length );
+		}
+		ByteArray sign = Ed25519::Sign( &message.front(), (int)message.size(), expandedPrivateKey.bytes, 64 );
+		return Ed25519Signature(sign);
+	}
 private:
 	Byte bytes[Length];
 };
