@@ -7,59 +7,85 @@
 
 namespace phantasma {
 
+enum class AddressKind
+{
+	Null = 0,
+	User = 1,
+	System = 2,
+	Interop = 3,
+};
+
 class Address : public Serializable
 {
 public:
 	static constexpr int TextLength = 45;
-	static constexpr int PublicKeyLength = 32;
+	static constexpr int LengthInBytes = 34;
 	static constexpr int MaxPlatformNameLength = 10;
-	static constexpr Byte NullKey[PublicKeyLength] = {};
-
-	const Byte* PublicKey() const
-	{
-		return _publicKey;
-	}
+	static constexpr Byte NullPublicKey[LengthInBytes] = {};
 
 	const String& Text() const
 	{
 		if(_text.empty())
-			_text = Base58::Encode(&_opcode, PublicKeyLength+1);
+		{
+			Char prefix;
+			switch (Kind())
+			{
+			case AddressKind::User: prefix = 'P'; break;
+			case AddressKind::Interop: prefix = 'X'; break;
+			default: prefix = 'S'; break;
+			}
+			_text.append(prefix);
+			_text.append(Base58::Encode(&_bytes[1], LengthInBytes-1));
+		}
 		return _text;
 	}
 
 	Address()
 	{
-		PHANTASMA_COPY(NullKey, NullKey+PublicKeyLength, _publicKey);
+		PHANTASMA_COPY(NullPublicKey, NullPublicKey+PublicKeyLength, _bytes);
 	}
 
 	Address(const Byte* publicKey, int length)
 	{
-		if(!publicKey || length != PublicKeyLength)
+		if(!publicKey || length != LengthInBytes)
 		{
 			PHANTASMA_EXCEPTION("Invalid public key length");
-			PHANTASMA_COPY(NullKey, NullKey+PublicKeyLength, _publicKey);
+			PHANTASMA_COPY(NullPublicKey, NullPublicKey+PublicKeyLength, _bytes);
 		}
 		else
 		{
 			PHANTASMA_COPY(publicKey, publicKey+length, _publicKey);
-			if (IsSystem)
-			{
-				_opcode = SystemOpcode;
-			}
-			else if (IsInterop)
-			{
-				_opcode = InteropOpcode;
-			}
-			else
-			{
-				_opcode = UserOpcode;
-			}
 		}
 	}
 
 	Address(const ByteArray& publicKey)
 		: Address(&publicKey.front(), (int)publicKey.size())
 	{}
+
+	template<class IKeyPair>
+	static Address FromKey(const IKeyPair& key)
+	{
+		Byte bytes[LengthInBytes] = {};
+		bytes[0] = (Byte)AddressKind::User;
+
+		int publicKeyLength = key.PublicKeyLength();
+		const Byte* publicKeyBytes = key.PublicKeyBytes();
+		if (publicKeyLength == 32)
+		{
+			PHANTASMA_COPY(publicKeyBytes, publicKeyBytes+publicKeyLength, bytes+2);
+		}
+		else if (publicKeyLength == 33)
+		{
+			PHANTASMA_COPY(publicKeyBytes, publicKeyBytes+publicKeyLength, bytes+1);
+		}
+		else
+		{
+			PHANTASMA_EXCEPTION("Invalid public key length");
+			return {};
+		}
+
+		return Address(bytes, LengthInBytes);
+	}
 
 	static Address FromHash(const String& str)
 	{
@@ -69,32 +95,28 @@ public:
 		return FromHash(bytes,numBytes);
 	}
 
-	static Address FromHash(const Byte* bytes, int length)
+	static Address FromHash(const Byte* input, int inputLength)
 	{
-		Byte hash[PHANTASMA_SHA256_LENGTH];
-		SHA256( hash, PHANTASMA_SHA256_LENGTH, bytes, length );
-		hash[0] = SystemOpcode;
-		return Address(hash, PHANTASMA_SHA256_LENGTH);
+		Byte bytes[34];
+		SHA256( bytes+2, 32, input, inputLength );
+		bytes[0] = (Byte)AddressKind::System;
+		bytes[1] = 0;
+		return Address(bytes, 34);
 	}
 
-	bool IsNull() const { return  PHANTASMA_EQUAL(_publicKey, _publicKey + PublicKeyLength, NullKey); };
-	bool IsSystem() const
-	{
-		return _publicKey[0] == SystemOpcode || IsNull();
-	}
-	// NOTE currently we only support interop chain names with 3 chars, but this could be expanded to support up to 10 chars
-	bool IsInterop() const
-	{
-		return !IsNull() && _publicKey[0] == InteropOpcode;
-	}
-	bool IsUser() const { return !IsNull() && !IsSystem() && !IsInterop(); }
+	AddressKind Kind() const { return (AddressKind)_bytes[0]; }
+
+	bool IsNull() const { return  PHANTASMA_EQUAL(_bytes, _bytes + LengthInBytes, NullPublicKey); };
+	bool IsSystem() const { auto kind = Kind(); return kind == AddressKind::Null || kind == AddressKind::System;; }
+	bool IsInterop() const { return Kind() == AddressKind::Interop; }
+	bool IsUser() const { return Kind() == AddressKind::User; }
 	
-	bool operator ==( const Address& B ) const { return  PHANTASMA_EQUAL(_publicKey, _publicKey + PublicKeyLength, B._publicKey); }
-	bool operator !=( const Address& B ) const { return !PHANTASMA_EQUAL(_publicKey, _publicKey + PublicKeyLength, B._publicKey); }
+	bool operator ==( const Address& B ) const { return  PHANTASMA_EQUAL(_bytes, _bytes + LengthInBytes, B._bytes); }
+	bool operator !=( const Address& B ) const { return !PHANTASMA_EQUAL(_bytes, _bytes + LengthInBytes, B._bytes); }
 
 	String ToString() const
 	{
-		if (PHANTASMA_EQUAL(_publicKey, _publicKey + PublicKeyLength, NullKey))
+		if (IsNull())
 		{
 			return String(PHANTASMA_LITERAL("[Null address]"));
 		}
@@ -137,7 +159,7 @@ public:
 			textLength = (int)PHANTASMA_STRLEN(text);
 		}
 
-		Byte bytes[PublicKeyLength+1];
+		Byte bytes[LengthInBytes+1];
 		int decoded = 1;
 		bool error = false;
 		if(textLength != TextLength)
@@ -147,14 +169,14 @@ public:
 		}
 		else
 		{
-			decoded = Base58::Decode(bytes, PublicKeyLength+1, text, textLength);
-			if( decoded != PublicKeyLength+1 )
+			decoded = Base58::Decode(bytes, LengthInBytes+1, text, textLength);
+			if( decoded != LengthInBytes+1 )
 			{
 				PHANTASMA_EXCEPTION("Invalid address encoding");
 				error = true;
 			}
-			Byte opcode = bytes[0];
-			if(opcode != UserOpcode && opcode != SystemOpcode && opcode != InteropOpcode)
+			AddressKind kind = (AddressKind)bytes[0];
+			if(kind > AddressKind::Interop)
 			{
 				PHANTASMA_EXCEPTION("Invalid address opcode");
 				error = true;
@@ -167,16 +189,6 @@ public:
 			return Address();
 		}
 		return Address(bytes+1, decoded-1);
-	}
-
-	static Address FromScript(const ByteArray& script)
-	{
-		return Address(SHA256(script));
-	}
-
-	int GetSize() const
-	{
-		return PublicKeyLength;
 	}
 
 	static bool IsValidAddress(const String& text)
@@ -196,115 +208,59 @@ public:
 	template<class BinaryWriter>
 	void SerializeData(BinaryWriter& writer) const
 	{
-		writer.WriteByteArray(_publicKey);
+		writer.WriteByteArray(_bytes);
 	}
 
 	template<class BinaryReader>
 	void UnserializeData(BinaryReader& reader)
 	{
-		reader.ReadByteArray(_publicKey);
+		reader.ReadByteArray(_bytes);
 		_text = "";
 	}
 	
-	int DecodeInterop(String& platformName, Byte* data, int expectedDataLength)
+	int DecodeInterop(Byte& out_platformID, Byte* out_publicKey, int publicKeyLength)
 	{
-		if(expectedDataLength < 0)
+		out_platformID = (Byte)(1 + _bytes[0] - (int)AddressKind::Interop);
+		if(!out_publicKey || publicKeyLength < LengthInBytes - 1)
 		{
-			PHANTASMA_EXCEPTION("invalid data length");
-			return -1;
+			PHANTASMA_EXCEPTION("insufficient output space");
+			return 0;
 		}
-		if(expectedDataLength > 27)
-		{
-			PHANTASMA_EXCEPTION("data is too large");
-			return -1;
-		}
-		if(!IsInterop())
-		{
-			PHANTASMA_EXCEPTION("must be an interop address");
-			return -1;
-		}
-
-		StringBuilder sb;
-		int i = 1;
-		while (true)
-		{
-			if (i >= PublicKeyLength)
-			{
-				PHANTASMA_EXCEPTION("invalid interop address");
-				return -1;
-			}
-			if (_publicKey[i] == InteropOpcode)
-			{
-				break;
-			}
-
-			Char ch = (Char)_publicKey[i];
-			sb << ch;
-			i++;
-		}
-
-		const String& str = sb.str();
-		if (str.length() == 0)
-		{
-			PHANTASMA_EXCEPTION("invalid interop address");
-			return -1;
-		}
-
-		i++;
-		platformName = str;
-
-		if (expectedDataLength > 0)
-		{
-			int n;
-			for (n=0; n<expectedDataLength && i+n < PublicKeyLength; n++)
-			{
-				data[n] = _publicKey[i+n];
-			}
-			return n;
-		}
-		return 0;
+		PHANTASMA_COPY(_bytes+1, _bytes+LengthInBytes, out_publicKey);
+		return LengthInBytes - 1;
 	}
 
-	static Address EncodeInterop(const String& platformName, const Byte* data, int dataLength)
+	static Address FromInterop(Byte platformID, const Byte* publicKey, int publicKeyLength)
 	{
-		if(platformName.length() == 0)
+		if(!publicKey || publicKeyLength != 33)
 		{
-			PHANTASMA_EXCEPTION("platform name cant be null");
+			PHANTASMA_EXCEPTION("public key is invalid");
 			return {};
 		}
-		if(platformName.length() > MaxPlatformNameLength)
+		if(platformID < 1)
 		{
-			PHANTASMA_EXCEPTION("platform name is too big");
+			PHANTASMA_EXCEPTION("invalid platform id");
 			return {};
 		}
+	
+		Byte bytes[LengthInBytes];
+		bytes[0] = (Byte)((int)AddressKind::Interop+platformID-1);
+		PHANTASMA_COPY(publicKey, publicKey+33, bytes+1);
+		return Address(bytes, LengthInBytes);
+	}
 
-		Byte bytes[PublicKeyLength];
-		bytes[0] = InteropOpcode;
-		int i = 1;
-		for(Char ch : platformName)
-		{
-			bytes[i] = (Byte)ch;
-			i++;
-		}
-		bytes[i] = InteropOpcode;
-		i++;
+	const Byte* ToByteArray() const
+	{
+		return _bytes;
+	}
 
-		for(int j=0; j<dataLength; ++j)
-		{
-			bytes[i] = (Byte)data[j];
-			i++;
-		}
-
-		return Address(bytes, PublicKeyLength);
+	int GetSize() const
+	{
+		return LengthInBytes;
 	}
 
 private:
-	static constexpr Byte UserOpcode = 75;
-	static constexpr Byte SystemOpcode = 85;
-	static constexpr Byte InteropOpcode = 102;
-
-	Byte _opcode = 74;
-	Byte _publicKey[PublicKeyLength];
+	Byte _bytes[LengthInBytes];
 	mutable String _text;
 };
 

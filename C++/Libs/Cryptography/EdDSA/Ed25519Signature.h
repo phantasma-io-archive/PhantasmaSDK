@@ -44,7 +44,12 @@ public:
 		for(int i=0; i<numAddresses; ++i)
 		{
 			const Address& address = addresses[i];
-			if (Ed25519::Verify(bytes, Length, message, messageLength, address.PublicKey(), Address::PublicKeyLength))
+			if( !address.IsUser() )
+				continue;
+
+			const Byte* pubKey = address.ToByteArray() + 2;
+			int pubKeyLength = address.GetSize() - 2;
+			if (Ed25519::Verify(bytes, Length, message, messageLength, pubKey, pubKeyLength))
 			{
 				return true;
 			}

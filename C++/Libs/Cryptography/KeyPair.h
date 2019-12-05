@@ -31,10 +31,15 @@ private:
 class KeyPair
 {
 	PrivateKey privateKey;
+	ByteArray  publicKey;
 	Address    address;
 public:
 	const PrivateKey& PrivateKey() const { return privateKey; }
+	const ByteArray&  PublicKey()  const { return publicKey; }
 	const Address&    Address()    const { return address; }
+
+	const Byte*  PublicKeyBytes()  const { return publicKey.size() ? &publicKey.front() : 0; }
+	int          PublicKeyLength() const { return publicKey.size(); }
 
 	KeyPair()
 		: privateKey()
@@ -43,7 +48,8 @@ public:
 	}
 	KeyPair( const Byte* privateKey, int privateKeyLength )
 		: privateKey(privateKey, privateKeyLength)
-		, address( Ed25519::PublicKeyFromSeed( privateKey, privateKeyLength ) )
+		, publicKey( Ed25519::PublicKeyFromSeed( privateKey, privateKeyLength ) )
+		, address( Address::FromKey(*this) )
 	{
 	}
 
@@ -61,16 +67,9 @@ public:
 
 	static KeyPair Generate()
 	{
-		do
-		{
-			PinnedBytes<PrivateKey::Length> privateKey;
-			Entropy::GetRandomBytes( privateKey.bytes, PrivateKey::Length );
-			KeyPair pair( privateKey.bytes, PrivateKey::Length );
-			if (pair.Address().IsUser())
-			{
-				return pair;
-			}
-		} while (true);
+		PinnedBytes<PrivateKey::Length> privateKey;
+		Entropy::GetRandomBytes( privateKey.bytes, PrivateKey::Length );
+		return { privateKey.bytes, PrivateKey::Length };
 	}
 
 	static KeyPair FromWIF(const SecureString& wif)
