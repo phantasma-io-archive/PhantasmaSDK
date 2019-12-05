@@ -80,12 +80,12 @@ public:
 	bool IsNull() const { return  PHANTASMA_EQUAL(_publicKey, _publicKey + PublicKeyLength, NullKey); };
 	bool IsSystem() const
 	{
-		return _publicKey[0] == (Byte)'!' || IsNull();
+		return _publicKey[0] == SystemOpcode || IsNull();
 	}
 	// NOTE currently we only support interop chain names with 3 chars, but this could be expanded to support up to 10 chars
 	bool IsInterop() const
 	{
-		return !IsNull() && _publicKey[0] == (Byte)'*';
+		return !IsNull() && _publicKey[0] == InteropOpcode;
 	}
 	bool IsUser() const { return !IsSystem() && !IsInterop(); }
 	
@@ -233,12 +233,12 @@ public:
 				PHANTASMA_EXCEPTION("invalid interop address");
 				return -1;
 			}
-			Char ch = (Char)_publicKey[i];
-			if (ch == '*')
+			if (_publicKey[i] == InteropOpcode)
 			{
 				break;
 			}
 
+			Char ch = (Char)_publicKey[i];
 			sb << ch;
 			i++;
 		}
@@ -279,14 +279,14 @@ public:
 		}
 
 		Byte bytes[PublicKeyLength];
-		bytes[0] = (Byte)'*';
+		bytes[0] = InteropOpcode;
 		int i = 1;
 		for(Char ch : platformName)
 		{
 			bytes[i] = (Byte)ch;
 			i++;
 		}
-		bytes[i] = (Byte)'*';
+		bytes[i] = InteropOpcode;
 		i++;
 
 		for(int j=0; j<dataLength; ++j)
