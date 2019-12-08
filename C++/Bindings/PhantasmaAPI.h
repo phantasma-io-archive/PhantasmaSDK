@@ -630,9 +630,13 @@ PHANTASMA_FUNCTION {{#fix-type Key}} PhantasmaJsonAPI::Deserialize{{#fix-type Ke
 		json::LookupString(value, PHANTASMA_LITERAL("{{Name}}"), err)
 {{#else}}
 {{#if FieldType.Name=='IAPIResult'}}
-		json::LookupValue(value, PHANTASMA_LITERAL("result"), err)
+		json::LookupValue(value, PHANTASMA_LITERAL("{{Name}}"), err)
+{{#else}}
+{{#if FieldType.BaseType != null && FieldType.BaseType.Name=='IAPIResult'}}
+		Deserialize{{#fix-type FieldType.Name}}(json::LookupValue(value, PHANTASMA_LITERAL("{{Name}}"), err), err)
 {{#else}}
 		(err=true, "Variable type {{FieldType.Name}} isnt currently handled by the template system")
+{{/if}}
 {{/if}}
 {{/if}}
 {{/if}}
@@ -657,7 +661,7 @@ PHANTASMA_FUNCTION JSONValue PhantasmaJsonAPI::CheckResponse(JSONValue response,
 	{
 		const JSONValue& error = json::LookupValue(response, PHANTASMA_LITERAL("error"), out_error);
 		int code = 0;
-		String msg = PHANTASMA_LITERAL("???");
+		String msg;
 		if(json::IsObject(error, out_error))
 		{
 			msg = json::LookupString(error, PHANTASMA_LITERAL("message"), out_error);
