@@ -263,6 +263,16 @@ public:
 	constexpr static const Char* SwapContract = PHANTASMA_LITERAL("swap");
 
 
+	ScriptBuilder& AllowGas( const Address& from, const Address& to, const BigInteger& gasPrice, const BigInteger& gasLimit )
+	{
+		return CallContract( PHANTASMA_LITERAL("gas"), PHANTASMA_LITERAL("AllowGas"), from, to, gasPrice, gasLimit );
+	}
+
+	ScriptBuilder& SpendGas( const Address& address )
+	{
+		return CallContract( PHANTASMA_LITERAL("gas"), PHANTASMA_LITERAL("SpendGas"), address );
+	}
+
 	ScriptBuilder& MintTokens(const String& tokenSymbol, const Address& target, const BigInteger& amount)
 	{
 		return CallContract(TokenContract, PHANTASMA_LITERAL("MintTokens"), tokenSymbol, target, amount);
@@ -277,6 +287,11 @@ public:
 	{
 		return CallContract(TokenContract, PHANTASMA_LITERAL("TransferTokens"), from, to, tokenSymbol, amount);
 	}
+
+    ScriptBuilder& TransferBalance(const String& tokenSymbol, const Address& from, const Address& to)
+    {
+        return CallInterop(PHANTASMA_LITERAL("Runtime.TransferBalance"), from, to, tokenSymbol);
+    }
 
 	ScriptBuilder& TransferNFT(const String& tokenSymbol, const Address& from, const Address& to, const BigInteger& tokenId)//todo check if this is valid
 	{
@@ -321,18 +336,6 @@ public:
 	{
 		Emit( Opcode::RET );
 		return ToScript();
-	}
-	
-	ScriptBuilder& AllowGas( const Address& from, const Address& to, const BigInteger& gasPrice, const BigInteger& gasLimit )
-	{
-		CallContract( PHANTASMA_LITERAL("gas"), PHANTASMA_LITERAL("AllowGas"), from, to, gasPrice, gasLimit );
-		return *this;
-	}
-
-	ScriptBuilder& SpendGas( const Address& address )
-	{
-		CallContract( PHANTASMA_LITERAL("gas"), PHANTASMA_LITERAL("SpendGas"), address );
-		return *this;
 	}
 
 private:
