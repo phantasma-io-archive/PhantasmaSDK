@@ -19,6 +19,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.VM", "..\..\..\..
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Storage", "..\..\..\..\PhantasmaChain\Phantasma.Storage\Phantasma.Storage.csproj", "{BEA1490F-F026-41A9-8E3A-41FABB46BDF8}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.CodeGen", "..\..\..\..\PhantasmaChain\Phantasma.CodeGen\Phantasma.CodeGen.csproj", "{5F38D1F9-F58E-4B51-9960-4F73F5A7BC75}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Contracts", "..\..\..\..\PhantasmaChain\Phantasma.Contracts\Phantasma.Contracts.csproj", "{404DE755-5CF3-438A-9A1F-9435ACD78EDE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Domain", "..\..\..\..\PhantasmaChain\Phantasma.Domain\Phantasma.Domain.csproj", "{54AFD371-FF30-495D-B438-21CAF4F4FA18}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +63,18 @@ Global
 		{BEA1490F-F026-41A9-8E3A-41FABB46BDF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BEA1490F-F026-41A9-8E3A-41FABB46BDF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BEA1490F-F026-41A9-8E3A-41FABB46BDF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F38D1F9-F58E-4B51-9960-4F73F5A7BC75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F38D1F9-F58E-4B51-9960-4F73F5A7BC75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F38D1F9-F58E-4B51-9960-4F73F5A7BC75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F38D1F9-F58E-4B51-9960-4F73F5A7BC75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{404DE755-5CF3-438A-9A1F-9435ACD78EDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{404DE755-5CF3-438A-9A1F-9435ACD78EDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{404DE755-5CF3-438A-9A1F-9435ACD78EDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{404DE755-5CF3-438A-9A1F-9435ACD78EDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54AFD371-FF30-495D-B438-21CAF4F4FA18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54AFD371-FF30-495D-B438-21CAF4F4FA18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54AFD371-FF30-495D-B438-21CAF4F4FA18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54AFD371-FF30-495D-B438-21CAF4F4FA18}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
