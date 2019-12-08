@@ -36,7 +36,7 @@
 # define PHANTASMA_LOCKMEM(pointer, size)
 #endif
 
-//Un-pin a region and also erase it as PHANTASMA_WIPEMEM would do.
+//Un-pin a region and also erase it as `PHANTASMA_WIPEMEM` would do.
 #ifndef PHANTASMA_UNLOCKMEM
 # define PHANTASMA_UNLOCKMEM(pointer, size) memset(buffer, 0, size)
 #endif

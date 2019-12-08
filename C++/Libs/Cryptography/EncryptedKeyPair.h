@@ -38,7 +38,7 @@ public:
 
 	//Encrypt a private key with a password for safe keeping
 	EncryptedKeyPair( const Char* password, const Byte* privateKey, int privateKeyLength )
-		: m_address( Ed25519::PublicKeyFromSeed( privateKey, privateKeyLength ) )
+		: m_address( Address::FromKey(Ed25519::PublicKeyFromSeed( privateKey, privateKeyLength )) )
 	{
 		SecureVector<Byte> temp;
 		int passwordLength = 0;

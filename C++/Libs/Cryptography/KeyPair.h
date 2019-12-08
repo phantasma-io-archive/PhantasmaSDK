@@ -114,4 +114,10 @@ public:
 	}
 };
 
+
+inline Address Address::FromWIF(const Char* wif, int wifStringLength)
+{
+	return PhantasmaKeys::FromWIF(wif, wifStringLength).Address();
+}
+
 }

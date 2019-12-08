@@ -66,11 +66,21 @@ public:
 	template<class IKeyPair>
 	static Address FromKey(const IKeyPair& key)
 	{
+		return FromKey(key.PublicKeyBytes(), key.PublicKeyLength());
+	}
+	static Address FromKey(const ByteArray& input)
+	{
+		if(input.empty())
+		{
+			PHANTASMA_EXCEPTION("Invalid public key length");
+			return {};
+		}
+		return FromKey(&input.front(), (int)input.size());
+	}
+	static Address FromKey(const Byte* publicKeyBytes, int publicKeyLength)
+	{
 		Byte bytes[LengthInBytes] = {};
 		bytes[0] = (Byte)AddressKind::User;
-
-		int publicKeyLength = key.PublicKeyLength();
-		const Byte* publicKeyBytes = key.PublicKeyBytes();
 		if (publicKeyLength == 32)
 		{
 			PHANTASMA_COPY(publicKeyBytes, publicKeyBytes+publicKeyLength, bytes+2);
@@ -95,7 +105,7 @@ public:
 		const Byte* bytes = GetUTF8Bytes( str, temp, numBytes );
 		return FromHash(bytes,numBytes);
 	}
-
+	
 	static Address FromHash(const Byte* input, int inputLength)
 	{
 		Byte bytes[34];
@@ -128,26 +138,7 @@ public:
 	{
 		return FromWIF(wif.c_str(), wif.length());
 	}
-	static Address FromWIF(const Char* wif, int wifStringLength)
-	{
-		if( !wif || wif[0] == '\0' || wifStringLength <= 0 )
-		{
-			PHANTASMA_EXCEPTION( "WIF required" );
-			return Address();
-		}
-		Byte publicKey[32];
-		{
-			PinnedBytes<34> data;
-			int size = Base58::CheckDecodeSecure(data.bytes, 34, wif, wifStringLength);
-			if( size != 34 || data.bytes[0] != 0x80 || data.bytes[33] != 0x01 )
-			{
-				PHANTASMA_EXCEPTION( "Invalid WIF format" );
-				return Address();
-			}
-			Ed25519::PublicKeyFromSeed( publicKey, 32, &data.bytes[1], 32 );
-		}
-		return Address( publicKey, 32 );
-	}
+	static Address FromWIF(const Char* wif, int wifStringLength);
 
 	static Address FromText(const String& text, bool* out_error=0)
 	{

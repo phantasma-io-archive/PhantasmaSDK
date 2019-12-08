@@ -20,18 +20,19 @@ class Transaction : public Serializable
 	String m_chainName;
 	PHANTASMA_VECTOR<Signature> m_signatures;
 	Hash m_hash;
+	struct StringToByteHelper
+	{
+		ByteArray buffer;
+		int numBytes;
+	};
 public:
 	const ByteArray& Script() const { return m_script; }
-
-	const String NexusName() const { return m_nexusName; }
-	const String ChainName() const { return m_chainName; }
-
-	const Timestamp Expiration() const { return m_expiration; }
-
+	const String     NexusName() const { return m_nexusName; }
+	const String     ChainName() const { return m_chainName; }
+	const Timestamp  Expiration() const { return m_expiration; }
 	const ByteArray& Payload() const { return m_payload; }
-
+	const Hash       GetHash() const { return m_hash; }
 	const PHANTASMA_VECTOR<Signature> Signatures() const { return m_signatures; }
-	const Hash GetHash() const { return m_hash; }
 
 	template<class BinaryReader>
 	static Transaction Unserialize( Byte* bytes, int numBytes )
@@ -72,18 +73,17 @@ public:
 	//	return String("{Hash}");//todo
 	//}
 
-
 	Transaction()
 	{
 	}
 
-	Transaction( const Char* nexusName, const Char* chainName, const ByteArray& script, Timestamp expiration, const String& payload )
-		: Transaction()
+	Transaction( const Char* nexusName, const Char* chainName, const ByteArray& script, Timestamp expiration, const String& payload, StringToByteHelper temp={} )
+		: Transaction(nexusName, chainName, script, expiration, GetUTF8Bytes(payload, temp.buffer, temp.numBytes), temp.numBytes)
 	{
 	}
 	
     // transactions are always created unsigned, call Sign() to generate signatures
-	Transaction( const Char* nexusName, const Char* chainName, const ByteArray& script, Timestamp expiration, const Byte* payload, int payloadLength )
+	Transaction( const Char* nexusName, const Char* chainName, const ByteArray& script, Timestamp expiration, const Byte* payload=0, int payloadLength=0 )
 		: m_nexusName(nexusName)
 		, m_chainName(chainName)
 		, m_script(script)
@@ -206,7 +206,7 @@ public:
 		Mine( (int)targetDifficulty );
 	}
 
-	void Mine( int targetDifficulty )
+	bool Mine( int targetDifficulty )
 	{
 		if( targetDifficulty < 0 || targetDifficulty > 256 )
 			PHANTASMA_EXCEPTION( "invalid difficulty" );
@@ -215,17 +215,16 @@ public:
 
 		if(targetDifficulty == 0)
 		{
-			return; // no mining necessary 
+			return true; // no mining necessary 
 		}
 
 		uint nonce = 0;
 
 		while(true)
 		{
-			PHANTASMA_EXCEPTION("todo - finish porting this");
-			//if(GetHash().GetDifficulty() >= targetDifficulty)
+			if(GetHash().GetDifficulty() >= targetDifficulty)
 			{
-				return;
+				return true;
 			}
 
 			if(nonce == 0)
@@ -237,6 +236,7 @@ public:
 			if(nonce == 0)
 			{
 				PHANTASMA_EXCEPTION( "Transaction mining failed" );
+				return false;
 			}
 
 			m_payload[0] = (byte)((nonce >> 0) & 0xFF);
