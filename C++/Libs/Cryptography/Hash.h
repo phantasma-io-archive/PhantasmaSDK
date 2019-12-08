@@ -15,6 +15,18 @@ class Hash : public Serializable
 public:
 	constexpr static int Length = 32;
 
+	bool IsNull() const
+	{
+		for (int i=0; i<Length; i++)
+		{
+			if (m_data[i] != 0)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
 	bool operator==(const Hash& other) const
 	{
 		if( this == &other )
@@ -29,15 +41,14 @@ public:
 
 	String ToString() const
 	{
-		String result = String(PHANTASMA_LITERAL("0x"));
 		ByteArray temp;
 		temp.resize(Length);
 		PHANTASMA_COPY(m_data, m_data+Length, &temp.front());
 		ArrayReverse(temp);
-		result.append(Base16::Encode(temp));
-		return result;
+		return Base16::Encode(temp);
 	}
 
+	static Hash Zero() { return Hash(); }
 
 	Hash()
 	{
@@ -83,21 +94,48 @@ public:
 
 	static Hash Parse(const String& s)
 	{
-		if(s.length() < 2 )
+		return Parse(s.c_str(), (int)s.length());
+	}
+	static Hash Parse(const Char* s, int sLength)
+	{
+		if(sLength == 0 )
 		{
 			PHANTASMA_EXCEPTION("string cannot be empty");
 			return Hash();
 		}
+		if(sLength < 64 )
+		{
+			PHANTASMA_EXCEPTION("string too short");
+			return Hash();
+		}
 
-		auto bytes = Base16::Decode(s);
-		if(bytes.size() != Length)
+		Char ch = s[1];
+		if (ch == 'X' || ch == 'x')
+		{
+			if(s[0] != '0')
+			{
+				PHANTASMA_EXCEPTION("invalid hexdecimal prefix");
+				return Hash();
+			}
+			return Parse(s+2, sLength-2);
+		}
+
+		constexpr int expectedLength = Length * 2;
+		if(sLength != expectedLength)
 		{
 			PHANTASMA_EXCEPTION("length of string must be 64 hex chars");
 			return Hash();
 		}
 
-		ArrayReverse(bytes);
-		return Hash(bytes);
+		Byte decoded[Length];
+		int decodedLength = Base16::Decode( decoded, Length, s, sLength );
+		if(decodedLength != Length)
+		{
+			PHANTASMA_EXCEPTION("base16 decoding error");
+			return Hash();
+		}
+		ArrayReverse(decoded, Length);
+		return Hash(decoded, Length);
 	}
 
 	static bool TryParse(const String& s, Hash& result)
@@ -110,7 +148,7 @@ public:
 
 		auto sLength = s.length();
 		int expectedLength = Length*2;
-		if (sLength > 2 && s[0] == '0' && s[1] == 'x')
+		if (sLength > 2 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X'))
 		{
 			expectedLength += 2;
 		}
@@ -123,9 +161,15 @@ public:
 
 		PHANTASMA_TRY
 		{
-			auto data = Base16::Decode(s);
-			ArrayReverse(data);
-			result = Hash(data);
+			Byte decoded[Length];
+			int decodedLength = Base16::Decode( decoded, Length, s.c_str(), sLength );
+			if(decodedLength != Length)
+			{
+				result = Hash();
+				return false;
+			}
+			ArrayReverse(decoded, Length);
+			result = Hash(decoded, Length);
 			return true;
 		}
 		PHANTASMA_CATCH(...)
@@ -164,7 +208,8 @@ public:
 	// If necessary pads the number to 32 bytes with zeros 
 	Hash(const BigInteger& val)
 	{
-		auto src = val.ToSignedByteArray();
+		//auto src = val.ToSignedByteArray();
+		auto src = val.ToUnsignedByteArray();
 		if(src.size() > Length)
 		{
 			PHANTASMA_EXCEPTION("number is too large");
@@ -206,7 +251,7 @@ public:
 
 	operator BigInteger() const
 	{
-		return BigInteger(ToByteArray(), Length);
+		return BigInteger::FromUnsignedArray(ToByteArray(), true);
 	}
 
 	static Hash MerkleCombine(const Hash& A, const Hash& B)
@@ -224,13 +269,13 @@ public:
 		const Byte* utf8 = GetUTF8Bytes(str, temp, utf8Length );
 		Byte bytes[PHANTASMA_SHA256_LENGTH];
 		SHA256( bytes, PHANTASMA_SHA256_LENGTH, utf8, utf8Length );
-		return Hash::FromBytes(bytes, PHANTASMA_SHA256_LENGTH);
+		return Hash(bytes, PHANTASMA_SHA256_LENGTH);
 	}
 
 	static Hash FromUnpaddedHex(const String& hash)
 	{
 		const Char* szHash = hash.c_str();
-		if (hash.length() >= 2 && szHash[0] == '0' && szHash[1] == 'x')
+		if (hash.length() >= 2 && szHash[0] == '0' && (szHash[1] == 'x' || szHash[1] == 'X'))
 		{
 			szHash += 2;
 		}
@@ -244,6 +289,26 @@ public:
 		}
 
 		return Hash::Parse(sb.str());
+	}
+
+	//public static class PoWUtils
+	int GetDifficulty() const
+	{
+		int result = 0;
+		for (int i=0; i<Length; i++)
+		{
+			Byte n = m_data[i];
+
+			for (int j=0; j<8; j++)
+			{
+				if ((n & (1 << j)) != 0)
+				{
+					result = 1 + (i << 3) + j;
+				}
+			}
+		}
+
+		return 256 - result;
 	}
 };
 

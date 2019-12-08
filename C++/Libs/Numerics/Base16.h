@@ -82,16 +82,20 @@ inline int Decode(Byte* output, int outputLength, const Char* sz, int inputLengt
 
 	return length;
 }
-inline ByteArray Decode(const String& input)
+inline ByteArray Decode(const Char* input, int inputLength)
 {
-	int length = Decode( 0, 0, input.c_str(), (int)input.length() );
+	int length = Decode( 0, 0, input, inputLength );
 	ByteArray result;
 	if( length > 0 )
 	{
 		result.resize(length);
-		Decode( &result.front(), length, input.c_str(), (int)input.length() );
+		Decode( &result.front(), length, input, inputLength );
 	}
 	return result;
+}
+inline ByteArray Decode(const String& input)
+{
+	return Decode(input.c_str(), (int)input.length());
 }
 
 inline String Encode(const Byte* input, int length)

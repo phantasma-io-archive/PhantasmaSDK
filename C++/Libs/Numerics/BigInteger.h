@@ -98,13 +98,13 @@ public:
 	}
 
 	template<class Bytes>
-	static TBigInteger FromUnsignedArray(const Bytes& bytes, bool isPositive)
+	static TBigInteger FromUnsignedArray(const Bytes& unsignedArray, bool isPositive)
 	{
 		return BigInteger(unsignedArray, isPositive ? 1 : -1);
 	}
 
 	template<class Bytes>
-	static TBigInteger FromSignedArray(const Bytes& bytes)
+	static TBigInteger FromSignedArray(const Bytes& signedArray)
 	{
 		return BigInteger(signedArray);
 	}
