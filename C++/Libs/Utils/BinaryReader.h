@@ -7,6 +7,7 @@ namespace phantasma {
 class Hash;
 class Address;
 class Signature;
+class Serializable;
 
 class BinaryReader
 {
@@ -196,18 +197,9 @@ public:
 		text = FromUTF8Bytes(bytes);
 	}
 
-	void ReadAddress(Address& address)
-	{
-		ReadSerializable(address);
-	}
-	void ReadHash(Hash& hash)
-	{
-		ReadSerializable(hash);
-	}
-	void ReadSignature(Signature& hash)
-	{
-		ReadSerializable(hash);
-	}
+	void ReadAddress(Address& address);
+	void ReadHash(Hash& hash);
+	void ReadSignature(Signature& hash);
 	template<class T, typename std::enable_if<std::is_base_of<Serializable, T>::value>::type* = nullptr>
 	void ReadSerializable(T& s)
 	{

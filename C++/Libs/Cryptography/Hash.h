@@ -312,4 +312,9 @@ public:
 	}
 };
 
+inline void BinaryReader::ReadHash(Hash& hash)
+{
+	ReadSerializable(hash);
+}
+
 }

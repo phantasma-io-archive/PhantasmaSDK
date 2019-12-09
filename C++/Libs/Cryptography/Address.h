@@ -234,7 +234,7 @@ public:
 	void UnserializeData(BinaryReader& reader)
 	{
 		reader.ReadByteArray(_bytes);
-		_text = "";
+		_text = PHANTASMA_LITERAL("");
 	}
 	
 	int DecodeInterop(Byte& out_platformID, Byte* out_publicKey, int publicKeyLength)
@@ -282,5 +282,10 @@ private:
 	Byte _bytes[LengthInBytes];
 	mutable String _text;
 };
+
+inline void BinaryReader::ReadAddress(Address& address)
+{
+	ReadSerializable(address);
+}
 
 }

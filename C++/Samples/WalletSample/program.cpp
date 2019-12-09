@@ -9,6 +9,7 @@
 #include "../../Libs/Domain/Event.h"
 #include "../../Libs/Cryptography/KeyPair.h"
 #include "../../Libs/VM/ScriptBuilder.h"
+#include "../../Libs/Utils/RpcUtils.h"
 
 //Sorry, I haven't actually bundled a compiled version of libSodium with the project.
 //You have to download/build libSodium yourself!
@@ -83,113 +84,6 @@ static String GetChainAddress(const String& chainName, const vector<rpc::Chain>&
 	return {};
 }
 
-static String GetTxDescription(const rpc::Transaction& tx, const vector<rpc::Chain>& phantasmaChains, const vector<rpc::Token>& phantasmaTokens)
-{
-	String description;
-
-	String senderToken;
-	Address senderChain = Address::FromText(tx.chainAddress);
-	Address senderAddress;
-
-	String receiverToken;
-	Address receiverChain;
-	Address receiverAddress;
-
-	BigInteger amount = 0;
-
-	for(const auto& evt : tx.events) //todo move this
-	{
-		Event nativeEvent(evt.kind, evt.address, evt.contract, evt.data);
-
-		switch (nativeEvent.kind)
-		{
-		case EventKind::TokenSend:
-		{
-		//	TokenEventData data = nativeEvent.GetContent<TokenEventData>();
-		//	amount = data.value;
-		//	senderAddress = nativeEvent.address;
-		//	senderToken = (data.symbol);
-		}
-		break;
-		
-		case EventKind::TokenReceive:
-		{
-		//	TokenEventData data = nativeEvent.GetContent<TokenEventData>();
-		//	amount = data.value;
-		//	receiverAddress = nativeEvent.address;
-		//	receiverChain = data.chainAddress;
-		//	receiverToken = data.symbol;
-		}
-		break;
-		
-		//case EventKind::TokenEscrow:
-		{
-			//TokenEventData data = nativeEvent.GetContent<TokenEventData>();
-			//amount = data.value;
-			//BigInteger amountDecimal = DecimalConversion( const String& value, UInt32 decimals, Char decimalPoint='.', Char toleratedSeparator='\0' )
-			//
-			//	UnitConversion.ToDecimal(amount,
-			//	phantasmaTokens.SingleOrDefault(p => p.Symbol == data.symbol).Decimals);
-			//receiverAddress = nativeEvent.address;
-			//receiverChain = data.chainAddress;
-			//String chain = GetChainName(receiverChain.Text, phantasmaChains);
-			//description =
-			//	$"{amountDecimal} {data.symbol} tokens escrowed for address {receiverAddress} in {chain}";
-		}
-		break;
-		case EventKind::AddressRegister:
-		{
-		//	String name = nativeEvent.GetContent<String>();
-		//	description = $"{nativeEvent.Address} registered the name '{name}'";
-		}
-		break;
-		
-		//case EventKind::AddFriend:
-		{
-		//	Address address = nativeEvent.GetContent<Address>();
-		//	description = $"{nativeEvent.Address} added '{address} to friends.'";
-		}
-		break;
-		
-		//case EventKind::RemoveFriend:
-		{
-		//	Address address = nativeEvent.GetContent<Address>();
-		//	description = $"{nativeEvent.Address} removed '{address} from friends.'";
-		}
-		break;
-		}
-	}
-
-	if (description.empty())
-	{
-		if (amount > 0 && !senderAddress.IsNull() && !receiverAddress.IsNull() &&
-			!senderToken.empty() && senderToken == receiverToken)
-		{
-		//	var amountDecimal = UnitConversion.ToDecimal(amount,
-		//		phantasmaTokens.SingleOrDefault(p => p.Symbol == senderToken).Decimals);
-		//	description =
-		//		$"{amountDecimal} {senderToken} sent from {senderAddress.Text} to {receiverAddress.Text}";
-		}
-		else if (amount > 0 && !receiverAddress.IsNull() && !receiverToken.empty())
-		{
-		//	var amountDecimal = UnitConversion.ToDecimal(amount,
-		//		phantasmaTokens.SingleOrDefault(p => p.Symbol == receiverToken).Decimals);
-		//	description = $"{amountDecimal} {receiverToken} received on {receiverAddress.Text} ";
-		}
-		else
-		{
-			description = U("Custom transaction");
-		}
-
-		if (!receiverChain.IsNull() && receiverChain != senderChain)
-		{
-		//	description +=
-		//		$" from {GetChainName(senderChain.Text, phantasmaChains)} chain to {GetChainName(receiverChain.Text, phantasmaChains)} chain";
-		}
-	}
-
-	return description;
-}
 
 class Program
 {

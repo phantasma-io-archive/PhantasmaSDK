@@ -1,4 +1,5 @@
 #pragma once
+#include "BinaryReader.h"
 
 namespace phantasma {
 
@@ -10,11 +11,9 @@ class Serializable // concept
 	//void UnserializeData(BinaryReader& reader);
 };
 
-class BinaryReader;
-
-namespace Serialization
+template<class T>
+struct Serialization
 {
-	template<class T>
 	static T Unserialize(const ByteArray& bytes)
 	{
 		if (bytes.size() != 0)
@@ -24,6 +23,22 @@ namespace Serialization
 		}
 		return T{};
 	}
-}
+};
+
+template<>
+struct Serialization<String>
+{
+	static String Unserialize(const ByteArray& bytes)
+	{
+		if (bytes.size() != 0)
+		{
+			BinaryReader reader(bytes);
+			String s;
+			reader.ReadVarString(s);
+			return s;
+		}
+		return String{};
+	}
+};
 
 }

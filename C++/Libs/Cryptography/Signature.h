@@ -128,4 +128,9 @@ public:
 	}
 };
 
+inline void BinaryReader::ReadSignature(Signature& hash)
+{
+	ReadSerializable(hash);
+}
+
 }
