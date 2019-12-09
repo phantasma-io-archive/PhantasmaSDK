@@ -28,12 +28,12 @@ public:
 	{
 		if(_text.empty())
 		{
-			Char prefix;
+			const Char* prefix;
 			switch (Kind())
 			{
-			case AddressKind::User: prefix = 'P'; break;
-			case AddressKind::Interop: prefix = 'X'; break;
-			default: prefix = 'S'; break;
+			case AddressKind::User: prefix = PHANTASMA_LITERAL("P"); break;
+			case AddressKind::Interop: prefix = PHANTASMA_LITERAL("X"); break;
+			default: prefix = PHANTASMA_LITERAL("S"); break;
 			}
 			_text.append(prefix);
 			_text.append(Base58::Encode(_bytes, LengthInBytes));

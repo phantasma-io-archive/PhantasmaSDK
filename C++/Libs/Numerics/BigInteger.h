@@ -50,7 +50,7 @@ public:
 	static const TBigInteger Zero() { return TBigInteger{0LL}; }
 	static const TBigInteger One()  { return TBigInteger{1LL}; }
 
-	TBigInteger() {}
+	TBigInteger() : TBigInteger(0) {}
 
 	TBigInteger(TBigInteger&& other)
 		: _sign(other._sign)
@@ -981,6 +981,11 @@ public:
 		return n;
 	}
 
+	bool IsZero() const
+	{
+		return _sign == 0;
+	}
+
 	bool operator ==(const TBigInteger& b) const
 	{
 		return _data.size() == b._data.size() && _sign == b._sign && PHANTASMA_EQUAL(_data.begin(), _data.end(), b._data.begin());
@@ -1564,9 +1569,12 @@ String DecimalConversion( const TBigInteger<S>& value, UInt32 decimals, Char dec
 			String result = q.ToString();
 			result.append({decimalPoint});
 			for( UInt32 i=(UInt32)rstr.length(); i<decimals; ++i)
-				result.append({'0'});
+				result.append(PHANTASMA_LITERAL("0"));
 			for( UInt32 i=0, end=(UInt32)rstr.length()-trailingZeros; i<end; ++i)
-				result.append(rstr[i]);
+			{
+				Char ch[2] = { rstr[i], '\0' };
+				result.append(ch);
+			}
 			return result;
 		}
 		else

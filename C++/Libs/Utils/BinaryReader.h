@@ -193,9 +193,7 @@ public:
 			return;
 		}
 		Read(bytes, (int)numBytes);
-		bytes.push_back(0);
-		//TODO - actual UTF8 bytes to String helper function
-		text = String{(char*)&bytes.front()};
+		text = FromUTF8Bytes(bytes);
 	}
 
 	void ReadAddress(Address& address)
