@@ -257,6 +257,7 @@ public:
 	//--------------------------------------------------------------
 	// ScriptBuilderExtensions.cs port:
 	//--------------------------------------------------------------
+	constexpr static const Char* GasContract = PHANTASMA_LITERAL("gas");
 	constexpr static const Char* NexusContract = PHANTASMA_LITERAL("nexus");
 	constexpr static const Char* TokenContract = PHANTASMA_LITERAL("token");
 	constexpr static const Char* EnergyContract = PHANTASMA_LITERAL("energy");
@@ -265,27 +266,32 @@ public:
 
 	ScriptBuilder& AllowGas( const Address& from, const Address& to, const BigInteger& gasPrice, const BigInteger& gasLimit )
 	{
-		return CallContract( PHANTASMA_LITERAL("gas"), PHANTASMA_LITERAL("AllowGas"), from, to, gasPrice, gasLimit );
+		return CallContract( GasContract, PHANTASMA_LITERAL("AllowGas"), from, to, gasPrice, gasLimit );
 	}
 
 	ScriptBuilder& SpendGas( const Address& address )
 	{
-		return CallContract( PHANTASMA_LITERAL("gas"), PHANTASMA_LITERAL("SpendGas"), address );
+		return CallContract( GasContract, PHANTASMA_LITERAL("SpendGas"), address );
 	}
 
-	ScriptBuilder& MintTokens(const String& tokenSymbol, const Address& target, const BigInteger& amount)
+	ScriptBuilder& MintTokens(const String& tokenSymbol, const Address& from, const Address& target, const BigInteger& amount)
 	{
-		return CallContract(TokenContract, PHANTASMA_LITERAL("MintTokens"), tokenSymbol, target, amount);
+		return CallInterop(PHANTASMA_LITERAL("Runtime.MintTokens"), from, target, tokenSymbol, amount);
+	}
+
+	ScriptBuilder& MintNonFungibleToken(const String& tokenSymbol, const Address& from, const Address& target, const ByteArray& rom, const ByteArray& ram)
+	{
+		return CallInterop(PHANTASMA_LITERAL("Runtime.MintToken"), from, target, tokenSymbol, rom, ram); 
 	}
 
 	ScriptBuilder& TransferTokens(const String& tokenSymbol, const Address& from, const String& to, const BigInteger& amount)
 	{
-		return CallContract(TokenContract, PHANTASMA_LITERAL("TransferTokens"), from, to, tokenSymbol, amount);
+		return CallInterop(PHANTASMA_LITERAL("Runtime.TransferTokens"), from, to, tokenSymbol, amount);
 	}
 
 	ScriptBuilder& TransferTokens(const String& tokenSymbol, const Address& from, const Address& to, const BigInteger& amount)
 	{
-		return CallContract(TokenContract, PHANTASMA_LITERAL("TransferTokens"), from, to, tokenSymbol, amount);
+		return CallInterop(PHANTASMA_LITERAL("Runtime.TransferTokens"), from, to, tokenSymbol, amount);
 	}
 
     ScriptBuilder& TransferBalance(const String& tokenSymbol, const Address& from, const Address& to)
@@ -295,32 +301,32 @@ public:
 
 	ScriptBuilder& TransferNFT(const String& tokenSymbol, const Address& from, const Address& to, const BigInteger& tokenId)//todo check if this is valid
 	{
-		return CallContract(TokenContract, PHANTASMA_LITERAL("TransferToken"), from, to, tokenSymbol, tokenId);
+		return CallInterop(PHANTASMA_LITERAL("Runtime.TransferToken"), from, to, tokenSymbol, tokenId);
 	}
 
 	ScriptBuilder& TransferNFT(const String& tokenSymbol, const Address& from, const String& to, const BigInteger& tokenId)//todo check if this is valid
 	{
-		return CallContract(TokenContract, PHANTASMA_LITERAL("TransferToken"), from, to, tokenSymbol, tokenId);
+		return CallInterop(PHANTASMA_LITERAL("Runtime.TransferToken"), from, to, tokenSymbol, tokenId);
 	}
 
 	ScriptBuilder& CrossTransferToken(const Address& destinationChain, const String& tokenSymbol, const Address& from, const Address& to, const BigInteger& amount)
 	{
-		return CallContract(TokenContract, PHANTASMA_LITERAL("SendTokens"), destinationChain, from, to, tokenSymbol, amount);
+		return CallInterop(PHANTASMA_LITERAL("Runtime.SendTokens"), destinationChain, from, to, tokenSymbol, amount);
 	}
 
 	ScriptBuilder& CrossTransferToken(const Address& destinationChain, const String& tokenSymbol, const Address& from, const String& to, const BigInteger& amount)
 	{
-		return CallContract(TokenContract, PHANTASMA_LITERAL("SendTokens"), destinationChain, from, to, tokenSymbol, amount);
+		return CallInterop(PHANTASMA_LITERAL("Runtime.SendTokens"), destinationChain, from, to, tokenSymbol, amount);
 	}
 
 	ScriptBuilder& CrossTransferNFT(const Address& destinationChain, const String& tokenSymbol, const Address& from, const Address& to, const BigInteger& tokenId)
 	{
-		return CallContract(TokenContract, PHANTASMA_LITERAL("SendToken"), destinationChain, from, to, tokenSymbol, tokenId);
+		return CallInterop(PHANTASMA_LITERAL("Runtime.SendToken"), destinationChain, from, to, tokenSymbol, tokenId);
 	}
 
 	ScriptBuilder& CrossTransferNFT(const Address& destinationChain, const String& tokenSymbol, const Address& from, const String& to, const BigInteger& tokenId)
 	{
-		return CallContract(TokenContract, PHANTASMA_LITERAL("SendToken"), destinationChain, from, to, tokenSymbol, tokenId);
+		return CallInterop(PHANTASMA_LITERAL("Runtime.SendToken"), destinationChain, from, to, tokenSymbol, tokenId);
 	}
 
 //--------------------------------------------------------------

@@ -76,8 +76,13 @@ public:
 	{
 		return FromWIF(wif.c_str(), wif.length());
 	}
-	static PhantasmaKeys FromWIF(const Char* wif, int wifStringLength)
+	static PhantasmaKeys FromWIF(const Char* wif, int wifStringLength=0)
 	{
+		if( wifStringLength == 0 )
+		{
+			wifStringLength = (int)PHANTASMA_STRLEN(wif);
+		}
+
 		if( !wif || wif[0] == '\0' || wifStringLength <= 0 )
 		{
 			PHANTASMA_EXCEPTION( "WIF required" );
