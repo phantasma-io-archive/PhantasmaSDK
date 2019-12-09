@@ -162,7 +162,7 @@ public:
 		PHANTASMA_TRY
 		{
 			Byte decoded[Length];
-			int decodedLength = Base16::Decode( decoded, Length, s.c_str(), sLength );
+			int decodedLength = Base16::Decode( decoded, Length, s.c_str(), (int)sLength );
 			if(decodedLength != Length)
 			{
 				result = Hash();

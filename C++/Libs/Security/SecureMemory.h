@@ -38,7 +38,7 @@
 
 //Un-pin a region and also erase it as `PHANTASMA_WIPEMEM` would do.
 #ifndef PHANTASMA_UNLOCKMEM
-# define PHANTASMA_UNLOCKMEM(pointer, size) memset(buffer, 0, size)
+# define PHANTASMA_UNLOCKMEM(pointer, size) memset(pointer, 0, size)
 #endif
 
 //Allocate a region of memory that can have its access permissions modified

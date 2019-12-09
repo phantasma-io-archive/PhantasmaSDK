@@ -218,7 +218,7 @@ public:
 			return true; // no mining necessary 
 		}
 
-		uint nonce = 0;
+		UInt32 nonce = 0;
 
 		while(true)
 		{
@@ -239,10 +239,10 @@ public:
 				return false;
 			}
 
-			m_payload[0] = (byte)((nonce >> 0) & 0xFF);
-			m_payload[1] = (byte)((nonce >> 8) & 0xFF);
-			m_payload[2] = (byte)((nonce >> 16) & 0xFF);
-			m_payload[3] = (byte)((nonce >> 24) & 0xFF);
+			m_payload[0] = (Byte)((nonce >> 0) & 0xFF);
+			m_payload[1] = (Byte)((nonce >> 8) & 0xFF);
+			m_payload[2] = (Byte)((nonce >> 16) & 0xFF);
+			m_payload[3] = (Byte)((nonce >> 24) & 0xFF);
 			UpdateHash();
 		}
 	}

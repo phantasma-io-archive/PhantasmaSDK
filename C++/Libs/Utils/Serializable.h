@@ -10,6 +10,8 @@ class Serializable // concept
 	//void UnserializeData(BinaryReader& reader);
 };
 
+class BinaryReader;
+
 namespace Serialization
 {
 	template<class T>

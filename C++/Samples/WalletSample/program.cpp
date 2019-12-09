@@ -6,7 +6,7 @@
 #include "../../Libs/PhantasmaAPI.h"
 #include "../../Libs/Adapters/PhantasmaAPI_sodium.h"
 #include "../../Libs/Blockchain/Transaction.h"
-#include "../../Libs/Blockchain/Event.h"
+#include "../../Libs/Domain/Event.h"
 #include "../../Libs/Cryptography/KeyPair.h"
 #include "../../Libs/VM/ScriptBuilder.h"
 
@@ -99,7 +99,7 @@ static String GetTxDescription(const rpc::Transaction& tx, const vector<rpc::Cha
 
 	for(const auto& evt : tx.events) //todo move this
 	{
-		Event nativeEvent(evt.kind, evt.address, evt.data);
+		Event nativeEvent(evt.kind, evt.address, evt.contract, evt.data);
 
 		switch (nativeEvent.kind)
 		{
@@ -122,7 +122,7 @@ static String GetTxDescription(const rpc::Transaction& tx, const vector<rpc::Cha
 		}
 		break;
 		
-		case EventKind::TokenEscrow:
+		//case EventKind::TokenEscrow:
 		{
 			//TokenEventData data = nativeEvent.GetContent<TokenEventData>();
 			//amount = data.value;
@@ -144,14 +144,14 @@ static String GetTxDescription(const rpc::Transaction& tx, const vector<rpc::Cha
 		}
 		break;
 		
-		case EventKind::AddFriend:
+		//case EventKind::AddFriend:
 		{
 		//	Address address = nativeEvent.GetContent<Address>();
 		//	description = $"{nativeEvent.Address} added '{address} to friends.'";
 		}
 		break;
 		
-		case EventKind::RemoveFriend:
+		//case EventKind::RemoveFriend:
 		{
 		//	Address address = nativeEvent.GetContent<Address>();
 		//	description = $"{nativeEvent.Address} removed '{address} from friends.'";
@@ -198,7 +198,7 @@ class Program
 	rpc::PhantasmaAPI _phantasmaApiService;
 
 	rpc::Account _account;
-	KeyPair _key;
+	PhantasmaKeys _key;
 	vector<rpc::Chain> _chains;
 	vector<rpc::Token> _tokens;
 	String _nexus;
@@ -225,7 +225,7 @@ public:
 			try
 			{
 				String wif = ReadLine();
-				_key = KeyPair::FromWIF(wif); //KeyPair.Generate();
+				_key = PhantasmaKeys::FromWIF(wif); //KeyPair.Generate();
 				loggedIn = true;
 			}
 			catch (std::exception&)
@@ -483,7 +483,7 @@ public:
 			WriteLine("Sending transaction...");
 			Transaction tx(_nexus.c_str(), chain.c_str(), script, Timestamp::Now() + Timespan::FromHours(1));
 			tx.Sign(_key);
-			String txResult = _phantasmaApiService.SendRawTransaction(tx.ToRawTransaction().c_str());
+			String txResult = _phantasmaApiService.SendRawTransaction(Base16::Encode(tx.ToByteArray(true)).c_str());
 
 			WriteLine("Transaction sent. Tx hash: ", txResult);
 			return txResult;

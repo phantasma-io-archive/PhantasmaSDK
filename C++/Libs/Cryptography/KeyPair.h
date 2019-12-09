@@ -39,7 +39,7 @@ public:
 	const Address&    Address()    const { return address; }
 
 	const Byte*  PublicKeyBytes()  const { return publicKey.size() ? &publicKey.front() : 0; }
-	int          PublicKeyLength() const { return publicKey.size(); }
+	int          PublicKeyLength() const { return (int)publicKey.size(); }
 
 	PhantasmaKeys()
 		: privateKey()
