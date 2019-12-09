@@ -1556,9 +1556,17 @@ String DecimalConversion( const TBigInteger<S>& value, UInt32 decimals, Char dec
 		}
 		if( alwaysShowDecimalPoint || r != TBigInteger<S>::Zero() )
 		{
+			String rstr = r.ToString();
+			UInt32 trailingZeros = 0;
+			for( UInt32 i=(UInt32)rstr.length(); i-->0; ++trailingZeros )
+				if( rstr[i] != '0' )
+					break;
 			String result = q.ToString();
 			result.append({decimalPoint});
-			result.append(r.ToString());
+			for( UInt32 i=(UInt32)rstr.length(); i<decimals; ++i)
+				result.append({'0'});
+			for( UInt32 i=0, end=(UInt32)rstr.length()-trailingZeros; i<end; ++i)
+				result.append(rstr[i]);
 			return result;
 		}
 		else
