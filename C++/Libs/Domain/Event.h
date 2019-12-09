@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "../Cryptography/Address.h"
+#include "../Cryptography/Hash.h"
 #include "../Numerics/BigInteger.h"
 #include "../Numerics/Base16.h"
 #include <type_traits>
@@ -132,39 +133,52 @@ EventKind StringToEventKind(const String& k)
 class TokenEventData
 {
 public:
-	const String Symbol;
-	const BigInteger Value;
-	const String ChainName;
+	const String symbol;
+	const BigInteger value;
+	const String chainName;
 
+	TokenEventData(){}
 	TokenEventData(const String& symbol, const BigInteger& value, const String& chainName)
-		: Symbol(symbol)
-		, Value(value)
-		, ChainName(chainName)
+		: symbol(symbol)
+		, value(value)
+		, chainName(chainName)
 	{
 	}
-}
+
+	template<class BinaryReader>
+	static TokenEventData Unserialize( BinaryReader& reader )
+	{
+		String symbol;
+		BigInteger value;
+		String chainName;
+		reader.ReadVarString(symbol);
+		reader.ReadBigInteger(value);
+		reader.ReadVarString(chainName);
+		return { symbol, value, chainName };
+	}
+};
 
 class ChainValueEventData
 {
 public:
-	String Name;
-	BigInteger Value;
-}
+	String name;
+	BigInteger value;
+};
 
 class TransactionSettleEventData
 {
 public:
-	const Hash Hash;
-	const String Platform;
-	const String Chain;
+	const Hash hash;
+	const String platform;
+	const String chain;
 
 	TransactionSettleEventData(const Hash& hash, const String& platform, const String& chain)
-		: Hash(hash)
-		, Platform(platform)
-		, Chain(chain)
+		: hash(hash)
+		, platform(platform)
+		, chain(chain)
 	{
 	}
-}
+};
 
 class GasEventData
 {
@@ -179,7 +193,7 @@ public:
 		, amount(amount)
 	{
 	}
-}
+};
 
 class Event
 {

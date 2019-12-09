@@ -10,4 +10,18 @@ class Serializable // concept
 	//void UnserializeData(BinaryReader& reader);
 };
 
+namespace Serialization
+{
+	template<class T>
+	static T Unserialize(const ByteArray& bytes)
+	{
+		if (bytes.size() != 0)
+		{
+			BinaryReader reader(bytes);
+			return T::Unserialize(reader);
+		}
+		return T{};
+	}
+}
+
 }
