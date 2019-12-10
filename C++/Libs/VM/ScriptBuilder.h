@@ -286,7 +286,7 @@ public:
 
 	ScriptBuilder& TransferTokens(const String& tokenSymbol, const Address& from, const String& to, const BigInteger& amount)
 	{
-		return CallInterop(PHANTASMA_LITERAL("Runtime.TransferTokens"), from, to, tokenSymbol, amount);
+		return CallInterop(PHANTASMA_LITERAL("Runtime.TransferTokens"), from, Address::FromText(to), tokenSymbol, amount);
 	}
 
 	ScriptBuilder& TransferTokens(const String& tokenSymbol, const Address& from, const Address& to, const BigInteger& amount)

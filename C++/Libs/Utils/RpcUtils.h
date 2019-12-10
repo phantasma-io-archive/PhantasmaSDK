@@ -5,6 +5,7 @@
 namespace phantasma {
 
 const static BigInteger MinimumGasFee = 100000;
+constexpr static int PaginationMaxResults = 50;
 
 // Did an address receive a particular token type from this transaction?
 // Who sent it, how many tokens were received?

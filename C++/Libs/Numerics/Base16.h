@@ -89,7 +89,9 @@ inline ByteArray Decode(const Char* input, int inputLength)
 	if( length > 0 )
 	{
 		result.resize(length);
-		Decode( &result.front(), length, input, inputLength );
+		int decoded = Decode( &result.front(), length, input, inputLength );
+		if( decoded != length )
+			return ByteArray{};
 	}
 	return result;
 }
