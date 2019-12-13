@@ -253,7 +253,7 @@ String TEncode(const Byte* input, int length)
 	}
 	ArrayReverse(sb);
 
-	return { &sb.front(), (typename String::size_type)sb.size() };
+	return String{ &sb.front(), (typename String::size_type)sb.size() };
 }
 
 inline String Encode(const Byte* input, int length)

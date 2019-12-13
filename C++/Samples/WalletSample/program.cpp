@@ -118,7 +118,7 @@ public:
 		{
 			try
 			{
-				String wif = ReadLine();
+				SecureString wif = SecureString{ReadLine()};
 				_key = PhantasmaKeys::FromWIF(wif); //KeyPair.Generate();
 				loggedIn = true;
 			}

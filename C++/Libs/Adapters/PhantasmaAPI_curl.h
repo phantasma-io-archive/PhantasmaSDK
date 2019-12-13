@@ -111,12 +111,19 @@ public:
 };
 
 #ifdef PHANTASMA_RAPIDJSON
+namespace rpc {
+struct PhantasmaError;
+void OnHttpError(PhantasmaError&, const char*);
+}
+
 template<class CurlClient>
-static rapidjson::Document& HttpPost(CurlClient& client, const json::Char* uri, const RapidJsonBufferWriter& data)
+static rapidjson::Document& HttpPost(CurlClient& client, const json::Char* uri, const RapidJsonBufferWriter& data, rpc::PhantasmaError* err)
 {
 	const char* request = data.buf.GetString();
-	client.Post(request, strlen(request), uri);
+	CURLcode code = client.Post(request, strlen(request), uri);
 	client.result.append("\0", 1);
+	if(err && code != CURLE_OK)
+		rpc::OnHttpError(*err, curl_easy_strerror(code));
 	return client.doc.ParseInsitu<0>(client.result.begin());
 }
 #else
@@ -124,8 +131,10 @@ template<class CurlClient>
 static PHANTASMA_STRING HttpPost(CurlClient& client, const PHANTASMA_CHAR* uri, const PHANTASMA_STRINGBUILDER& data)
 {
 	const PHANTASMA_STRING& request = data.str();
-	client.Post(request.c_str(), request.length(), uri);
+	CURLcode code = client.Post(request.c_str(), request.length(), uri);
 	client.result.append("\0", 1);
+	if(err && code != CURLE_OK)
+		rpc::OnHttpError(*err, curl_easy_strerror(code));
 	return { client.result.begin() };
 }
 #endif

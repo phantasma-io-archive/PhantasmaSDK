@@ -82,8 +82,12 @@ inline int Decode(Byte* output, int outputLength, const Char* sz, int inputLengt
 
 	return length;
 }
-inline ByteArray Decode(const Char* input, int inputLength)
+inline ByteArray Decode(const Char* input, int inputLength=0)
 {
+	if(inputLength == 0)
+	{
+		inputLength = (int)PHANTASMA_STRLEN(input);
+	}
 	int length = Decode( 0, 0, input, inputLength );
 	ByteArray result;
 	if( length > 0 )

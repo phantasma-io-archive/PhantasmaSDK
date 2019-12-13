@@ -70,7 +70,11 @@ template<class... Args> void AddArray(web::json::value& root, const Char* key, A
 }
 }
 
-inline web::json::value HttpPost(web::http::client::http_client& client, const json::Char* uri, const web::json::value& data)
+namespace rpc {
+struct PhantasmaError;
+void OnHttpError(PhantasmaError&, const PHANTASMA_CHAR*);
+}
+inline web::json::value HttpPost(web::http::client::http_client& client, const json::Char* uri, const web::json::value& data, rpc::PhantasmaError* err)
 {
 	web::uri_builder builder(uri);
 	return client.request(web::http::methods::POST, builder.to_string(), data)
@@ -82,7 +86,10 @@ inline web::json::value HttpPost(web::http::client::http_client& client, const j
 			utility::stringstream_t msg;
 			msg << U("Malformed RPC request or endpoint: response status = ");
 			msg << statusCode;
-			throw web::http::http_exception(msg.str());
+			const auto& str = msg.str();
+			if(err)
+				rpc::OnHttpError(*err, str.c_str());
+			throw web::http::http_exception(str);
 		}
 		return response.content_ready().get().extract_json(true).get();
 	}).get();

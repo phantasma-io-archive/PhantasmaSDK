@@ -194,7 +194,7 @@
 //  function, which should perform a HTTP POST request and return the result:
 //
 //     namespace phantasma {
-//      JSONDocument HttpPost(HttpClient&, const Char* uri, const JSONBuilder&);
+//      JSONDocument HttpPost(HttpClient&, const Char* uri, const JSONBuilder&, PhantasmaError* out_error);
 //     }
 //
 //------------------------------------------------------------------------------
@@ -477,7 +477,7 @@ struct JSONBuilder // A VERY simple json string builder. Highly recommended that
 
 #ifdef PHANTASMA_HTTPCLIENT
 typedef PHANTASMA_HTTPCLIENT HttpClient;
-//JSONDocument HttpPost(HttpClient&, const Char* uri, const JSONBuilder&);
+//JSONDocument HttpPost(HttpClient&, const Char* uri, const JSONBuilder&, PhantasmaError* out_error);
 #endif
 
 //If providing a JSON library (highly recommended that you do!), then you must provide these functions yourself:
@@ -532,6 +532,22 @@ struct {{#fix-type Key}}{{#parse-lines false}}{{#new-line}}
 //------------------------------------------------------------------------------
 // Low level RPC API:
 //------------------------------------------------------------------------------
+struct PhantasmaError
+{
+	int code = 0;
+	String message;
+
+	const static int InvalidJSON = -1;
+	const static int HttpError = -2;
+	const static int InvalidRpcResponse = -3;
+	const static int RpcMessage = -4;
+};
+inline void OnHttpError(PhantasmaError& err, const Char* msg)
+{
+	err.code = PhantasmaError::HttpError; 
+	if( msg )
+		err.message = String(msg);
+}
 
 class PhantasmaJsonAPI
 {
@@ -540,15 +556,15 @@ public:
 
 	{{#each methods}}// {{Info.Description}} {{#if Info.IsPaginated==true}}(paginated call){{/if}}
 	static void Make{{Info.Name}}Request(JSONBuilder&{{#each Info.Parameters}}, {{#fix-ref Type.Name}} {{Name}}{{/each}});
-	static bool Parse{{Info.Name}}Response(const JSONValue&, {{#if Info.ReturnType.IsArray}}PHANTASMA_VECTOR<{{/if}}{{#fix-type Info.ReturnType.Name}}{{#if Info.ReturnType.IsArray}}>{{/if}}& out);
+	static bool Parse{{Info.Name}}Response(const JSONValue&, {{#if Info.ReturnType.IsArray}}PHANTASMA_VECTOR<{{/if}}{{#fix-type Info.ReturnType.Name}}{{#if Info.ReturnType.IsArray}}>{{/if}}& out, PhantasmaError* err=0);
 	{{/each}}
 
 private:
-	static JSONValue CheckResponse(JSONValue response, bool& out_error);
-	{{#each types}}static {{#fix-type Key}} Deserialize{{#fix-type Key}}(const JSONValue& json, bool& out_error);
+	static JSONValue CheckResponse(JSONValue response, PhantasmaError& out_error);
+	{{#each types}}static {{#fix-type Key}} Deserialize{{#fix-type Key}}(const JSONValue& json, bool& jsonError);
 	{{/each}}
 
-	static bool Deserializebool(const JSONValue& json, bool& out_error);
+	static bool Deserializebool(const JSONValue& json, bool& jsonError);
 };
 
 #if defined(PHANTASMA_HTTPCLIENT)
@@ -563,7 +579,7 @@ public:
 	{}
 
 	{{#each methods}}// {{Info.Description}} {{#if Info.IsPaginated==true}}(paginated call){{/if}}
-	{{#if Info.ReturnType.IsArray}}PHANTASMA_VECTOR<{{/if}}{{#fix-type Info.ReturnType.Name}}{{#if Info.ReturnType.IsArray}}>{{/if}} {{Info.Name}}({{#each Info.Parameters}}{{#fix-ref Type.Name}} {{Name}}, {{/each}}bool* out_error = nullptr);
+	{{#if Info.ReturnType.IsArray}}PHANTASMA_VECTOR<{{/if}}{{#fix-type Info.ReturnType.Name}}{{#if Info.ReturnType.IsArray}}>{{/if}} {{Info.Name}}({{#each Info.Parameters}}{{#fix-ref Type.Name}} {{Name}}, {{/each}}PhantasmaError* out_error = nullptr);
 	{{/each}}
 private:
 	HttpClient& m_httpClient;
@@ -574,38 +590,38 @@ private:
 //------------------------------------------------------------------------------
 // RPC API implementation details:
 //------------------------------------------------------------------------------
-PHANTASMA_FUNCTION bool PhantasmaJsonAPI::Deserializebool(const JSONValue& value, bool& err)
+PHANTASMA_FUNCTION bool PhantasmaJsonAPI::Deserializebool(const JSONValue& value, bool& jsonErr)
 {
-	return json::AsBool(value, err);
+	return json::AsBool(value, jsonErr);
 }
 
 {{#each types}}
-PHANTASMA_FUNCTION {{#fix-type Key}} PhantasmaJsonAPI::Deserialize{{#fix-type Key}}(const JSONValue& value, bool& err)
+PHANTASMA_FUNCTION {{#fix-type Key}} PhantasmaJsonAPI::Deserialize{{#fix-type Key}}(const JSONValue& value, bool& jsonErr)
 { {{#parse-lines false}}
 {{#each Value}}
 {{#if FieldType.Name=='String[]'}}{{#parse-lines true}}
 	PHANTASMA_VECTOR<{{#fix-type FieldType.Name}}> {{Name}}Vector;
-	if(json::HasArrayField(value, PHANTASMA_LITERAL("{{Name}}"), err))
+	if(json::HasArrayField(value, PHANTASMA_LITERAL("{{Name}}"), jsonErr))
 	{
-		const JSONArray& {{Name}}JsonArray = json::LookupArray(value, PHANTASMA_LITERAL("{{Name}}"), err);
-		int size = json::ArraySize({{Name}}JsonArray, err);
+		const JSONArray& {{Name}}JsonArray = json::LookupArray(value, PHANTASMA_LITERAL("{{Name}}"), jsonErr);
+		int size = json::ArraySize({{Name}}JsonArray, jsonErr);
 		{{Name}}Vector.reserve(size);
 		for(int i = 0; i < size; ++i)
 		{
-			{{Name}}Vector.push_back(json::AsString(json::IndexArray({{Name}}JsonArray, i, err), err));
+			{{Name}}Vector.push_back(json::AsString(json::IndexArray({{Name}}JsonArray, i, jsonErr), jsonErr));
 		}
 	}{{#parse-lines false}}
 {{#else}}
 {{#if FieldType.Name contains '[]'}}{{#parse-lines true}}
 	PHANTASMA_VECTOR<{{#fix-type FieldType.Name}}> {{Name}}Vector;
-	if(json::HasArrayField(value, PHANTASMA_LITERAL("{{Name}}"), err))
+	if(json::HasArrayField(value, PHANTASMA_LITERAL("{{Name}}"), jsonErr))
 	{
-		const JSONArray& {{Name}}JsonArray = json::LookupArray(value, PHANTASMA_LITERAL("{{Name}}"), err);
-		int size = json::ArraySize({{Name}}JsonArray, err);
+		const JSONArray& {{Name}}JsonArray = json::LookupArray(value, PHANTASMA_LITERAL("{{Name}}"), jsonErr);
+		int size = json::ArraySize({{Name}}JsonArray, jsonErr);
 		{{Name}}Vector.reserve(size);
 		for(int i = 0; i < size; ++i)
 		{
-			{{Name}}Vector.push_back(Deserialize{{#fix-type FieldType.Name}}(json::IndexArray({{Name}}JsonArray, i, err), err));
+			{{Name}}Vector.push_back(Deserialize{{#fix-type FieldType.Name}}(json::IndexArray({{Name}}JsonArray, i, jsonErr), jsonErr));
 		}
 	}{{#parse-lines false}}
 {{/if}}
@@ -618,24 +634,24 @@ PHANTASMA_FUNCTION {{#fix-type Key}} PhantasmaJsonAPI::Deserialize{{#fix-type Ke
 		{{Name}}Vector
 {{#else}}
 {{#if FieldType.Name=='Boolean'}}
-		json::LookupBool(value, PHANTASMA_LITERAL("{{Name}}"), err)
+		json::LookupBool(value, PHANTASMA_LITERAL("{{Name}}"), jsonErr)
 {{#else}}
 {{#if FieldType.Name=='UInt32'}}
-		json::LookupUInt32(value, PHANTASMA_LITERAL("{{Name}}"), err)
+		json::LookupUInt32(value, PHANTASMA_LITERAL("{{Name}}"), jsonErr)
 {{#else}}
 {{#if FieldType.Name=='Int32'}}
-		json::LookupInt32(value, PHANTASMA_LITERAL("{{Name}}"), err)
+		json::LookupInt32(value, PHANTASMA_LITERAL("{{Name}}"), jsonErr)
 {{#else}}
 {{#if FieldType.Name=='String'}}
-		json::LookupString(value, PHANTASMA_LITERAL("{{Name}}"), err)
+		json::LookupString(value, PHANTASMA_LITERAL("{{Name}}"), jsonErr)
 {{#else}}
 {{#if FieldType.Name=='IAPIResult'}}
-		json::LookupValue(value, PHANTASMA_LITERAL("{{Name}}"), err)
+		json::LookupValue(value, PHANTASMA_LITERAL("{{Name}}"), jsonErr)
 {{#else}}
 {{#if FieldType.BaseType != null && FieldType.BaseType.Name=='IAPIResult'}}
-		Deserialize{{#fix-type FieldType.Name}}(json::LookupValue(value, PHANTASMA_LITERAL("{{Name}}"), err), err)
+		Deserialize{{#fix-type FieldType.Name}}(json::LookupValue(value, PHANTASMA_LITERAL("{{Name}}"), jsonErr), jsonErr)
 {{#else}}
-		(err=true, "Variable type {{FieldType.Name}} isnt currently handled by the template system")
+		(jsonErr=true, "Variable type {{FieldType.Name}} isnt currently handled by the template system")
 {{/if}}
 {{/if}}
 {{/if}}
@@ -649,39 +665,44 @@ PHANTASMA_FUNCTION {{#fix-type Key}} PhantasmaJsonAPI::Deserialize{{#fix-type Ke
 {{/each}}
 
 
-PHANTASMA_FUNCTION JSONValue PhantasmaJsonAPI::CheckResponse(JSONValue response, bool& out_error)
+PHANTASMA_FUNCTION JSONValue PhantasmaJsonAPI::CheckResponse(JSONValue response, PhantasmaError& out_error)
 {
-	if( !json::IsObject(response, out_error) )
+	bool jsonErr = false;
+	if( !json::IsObject(response, jsonErr) || jsonErr )
 	{
 		PHANTASMA_EXCEPTION("Failed to parse JSON");
-		out_error = true;
+		out_error.code = PhantasmaError::InvalidRpcResponse;
 		return response;
 	}
-	if( json::HasField(response, PHANTASMA_LITERAL("error"), out_error) )
+	if( json::HasField(response, PHANTASMA_LITERAL("error"), jsonErr) )
 	{
-		const JSONValue& error = json::LookupValue(response, PHANTASMA_LITERAL("error"), out_error);
-		int code = 0;
+		const JSONValue& error = json::LookupValue(response, PHANTASMA_LITERAL("error"), jsonErr);
+		int code = PhantasmaError::RpcMessage;
 		String msg;
-		if(json::IsObject(error, out_error))
+		if(json::IsObject(error, jsonErr))
 		{
-			msg = json::LookupString(error, PHANTASMA_LITERAL("message"), out_error);
-			code = json::LookupInt32(error, PHANTASMA_LITERAL("code"), out_error);
+			msg = json::LookupString(error, PHANTASMA_LITERAL("message"), jsonErr);
+			code = json::LookupInt32(error, PHANTASMA_LITERAL("code"), jsonErr);
 		}
 		else
 		{
-			msg = json::LookupString(response, PHANTASMA_LITERAL("error"), out_error);
+			msg = json::LookupString(response, PHANTASMA_LITERAL("error"), jsonErr);
 		}
 		PHANTASMA_EXCEPTION_MESSAGE("Server returned error: %s", msg);
-		out_error = true;
+		out_error.message = msg;
+		out_error.code = code;
 		return response;
 	}
-	if( !json::HasField(response, PHANTASMA_LITERAL("result"), out_error) )
+	if( !json::HasField(response, PHANTASMA_LITERAL("result"), jsonErr) || jsonErr )
 	{
 		PHANTASMA_EXCEPTION("Malformed response: No \"result\" node on the JSON body");
-		out_error = true;
+		out_error.code = PhantasmaError::InvalidRpcResponse;
 		return response;
 	}
-	return json::LookupValue(response, PHANTASMA_LITERAL("result"), out_error);
+	JSONValue result = json::LookupValue(response, PHANTASMA_LITERAL("result"), jsonErr);
+	if( !out_error.code && jsonErr )
+		out_error.code = PhantasmaError::InvalidJSON;
+	return result;
 }
 
 {{#each methods}}
@@ -696,71 +717,78 @@ PHANTASMA_FUNCTION void PhantasmaJsonAPI::Make{{Info.Name}}Request(JSONBuilder& 
 	json::EndObject(request);{{#parse-lines true}}
 }
 
-PHANTASMA_FUNCTION bool PhantasmaJsonAPI::Parse{{Info.Name}}Response(const JSONValue& _jsonResponse, {{#if Info.ReturnType.IsArray}}PHANTASMA_VECTOR<{{/if}}{{#fix-type Info.ReturnType.Name}}{{#if Info.ReturnType.IsArray}}>{{/if}}& output)
+PHANTASMA_FUNCTION bool PhantasmaJsonAPI::Parse{{Info.Name}}Response(const JSONValue& _jsonResponse, {{#if Info.ReturnType.IsArray}}PHANTASMA_VECTOR<{{/if}}{{#fix-type Info.ReturnType.Name}}{{#if Info.ReturnType.IsArray}}>{{/if}}& output, PhantasmaError* pout_err)
 {
-	bool err = false;
-	JSONValue jsonResponse = PhantasmaJsonAPI::CheckResponse(_jsonResponse, err);
-	if( err )
+	PhantasmaError err_dummy;
+	PhantasmaError& out_error = pout_err ? *pout_err : err_dummy;
+	JSONValue jsonResponse = PhantasmaJsonAPI::CheckResponse(_jsonResponse, out_error);
+	if( out_error.code )
 		return false;
-	{{#if Info.IsPaginated}}Paginated pageStruct = DeserializePaginated(jsonResponse, err);
+	bool jsonErr = false;
+	{{#if Info.IsPaginated}}Paginated pageStruct = DeserializePaginated(jsonResponse, jsonErr);
 {{#parse-lines false}}
 {{#if Info.ReturnType.IsArray}}
-	if(!json::IsArray(pageStruct.result, err)){{#new-line}}
+	if(!json::IsArray(pageStruct.result, jsonErr)){{#new-line}}
 	{ {{#new-line}}
 		PHANTASMA_EXCEPTION("Malformed response: No JSON array on the \"result\" node");{{#new-line}}
+		out_error.code = PhantasmaError::InvalidJSON;{{#new-line}}
 		return false;{{#new-line}}
 	} {{#new-line}}
-	const JSONArray& pages = json::AsArray(pageStruct.result, err);{{#new-line}}
-	int size = json::ArraySize(pages, err);{{#new-line}}
+	const JSONArray& pages = json::AsArray(pageStruct.result, jsonErr);{{#new-line}}
+	int size = json::ArraySize(pages, jsonErr);{{#new-line}}
 	output.reserve(size);{{#new-line}}
 	for(int i = 0; i < size; ++i){{#new-line}}
 	{
 {{#new-line}}
 {{#if Info.ReturnType.Name=='UInt32'}}
-		output.push_back(json::AsUInt32(json::IndexArray(pages, i, err), err));{{#new-line}}
+		output.push_back(json::AsUInt32(json::IndexArray(pages, i, jsonErr), jsonErr));{{#new-line}}
 {{#else}}
 {{#if Info.ReturnType.Name=='Int32'}}
-		output.push_back(json::AsInt32(json::IndexArray(pages, i, err), err));{{#new-line}}
+		output.push_back(json::AsInt32(json::IndexArray(pages, i, jsonErr), jsonErr));{{#new-line}}
 {{#else}}
 {{#if Info.ReturnType.Name=='String'}}
-		output.push_back(json::AsString(json::IndexArray(pages, i, err), err));{{#new-line}}
+		output.push_back(json::AsString(json::IndexArray(pages, i, jsonErr), jsonErr));{{#new-line}}
 {{#else}}
-		output.push_back(Deserialize{{#fix-type Info.ReturnType.Name}}(json::IndexArray(pages, i, err), err));{{#new-line}}
+		output.push_back(Deserialize{{#fix-type Info.ReturnType.Name}}(json::IndexArray(pages, i, jsonErr), jsonErr));{{#new-line}}
 {{/if}}
 {{/if}}
 {{/if}}
 	}{{#new-line}}
 {{/if}}
 {{#if Info.ReturnType.IsArray==false}}
-	output = Deserialize{{#fix-type Info.ReturnType.Name}}(pageStruct.result, err);{{#new-line}}
+	output = Deserialize{{#fix-type Info.ReturnType.Name}}(pageStruct.result, jsonErr);{{#new-line}}
 {{/if}}
-	return !err;{{#new-line}}
+	if( !out_error.code && jsonErr ){{#new-line}}
+		out_error.code = PhantasmaError::InvalidJSON;{{#new-line}}
+	return out_error.code == 0;{{#new-line}}
 }
 {{#parse-lines true}}{{/if}}{{#if Info.IsPaginated==false}}{{#parse-lines false}}
 {{#if Info.ReturnType.IsArray}}
-if (!json::IsArray(jsonResponse, err)){{#new-line}}
+if (!json::IsArray(jsonResponse, jsonErr)){{#new-line}}
 	{ {{#new-line}}
 		PHANTASMA_EXCEPTION("Malformed response: No JSON array on the \"result\" node");{{#new-line}}
+		out_error.code = PhantasmaError::InvalidJSON;{{#new-line}}
 		return false;{{#new-line}}
 	} {{#new-line}}
 {{#new-line}}
-	const JSONArray& resultArray = json::AsArray(jsonResponse, err);{{#new-line}}
-	int resultArraySize = json::ArraySize(resultArray, err);{{#new-line}}
+	const JSONArray& resultArray = json::AsArray(jsonResponse, jsonErr);{{#new-line}}
+	int resultArraySize = json::ArraySize(resultArray, jsonErr);{{#new-line}}
 	output.reserve(resultArraySize);{{#new-line}}
 	for(int i = 0; i < resultArraySize; ++i){{#new-line}}
 	{
 {{#new-line}}
 {{#if Info.ReturnType.Name=='UInt32'}}
-		output.push_back(json::AsUInt32(json::IndexArray(resultArray, i, err), err));{{#new-line}}
+		output.push_back(json::AsUInt32(json::IndexArray(resultArray, i, jsonErr), jsonErr));{{#new-line}}
 {{#else}}
 {{#if Info.ReturnType.Name=='Int32'}}
-		output.push_back(json::AsInt32(json::IndexArray(resultArray, i, err), err));{{#new-line}}
+		output.push_back(json::AsInt32(json::IndexArray(resultArray, i, jsonErr), jsonErr));{{#new-line}}
 {{#else}}
 {{#if Info.ReturnType.Name=='String'}}
-		output.push_back(json::AsString(json::IndexArray(resultArray, i, err), err));{{#new-line}}
+		output.push_back(json::AsString(json::IndexArray(resultArray, i, jsonErr), jsonErr));{{#new-line}}
 {{#else}}
-		output.push_back(Deserialize{{#fix-type Info.ReturnType.Name}}(json::IndexArray(resultArray, i, err), err));{{#new-line}}
-		if( err ) return false;{{#new-line}}
+		output.push_back(Deserialize{{#fix-type Info.ReturnType.Name}}(json::IndexArray(resultArray, i, jsonErr), jsonErr));{{#new-line}}
+		if( jsonErr || out_error.code ){{#new-line}}
+			break;{{#new-line}}
 {{/if}}
 {{/if}}
 {{/if}}
@@ -768,21 +796,22 @@ if (!json::IsArray(jsonResponse, err)){{#new-line}}
 {{/if}}
 {{#if Info.ReturnType.IsArray==false}}
 {{#if Info.ReturnType.Name=='UInt32'}}
-output = json::AsUInt32(jsonResponse, err);{{#new-line}}
+output = json::AsUInt32(jsonResponse, jsonErr);{{#new-line}}
 {{#else}}
 {{#if Info.ReturnType.Name=='Int32'}}
-output = json::AsInt32(jsonResponse, err);{{#new-line}}
+output = json::AsInt32(jsonResponse, jsonErr);{{#new-line}}
 {{#else}}
 {{#if Info.ReturnType.Name=='String'}}
-output = json::AsString(jsonResponse, err);{{#new-line}}
+output = json::AsString(jsonResponse, jsonErr);{{#new-line}}
 {{#else}}
-output = Deserialize{{#fix-type Info.ReturnType.Name}}(jsonResponse, err);{{#new-line}}
-		if( err ) return false;{{#new-line}}
+output = Deserialize{{#fix-type Info.ReturnType.Name}}(jsonResponse, jsonErr);{{#new-line}}
 {{/if}}
 {{/if}}
 {{/if}}
 {{/if}}
-	return !err;{{#new-line}}
+	if( !out_error.code && jsonErr ){{#new-line}}
+		out_error.code = PhantasmaError::InvalidJSON;{{#new-line}}
+	return out_error.code == 0;{{#new-line}}
 }
 {{#parse-lines true}}
 {{/if}}
@@ -790,15 +819,14 @@ output = Deserialize{{#fix-type Info.ReturnType.Name}}(jsonResponse, err);{{#new
 	
 #if defined(PHANTASMA_HTTPCLIENT)
 {{#each methods}}
-PHANTASMA_FUNCTION {{#if Info.ReturnType.IsArray}}PHANTASMA_VECTOR<{{/if}}{{#fix-type Info.ReturnType.Name}}{{#if Info.ReturnType.IsArray}}>{{/if}} PhantasmaAPI::{{Info.Name}}({{#each Info.Parameters}}{{#fix-ref Type.Name}} {{Name}}, {{/each}}bool* out_error)
+PHANTASMA_FUNCTION {{#if Info.ReturnType.IsArray}}PHANTASMA_VECTOR<{{/if}}{{#fix-type Info.ReturnType.Name}}{{#if Info.ReturnType.IsArray}}>{{/if}} PhantasmaAPI::{{Info.Name}}({{#each Info.Parameters}}{{#fix-ref Type.Name}} {{Name}}, {{/each}}PhantasmaError* out_error)
 {
 	JSONBuilder request;
 	PhantasmaJsonAPI::Make{{Info.Name}}Request(request{{#each Info.Parameters}}, {{Name}}{{/each}});
-	const JSONDocument& response = HttpPost(m_httpClient, PhantasmaJsonAPI::Uri(), request);
+	const JSONDocument& response = HttpPost(m_httpClient, PhantasmaJsonAPI::Uri(), request, out_error);
 	{{#if Info.ReturnType.IsArray}}PHANTASMA_VECTOR<{{/if}}{{#fix-type Info.ReturnType.Name}}{{#if Info.ReturnType.IsArray}}>{{/if}} output;
-	bool success = PhantasmaJsonAPI::Parse{{Info.Name}}Response(json::Parse(response), output);
-	if( !success && out_error )
-		*out_error = true;
+	if( !out_error || out_error->code == 0 )
+		PhantasmaJsonAPI::Parse{{Info.Name}}Response(json::Parse(response), output, out_error);
 	return output;
 }
 {{/each}}

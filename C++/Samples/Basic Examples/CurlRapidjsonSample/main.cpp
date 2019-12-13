@@ -23,10 +23,10 @@ int main()
 
 	const char* wif = "NztsEZP7dtrzRBagogUYVp6mgEFbhjZfvHMVkd2bYWJfE";
 
-	bool error = false;
+	PhantasmaError error;
 	Account account = phantasmaAPI.GetAccount(wif, &error);
 
-	if( !error )
+	if( !error.code )
 	{
 		std::cout << "Balance description for address " << wif << std::endl;
 
