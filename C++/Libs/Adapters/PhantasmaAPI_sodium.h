@@ -13,6 +13,8 @@
 #include "sodium/randombytes.h"
 #include "sodium/crypto_hash_sha256.h"
 #include "sodium/crypto_sign_ed25519.h"
+#include "sodium/crypto_secretbox.h"
+#include "sodium/crypto_pwhash.h"
 
 namespace phantasma { 
 
@@ -79,7 +81,41 @@ bool Ed25519_ValidateDetached( const uint8_t* signature, int signatureLength, co
 	return 0 == crypto_sign_ed25519_verify_detached(signature, message, messageLength, publicKey);
 }
 
-//todo - hook up secure memory allocations, locking/unlocking
+int Phantasma_Encrypt(Byte* output, int outputLength, const Byte* message, int messageLength, const Byte* nonce, const Byte* key)
+{
+	if( outputLength < 0 || messageLength < 0 || !message )
+		return -1;
+	if( !output || outputLength < messageLength + (int)crypto_secretbox_MACBYTES )
+		return messageLength + (int)crypto_secretbox_MACBYTES;
+	crypto_secretbox_easy( output, message, messageLength, nonce, key );
+	return 0;
+}
+
+int Phantasma_Decrypt(Byte* output, int outputLength, const Byte* encrypted, int encryptedLength, const Byte* nonce, const Byte* key)
+{
+	if( outputLength < 0 || encryptedLength < (int)crypto_secretbox_MACBYTES || !encrypted )
+		return -1;
+	if( !output || outputLength < encryptedLength - (int)crypto_secretbox_MACBYTES )
+		return encryptedLength - (int)crypto_secretbox_MACBYTES;
+	if( 0==crypto_secretbox_open_easy(output, encrypted, encryptedLength, nonce, key) )
+		return 0;
+	return INT_MAX;
+}
+
+bool Phantasma_PasswordToKey( phantasma::Byte* output, const char* password, int passwordLength, const Byte* salt )
+{
+	static_assert( crypto_secretbox_KEYBYTES >= crypto_pwhash_BYTES_MIN, "" );
+	static_assert( crypto_secretbox_KEYBYTES <= crypto_pwhash_BYTES_MAX, "" );
+	if( !output || !password || passwordLength <= 0 )
+		return false;
+	crypto_pwhash(output, crypto_secretbox_KEYBYTES,
+		password,
+		passwordLength,
+		salt,
+		crypto_pwhash_OPSLIMIT_MODERATE,
+		crypto_pwhash_argon2id_MEMLIMIT_MODERATE, crypto_pwhash_ALG_DEFAULT);
+	return true;
+}
 
 #define PHANTASMA_RANDOMBYTES(buffer, size) randombytes_buf(buffer, size)
 #define PHANTASMA_WIPEMEM(buffer, size)     sodium_memzero(buffer, size)
@@ -107,5 +143,13 @@ bool Ed25519_ValidateDetached( const uint8_t* signature, int signatureLength, co
                   Ed25519_ValidateDetached(signature, signatureLength, message, messageLength, publicKey, publicKeyLength)
 
 #define PHANTASMA_SHA256(output, outputSize, input, inputSize) crypto_hash_sha256(output, input, inputSize)
+
+#define PHANTASMA_AuthenticatedEncrypt        Phantasma_Encrypt
+#define PHANTASMA_AuthenticatedDecrypt        Phantasma_Decrypt
+#define PHANTASMA_AuthenticatedNonceLength    crypto_secretbox_NONCEBYTES
+#define PHANTASMA_AuthenticatedKeyLength      crypto_secretbox_KEYBYTES
+#define PHANTASMA_PasswordToKey               Phantasma_PasswordToKey
+#define PHANTASMA_PasswordSaltLength          crypto_pwhash_SALTBYTES
+
 
 }

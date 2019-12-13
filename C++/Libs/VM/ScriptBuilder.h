@@ -54,7 +54,7 @@ public:
 		return *this;
 	}
 
-	ScriptBuilder& EmitLoad( Byte reg, const PHANTASMA_VECTOR<Byte>& bytes )
+	ScriptBuilder& EmitLoad( Byte reg, const ByteArray& bytes )
 	{
 		return EmitLoad( reg, bytes.empty()?0:&bytes.front(), (int)bytes.size() );
 	}
@@ -78,7 +78,7 @@ public:
 
 	ScriptBuilder& EmitLoad( Byte reg, const String& val )
 	{
-		ByteBuffer temp;
+		ByteArray temp;
 		int numBytes = 0;
 		const Byte* bytes = GetUTF8Bytes( val, temp, numBytes );
 		EmitLoad( reg, bytes, numBytes, VMType::String );
@@ -87,16 +87,16 @@ public:
 
 	ScriptBuilder& EmitLoad( Byte reg, const Char* val )
 	{
-		ByteBuffer temp;
+		ByteArray temp;
 		int numBytes = 0;
-		const Byte* bytes = GetUTF8Bytes( val, temp, numBytes );
+		const Byte* bytes = GetUTF8Bytes( val, 0, temp, numBytes );
 		EmitLoad( reg, bytes, numBytes, VMType::String );
 		return *this;
 	}
 
 	ScriptBuilder& EmitLoad( Byte reg, const BigInteger& val )
 	{
-		auto bytes = val.ToByteArray( true );
+		auto bytes = val.ToSignedByteArray();
 		EmitLoad( reg, bytes.empty()?0:&bytes.front(), (int)bytes.size(), VMType::Number );
 		return *this;
 	}
@@ -133,7 +133,7 @@ public:
 		BinaryWriter temp;
 		val.SerializeData( temp );
 
-		const PHANTASMA_VECTOR<Byte>& bytes = temp.ToArray();
+		const ByteArray& bytes = temp.ToArray();
 		EmitLoad( reg, bytes.empty() ? 0 : &bytes.front(), (int)bytes.size(), VMType::Bytes );
 		return *this;
 	}
@@ -236,9 +236,9 @@ public:
 		return *this;
 	}
 
-	PHANTASMA_VECTOR<Byte> ToScript()
+	ByteArray ToScript()
 	{
-		PHANTASMA_VECTOR<Byte> script = writer.ToArray();
+		ByteArray script = writer.ToArray();
 
 		// resolve jump offsets
 		for(const auto& entry : _jumpLocations)
@@ -254,6 +254,81 @@ public:
 		return script;
 	}
 
+	//--------------------------------------------------------------
+	// ScriptBuilderExtensions.cs port:
+	//--------------------------------------------------------------
+	constexpr static const Char* GasContract = PHANTASMA_LITERAL("gas");
+	constexpr static const Char* NexusContract = PHANTASMA_LITERAL("nexus");
+	constexpr static const Char* TokenContract = PHANTASMA_LITERAL("token");
+	constexpr static const Char* EnergyContract = PHANTASMA_LITERAL("energy");
+	constexpr static const Char* SwapContract = PHANTASMA_LITERAL("swap");
+
+
+	ScriptBuilder& AllowGas( const Address& from, const Address& to, const BigInteger& gasPrice, const BigInteger& gasLimit )
+	{
+		return CallContract( GasContract, PHANTASMA_LITERAL("AllowGas"), from, to, gasPrice, gasLimit );
+	}
+
+	ScriptBuilder& SpendGas( const Address& address )
+	{
+		return CallContract( GasContract, PHANTASMA_LITERAL("SpendGas"), address );
+	}
+
+	ScriptBuilder& MintTokens(const String& tokenSymbol, const Address& from, const Address& target, const BigInteger& amount)
+	{
+		return CallInterop(PHANTASMA_LITERAL("Runtime.MintTokens"), from, target, tokenSymbol, amount);
+	}
+
+	ScriptBuilder& MintNonFungibleToken(const String& tokenSymbol, const Address& from, const Address& target, const ByteArray& rom, const ByteArray& ram)
+	{
+		return CallInterop(PHANTASMA_LITERAL("Runtime.MintToken"), from, target, tokenSymbol, rom, ram); 
+	}
+
+	ScriptBuilder& TransferTokens(const String& tokenSymbol, const Address& from, const String& to, const BigInteger& amount)
+	{
+		return CallInterop(PHANTASMA_LITERAL("Runtime.TransferTokens"), from, Address::FromText(to), tokenSymbol, amount);
+	}
+
+	ScriptBuilder& TransferTokens(const String& tokenSymbol, const Address& from, const Address& to, const BigInteger& amount)
+	{
+		return CallInterop(PHANTASMA_LITERAL("Runtime.TransferTokens"), from, to, tokenSymbol, amount);
+	}
+
+    ScriptBuilder& TransferBalance(const String& tokenSymbol, const Address& from, const Address& to)
+    {
+        return CallInterop(PHANTASMA_LITERAL("Runtime.TransferBalance"), from, to, tokenSymbol);
+    }
+
+	ScriptBuilder& TransferNFT(const String& tokenSymbol, const Address& from, const Address& to, const BigInteger& tokenId)//todo check if this is valid
+	{
+		return CallInterop(PHANTASMA_LITERAL("Runtime.TransferToken"), from, to, tokenSymbol, tokenId);
+	}
+
+	ScriptBuilder& TransferNFT(const String& tokenSymbol, const Address& from, const String& to, const BigInteger& tokenId)//todo check if this is valid
+	{
+		return CallInterop(PHANTASMA_LITERAL("Runtime.TransferToken"), from, to, tokenSymbol, tokenId);
+	}
+
+	ScriptBuilder& CrossTransferToken(const Address& destinationChain, const String& tokenSymbol, const Address& from, const Address& to, const BigInteger& amount)
+	{
+		return CallInterop(PHANTASMA_LITERAL("Runtime.SendTokens"), destinationChain, from, to, tokenSymbol, amount);
+	}
+
+	ScriptBuilder& CrossTransferToken(const Address& destinationChain, const String& tokenSymbol, const Address& from, const String& to, const BigInteger& amount)
+	{
+		return CallInterop(PHANTASMA_LITERAL("Runtime.SendTokens"), destinationChain, from, to, tokenSymbol, amount);
+	}
+
+	ScriptBuilder& CrossTransferNFT(const Address& destinationChain, const String& tokenSymbol, const Address& from, const Address& to, const BigInteger& tokenId)
+	{
+		return CallInterop(PHANTASMA_LITERAL("Runtime.SendToken"), destinationChain, from, to, tokenSymbol, tokenId);
+	}
+
+	ScriptBuilder& CrossTransferNFT(const Address& destinationChain, const String& tokenSymbol, const Address& from, const String& to, const BigInteger& tokenId)
+	{
+		return CallInterop(PHANTASMA_LITERAL("Runtime.SendToken"), destinationChain, from, to, tokenSymbol, tokenId);
+	}
+
 //--------------------------------------------------------------
 // ScriptUtils.cs port:
 //--------------------------------------------------------------
@@ -263,22 +338,10 @@ public:
 		return ScriptBuilder();
 	}
 
-	PHANTASMA_VECTOR<Byte> EndScript()
+	ByteArray EndScript()
 	{
 		Emit( Opcode::RET );
 		return ToScript();
-	}
-	
-	ScriptBuilder& AllowGas( const Address& from, const Address& to, const BigInteger& gasPrice, const BigInteger& gasLimit )
-	{
-		CallContract( PHANTASMA_LITERAL("gas"), PHANTASMA_LITERAL("AllowGas"), from, to, gasPrice, gasLimit );
-		return *this;
-	}
-
-	ScriptBuilder& SpendGas( const Address& address )
-	{
-		CallContract( PHANTASMA_LITERAL("gas"), PHANTASMA_LITERAL("SpendGas"), address );
-		return *this;
 	}
 
 private:
@@ -310,7 +373,7 @@ private:
 	{
 		sb.EmitLoad( target_reg, arg );
 	}
-	static void LoadIntoReg( ScriptBuilder& sb, Byte target_reg, const PHANTASMA_VECTOR<Byte>& arg )
+	static void LoadIntoReg( ScriptBuilder& sb, Byte target_reg, const ByteArray& arg )
 	{
 		sb.EmitLoad( target_reg, arg );
 	}

@@ -117,15 +117,20 @@ public:
 				temp.UnserializeData(reader);
 				return Signature(temp);
 			}
-			case SignatureKind::Ring:
-			{
-				RingSignature temp;
-				temp.UnserializeData(reader);
-				return Signature(temp);
-			}
+			//case SignatureKind::Ring:
+			//{
+			//	RingSignature temp;
+			//	temp.UnserializeData(reader);
+			//	return Signature(temp);
+			//}
 		}
 		return Signature();
 	}
 };
+
+inline void BinaryReader::ReadSignature(Signature& hash)
+{
+	ReadSerializable(hash);
+}
 
 }

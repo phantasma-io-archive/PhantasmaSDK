@@ -211,23 +211,23 @@ namespace WalletSample
             }
             else
             {
-                Console.WriteLine("TODO");
-                //var listSteps = Helper.GetShortestPath(token.ChainName, destinationChain.Name, _chains);
-                //if (listSteps.Count >= 2)
-                //{
-                //    while (listSteps.Count >= 2)
-                //    {
-                //        Console.WriteLine($"Sending {cont} transaction of {listSteps.Count}");
-                //        var txHash = await CrossChainTransferToken(destinationAddress, listSteps[0].Name, listSteps[1].Name, token.Symbol,
-                //            amount);
-                //        var confirmationDto = await _phantasmaApiService.GetConfirmations.SendRequestAsync(txHash);
-                //        while (!confirmationDto.IsConfirmed) await Task.Delay(100);
-                //        Console.WriteLine($"Settling block...");
-                //        var settleTx = await SettleBlock(listSteps[0].Address, confirmationDto.Hash, listSteps[1].Address);
-                //        listSteps.RemoveAt(0);
-                //        cont++;
-                //    }
-                //}
+                var listSteps = Helper.GetShortestPath(token.ChainName, destinationChain.Name, _chains);
+                if (listSteps.Count >= 2)
+                {
+                    while (listSteps.Count >= 2)
+                    {
+                        Console.WriteLine($"Sending {cont} transaction of {listSteps.Count}");
+                        var txHash = await CrossChainTransferToken(destinationAddress, listSteps[0].Name, listSteps[1].Name, token.Symbol,
+                            amount);
+                        //todo
+                        //var confirmationDto = await _phantasmaApiService.GetConfirmations.SendRequestAsync(txHash);
+                        //while (!confirmationDto.IsConfirmed) await Task.Delay(100);
+                        Console.WriteLine($"Settling block...");
+                        var settleTx = await SettleBlock(listSteps[0].Address, confirmationDto.Hash, listSteps[1].Address);
+                        listSteps.RemoveAt(0);
+                        cont++;
+                    }
+                }
             }
         }
 

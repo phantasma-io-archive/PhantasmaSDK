@@ -48,7 +48,7 @@ namespace json {
 	inline bool                    LookupBool(   const rapidjson::Value& v, const Char* field, bool& out_error) { return v[field].GetBool(); }
 	inline int32_t                 LookupInt32(  const rapidjson::Value& v, const Char* field, bool& out_error) { return v[field].GetInt(); }
 	inline uint32_t                LookupUInt32( const rapidjson::Value& v, const Char* field, bool& out_error) { return (uint32_t)v[field].GetInt(); }
-	inline String                  LookupString( const rapidjson::Value& v, const Char* field, bool& out_error) { return (String)(v[field].GetString()); }
+	inline String                  LookupString( const rapidjson::Value& v, const Char* field, bool& out_error) { return (String)( v[field].IsString() ? v[field].GetString() : ""); }
 	inline const rapidjson::Value& LookupValue(  const rapidjson::Value& v, const Char* field, bool& out_error) { return v[field]; }
 	inline const rapidjson::Value& LookupArray(  const rapidjson::Value& v, const Char* field, bool& out_error) { return v[field]; }
 	inline bool                    HasField(     const rapidjson::Value& v, const Char* field, bool& out_error) { return v.HasMember(field); }
@@ -56,7 +56,7 @@ namespace json {
 	inline bool                    AsBool(       const rapidjson::Value& v,                    bool& out_error) { return v.GetBool(); }
 	inline int32_t                 AsInt32(      const rapidjson::Value& v,                    bool& out_error) { return v.GetInt(); }
 	inline uint32_t                AsUInt32(     const rapidjson::Value& v,                    bool& out_error) { return (uint32_t)v.GetInt(); }
-	inline String                  AsString(     const rapidjson::Value& v,                    bool& out_error) { return (String)(v.GetString()); }
+	inline String                  AsString(     const rapidjson::Value& v,                    bool& out_error) { return (String)(v.IsString() ? v.GetString() : ""); }
 	inline const rapidjson::Value& AsArray(      const rapidjson::Value& v,                    bool& out_error) { return v; }
 	inline bool                    IsArray(      const rapidjson::Value& v,                    bool& out_error) { return v.IsArray(); }
 	inline bool                    IsObject(     const rapidjson::Value& v,                    bool& out_error) { return v.IsObject(); }

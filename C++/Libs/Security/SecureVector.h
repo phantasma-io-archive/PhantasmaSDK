@@ -1,5 +1,9 @@
 #pragma once
 
+//--------------------------------------------------------------
+// Read the "Secure Memory" disclaimer in SecureMemory.h!
+//--------------------------------------------------------------
+
 #include "SecureMemory.h"
 #include <type_traits>
 
@@ -7,7 +11,7 @@ namespace phantasma {
 
 // This is a wrapper around the PHANTASMA_VECTOR type which adds pinning/unpinning/wiping behavior to 
 //  the memory allocations in order to prevent the data from being swapped out of RAM.
-// Data contained in these vectors is also always overwritted with zeros during deallocation.
+// Data contained in these vectors is also always overwritten with zeros during deallocation.
 template<class T>
 class SecureVector
 {
@@ -35,6 +39,8 @@ public:
 		return *this;
 	}
 
+	typedef typename PHANTASMA_VECTOR<T>::size_type size_type;
+
 	auto  begin()       { return data.begin(); }
 	auto  begin() const { return data.begin(); }
 	auto    end()       { return data.end(); }
@@ -45,10 +51,11 @@ public:
 	auto  empty() const { return data.empty(); }
 	auto& front()       { return data.front(); }
 	auto& front() const { return data.front(); }
-	auto& operator[](int i)       { return data[i]; }
-	auto& operator[](int i) const { return data[i]; }
-	
-	void resize( UInt32 size )
+	auto& operator[](size_type i)       { return data[i]; }
+	auto& operator[](size_type i) const { return data[i]; }
+
+	void reserve( size_type size ) { data.reserve(size); }
+	void resize( size_type size )
 	{
 		if(data.capacity() >= size) // relying on std C++ vector iterator invalidation rules here
 		{
@@ -89,6 +96,7 @@ public:
 			Unlock();
 			PHANTASMA_SWAP(data, clone);
 			Lock();
+			data.push_back(t);
 		}
 	}
 

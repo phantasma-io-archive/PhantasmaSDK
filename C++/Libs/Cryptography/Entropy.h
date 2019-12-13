@@ -9,6 +9,11 @@ namespace Entropy
 {
 	void GetRandomBytes( Byte* output, int length )
 	{
+		if(!output || length <= 0)
+		{
+			PHANTASMA_EXCEPTION("Invalid usage");
+			return;
+		}
 #ifdef PHANTASMA_RANDOMBYTES
 		PHANTASMA_RANDOMBYTES(output, length);
 #else

@@ -18,52 +18,86 @@ inline int AlphabetIndexOf( Char in )
 	return -1;
 }
 
-inline PHANTASMA_VECTOR<Byte> Decode(const String& input)
+inline int RequiredCharacters( int numBytes )//does not include a null terminator
 {
-	if( input.empty() )
+	return numBytes * 2;
+}
+
+inline int Decode(Byte* output, int outputLength, const Char* sz, int inputLength=0)
+{
+	if(!sz || inputLength < 0 || outputLength < 0)
 	{
-		PHANTASMA_EXCEPTION("string cannot be empty");
-		return PHANTASMA_VECTOR<Byte>{};
+		PHANTASMA_EXCEPTION("invalid usage");
+		return 0;
 	}
 
-	auto length = input.length();
-	const Char* sz = input.c_str();
+	if(inputLength == 0)
+	{
+		inputLength = (int)PHANTASMA_STRLEN(sz);
+	}
 
-	if (length >= 2 && sz[0] == '0' && sz[1] == 'x')
+	if( inputLength == 0 )
+	{
+		PHANTASMA_EXCEPTION("string cannot be empty");
+		return 0;
+	}
+
+	if (inputLength >= 2 && sz[0] == '0' && sz[1] == 'x')
 	{
 		sz += 2;
-		length -= 2;
-		if( length == 0 )
+		inputLength -= 2;
+		if( inputLength == 0 )
 		{
 			PHANTASMA_EXCEPTION("string cannot be empty");
-			return PHANTASMA_VECTOR<Byte>{};
+			return 0;
 		}
 	}
 
-	if( length % 2 == 1 )
+	if( inputLength % 2 == 1 )
 	{
 		PHANTASMA_EXCEPTION("string length must be even");
-		return PHANTASMA_VECTOR<Byte>{};
+		return 0;
 	}
 
-	length /= 2;
-	PHANTASMA_VECTOR<Byte> result;
-	result.resize(length);
+	int length = inputLength / 2;
+
+	if( !output )
+		return length;
+
+	length = PHANTASMA_MIN(length, outputLength);
+
 	for (int i = 0; i < length; i++)
 	{
-		int A = AlphabetIndexOf(toupper(input[i * 2 + 0]));
-		int B = AlphabetIndexOf(toupper(input[i * 2 + 1]));
+		int A = AlphabetIndexOf(toupper(sz[i * 2 + 0]));
+		int B = AlphabetIndexOf(toupper(sz[i * 2 + 1]));
 
 		if(A < 0 || B < 0)
 		{
 			PHANTASMA_EXCEPTION("invalid character");
-			return PHANTASMA_VECTOR<Byte>{};
+			return i;
 		}
 
-		result[i] = (Byte)(A * 16 + B);
+		output[i] = (Byte)(A * 16 + B);
 	}
 
+	return length;
+}
+inline ByteArray Decode(const Char* input, int inputLength)
+{
+	int length = Decode( 0, 0, input, inputLength );
+	ByteArray result;
+	if( length > 0 )
+	{
+		result.resize(length);
+		int decoded = Decode( &result.front(), length, input, inputLength );
+		if( decoded != length )
+			return ByteArray{};
+	}
 	return result;
+}
+inline ByteArray Decode(const String& input)
+{
+	return Decode(input.c_str(), (int)input.length());
 }
 
 inline String Encode(const Byte* input, int length)
@@ -89,7 +123,7 @@ inline String Encode(const Byte* input, int length)
 	return String(&c.front());
 }
 
-inline String Encode(const PHANTASMA_VECTOR<Byte>& input)
+inline String Encode(const ByteArray& input)
 {
 	if(input.empty())
 	{

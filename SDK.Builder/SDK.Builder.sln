@@ -29,6 +29,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Contracts", "..\.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Domain", "..\..\PhantasmaChain\Phantasma.Domain\Phantasma.Domain.csproj", "{D8A80A0F-F572-42B8-9783-21EE70639190}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.CodeGen", "..\..\PhantasmaChain\Phantasma.CodeGen\Phantasma.CodeGen.csproj", "{6CD3D00C-1DC8-4DDF-9205-950896034559}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,10 @@ Global
 		{D8A80A0F-F572-42B8-9783-21EE70639190}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8A80A0F-F572-42B8-9783-21EE70639190}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8A80A0F-F572-42B8-9783-21EE70639190}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6CD3D00C-1DC8-4DDF-9205-950896034559}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CD3D00C-1DC8-4DDF-9205-950896034559}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CD3D00C-1DC8-4DDF-9205-950896034559}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CD3D00C-1DC8-4DDF-9205-950896034559}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
