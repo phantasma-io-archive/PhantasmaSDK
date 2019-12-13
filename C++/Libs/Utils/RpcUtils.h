@@ -13,8 +13,6 @@ inline bool GetTxTokensReceived(
 	BigInteger& out_value, 
 	String& out_addressFrom, 
 	const rpc::Transaction& tx, 
-	const PHANTASMA_VECTOR<rpc::Chain>& phantasmaChains, 
-	const PHANTASMA_VECTOR<rpc::Token>& phantasmaTokens, 
 	const String& addressTo, 
 	const Char* tokenSymbol = PHANTASMA_LITERAL("SOUL"),
 	const Char* chainName = PHANTASMA_LITERAL("main")
@@ -63,6 +61,56 @@ inline bool GetTxTokensReceived(
 			out_value = value;
 			out_addressFrom = evt.address;
 			return true;
+		}
+	}
+	return false;
+}
+
+
+inline bool GetTxTokensSent(
+	BigInteger& out_value, 
+	String& out_addressTo, 
+	const rpc::Transaction& tx, 
+	const String& addressFrom, 
+	const Char* tokenSymbol = PHANTASMA_LITERAL("SOUL"),
+	const Char* tokenIgnore = PHANTASMA_LITERAL("KCAL"),
+	const Char* chainName = PHANTASMA_LITERAL("main")
+)
+{
+	for (int i=0, end=(int)tx.events.size(); i!=end; ++i)
+	{
+		const auto& evtA = tx.events[i];
+		if( evtA.address != addressFrom )
+			continue;
+		EventKind eventKind = StringToEventKind(evtA.kind);
+		if(eventKind == EventKind::TokenSend)
+		{
+			TokenEventData sendData = Serialization<TokenEventData>::Unserialize(Base16::Decode(evtA.data));
+			if( tokenSymbol && 0!=sendData.symbol.compare(tokenSymbol) )
+				continue;
+			if( tokenIgnore && 0==sendData.symbol.compare(tokenIgnore) )
+				continue;
+			if( chainName && 0!=sendData.chainName.compare(chainName) )
+				continue;
+			if( sendData.value.IsZero() )
+				continue;
+
+			for (int j=i+1; j<end; ++j)
+			{
+				const auto& evtB = tx.events[j];
+				EventKind eventKind = StringToEventKind(evtB.kind);
+				if(eventKind == EventKind::TokenReceive)
+				{
+					TokenEventData rcvData = Serialization<TokenEventData>::Unserialize(Base16::Decode(evtB.data));
+					if( rcvData.symbol != sendData.symbol ||
+						rcvData.chainName != sendData.chainName ||
+						rcvData.value != sendData.value )
+						continue;
+					out_value = rcvData.value;
+					out_addressTo = evtB.address;
+					return true;
+				}
+			}
 		}
 	}
 	return false;

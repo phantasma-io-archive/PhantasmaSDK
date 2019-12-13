@@ -734,6 +734,7 @@ struct Transaction
 	Int32 blockHeight;//
 	String blockHash;//
 	String script;//
+	String payload;//
 	PHANTASMA_VECTOR<Event> events;//
 	String result;//
 	String fee;//
@@ -1442,6 +1443,7 @@ PHANTASMA_FUNCTION Transaction PhantasmaJsonAPI::DeserializeTransaction(const JS
 		json::LookupInt32(value, PHANTASMA_LITERAL("blockHeight"), err), 
 		json::LookupString(value, PHANTASMA_LITERAL("blockHash"), err), 
 		json::LookupString(value, PHANTASMA_LITERAL("script"), err), 
+		json::LookupString(value, PHANTASMA_LITERAL("payload"), err), 
 		eventsVector, 
 		json::LookupString(value, PHANTASMA_LITERAL("result"), err), 
 		json::LookupString(value, PHANTASMA_LITERAL("fee"), err)
