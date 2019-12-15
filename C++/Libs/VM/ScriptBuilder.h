@@ -284,6 +284,11 @@ public:
 		return CallInterop(PHANTASMA_LITERAL("Runtime.MintToken"), from, target, tokenSymbol, rom, ram); 
 	}
 
+	ScriptBuilder& WriteToken(const String& tokenSymbol, const BigInteger& id, const ByteArray& ram)
+	{
+		return CallInterop(PHANTASMA_LITERAL("Runtime.WriteToken"), tokenSymbol, id, ram); 
+	}
+
 	ScriptBuilder& TransferTokens(const String& tokenSymbol, const Address& from, const String& to, const BigInteger& amount)
 	{
 		return CallInterop(PHANTASMA_LITERAL("Runtime.TransferTokens"), from, Address::FromText(to), tokenSymbol, amount);

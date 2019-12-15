@@ -124,7 +124,7 @@ public:
 	{
 		auto msg = ToByteArray( false );
 
-		m_signatures.clear();
+		//m_signatures.clear();
 		m_signatures.push_back( Signature{keypair.Sign( msg )} );
 	}
 
