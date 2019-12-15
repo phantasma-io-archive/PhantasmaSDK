@@ -172,7 +172,7 @@ public:
 			result = Hash(decoded, Length);
 			return true;
 		}
-		PHANTASMA_CATCH(...)
+		PHANTASMA_CATCH_ALL()
 		{
 			result = Hash();
 			return false;

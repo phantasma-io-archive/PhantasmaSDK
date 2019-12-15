@@ -218,7 +218,7 @@ public:
 			Address addr = Address::FromText(text, &error);
 			return !error;
 		}
-		PHANTASMA_CATCH(...)
+		PHANTASMA_CATCH_ALL()
 		{
 			return false;
 		}

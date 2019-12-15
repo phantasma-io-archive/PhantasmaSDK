@@ -1296,10 +1296,10 @@ public:
 		PHANTASMA_TRY
 		{
 			bool error = false;
-		output = TBigInteger(input, 10, &error);
-		return error;
+			output = TBigInteger(input, 10, &error);
+			return error;
 		}
-			PHANTASMA_CATCH(...)
+		PHANTASMA_CATCH_ALL()
 		{
 			output = Zero();
 			return false;

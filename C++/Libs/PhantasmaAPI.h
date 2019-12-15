@@ -418,6 +418,18 @@
 # define PHANTASMA_EQUAL(a, b, c) std::equal(a, b, c)
 #endif
 
+#if !defined(PHANTASMA_TRY)
+# if !defined(PHANTASMA_EXCEPTION)
+#  define PHANTASMA_TRY         if(true)
+#  define PHANTASMA_CATCH( x )  else
+#  define PHANTASMA_CATCH_ALL() else
+# else
+#  define PHANTASMA_TRY		    try
+#  define PHANTASMA_CATCH( x )  catch(std::runtime_error& x)
+#  define PHANTASMA_CATCH_ALL() catch(...)
+# endif
+#endif
+
 #if !defined(PHANTASMA_EXCEPTION)
 # ifdef PHANTASMA_EXCEPTION_ENABLE
 #  ifdef _UNICODE
@@ -430,16 +442,6 @@
 # else
 #   define PHANTASMA_EXCEPTION(literal)                
 #   define PHANTASMA_EXCEPTION_MESSAGE(literal, string)
-# endif
-#endif
-
-#if !defined(PHANTASMA_TRY)
-# if !defined(PHANTASMA_EXCEPTION)
-#  define PHANTASMA_TRY        if(true)
-#  define PHANTASMA_CATCH( x ) else
-# else
-#  define PHANTASMA_TRY		  try
-#  define PHANTASMA_CATCH( x )  catch(x)
 # endif
 #endif
 
@@ -623,6 +625,10 @@ namespace rpc
 //------------------------------------------------------------------------------
 // RPC structures:
 //------------------------------------------------------------------------------
+struct Token;
+struct Chain;
+struct Governance;
+struct Leaderboard;
 
 
 struct Balance
@@ -662,10 +668,6 @@ struct Organization
 	PHANTASMA_VECTOR<String> members;//
 };
 
-struct Token;
-struct Chain;
-struct Governance;
-struct Leaderboard;
 struct Nexus
 {
 	String name;//
@@ -703,13 +705,22 @@ struct Leaderboard
 	String value;//
 };
 
+struct Dapp
+{
+	String name;//
+	String address;//
+	String chain;//
+};
+
 struct Chain
 {
 	String name;//
 	String address;//
-	String parentAddress;//
+	String parent;//
 	UInt32 height;//
+	String organization;//
 	PHANTASMA_VECTOR<String> contracts;//
+	PHANTASMA_VECTOR<String> dapps;//
 };
 
 struct Event
@@ -903,6 +914,38 @@ struct Swap
 	String value;//
 };
 
+struct Error
+{
+	String message;//
+};
+
+struct Authorization
+{
+	String dapp;//
+	String token;//
+};
+
+struct WalletBalance
+{
+	String symbol;//
+	String value;//
+	Int32 decimals;//
+};
+
+struct WalletAccount
+{
+	String id;//
+	String address;//
+	String name;//
+	String avatar;//
+	PHANTASMA_VECTOR<WalletBalance> balances;//
+};
+
+struct Invocation
+{
+	String result;//
+};
+
 
 //------------------------------------------------------------------------------
 // Low level RPC API:
@@ -1050,6 +1093,7 @@ private:
 	static Stake DeserializeStake(const JSONValue& json, bool& jsonError);
 	static Account DeserializeAccount(const JSONValue& json, bool& jsonError);
 	static Leaderboard DeserializeLeaderboard(const JSONValue& json, bool& jsonError);
+	static Dapp DeserializeDapp(const JSONValue& json, bool& jsonError);
 	static Chain DeserializeChain(const JSONValue& json, bool& jsonError);
 	static Event DeserializeEvent(const JSONValue& json, bool& jsonError);
 	static Oracle DeserializeOracle(const JSONValue& json, bool& jsonError);
@@ -1071,6 +1115,13 @@ private:
 	static Peer DeserializePeer(const JSONValue& json, bool& jsonError);
 	static Validator DeserializeValidator(const JSONValue& json, bool& jsonError);
 	static Swap DeserializeSwap(const JSONValue& json, bool& jsonError);
+	static Error DeserializeError(const JSONValue& json, bool& jsonError);
+	static Authorization DeserializeAuthorization(const JSONValue& json, bool& jsonError);
+	static WalletBalance DeserializeWalletBalance(const JSONValue& json, bool& jsonError);
+	static WalletAccount DeserializeWalletAccount(const JSONValue& json, bool& jsonError);
+	static Invocation DeserializeInvocation(const JSONValue& json, bool& jsonError);
+	
+
 	static bool Deserializebool(const JSONValue& json, bool& jsonError);
 };
 
@@ -1397,6 +1448,15 @@ PHANTASMA_FUNCTION Leaderboard PhantasmaJsonAPI::DeserializeLeaderboard(const JS
 	};
 }
 
+PHANTASMA_FUNCTION Dapp PhantasmaJsonAPI::DeserializeDapp(const JSONValue& value, bool& jsonErr)
+{ 	
+	return Dapp { 
+		json::LookupString(value, PHANTASMA_LITERAL("name"), jsonErr), 
+		json::LookupString(value, PHANTASMA_LITERAL("address"), jsonErr), 
+		json::LookupString(value, PHANTASMA_LITERAL("chain"), jsonErr)
+	};
+}
+
 PHANTASMA_FUNCTION Chain PhantasmaJsonAPI::DeserializeChain(const JSONValue& value, bool& jsonErr)
 { 
 	PHANTASMA_VECTOR<String> contractsVector;
@@ -1409,13 +1469,26 @@ PHANTASMA_FUNCTION Chain PhantasmaJsonAPI::DeserializeChain(const JSONValue& val
 		{
 			contractsVector.push_back(json::AsString(json::IndexArray(contractsJsonArray, i, jsonErr), jsonErr));
 		}
+	}
+	PHANTASMA_VECTOR<String> dappsVector;
+	if(json::HasArrayField(value, PHANTASMA_LITERAL("dapps"), jsonErr))
+	{
+		const JSONArray& dappsJsonArray = json::LookupArray(value, PHANTASMA_LITERAL("dapps"), jsonErr);
+		int size = json::ArraySize(dappsJsonArray, jsonErr);
+		dappsVector.reserve(size);
+		for(int i = 0; i < size; ++i)
+		{
+			dappsVector.push_back(json::AsString(json::IndexArray(dappsJsonArray, i, jsonErr), jsonErr));
+		}
 	}	
 	return Chain { 
 		json::LookupString(value, PHANTASMA_LITERAL("name"), jsonErr), 
 		json::LookupString(value, PHANTASMA_LITERAL("address"), jsonErr), 
-		json::LookupString(value, PHANTASMA_LITERAL("parentAddress"), jsonErr), 
+		json::LookupString(value, PHANTASMA_LITERAL("parent"), jsonErr), 
 		json::LookupUInt32(value, PHANTASMA_LITERAL("height"), jsonErr), 
-		contractsVector
+		json::LookupString(value, PHANTASMA_LITERAL("organization"), jsonErr), 
+		contractsVector, 
+		dappsVector
 	};
 }
 
@@ -1768,6 +1841,59 @@ PHANTASMA_FUNCTION Swap PhantasmaJsonAPI::DeserializeSwap(const JSONValue& value
 		json::LookupString(value, PHANTASMA_LITERAL("destinationAddress"), jsonErr), 
 		json::LookupString(value, PHANTASMA_LITERAL("symbol"), jsonErr), 
 		json::LookupString(value, PHANTASMA_LITERAL("value"), jsonErr)
+	};
+}
+
+PHANTASMA_FUNCTION Error PhantasmaJsonAPI::DeserializeError(const JSONValue& value, bool& jsonErr)
+{ 	
+	return Error { 
+		json::LookupString(value, PHANTASMA_LITERAL("message"), jsonErr)
+	};
+}
+
+PHANTASMA_FUNCTION Authorization PhantasmaJsonAPI::DeserializeAuthorization(const JSONValue& value, bool& jsonErr)
+{ 	
+	return Authorization { 
+		json::LookupString(value, PHANTASMA_LITERAL("dapp"), jsonErr), 
+		json::LookupString(value, PHANTASMA_LITERAL("token"), jsonErr)
+	};
+}
+
+PHANTASMA_FUNCTION WalletBalance PhantasmaJsonAPI::DeserializeWalletBalance(const JSONValue& value, bool& jsonErr)
+{ 	
+	return WalletBalance { 
+		json::LookupString(value, PHANTASMA_LITERAL("symbol"), jsonErr), 
+		json::LookupString(value, PHANTASMA_LITERAL("value"), jsonErr), 
+		json::LookupInt32(value, PHANTASMA_LITERAL("decimals"), jsonErr)
+	};
+}
+
+PHANTASMA_FUNCTION WalletAccount PhantasmaJsonAPI::DeserializeWalletAccount(const JSONValue& value, bool& jsonErr)
+{ 
+	PHANTASMA_VECTOR<WalletBalance> balancesVector;
+	if(json::HasArrayField(value, PHANTASMA_LITERAL("balances"), jsonErr))
+	{
+		const JSONArray& balancesJsonArray = json::LookupArray(value, PHANTASMA_LITERAL("balances"), jsonErr);
+		int size = json::ArraySize(balancesJsonArray, jsonErr);
+		balancesVector.reserve(size);
+		for(int i = 0; i < size; ++i)
+		{
+			balancesVector.push_back(DeserializeWalletBalance(json::IndexArray(balancesJsonArray, i, jsonErr), jsonErr));
+		}
+	}	
+	return WalletAccount { 
+		json::LookupString(value, PHANTASMA_LITERAL("id"), jsonErr), 
+		json::LookupString(value, PHANTASMA_LITERAL("address"), jsonErr), 
+		json::LookupString(value, PHANTASMA_LITERAL("name"), jsonErr), 
+		json::LookupString(value, PHANTASMA_LITERAL("avatar"), jsonErr), 
+		balancesVector
+	};
+}
+
+PHANTASMA_FUNCTION Invocation PhantasmaJsonAPI::DeserializeInvocation(const JSONValue& value, bool& jsonErr)
+{ 	
+	return Invocation { 
+		json::LookupString(value, PHANTASMA_LITERAL("result"), jsonErr)
 	};
 }
 
