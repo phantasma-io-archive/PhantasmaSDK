@@ -1,11 +1,97 @@
 #pragma once
 
 #include "../Domain/Event.h"
+#include "../Blockchain/Transaction.h"
 
 namespace phantasma {
 
 const static BigInteger MinimumGasFee = 100000;
 constexpr static int PaginationMaxResults = 50;
+static const Char* PlatformName = "phantasma";
+typedef void(FnCallback)(void);
+
+enum class TransactionState
+{
+	Unknown,
+	Rejected,
+	Pending,
+	Confirmed,
+};
+
+inline TransactionState CheckConfirmation(rpc::PhantasmaAPI& api, const Char* txHash, rpc::Transaction& output)
+{
+	rpc::PhantasmaError err;
+	PHANTASMA_TRY
+	{
+		output = api.GetTransaction(txHash, &err);
+	}
+	PHANTASMA_CATCH( e )
+	{
+		err.code = 1;
+		err.message = FromUTF8(e.what());
+	}
+	if( err.code == 0 )
+		return TransactionState::Confirmed;
+	else if( StringStartsWith(err.message, PHANTASMA_LITERAL("pending"), 7) )
+		return TransactionState::Pending;
+	else if( StringStartsWith(err.message, PHANTASMA_LITERAL("rejected"), 8) )
+		return TransactionState::Rejected;
+	else
+		return TransactionState::Unknown;
+}
+
+inline TransactionState WaitForConfirmation(rpc::PhantasmaAPI& api, const Char* txHash, rpc::Transaction& output, FnCallback* fnSleep)
+{
+	for(;;)
+	{
+		TransactionState state = CheckConfirmation( api, txHash, output );
+		switch(state)
+		{
+		case TransactionState::Confirmed:
+		case TransactionState::Rejected:
+			return state;
+		default:
+			if( fnSleep )
+				fnSleep();
+			break;
+		}
+	}
+}
+
+inline TransactionState SendTransaction(rpc::PhantasmaAPI& api, Transaction& tx, String& out_txHash)
+{
+	String rawTx = Base16::Encode(tx.ToByteArray(true));
+	out_txHash = tx.GetHash().ToString();
+	PHANTASMA_TRY
+	{
+		if( out_txHash == api.SendRawTransaction(rawTx.c_str()) )
+			return TransactionState::Pending;
+	}
+	PHANTASMA_CATCH_ALL()
+	{
+	}
+	return TransactionState::Unknown;
+}
+
+inline TransactionState SendTransaction(rpc::PhantasmaAPI& api, Transaction& tx)
+{
+	String txHash;
+	return SendTransaction(api, tx, txHash);
+}
+
+inline TransactionState SendTransactionAndConfirm(rpc::PhantasmaAPI& api, Transaction& tx, String& out_txHash, rpc::Transaction& out_confirmation, FnCallback* fnSleep)
+{
+	if( TransactionState::Unknown == SendTransaction(api, tx, out_txHash) )
+		return TransactionState::Unknown;
+	return WaitForConfirmation(api, out_txHash.c_str(), out_confirmation, fnSleep);
+}
+
+inline TransactionState SendTransactionAndConfirm(rpc::PhantasmaAPI& api, Transaction& tx, FnCallback* fnSleep)
+{
+	String txHash;
+	rpc::Transaction confirmation;
+	return SendTransactionAndConfirm(api, tx, txHash, confirmation, fnSleep);
+}
 
 // Did an address receive a particular token type from this transaction?
 // Who sent it, how many tokens were received?
