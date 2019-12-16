@@ -79,18 +79,18 @@ inline TransactionState SendTransaction(rpc::PhantasmaAPI& api, Transaction& tx)
 	return SendTransaction(api, tx, txHash);
 }
 
-inline TransactionState SendTransactionAndConfirm(rpc::PhantasmaAPI& api, Transaction& tx, String& out_txHash, rpc::Transaction& out_confirmation, FnCallback* fnSleep)
+inline TransactionState SendTransactionWaitConfirm(rpc::PhantasmaAPI& api, Transaction& tx, String& out_txHash, rpc::Transaction& out_confirmation, FnCallback* fnSleep)
 {
 	if( TransactionState::Unknown == SendTransaction(api, tx, out_txHash) )
 		return TransactionState::Unknown;
 	return WaitForConfirmation(api, out_txHash.c_str(), out_confirmation, fnSleep);
 }
 
-inline TransactionState SendTransactionAndConfirm(rpc::PhantasmaAPI& api, Transaction& tx, FnCallback* fnSleep)
+inline TransactionState SendTransactionWaitConfirm(rpc::PhantasmaAPI& api, Transaction& tx, FnCallback* fnSleep)
 {
 	String txHash;
 	rpc::Transaction confirmation;
-	return SendTransactionAndConfirm(api, tx, txHash, confirmation, fnSleep);
+	return SendTransactionWaitConfirm(api, tx, txHash, confirmation, fnSleep);
 }
 
 // Did an address receive a particular token type from this transaction?

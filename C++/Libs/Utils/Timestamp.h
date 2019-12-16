@@ -5,6 +5,10 @@
 
 #include <ctime>
 #include <chrono>
+//#include <iostream>
+//#include <sstream>
+//#include <locale>
+//#include <iomanip>
 
 namespace phantasma {
 
@@ -48,10 +52,10 @@ public:
 		std::time_t value = (std::time_t)Value;
 #ifdef _MSC_VER
 		std::tm timeBuffer;
-		localtime_s(&timeBuffer, &value);
+		gmtime_s(&timeBuffer, &value);
 		const std::tm* dateTime = &timeBuffer;
 #else
-		const std::tm* dateTime = std::localtime(&value);
+		const std::tm* dateTime = std::gmtime(&value);
 #endif
 		constexpr int BufferLength = 512;
 		Char buffer[BufferLength];
@@ -65,8 +69,33 @@ public:
 
 	static Timestamp Now()
 	{
-		std::time_t value = std::time(0);
+		std::time_t now = std::time(0);
+		std::tm time;
+		gmtime_s(&time, &now);
+		std::time_t value = _mkgmtime(&time);
 		return Timestamp((UInt32)value);
+	}
+
+	static Timestamp FromDateTimeUTC(int year, int month, int day, int hour, int minute, int second)
+	{
+		if( month < 1 || month > 12 || day < 1 || day > 31 || hour < 0 || hour > 23 || 
+			minute < 0 || minute > 59 || second < 0 || second > 60 )
+		{
+			PHANTASMA_EXCEPTION("Invalid date/time");
+		}
+		std::tm t = {};
+		//std::stringstream ss;//("2011-2-18 23:12:34");
+		//ss.imbue(std::locale("en_US.utf-8"));
+		//ss << year << "-" << month << "-" << day << " " << hour24 << ":" << minute << ":" << second;
+		//ss >> std::get_time(&t, "%Y-%m-%d %H:%M:%S");
+		t.tm_hour = hour;
+		t.tm_min = minute;
+		t.tm_sec = second;
+		t.tm_year = year - 1900;
+		t.tm_mon = month - 1;
+		t.tm_mday = day;
+		std::time_t time = _mkgmtime(&t);
+		return Timestamp((UInt32)time);
 	}
 
 	int CompareTo( Timestamp other ) const
