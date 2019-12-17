@@ -5,6 +5,8 @@
 #include "Opcodes.h"
 #include "../Utils/TextUtils.h"
 #include "../Utils/BinaryWriter.h"
+#include "../Utils/Timestamp.h"
+#include "../Cryptography/Address.h"
 #include <type_traits>
 
 namespace phantasma {
@@ -46,7 +48,157 @@ public:
 		return *this;
 	}
 
-	ScriptBuilder& EmitExtCall( const String& method, Byte reg = 0 )
+	ScriptBuilder& EmitCast( Byte src_reg, Byte dst_reg, VMType type )
+	{
+		Emit( Opcode::CAST );
+		writer.Write( (Byte)src_reg );
+		writer.Write( (Byte)dst_reg );
+		writer.Write( (Byte)type );
+		return *this;
+	}
+
+	ScriptBuilder& EmitCat( Byte src_a, Byte src_b, Byte dst_reg )
+	{
+		return Emit3Arg( Opcode::CAT, src_a, src_b, dst_reg );
+	}
+
+	ScriptBuilder& EmitLeft( Byte src_reg, Byte dest_reg, int length )
+	{
+		if(length < 0 || length > 0xFFFF)
+		{
+			PHANTASMA_EXCEPTION("Input exceed max");
+			//todo - set error flag for when exceptions are disabled?
+		}
+		Emit( Opcode::LEFT );
+		writer.Write( (Byte)src_reg );
+		writer.Write( (Byte)dest_reg );
+		writer.WriteVarInt(length);
+		return *this;
+	}
+
+	ScriptBuilder& EmitRight( Byte src_reg, Byte dest_reg, int length )
+	{
+		if(length < 0 || length > 0xFFFF)
+		{
+			PHANTASMA_EXCEPTION("Input exceed max");
+			//todo - set error flag for when exceptions are disabled?
+		}
+		Emit( Opcode::RIGHT );
+		writer.Write( (Byte)src_reg );
+		writer.Write( (Byte)dest_reg );
+		writer.WriteVarInt(length);
+		return *this;
+	}
+
+	ScriptBuilder& EmitSize( Byte src_reg, Byte dest_reg )
+	{
+		return Emit2Arg( Opcode::SIZE, src_reg, dest_reg );
+	}
+
+	ScriptBuilder& EmitCount( Byte src_reg, Byte dest_reg )
+	{
+		return Emit2Arg( Opcode::COUNT, src_reg, dest_reg );
+	}
+
+	ScriptBuilder& EmitNot( Byte src_reg, Byte dest_reg )
+	{
+		return Emit2Arg( Opcode::NOT, src_reg, dest_reg );
+	}
+
+	ScriptBuilder& EmitAnd( Byte src_a, Byte src_b, Byte dst_reg )
+	{
+		return Emit3Arg( Opcode::AND, src_a, src_b, dst_reg );
+	}
+
+	ScriptBuilder& EmitOr( Byte src_a, Byte src_b, Byte dst_reg )
+	{
+		return Emit3Arg( Opcode::OR, src_a, src_b, dst_reg );
+	}
+
+	ScriptBuilder& EmitXor( Byte src_a, Byte src_b, Byte dst_reg )
+	{
+		return Emit3Arg( Opcode::XOR, src_a, src_b, dst_reg );
+	}
+
+	ScriptBuilder& EmitEqual( Byte src_a, Byte src_b, Byte dst_reg )
+	{
+		return Emit3Arg( Opcode::EQUAL, src_a, src_b, dst_reg );
+	}
+
+	ScriptBuilder& EmitLessThan( Byte src_a, Byte src_b, Byte dst_reg )
+	{
+		return Emit3Arg( Opcode::LT, src_a, src_b, dst_reg );
+	}
+
+	ScriptBuilder& EmitLessThanEqual( Byte src_a, Byte src_b, Byte dst_reg )
+	{
+		return Emit3Arg( Opcode::LTE, src_a, src_b, dst_reg );
+	}
+
+	ScriptBuilder& EmitGreaterThan( Byte src_a, Byte src_b, Byte dst_reg )
+	{
+		return Emit3Arg( Opcode::GT, src_a, src_b, dst_reg );
+	}
+
+	ScriptBuilder& EmitGreaterThanEqual( Byte src_a, Byte src_b, Byte dst_reg )
+	{
+		return Emit3Arg( Opcode::GTE, src_a, src_b, dst_reg );
+	}
+
+	ScriptBuilder& EmitInc( Byte reg )
+	{
+		Emit( Opcode::INC );
+		writer.Write( (Byte)reg );
+		return *this;
+	}
+
+	ScriptBuilder& EmitDec( Byte reg )
+	{
+		Emit( Opcode::DEC );
+		writer.Write( (Byte)reg );
+		return *this;
+	}
+
+	ScriptBuilder& EmitSign( Byte src_reg, Byte dest_reg )
+	{
+		return Emit2Arg( Opcode::SIGN, src_reg, dest_reg );
+	}
+
+	ScriptBuilder& EmitNegate( Byte src_reg, Byte dest_reg )
+	{
+		return Emit2Arg( Opcode::NEGATE, src_reg, dest_reg );
+	}
+
+	ScriptBuilder& EmitAbs( Byte src_reg, Byte dest_reg )
+	{
+		return Emit2Arg( Opcode::ABS, src_reg, dest_reg );
+	}
+
+
+	ScriptBuilder& EmitPut( Byte src_reg, Byte dest_reg, Byte key_reg )
+	{
+		return Emit3Arg( Opcode::PUT, src_reg, dest_reg, key_reg );
+	}
+
+private:
+	ScriptBuilder& Emit2Arg( Opcode opcode, Byte src_reg, Byte dst_reg )
+	{
+		Emit( opcode );
+		writer.Write( (Byte)src_reg );
+		writer.Write( (Byte)dst_reg );
+		return *this;
+	}
+	ScriptBuilder& Emit3Arg( Opcode opcode, Byte src_a, Byte src_b, Byte dst_reg )
+	{
+		Emit( opcode );
+		writer.Write( (Byte)src_a );
+		writer.Write( (Byte)src_b );
+		writer.Write( (Byte)dst_reg );
+		return *this;
+	}
+public:
+
+	ScriptBuilder& EmitExtCall( const Char* method, Byte reg = 0 )
 	{
 		EmitLoad( reg, method );
 		Emit( Opcode::EXTCALL );
@@ -174,6 +326,7 @@ public:
 		default:
 			PHANTASMA_EXCEPTION( "Invalid jump opcode" );// todo format the string properly
 			//throw new Exception( "Invalid jump opcode: " + opcode ); 
+			Emit( Opcode::NOP );//todo - set error flag for when exceptions are disabled?
 			return *this;
 		}
 
@@ -193,6 +346,7 @@ public:
 		if(regCount<1 || regCount > VirtualMachine::MaxRegisterCount)
 		{
 			PHANTASMA_EXCEPTION( "Invalid number of registers" );
+			Emit( Opcode::NOP );//todo - set error flag for when exceptions are disabled?
 			return *this;
 		}
 
@@ -211,6 +365,7 @@ public:
 		if(opcode != Opcode::JMPIF && opcode != Opcode::JMPNOT)
 		{
 			PHANTASMA_EXCEPTION( "Opcode is not a conditional jump" );
+			Emit( Opcode::NOP );//todo - set error flag for when exceptions are disabled?
 			return *this;
 		}
 
@@ -279,14 +434,19 @@ public:
 		return CallInterop(PHANTASMA_LITERAL("Runtime.MintTokens"), from, target, tokenSymbol, amount);
 	}
 
-	ScriptBuilder& MintNonFungibleToken(const String& tokenSymbol, const Address& from, const Address& target, const ByteArray& rom, const ByteArray& ram)
+	ScriptBuilder& MintToken(const String& tokenSymbol, const Address& from, const Address& target, const ByteArray& rom, const ByteArray& ram)
 	{
 		return CallInterop(PHANTASMA_LITERAL("Runtime.MintToken"), from, target, tokenSymbol, rom, ram); 
 	}
 
-	ScriptBuilder& WriteToken(const String& tokenSymbol, const BigInteger& id, const ByteArray& ram)
+	ScriptBuilder& BurnTokens(const Address& from, const String& tokenSymbol, const BigInteger& amount)
 	{
-		return CallInterop(PHANTASMA_LITERAL("Runtime.WriteToken"), tokenSymbol, id, ram); 
+		return CallInterop(PHANTASMA_LITERAL("Runtime.BurnTokens"), from, tokenSymbol, amount); 
+	}
+
+	ScriptBuilder& BurnToken(const Address& from, const String& tokenSymbol, const BigInteger& nftID)
+	{
+		return CallInterop(PHANTASMA_LITERAL("Runtime.BurnToken"), from, tokenSymbol, nftID); 
 	}
 
 	ScriptBuilder& TransferTokens(const String& tokenSymbol, const Address& from, const String& to, const BigInteger& amount)
@@ -304,34 +464,36 @@ public:
         return CallInterop(PHANTASMA_LITERAL("Runtime.TransferBalance"), from, to, tokenSymbol);
     }
 
-	ScriptBuilder& TransferNFT(const String& tokenSymbol, const Address& from, const Address& to, const BigInteger& tokenId)//todo check if this is valid
+	ScriptBuilder& TransferToken(const String& tokenSymbol, const Address& from, const Address& to, const BigInteger& tokenId)//todo check if this is valid
 	{
 		return CallInterop(PHANTASMA_LITERAL("Runtime.TransferToken"), from, to, tokenSymbol, tokenId);
 	}
 
-	ScriptBuilder& TransferNFT(const String& tokenSymbol, const Address& from, const String& to, const BigInteger& tokenId)//todo check if this is valid
+	ScriptBuilder& TransferToken(const String& tokenSymbol, const Address& from, const String& to, const BigInteger& tokenId)//todo check if this is valid
 	{
-		return CallInterop(PHANTASMA_LITERAL("Runtime.TransferToken"), from, to, tokenSymbol, tokenId);
+		return CallInterop(PHANTASMA_LITERAL("Runtime.TransferToken"), from, Address::FromText(to), tokenSymbol, tokenId);
 	}
 
-	ScriptBuilder& CrossTransferToken(const Address& destinationChain, const String& tokenSymbol, const Address& from, const Address& to, const BigInteger& amount)
+	ScriptBuilder& ReadTokenToRegister( const String& tokenSymbol, const BigInteger& nftId, Byte dst_reg)
 	{
-		return CallInterop(PHANTASMA_LITERAL("Runtime.SendTokens"), destinationChain, from, to, tokenSymbol, amount);
+		return CallInterop(PHANTASMA_LITERAL("Runtime.ReadToken"), tokenSymbol, nftId)
+			.EmitPop(dst_reg);
 	}
 
-	ScriptBuilder& CrossTransferToken(const Address& destinationChain, const String& tokenSymbol, const Address& from, const String& to, const BigInteger& amount)
+	ScriptBuilder& WriteTokenFromRegister( const String& tokenSymbol, const BigInteger& nftId, Byte src_reg)
 	{
-		return CallInterop(PHANTASMA_LITERAL("Runtime.SendTokens"), destinationChain, from, to, tokenSymbol, amount);
+		Byte temp_reg = 0;
+		return EmitPush(src_reg)
+			.EmitLoad(temp_reg, nftId)
+			.EmitPush(temp_reg)
+			.EmitLoad(temp_reg, tokenSymbol)
+			.EmitPush(temp_reg)
+			.EmitExtCall( PHANTASMA_LITERAL("Runtime.WriteToken") );
 	}
 
-	ScriptBuilder& CrossTransferNFT(const Address& destinationChain, const String& tokenSymbol, const Address& from, const Address& to, const BigInteger& tokenId)
+	ScriptBuilder& WriteToken(const String& tokenSymbol, const BigInteger& id, const ByteArray& ram)
 	{
-		return CallInterop(PHANTASMA_LITERAL("Runtime.SendToken"), destinationChain, from, to, tokenSymbol, tokenId);
-	}
-
-	ScriptBuilder& CrossTransferNFT(const Address& destinationChain, const String& tokenSymbol, const Address& from, const String& to, const BigInteger& tokenId)
-	{
-		return CallInterop(PHANTASMA_LITERAL("Runtime.SendToken"), destinationChain, from, to, tokenSymbol, tokenId);
+		return CallInterop(PHANTASMA_LITERAL("Runtime.WriteToken"), tokenSymbol, id, ram); 
 	}
 
 //--------------------------------------------------------------
@@ -400,8 +562,7 @@ private:
 	static void LoadIntoReg( ScriptBuilder& sb, Byte target_reg, const PHANTASMA_VECTOR<T>& array )
 	{
 		// this cast is required to clear any previous value that might be stored at target_reg
-		Byte cast_bytes[3] = { target_reg, target_reg, (Byte)VMType::None };
-		sb.Emit( Opcode.CAST, cast_bytes );
+		sb.EmitCast( target_reg, target_reg, VMType::None );
 		for(int j = 0, jend=(int)array.size(); j < jend; j++)
 		{
 			const auto& element = array[j];
@@ -409,8 +570,7 @@ private:
 			Byte temp_regKey = (Byte)(target_reg + 2);
 			LoadIntoReg( sb, temp_regVal, element );
 			LoadIntoReg( sb, temp_regKey, j );
-			Byte put_bytes[3] = { temp_regVal, target_reg , temp_regKey };
-			sb.Emit( Opcode::PUT, put_bytes );
+			sb.EmitPut( temp_regVal, target_reg, temp_regKey )
 		}
 	}
 
