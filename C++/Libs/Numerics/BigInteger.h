@@ -109,6 +109,17 @@ public:
 		return BigInteger(signedArray);
 	}
 
+	static TBigInteger FromSignedArray(const Byte* signedArray, int signedArrayLength)
+	{//todo - do this without the extra copy
+		ByteArray temp;
+		if( signedArray && signedArrayLength > 0 )
+		{
+			temp.resize(signedArrayLength);
+			memcpy(&temp.front(), signedArray, signedArrayLength);
+		}
+		return BigInteger(temp);
+	}
+
     //this constructor assumes that the byte array is in Two's complement notation
 	template<class Bytes>
 	TBigInteger(const Bytes& bytes)

@@ -200,7 +200,7 @@ public:
 				StringBuilder sb;
 				sb << "invalid address prefix: ";
 				sb << prefix;
-				PHANTASMA_EXCEPTION_MESSAGE("invalid address prefix", sb.str().c_str());
+				PHANTASMA_EXCEPTION_MESSAGE("invalid address prefix", sb.str());
 				if( out_error )
 					*out_error = true;
 				return {};

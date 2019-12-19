@@ -76,6 +76,19 @@ public:
 		return Timestamp((UInt32)value);
 	}
 
+	void GetDateTimeElements(int& out_year, int& out_month, int& out_day, int& out_hour, int& out_minute, int& out_second)
+	{
+		std::tm time;
+		const std::time_t value = Value;
+		gmtime_s(&time, &value);
+		out_year = time.tm_year + 1900;
+		out_month = time.tm_mon + 1;
+		out_day = time.tm_mday;
+		out_hour = time.tm_hour;
+		out_minute = time.tm_min;
+		out_second = time.tm_sec;
+	}
+
 	static Timestamp FromDateTimeUTC(int year, int month, int day, int hour, int minute, int second)
 	{
 		if( month < 1 || month > 12 || day < 1 || day > 31 || hour < 0 || hour > 23 || 

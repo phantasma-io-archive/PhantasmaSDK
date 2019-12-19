@@ -439,6 +439,13 @@ public:
 		return CallInterop(PHANTASMA_LITERAL("Runtime.MintToken"), from, target, tokenSymbol, rom, ram); 
 	}
 
+	ScriptBuilder& MintTokenContentsFromRegisters(const String& tokenSymbol, const Address& from, const Address& target, Byte rom_reg, Byte ram_reg)
+	{
+		return EmitPush( ram_reg )
+			.EmitPush( rom_reg )
+			.CallInterop(PHANTASMA_LITERAL("Runtime.MintToken"), from, target, tokenSymbol); 
+	}
+
 	ScriptBuilder& BurnTokens(const Address& from, const String& tokenSymbol, const BigInteger& amount)
 	{
 		return CallInterop(PHANTASMA_LITERAL("Runtime.BurnTokens"), from, tokenSymbol, amount); 

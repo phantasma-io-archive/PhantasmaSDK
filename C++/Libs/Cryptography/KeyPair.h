@@ -56,6 +56,7 @@ public:
 	PhantasmaKeys& operator=( const PhantasmaKeys& other )
 	{
 		privateKey = other.privateKey;
+		publicKey = other.publicKey;
 		address = other.address;
 		return *this;
 	}
