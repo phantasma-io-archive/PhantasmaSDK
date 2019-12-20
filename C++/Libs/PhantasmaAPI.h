@@ -1922,7 +1922,7 @@ PHANTASMA_FUNCTION JSONValue PhantasmaJsonAPI::CheckResponse(JSONValue response,
 		{
 			msg = json::LookupString(response, PHANTASMA_LITERAL("error"), jsonErr);
 		}
-		PHANTASMA_EXCEPTION_MESSAGE("Server returned error: %s", msg);
+		PHANTASMA_EXCEPTION_MESSAGE("Server returned error", msg);
 		out_error.message = msg;
 		out_error.code = code;
 		return response;

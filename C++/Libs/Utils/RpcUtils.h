@@ -202,6 +202,25 @@ inline bool GetTxTokensSent(
 	return false;
 }
 
+
+inline bool GetTxTokensMinted(
+	const rpc::Transaction& tx,
+	PHANTASMA_VECTOR<TokenEventData>& output
+)
+{
+	bool any = false;
+	for (int i=0, end=(int)tx.events.size(); i!=end; ++i)
+	{
+		const auto& evt = tx.events[i];
+		if( 0 == evt.kind.compare(PHANTASMA_LITERAL("TokenMint")) )
+		{
+			output.push_back(Serialization<TokenEventData>::Unserialize(Base16::Decode(evt.data)));
+			any = true;
+		}
+	}
+	return any;
+}
+
 inline String GetTxDescription(
 	const rpc::Transaction& tx, 
 	const PHANTASMA_VECTOR<rpc::Chain>& phantasmaChains, 
