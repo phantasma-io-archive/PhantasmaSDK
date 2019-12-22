@@ -374,9 +374,9 @@ typedef char Char;
 
 #ifndef PHANTASMA_STRTOINT
 # ifdef _UNICODE
-#  define PHANTASMA_STRTOINT(x) std::wcstol(x, 0, 10)
+#  define PHANTASMA_STRTOINT(x) std::wcstoll(x, 0, 10)
 # else
-#  define PHANTASMA_STRTOINT(x) std::strtol(x, 0, 10)
+#  define PHANTASMA_STRTOINT(x) std::strtoll(x, 0, 10)
 # endif
 #endif
 
