@@ -16,7 +16,7 @@ public class LoginMenu : MonoBehaviour
 
         if (PhantasmaDemo.Instance != null)
         {
-            if (PhantasmaDemo.Instance.PhantasmaApi != null && !API.IsValidPrivateKey(addressInputField.text))
+            if (PhantasmaDemo.Instance.PhantasmaApi != null && !PhantasmaAPI.IsValidPrivateKey(addressInputField.text))
             {
                 CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "Error: The entered private key is not valid.\nThe private key must start with an 'L' or a 'K' and have 52 characters.");
                 return;

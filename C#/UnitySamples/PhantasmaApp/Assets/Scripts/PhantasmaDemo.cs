@@ -10,6 +10,7 @@ using Phantasma.SDK;
 using Phantasma.VM.Utils;
 using Token = Phantasma.SDK.Token;
 using Transaction = Phantasma.SDK.Transaction;
+using Phantasma.Domain;
 
 public enum EOPERATION_RESULT
 {
@@ -33,14 +34,14 @@ public class PhantasmaDemo : MonoBehaviour
 
     private const float _TRANSACTION_CONFIRMATION_DELAY = 10f;
 
-    public KeyPair Key { get; private set; }
+    public PhantasmaKeys Key { get; private set; }
 
     private decimal                 _balance;
     private IEnumerator             _pendingTxCoroutine;
     private string                  _lastTransactionHash;
     private EBLOCKCHAIN_OPERATION   _lastTransactionType;
 
-    public API                          PhantasmaApi        { get; private set; }
+    public PhantasmaAPI                          PhantasmaApi        { get; private set; }
     public Dictionary<string, Token>    PhantasmaTokens     { get; private set; }
     public List<Transaction>            LastTransactions    { get; private set; }
 
@@ -58,7 +59,7 @@ public class PhantasmaDemo : MonoBehaviour
 
     private void Start ()
     {
-        PhantasmaApi = new API(_SERVER_ADDRESS);
+        PhantasmaApi = new PhantasmaAPI(_SERVER_ADDRESS);
         
         Invoke("LoadPhantasmaData", 2f);
     }
@@ -80,7 +81,7 @@ public class PhantasmaDemo : MonoBehaviour
     /// <param name="callback"></param>
     public void GenerateNewKey(Action<string> callback = null)
     {
-        var newKey = KeyPair.Generate().ToWIF();
+        var newKey = PhantasmaKeys.Generate().ToWIF();
 
         if (callback != null)
         {
@@ -96,7 +97,7 @@ public class PhantasmaDemo : MonoBehaviour
     {
         try
         {
-            Key = KeyPair.FromWIF(privateKey);
+            Key = PhantasmaKeys.FromWIF(privateKey);
 
             GetAccount(Key.Address.ToString());
         }
@@ -355,7 +356,7 @@ public class PhantasmaDemo : MonoBehaviour
             .SpendGas(Key.Address)
             .EndScript();
 
-        StartCoroutine(PhantasmaApi.SignAndSendTransaction(Key, script, "main",
+        StartCoroutine(PhantasmaApi.SignAndSendTransaction(Key, "simnet", script, "main",
             (result) =>
             {
                 StartCoroutine(CheckTokensTransfer(result));

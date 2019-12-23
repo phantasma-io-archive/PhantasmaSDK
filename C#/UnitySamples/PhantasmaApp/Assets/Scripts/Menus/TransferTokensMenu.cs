@@ -56,7 +56,7 @@ public class TransferTokensMenu : MonoBehaviour
 
         Address address;
 
-        if(!API.IsValidAddress(addressInput.text))
+        if(!PhantasmaAPI.IsValidAddress(addressInput.text))
         {
             CanvasManager.Instance.ShowResultPopup(EOPERATION_RESULT.FAIL, "The entered address is not valid.\nThe address must start with a 'P' and have 45 characters.");
             return;
