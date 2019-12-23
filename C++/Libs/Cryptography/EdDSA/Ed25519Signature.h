@@ -26,7 +26,7 @@ public:
 			PHANTASMA_EXCEPTION( "Invalid Ed25519 signature length, should be 64 bytes" );
 		}
 	}
-	Ed25519Signature( const PHANTASMA_VECTOR<Byte>& signature )
+	Ed25519Signature( const ByteArray& signature )
 			: Ed25519Signature(signature.empty() ? 0 : &signature.front(), (int)signature.size())
 	{
 	}
@@ -44,7 +44,12 @@ public:
 		for(int i=0; i<numAddresses; ++i)
 		{
 			const Address& address = addresses[i];
-			if (Ed25519::Verify(bytes, Length, message, messageLength, address.PublicKey(), Address::PublicKeyLength))
+			if( !address.IsUser() )
+				continue;
+
+			const Byte* pubKey = address.ToByteArray() + 2;
+			int pubKeyLength = address.GetSize() - 2;
+			if (Ed25519::Verify(bytes, Length, message, messageLength, pubKey, pubKeyLength))
 			{
 				return true;
 			}
@@ -68,6 +73,23 @@ public:
 	void UnserializeData(BinaryReader& reader)
 	{
 		reader.ReadByteArray(bytes, Length);
+	}
+	
+	template<class IKeyPair>
+	static Ed25519Signature Generate(const IKeyPair& keypair, const ByteArray& message)
+	{
+		if(message.empty())
+		{
+			PHANTASMA_EXCEPTION("Can't sign an empty message");
+			return Ed25519Signature();
+		}
+		PinnedBytes<64> expandedPrivateKey;
+		{
+			SecureByteReader read = keypair.PrivateKey().Read();
+			Ed25519::ExpandedPrivateKeyFromSeed( expandedPrivateKey.bytes, 64, read.Bytes(), PrivateKey::Length );
+		}
+		ByteArray sign = Ed25519::Sign( &message.front(), (int)message.size(), expandedPrivateKey.bytes, 64 );
+		return Ed25519Signature(sign);
 	}
 private:
 	Byte bytes[Length];

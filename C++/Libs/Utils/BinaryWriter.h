@@ -10,7 +10,7 @@ class Signature;
 
 class BinaryWriter
 {
-	PHANTASMA_VECTOR<Byte> stream;
+	ByteArray stream;
 public:
 	BinaryWriter(UInt32 sizeHint = 4096)
 	{
@@ -19,7 +19,7 @@ public:
 
 	UInt32 Position() const { return (UInt32)stream.size(); }
 
-	const PHANTASMA_VECTOR<Byte>& ToArray() { return stream; }
+	const ByteArray& ToArray() { return stream; }
 
 	void Write(uint8_t b) 
 	{
@@ -64,7 +64,7 @@ public:
 		for( int i=0; i<size; ++i )
 			stream.push_back(b[i]);
 	}
-	void Write( const PHANTASMA_VECTOR<Byte>& bytes )
+	void Write( const ByteArray& bytes )
 	{
 		if(!bytes.empty()) 
 			Write(&bytes.front(), (int)bytes.size());
@@ -100,7 +100,7 @@ public:
 
 	void WriteBigInteger(const BigInteger& n)
 	{
-		auto bytes = n.ToByteArray();
+		auto bytes = n.ToSignedByteArray();
 		Write((Byte)bytes.size());
 		Write(bytes);
 	}
@@ -115,7 +115,7 @@ public:
 		WriteVarInt(numBytes);
 		Write(bytes, numBytes);
 	}
-	void WriteByteArray(const PHANTASMA_VECTOR<Byte>& bytes) 
+	void WriteByteArray(const ByteArray& bytes) 
 	{
 		WriteByteArray( bytes.empty()?0:&bytes.front(), (int)bytes.size() );
 	}
@@ -133,7 +133,7 @@ public:
 			return;
 		}
 
-		ByteBuffer temp;
+		ByteArray temp;
 		int numBytes = 0;
 		const Byte* bytes = GetUTF8Bytes( text, temp, numBytes );
 
@@ -148,9 +148,9 @@ public:
 			return;
 		}
 
-		ByteBuffer temp;
+		ByteArray temp;
 		int numBytes = 0;
-		const Byte* bytes = GetUTF8Bytes( text, temp, numBytes );
+		const Byte* bytes = GetUTF8Bytes( text, 0, temp, numBytes );
 
 		WriteVarInt(numBytes);
 		Write(bytes, numBytes);

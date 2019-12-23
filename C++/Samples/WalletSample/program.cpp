@@ -6,8 +6,10 @@
 #include "../../Libs/PhantasmaAPI.h"
 #include "../../Libs/Adapters/PhantasmaAPI_sodium.h"
 #include "../../Libs/Blockchain/Transaction.h"
+#include "../../Libs/Domain/Event.h"
 #include "../../Libs/Cryptography/KeyPair.h"
 #include "../../Libs/VM/ScriptBuilder.h"
+#include "../../Libs/Utils/RpcUtils.h"
 
 //Sorry, I haven't actually bundled a compiled version of libSodium with the project.
 //You have to download/build libSodium yourself!
@@ -82,121 +84,6 @@ static String GetChainAddress(const String& chainName, const vector<rpc::Chain>&
 	return {};
 }
 
-static String GetTxDescription(const rpc::Transaction& tx, const vector<rpc::Chain>& phantasmaChains, const vector<rpc::Token>& phantasmaTokens)
-{
-	String description;
-
-	String senderToken;
-	Address senderChain = Address::FromText(tx.chainAddress);
-	Address senderAddress;
-
-	String receiverToken;
-	Address receiverChain;
-	Address receiverAddress;
-
-	BigInteger amount = 0;
-
-	for(const auto& evt : tx.events) //todo move this
-	{
-		//Event nativeEvent;
-		//if (evt.Data != null)
-		//{
-		//	nativeEvent = new Event((Phantasma.Blockchain.Contracts.EventKind)evt.EventKind,
-		//		Address.FromText(evt.EventAddress), evt.Data.Decode());
-		//}
-		//else
-		//{
-		//	nativeEvent =
-		//		new Event((Phantasma.Blockchain.Contracts.EventKind)evt.EventKind, Address.FromText(evt.EventAddress));
-		//}
-
-		//switch (evt.EventKind)
-		//{
-		//case Phantasma.RpcClient.DTOs.EventKind.TokenSend:
-		//{
-		//	var data = nativeEvent.GetContent<TokenEventData>();
-		//	amount = data.value;
-		//	senderAddress = nativeEvent.Address;
-		//	senderToken = (data.symbol);
-		//}
-		//break;
-		//
-		//case Phantasma.RpcClient.DTOs.EventKind.TokenReceive:
-		//{
-		//	var data = nativeEvent.GetContent<TokenEventData>();
-		//	amount = data.value;
-		//	receiverAddress = nativeEvent.Address;
-		//	receiverChain = data.chainAddress;
-		//	receiverToken = data.symbol;
-		//}
-		//break;
-		//
-		//case Phantasma.RpcClient.DTOs.EventKind.TokenEscrow:
-		//{
-		//	var data = nativeEvent.GetContent<TokenEventData>();
-		//	amount = data.value;
-		//	var amountDecimal = UnitConversion.ToDecimal(amount,
-		//		phantasmaTokens.SingleOrDefault(p => p.Symbol == data.symbol).Decimals);
-		//	receiverAddress = nativeEvent.Address;
-		//	receiverChain = data.chainAddress;
-		//	var chain = GetChainName(receiverChain.Text, phantasmaChains);
-		//	description =
-		//		$"{amountDecimal} {data.symbol} tokens escrowed for address {receiverAddress} in {chain}";
-		//}
-		//break;
-		//case Phantasma.RpcClient.DTOs.EventKind.AddressRegister:
-		//{
-		//	var name = nativeEvent.GetContent<string>();
-		//	description = $"{nativeEvent.Address} registered the name '{name}'";
-		//}
-		//break;
-		//
-		//case Phantasma.RpcClient.DTOs.EventKind.AddFriend:
-		//{
-		//	var address = nativeEvent.GetContent<Address>();
-		//	description = $"{nativeEvent.Address} added '{address} to friends.'";
-		//}
-		//break;
-		//
-		//case Phantasma.RpcClient.DTOs.EventKind.RemoveFriend:
-		//{
-		//	var address = nativeEvent.GetContent<Address>();
-		//	description = $"{nativeEvent.Address} removed '{address} from friends.'";
-		//}
-		//break;
-		//}
-	}
-
-	if (description.empty())
-	{
-		if (amount > 0 && !senderAddress.IsNull() && !receiverAddress.IsNull() &&
-			!senderToken.empty() && senderToken == receiverToken)
-		{
-		//	var amountDecimal = UnitConversion.ToDecimal(amount,
-		//		phantasmaTokens.SingleOrDefault(p => p.Symbol == senderToken).Decimals);
-		//	description =
-		//		$"{amountDecimal} {senderToken} sent from {senderAddress.Text} to {receiverAddress.Text}";
-		}
-		else if (amount > 0 && !receiverAddress.IsNull() && !receiverToken.empty())
-		{
-		//	var amountDecimal = UnitConversion.ToDecimal(amount,
-		//		phantasmaTokens.SingleOrDefault(p => p.Symbol == receiverToken).Decimals);
-		//	description = $"{amountDecimal} {receiverToken} received on {receiverAddress.Text} ";
-		}
-		else
-		{
-			description = U("Custom transaction");
-		}
-
-		if (!receiverChain.IsNull() && receiverChain != senderChain)
-		{
-		//	description +=
-		//		$" from {GetChainName(senderChain.Text, phantasmaChains)} chain to {GetChainName(receiverChain.Text, phantasmaChains)} chain";
-		}
-	}
-
-	return description;
-}
 
 class Program
 {
@@ -205,7 +92,7 @@ class Program
 	rpc::PhantasmaAPI _phantasmaApiService;
 
 	rpc::Account _account;
-	KeyPair _key;
+	PhantasmaKeys _key;
 	vector<rpc::Chain> _chains;
 	vector<rpc::Token> _tokens;
 	String _nexus;
@@ -232,7 +119,7 @@ public:
 			try
 			{
 				String wif = ReadLine();
-				_key = KeyPair::FromWIF(wif); //KeyPair.Generate();
+				_key = PhantasmaKeys::FromWIF(wif); //KeyPair.Generate();
 				loggedIn = true;
 			}
 			catch (std::exception&)
@@ -326,15 +213,15 @@ public:
 		}
 	}
 
-	static bool HaveTokenBalanceToTransfer(const BigInteger& amount = 0)
+	bool HaveTokenBalanceToTransfer()
 	{
-		return true;
-		//TODO!!!!!!
-	//	var test = _account.Tokens.Where(p => decimal.Parse(p.Amount) > amount);
-	//	return test.Any();
+		for(const auto& token : _account.balances)
+			if( BigInteger::Parse(token.amount) > BigInteger::Zero() )
+				return true;
+		return false;
 	}
 
-	void CrossChainTransfer()//todo
+	void CrossChainTransfer()
 	{
 		if (_account.address.empty())
 			_account = _phantasmaApiService.GetAccount(_key.Address().ToString().c_str());
@@ -423,8 +310,7 @@ public:
 
 		const auto& script = ScriptBuilder::BeginScript()
 			.AllowGas(_key.Address(), Address(), 1, 9999)
-			//TODO!!!!!!
-//asdf			.TransferTokens(tokenSymbol, _key.Address, destinationAddress, bigIntAmount)
+			.TransferTokens(tokenSymbol, _key.Address(), destinationAddress, bigIntAmount)
 			.SpendGas(_key.Address())
 			.EndScript();
 
@@ -456,11 +342,10 @@ public:
 
 		auto script = ScriptBuilder::BeginScript()
 			.AllowGas(_key.Address(), Address(), 1, 9999)
-		//TODO!!!!!!
-		//	.CrossTransferToken(Address::FromText(toChain.address), symbol, _key.Address,
-		//		_key.Address, fee)
-		//	.CrossTransferToken(Address::FromText(toChain.address), symbol, _key.Address,
-		//		destinationAddress, bigIntAmount)
+			.CrossTransferToken(Address::FromText(toChain), symbol, _key.Address(),
+				_key.Address(), fee)
+			.CrossTransferToken(Address::FromText(toChain), symbol, _key.Address(),
+				destinationAddress, bigIntAmount)
 			.SpendGas(_key.Address())
 			.EndScript();
 
@@ -492,7 +377,7 @@ public:
 			WriteLine("Sending transaction...");
 			Transaction tx(_nexus.c_str(), chain.c_str(), script, Timestamp::Now() + Timespan::FromHours(1));
 			tx.Sign(_key);
-			String txResult = _phantasmaApiService.SendRawTransaction(tx.ToRawTransaction().c_str());
+			String txResult = _phantasmaApiService.SendRawTransaction(Base16::Encode(tx.ToByteArray(true)).c_str());
 
 			WriteLine("Transaction sent. Tx hash: ", txResult);
 			return txResult;

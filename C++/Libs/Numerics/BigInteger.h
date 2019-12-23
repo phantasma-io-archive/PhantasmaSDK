@@ -6,10 +6,11 @@
 #include <ctype.h>
 #include <math.h>
 #include <utility>
+#include "../Security/SecureString.h"
 
 /*
 * Implementation of BigInteger class, written for Phantasma project
-* Author: Simão Pavlovich
+* Author: Simão Pavlovich and Bernardo Pinho
 * Ported from C# to C++ by Brooke Hodgman.
 * I've left all declarations in the same order as the C# code for maintainability, so it jumps between private/public sections like this as a deliberate choice :)
 */
@@ -33,7 +34,6 @@ private:
 	typedef SecureVector<UInt32>     Data_Secure;
 
 	typedef typename SelectType<UseSecureMemory, Data_Secure, Data_Fast>::Type Data;
-	typedef PHANTASMA_VECTOR<Byte> Bytes;
 	Data _data;
 
 	constexpr static int _Base = sizeof(UInt32) * 8;    //number of bits required for shift operations
@@ -50,7 +50,7 @@ public:
 	static const TBigInteger Zero() { return TBigInteger{0LL}; }
 	static const TBigInteger One()  { return TBigInteger{1LL}; }
 
-	TBigInteger() {}
+	TBigInteger() : TBigInteger(0) {}
 
 	TBigInteger(TBigInteger&& other)
 		: _sign(other._sign)
@@ -97,7 +97,21 @@ public:
 	{
 	}
 
-	TBigInteger(const Bytes& bytes, bool twosComplementFormatFlag)
+	template<class Bytes>
+	static TBigInteger FromUnsignedArray(const Bytes& unsignedArray, bool isPositive)
+	{
+		return BigInteger(unsignedArray, isPositive ? 1 : -1);
+	}
+
+	template<class Bytes>
+	static TBigInteger FromSignedArray(const Bytes& signedArray)
+	{
+		return BigInteger(signedArray);
+	}
+
+    //this constructor assumes that the byte array is in Two's complement notation
+	template<class Bytes>
+	TBigInteger(const Bytes& bytes)
 	{
 		if( bytes.empty() )
 		{
@@ -106,27 +120,38 @@ public:
 			return;
 		}
 
-		int sign;
+		Byte msb = bytes[bytes.size() - 1];
 
-		if (twosComplementFormatFlag)
+		int sign = 0;
+
+        switch (msb)
+        {
+            case 0xFF:
+                sign = -1;
+                break;
+
+            case 0x00:
+                sign = 1;
+                break;
+
+            default:
+                PHANTASMA_EXCEPTION("unexpected sign byte value");
+				break;
+        }
+		
+		if (sign == -1)
 		{
-			Byte msb = bytes[bytes.size() - 1] >> 7;
-			sign = msb == 0 ? 1 : -1;
+			*this = TBigInteger(ApplyTwosComplement(bytes), sign);
 		}
 		else
-			sign = 1;
-
-		Bytes buffer;
-
-		if (sign == -1)
-			buffer = ApplyTwosComplement(bytes);
-		else
-			buffer = bytes;
-
-		*this = TBigInteger(buffer, sign);
+		{
+			*this = TBigInteger(bytes, sign);
+		}
 	}
 
-	TBigInteger(const Bytes& bytes, int sign = 1)
+private:
+	template<class Bytes>
+	TBigInteger(const Bytes& bytes, int sign)
 	{
 		_sign = sign;
 
@@ -151,6 +176,7 @@ public:
 			InitFromArray(&uintArray.front(), (int)uintArray.size());
 		}
 	}
+public:
 
 	TBigInteger(const Byte* bytes, int numBytes, int sign = 1)
 	{
@@ -228,19 +254,27 @@ private:
 
 public:
 	TBigInteger(const String& str, int radix, bool* out_error=0)
+		:TBigInteger(str.c_str(), (int)str.length(), radix, out_error)
+	{
+	}
+	TBigInteger(const SecureString& str, int radix, bool* out_error=0)
+		:TBigInteger(str.c_str(), (int)str.length(), radix, out_error)
+	{
+	}
+	TBigInteger(const Char* str, int strLength, int radix, bool* out_error=0)
 	{
 		TBigInteger bigInteger = Zero();
 		TBigInteger bi = One();
 
-		if (0==str.compare(PHANTASMA_LITERAL("0")) || str.empty())
+		if (strLength == 0 || str[0] == '\0' || (strLength == 1 && str[0] == '0'))
 		{
 			_sign = 0;
 			_data.push_back(0);
 			return;
 		}
 
-		const Char* first = str.c_str();
-		const Char* last = first + str.length() - 1;
+		const Char* first = str;
+		const Char* last = first + strLength - 1;
 		while( *first == '\r' || *first == '\n' )
 			++first;
 		while( last >= first && (*last == '\r' || *last == '\n') )
@@ -947,6 +981,11 @@ public:
 		return n;
 	}
 
+	bool IsZero() const
+	{
+		return _sign == 0;
+	}
+
 	bool operator ==(const TBigInteger& b) const
 	{
 		return _data.size() == b._data.size() && _sign == b._sign && PHANTASMA_EQUAL(_data.begin(), _data.end(), b._data.begin());
@@ -1235,7 +1274,7 @@ public:
 		if (_sign == 0)
 			return -1;
 
-		Bytes b = ToByteArray();
+		ByteArray b = ToSignedByteArray();
 		int w = 0;
 		while (b[w] == 0)
 			w++;
@@ -1246,6 +1285,7 @@ public:
 		return -1;
 	}
 
+	template<class String>
 	static TBigInteger Parse(const String& input, int radix = 10)
 	{
 		return TBigInteger(input, radix);
@@ -1339,7 +1379,16 @@ public:
 		return TBigInteger(std::move(sqrtArray));
 	}
 
-	int ToByteArray(Byte* result, int resultSize) const
+    /// <summary>
+    /// IF YOU USE THIS METHOD, DON'T FEED THE RESULTING BYTE ARRAY TO THE BigInteger(byte[] array) CONSTRUCTOR
+    /// That constructor depends on having a byte array using the Two's Complement convention, where the MSB is either 0 or FF
+    /// This method does not produce an extra byte for the sign, that only happens on the ToSignedByteArray method.
+    ///
+    /// tl;dr:  if the byte array will be used to reconstruct a bigint, use ToSignedByteArray
+    ///         if you just need to manipulate the raw byte array without having to reconstruct a bigint, AND you don't care about sign, use ToUnsignedByteArray.
+    /// </summary>
+    /// <returns></returns>
+	int ToUnsignedByteArray(Byte* result, int resultSize) const
 	{
 		int bitLength = GetBitLength();
 		UInt32 byteArraySize = (bitLength / 8) + (UInt32)((bitLength % 8 > 0) ? 1 : 0);
@@ -1373,15 +1422,49 @@ public:
 
 		return (int)byteArraySize;
 	}
-
-	Bytes ToByteArray(bool includeSignInArray = false) const
+	
+    /// <summary>
+    /// IF YOU USE THIS METHOD, DON'T FEED THE RESULTING BYTE ARRAY TO THE BigInteger(byte[] array) CONSTRUCTOR
+    /// That constructor depends on having a byte array using the Two's Complement convention, where the MSB is either 0 or FF
+    /// This method does not produce an extra byte for the sign, that only happens on the ToSignedByteArray method.
+    ///
+    /// tl;dr:  if the byte array will be used to reconstruct a bigint, use ToSignedByteArray
+    ///         if you just need to manipulate the raw byte array without having to reconstruct a bigint, AND you don't care about sign, use ToUnsignedByteArray.
+    /// </summary>
+    /// <returns></returns>
+	ByteArray ToUnsignedByteArray() const
 	{
 		int bitLength = GetBitLength();
-		UInt32 byteArraySize = (bitLength / 8) + (UInt32)((bitLength % 8 > 0) ? 1 : 0) + (includeSignInArray ? 1 : 0);
-		Bytes result;
+		UInt32 byteArraySize = (bitLength / 8) + (UInt32)((bitLength % 8 > 0) ? 1 : 0);
+		ByteArray result;
 		result.resize(byteArraySize);
 
-		bool applyTwosComplement = includeSignInArray && (_sign == -1);    //only apply two's complement if this number is negative
+		for (UInt32 i = 0, j = 0, end = (UInt32)_data.size(); i < end; i++, j += 4)
+		{
+			Byte bytes[4];
+			memcpy(bytes, &_data[i], 4);
+			for (int k = 0; k < 4; k++)
+			{
+				if (bytes[k] == 0)
+					continue;
+
+				result[j + k] = bytes[k];
+			}
+		}
+
+		return result;
+	}
+	
+
+    //The returned byte array is signed by applying the Two's complement technique for negative numbers
+	ByteArray ToSignedByteArray() const
+	{
+		int bitLength = GetBitLength();
+		UInt32 byteArraySize = (bitLength / 8) + (UInt32)((bitLength % 8 > 0) ? 1 : 0) + 1; //the extra byte is for sign carrying purposes
+		ByteArray result;
+		result.resize(byteArraySize);
+
+		bool applyTwosComplement = _sign == -1;    //only apply two's complement if this number is negative
 
 		for (UInt32 i = 0, j = 0, end = (UInt32)_data.size(); i < end; i++, j += 4)
 		{
@@ -1395,7 +1478,7 @@ public:
 					break;
 
 				if (applyTwosComplement)
-					result[j + k] = (Byte)(bytes[k] ^ 0xFF);
+					result[j + k] = (Byte) ~bytes[k];
 				else
 					result[j + k] = bytes[k];
 			}
@@ -1406,18 +1489,19 @@ public:
 		{
 			TBigInteger tmp = TBigInteger(result, 1) + 1; //create a biginteger with the inverted bits but with positive sign, and add 1.
 
-			result = tmp.ToByteArray(true);     //when we call the ToByteArray asking to include sign, we will get an extra Byte on the array to keep sign information while in Byte[] format
+			result = tmp.ToSignedByteArray();     //when we call the ToByteArray, we will get an extra byte on the array to keep sign information while in byte[] format
 												//but the twos complement logic won't get applied again given the bigint has positive sign.
 
-			result[result.size() - 1] = 0xFF;      //force the MSB to 1's, as this array represents a negative number.
+			result[result.size() - 1] = 0xFF;      //sets the MSB to 1's, as this array represents a negative number.
 		}
 
 		return result;
 	}
 
-	static Bytes ApplyTwosComplement(const Bytes& bytes)
+	template<class Bytes>
+	static ByteArray ApplyTwosComplement(const Bytes& bytes)
 	{
-		Bytes buffer;
+		ByteArray buffer;
 		buffer.resize(bytes.size());
 
 		for (int i = 0, end = (int)bytes.size(); i < end; i++)
@@ -1427,7 +1511,7 @@ public:
 
 		TBigInteger tmp = TBigInteger(buffer, 1) + 1; //create a biginteger with the inverted bits but with positive sign, and add 1. result will remain with positive sign
 
-		buffer = tmp.ToByteArray(true); //when we call the ToByteArray asking to include sign, we will get an extra Byte on the array to make sure sign is correct 
+		buffer = tmp.ToSignedByteArray(); //when we call the ToByteArray asking to include sign, we will get an extra Byte on the array to make sure sign is correct 
 										//but the twos complement logic won't get applied again given the bigint has positive sign.
 
 		return buffer;
@@ -1477,9 +1561,20 @@ String DecimalConversion( const TBigInteger<S>& value, UInt32 decimals, Char dec
 		}
 		if( alwaysShowDecimalPoint || r != TBigInteger<S>::Zero() )
 		{
+			String rstr = r.ToString();
+			UInt32 trailingZeros = 0;
+			for( UInt32 i=(UInt32)rstr.length(); i-->0; ++trailingZeros )
+				if( rstr[i] != '0' )
+					break;
 			String result = q.ToString();
 			result.append({decimalPoint});
-			result.append(r.ToString());
+			for( UInt32 i=(UInt32)rstr.length(); i<decimals; ++i)
+				result.append(PHANTASMA_LITERAL("0"));
+			for( UInt32 i=0, end=(UInt32)rstr.length()-trailingZeros; i<end; ++i)
+			{
+				Char ch[2] = { rstr[i], '\0' };
+				result.append(ch);
+			}
 			return result;
 		}
 		else
@@ -1489,7 +1584,7 @@ String DecimalConversion( const TBigInteger<S>& value, UInt32 decimals, Char dec
 		return value.ToString();
 }
 
-template<bool S, class String>
+template<bool S, class CharArray, class String>
 TBigInteger<S> _DecimalConversion( const String& value, UInt32 decimals, Char decimalPoint='.', Char toleratedSeparator='\0' )
 {
 	int decimalIdx = -1;
@@ -1529,7 +1624,7 @@ TBigInteger<S> _DecimalConversion( const String& value, UInt32 decimals, Char de
 	else
 	{
 		//shift the fractional part over the decimal point
-		PHANTASMA_VECTOR<Char> copy;
+		CharArray copy;
 		copy.resize(value.length());
 		for( int i=0; i<decimalIdx; ++i )
 		{
@@ -1540,16 +1635,20 @@ TBigInteger<S> _DecimalConversion( const String& value, UInt32 decimals, Char de
 			copy[i] = value[i+1];
 		}
 
+		int newLength;
 		if(fractionalDecimals > decimals)//user has provided a value that is too precise. Truncate their input.
 		{
 			int excess = fractionalDecimals - decimals;
 			fractionalDecimals = decimals;
-			copy[value.length()-(excess+1)] = '\0';
+			newLength = (int)value.length()-(excess+1);
 		}
 		else // we shifted everything down one place, so insert a new null terminator in the last place
-			copy[value.length()-1] = '\0';
+		{
+			newLength = (int)value.length()-1;
+		}
+		copy[newLength] = '\0';
 
-		TBigInteger<S> parsed = TBigInteger<S>::Parse(&copy.front());
+		TBigInteger<S> parsed = TBigInteger<S>::Parse(String(&copy.front(), newLength));
 		if( decimals == fractionalDecimals )//easy case, the user input had the exact right number of decimal places! (or too many, but we truncated)
 			return parsed;
 		TBigInteger<S> multiplier = TBigInteger<S>::Pow(10, decimals-fractionalDecimals);
@@ -1559,12 +1658,12 @@ TBigInteger<S> _DecimalConversion( const String& value, UInt32 decimals, Char de
 
 BigInteger DecimalConversion( const String& value, UInt32 decimals, Char decimalPoint='.', Char toleratedSeparator='\0' )
 {
-	return _DecimalConversion<false>( value, decimals, decimalPoint, toleratedSeparator );
+	return _DecimalConversion<false, PHANTASMA_VECTOR<Char>>( value, decimals, decimalPoint, toleratedSeparator );
 }
 
-//SecureBigInteger DecimalConversion( const String& value, UInt32 decimals, Char decimalPoint='.', Char toleratedSeparator='\0' )//todo - secure string class
-//{
-//	return _DecimalConversion<true>( value, decimals, decimalPoint, toleratedSeparator );
-//}
+SecureBigInteger DecimalConversion( const SecureString& value, UInt32 decimals, Char decimalPoint='.', Char toleratedSeparator='\0' )
+{
+	return _DecimalConversion<true, SecureVector<Char>>( value, decimals, decimalPoint, toleratedSeparator );
+}
 
 }

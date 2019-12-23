@@ -1,6 +1,10 @@
 #pragma once
 #include "SecureMemory.h"
 
+//--------------------------------------------------------------
+// Read the "Secure Memory" disclaimer in SecureMemory.h!
+//--------------------------------------------------------------
+
 namespace phantasma {
 
 class SecureByteReader;

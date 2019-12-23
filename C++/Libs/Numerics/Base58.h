@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "BigInteger.h"
-#include "../Security/SecureVector.h"
 #include "../Security/SecureByteArray.h"
+#include "../Security/SecureString.h"
 #include "../Utils/ByteArrayUtils.h"
 #include "../Cryptography/SHA.h"
 
@@ -17,9 +17,57 @@ inline int AlphabetIndexOf( Char in )
 	return -1;
 }
 
-inline PHANTASMA_VECTOR<Byte> Decode(const String& input)
+inline int Decode(Byte* output, int outputLength, const Char* input, int inputLength)
 {
-	PHANTASMA_VECTOR<Byte> tmp;
+	if(!input || inputLength < 0 || outputLength < 0)
+	{
+		PHANTASMA_EXCEPTION("Invalid usage");
+		return -1;
+	}
+	if(inputLength == 0)
+	{
+		inputLength = (int)PHANTASMA_STRLEN(input);
+		if( inputLength == 0 )
+			return 0;
+	}
+
+	BigInteger bi = BigInteger::Zero();
+	for (int i = inputLength - 1; i >= 0; i--)
+	{
+		int index = AlphabetIndexOf(input[i]);
+		if(index < 0)
+		{
+			PHANTASMA_EXCEPTION("invalid character");
+			return -1;
+		}
+
+		bi += BigInteger(index) * BigInteger::Pow(58, inputLength - 1 - i);
+	}
+
+	int leadingZeros = 0;
+	for (int i = 0; i < inputLength && input[i] == Alphabet[0]; i++)
+	{
+		leadingZeros++;
+	}
+
+	int bigIntBytes = bi.ToUnsignedByteArray(0, 0);
+	int bytesRequired = bigIntBytes + leadingZeros;
+	if( !output )
+		return bytesRequired;
+	if( bytesRequired > outputLength )
+		return -1;
+
+	for( int i=0; i<leadingZeros; ++i )
+		output[i] = 0;
+
+	bi.ToUnsignedByteArray(output+leadingZeros, outputLength-leadingZeros);
+	ArrayReverse(output+leadingZeros, bigIntBytes);
+	return bytesRequired;
+}
+
+inline ByteArray Decode(const String& input)
+{
+	ByteArray tmp;
 	if(input.empty())
 	{
 		return tmp;
@@ -38,7 +86,7 @@ inline PHANTASMA_VECTOR<Byte> Decode(const String& input)
 		bi += BigInteger(index) * BigInteger::Pow(58, (int)input.length() - 1 - i);
 	}
 
-	PHANTASMA_VECTOR<Byte> bytes = bi.ToByteArray();
+	ByteArray bytes = bi.ToUnsignedByteArray();
 	ArrayReverse(bytes);
 
 	int leadingZeros = 0;
@@ -52,13 +100,13 @@ inline PHANTASMA_VECTOR<Byte> Decode(const String& input)
 	return tmp;
 }
 
-inline PHANTASMA_VECTOR<Byte> CheckDecode(const String& input)
+inline ByteArray CheckDecode(const String& input)
 {
-	PHANTASMA_VECTOR<Byte> buffer = Decode(input);
+	ByteArray buffer = Decode(input);
 	if (buffer.size() < 4)
 	{
 		PHANTASMA_EXCEPTION("Bad format");
-		return PHANTASMA_VECTOR<Byte>{};
+		return ByteArray{};
 	}
 
 	Byte expected_checksum[32];
@@ -71,24 +119,24 @@ inline PHANTASMA_VECTOR<Byte> CheckDecode(const String& input)
 	if(!PHANTASMA_EQUAL( src_checksum, src_checksum+4, expected_checksum ))
 	{
 		PHANTASMA_EXCEPTION("WIF checksum failed");
-		return PHANTASMA_VECTOR<Byte>{};
+		return ByteArray{};
 	}
 	buffer.resize(buffer.size() - 4);
 	return buffer;
 }
 
-inline int DecodeSecure(Byte* output, int outputSize, const String& input)//todo - secure string
+inline int DecodeSecure(Byte* output, int outputSize, const Char* input, int inputLength)
 {
-	if((!output && outputSize > 0) || outputSize < 0)
+	if((!output && outputSize > 0) || outputSize < 0 || inputLength < 0)
 	{
 		PHANTASMA_EXCEPTION("invalid argument");
 		return 0;
 	}
-	if(input.empty())
+	if(!input || input[0] == '\0')
 		return 0;
 
 	SecureBigInteger bi = SecureBigInteger::Zero();
-	for (int i = (int)input.length() - 1; i >= 0; i--)
+	for (int i = inputLength - 1; i >= 0; i--)
 	{
 		int index = AlphabetIndexOf(input[i]);
 		if(index < 0)
@@ -97,20 +145,20 @@ inline int DecodeSecure(Byte* output, int outputSize, const String& input)//todo
 			return 0;
 		}
 
-		bi += SecureBigInteger(index) * SecureBigInteger::Pow(58, (int)input.length() - 1 - i);
+		bi += SecureBigInteger(index) * SecureBigInteger::Pow(58, inputLength - 1 - i);
 	}
 
-	int numBytes = bi.ToByteArray(0, 0);
+	int numBytes = bi.ToUnsignedByteArray(0, 0);
 	SecureByteArray byteAllocation(numBytes, 0, false);
 	const auto& byteWriter = byteAllocation.Write();
 	Byte* bytes = byteWriter.Bytes();
 
-	bi.ToByteArray(bytes, numBytes);
+	bi.ToUnsignedByteArray(bytes, numBytes);
 
 	ArrayReverse(bytes, numBytes);
 
 	int leadingZeros = 0;
-	for (int i = 0; i < (int)input.length() && input[i] == Alphabet[0]; i++)
+	for (int i = 0; i < inputLength && input[i] == Alphabet[0]; i++)
 	{
 		if( leadingZeros < outputSize )
 			output[leadingZeros] = 0;
@@ -127,9 +175,9 @@ inline int DecodeSecure(Byte* output, int outputSize, const String& input)//todo
 
 	return resultSize;
 }
-inline int CheckDecodeSecure(Byte* output, int outputSize, const String& input)//todo - secure string input
+inline int CheckDecodeSecure(Byte* output, int outputSize, const Char* input, int inputLength)
 {
-	if( outputSize < 0 )
+	if( outputSize < 0 || inputLength < 0 )
 	{
 		PHANTASMA_EXCEPTION("Invalid argument");
 		return 0;
@@ -138,7 +186,7 @@ inline int CheckDecodeSecure(Byte* output, int outputSize, const String& input)/
 	SecureByteArray bufferAlloc(bufferSize, 0, false);
 	const auto& bufferAccess = bufferAlloc.Write();
 	Byte* buffer = bufferAccess.Bytes();
-	int decodedSize = DecodeSecure(buffer, bufferSize, input);
+	int decodedSize = DecodeSecure(buffer, bufferSize, input, inputLength);
 	if (decodedSize < 4)
 	{
 		PHANTASMA_EXCEPTION("Bad format");
@@ -171,12 +219,13 @@ inline int CheckDecodeSecure(Byte* output, int outputSize, const String& input)/
 	return resultSize;
 }
 
-inline String Encode(const Byte* input, int length)
+template<class String, class ByteArray, class BigInteger, class CharArray>
+String TEncode(const Byte* input, int length)
 {
-	if( length == 0 )
+	if( length <= 0 )
 		return String();
 
-	PHANTASMA_VECTOR<Byte> temp;
+	ByteArray temp;
 	temp.resize(length + 1);
 	for (int i=0; i<length; i++)
 	{
@@ -185,8 +234,8 @@ inline String Encode(const Byte* input, int length)
 	temp[length] = 0;
 
 	BigInteger value(temp);
-	PHANTASMA_WIPEMEM(&temp.front(), (int)temp.size());
-	PHANTASMA_VECTOR<Char> sb;
+	CharArray sb;
+	sb.reserve(length);
 	while (value >= 58)
 	{
 		BigInteger mod = value % 58;
@@ -204,9 +253,44 @@ inline String Encode(const Byte* input, int length)
 	}
 	ArrayReverse(sb);
 
-	String result(&sb.front(), sb.size());
-	PHANTASMA_WIPEMEM(&sb.front(), sb.size());
-	return result;
+	return { &sb.front(), (typename String::size_type)sb.size() };
+}
+
+inline String Encode(const Byte* input, int length)
+{
+	return TEncode<String, ByteArray, BigInteger, PHANTASMA_VECTOR<Char>>(input, length);
+}
+
+inline SecureString EncodeSecure(const Byte* input, int length)
+{
+	return TEncode<SecureString, SecureVector<Byte>, SecureBigInteger, SecureVector<Char>>(input, length);
+}
+
+template<class String, class ByteArray, class BigInteger, class CharArray>
+String TCheckEncode(const Byte* input, int length)
+{
+	if( length <= 0 )
+		return String();
+	Byte checksum1[PHANTASMA_SHA256_LENGTH];
+	Byte checksum2[PHANTASMA_SHA256_LENGTH];
+	SHA256(checksum1, PHANTASMA_SHA256_LENGTH, input, length);
+	SHA256(checksum2, PHANTASMA_SHA256_LENGTH, checksum1, PHANTASMA_SHA256_LENGTH);
+
+	ByteArray buffer;
+	buffer.resize(length + 4);
+	PHANTASMA_COPY(input, input+length, &buffer[0]);
+	PHANTASMA_COPY(checksum2, checksum2+4, &buffer[length]);
+
+	return TEncode<String, ByteArray, BigInteger, CharArray>(&buffer.front(), (int)buffer.size());
+}
+
+inline String CheckEncode(const Byte* input, int length)
+{
+	return TCheckEncode<String, ByteArray, BigInteger, PHANTASMA_VECTOR<Char>>(input, length);
+}
+inline SecureString CheckEncodeSecure(const Byte* input, int length)
+{
+	return TCheckEncode<SecureString, SecureVector<Byte>, SecureBigInteger, SecureVector<Char>>(input, length);
 }
 
 }}
