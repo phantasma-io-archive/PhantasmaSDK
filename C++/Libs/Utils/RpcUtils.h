@@ -205,7 +205,7 @@ inline bool GetTxTokensSent(
 
 inline bool GetTxTokensMinted(
 	const rpc::Transaction& tx,
-	PHANTASMA_VECTOR<TokenEventData>& output
+	PHANTASMA_VECTOR<TokenEventData>* output
 )
 {
 	bool any = false;
@@ -214,7 +214,8 @@ inline bool GetTxTokensMinted(
 		const auto& evt = tx.events[i];
 		if( 0 == evt.kind.compare(PHANTASMA_LITERAL("TokenMint")) )
 		{
-			output.push_back(Serialization<TokenEventData>::Unserialize(Base16::Decode(evt.data)));
+			if( output )
+				output->push_back(Serialization<TokenEventData>::Unserialize(Base16::Decode(evt.data)));
 			any = true;
 		}
 	}
