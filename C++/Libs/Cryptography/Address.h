@@ -149,6 +149,8 @@ public:
 		if(textLength == 0)
 		{
 			textLength = (int)PHANTASMA_STRLEN(text);
+			if(textLength == 0)
+				return Address();
 		}
 
 		Char prefix = text[0];
