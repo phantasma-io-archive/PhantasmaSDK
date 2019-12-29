@@ -64,7 +64,8 @@ inline TransactionState SendTransaction(rpc::PhantasmaAPI& api, Transaction& tx,
 	out_txHash = tx.GetHash().ToString();
 	PHANTASMA_TRY
 	{
-		if( out_txHash == api.SendRawTransaction(rawTx.c_str()) )
+		rpc::PhantasmaError err;
+		if( out_txHash == api.SendRawTransaction(rawTx.c_str(), &err) )
 			return TransactionState::Pending;
 	}
 	PHANTASMA_CATCH_ALL()
@@ -93,63 +94,83 @@ inline TransactionState SendTransactionWaitConfirm(rpc::PhantasmaAPI& api, Trans
 	return SendTransactionWaitConfirm(api, tx, txHash, confirmation, fnSleep);
 }
 
+struct TxTokenEvent
+{
+	const rpc::Event* event;
+	TokenEventData data;
+};
+
 // Did an address receive a particular token type from this transaction?
 // Who sent it, how many tokens were received?
 inline bool GetTxTokensReceived(
-	BigInteger& out_value, 
-	String& out_addressFrom, 
+	PHANTASMA_VECTOR<TxTokenEvent>& out_events, 
 	const rpc::Transaction& tx, 
 	const String& addressTo, 
 	const Char* tokenSymbol = PHANTASMA_LITERAL("SOUL"),
-	const Char* chainName = PHANTASMA_LITERAL("main")
-	)
+	const Char* chainName = PHANTASMA_LITERAL("main"),
+	bool singleResult = false )
 {
 	if(!tokenSymbol || tokenSymbol[0] == '\0')
 	{
 		PHANTASMA_EXCEPTION("Invalid usage - must provide a token");
 		return false;
 	}
-	BigInteger value;
-	String receivedChain;
-	for (const auto& evt : tx.events)
+	bool any = false;
+	for (int i=0, end=(int)tx.events.size(); i!=end; ++i)
 	{
-		if( evt.address != addressTo )
+		const auto& evtA = tx.events[i];
+		if( evtA.address != addressTo )
 			continue;
-		EventKind eventKind = StringToEventKind(evt.kind);
+		EventKind eventKind = StringToEventKind(evtA.kind);
 		if(eventKind == EventKind::TokenReceive)
 		{
-			TokenEventData data = Serialization<TokenEventData>::Unserialize(Base16::Decode(evt.data));
-			if( 0!=data.symbol.compare(tokenSymbol) )
+			TokenEventData rcvData = Serialization<TokenEventData>::Unserialize(Base16::Decode(evtA.data));
+			if( 0!=rcvData.symbol.compare(tokenSymbol) )
 				continue;
-			if( chainName && 0!=data.chainName.compare(chainName) )
+			if( chainName && 0!=rcvData.chainName.compare(chainName) )
 				continue;
-			if( data.value.IsZero() )
+			if( rcvData.value.IsZero() )
 				continue;
-			receivedChain = data.chainName;
-			value = data.value;
-			break;
+
+			for (int j=i-1; j>=0; --j)
+			{
+				const auto& evtB = tx.events[j];
+				EventKind eventKind = StringToEventKind(evtB.kind);
+				if(eventKind == EventKind::TokenSend)
+				{
+					TokenEventData sendData = Serialization<TokenEventData>::Unserialize(Base16::Decode(evtB.data));
+					if( rcvData.symbol != sendData.symbol ||
+						rcvData.chainName != sendData.chainName ||
+						rcvData.value != sendData.value )
+						continue;
+					out_events.push_back({&evtB, sendData});
+					any = true;
+					if( singleResult )
+						return true;
+					break;
+				}
+			}
 		}
 	}
-	if( value.IsZero() )
-		return false;
-	for (const auto& evt : tx.events)
+	return any;
+}
+
+inline bool GetTxTokensReceived(
+	BigInteger& out_value, 
+	String& out_addressFrom, 
+	const rpc::Transaction& tx, 
+	const String& addressTo, 
+	const Char* tokenSymbol = PHANTASMA_LITERAL("SOUL"),
+	const Char* chainName = PHANTASMA_LITERAL("main") )
+{
+	PHANTASMA_VECTOR<TxTokenEvent> events;
+	bool any = GetTxTokensReceived(events, tx, addressTo, tokenSymbol, chainName, true);
+	if( any )
 	{
-		EventKind eventKind = StringToEventKind(evt.kind);
-		if(eventKind == EventKind::TokenSend)
-		{
-			TokenEventData data = Serialization<TokenEventData>::Unserialize(Base16::Decode(evt.data));
-			if( 0!=data.symbol.compare(tokenSymbol) )
-				continue;
-			if( data.chainName != receivedChain )
-				continue;
-			if( value != data.value )
-				continue;
-			out_value = value;
-			out_addressFrom = evt.address;
-			return true;
-		}
+		out_value = events.front().data.value;
+		out_addressFrom = events.front().event->address;
 	}
-	return false;
+	return any;
 }
 
 
@@ -205,8 +226,7 @@ inline bool GetTxTokensSent(
 
 inline bool GetTxTokensMinted(
 	const rpc::Transaction& tx,
-	PHANTASMA_VECTOR<TokenEventData>* output
-)
+	PHANTASMA_VECTOR<TokenEventData>* output)
 {
 	bool any = false;
 	for (int i=0, end=(int)tx.events.size(); i!=end; ++i)
