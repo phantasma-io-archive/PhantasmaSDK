@@ -105,27 +105,22 @@ struct TxTokenEvent
 inline bool GetTxTokensReceived(
 	PHANTASMA_VECTOR<TxTokenEvent>& out_events, 
 	const rpc::Transaction& tx, 
-	const String& addressTo, 
+	const Char* addressTo = 0, 
 	const Char* tokenSymbol = PHANTASMA_LITERAL("SOUL"),
 	const Char* chainName = PHANTASMA_LITERAL("main"),
 	bool singleResult = false )
 {
-	if(!tokenSymbol || tokenSymbol[0] == '\0')
-	{
-		PHANTASMA_EXCEPTION("Invalid usage - must provide a token");
-		return false;
-	}
 	bool any = false;
 	for (int i=0, end=(int)tx.events.size(); i!=end; ++i)
 	{
 		const auto& evtA = tx.events[i];
-		if( evtA.address != addressTo )
+		if( addressTo && 0!=evtA.address.compare(addressTo) )
 			continue;
 		EventKind eventKind = StringToEventKind(evtA.kind);
 		if(eventKind == EventKind::TokenReceive)
 		{
 			TokenEventData rcvData = Serialization<TokenEventData>::Unserialize(Base16::Decode(evtA.data));
-			if( 0!=rcvData.symbol.compare(tokenSymbol) )
+			if( tokenSymbol && 0!=rcvData.symbol.compare(tokenSymbol) )
 				continue;
 			if( chainName && 0!=rcvData.chainName.compare(chainName) )
 				continue;
@@ -164,7 +159,7 @@ inline bool GetTxTokensReceived(
 	const Char* chainName = PHANTASMA_LITERAL("main") )
 {
 	PHANTASMA_VECTOR<TxTokenEvent> events;
-	bool any = GetTxTokensReceived(events, tx, addressTo, tokenSymbol, chainName, true);
+	bool any = GetTxTokensReceived(events, tx, addressTo.c_str(), tokenSymbol, chainName, true);
 	if( any )
 	{
 		out_value = events.front().data.value;
@@ -175,19 +170,19 @@ inline bool GetTxTokensReceived(
 
 
 inline bool GetTxTokensSent(
-	BigInteger& out_value, 
-	String& out_addressTo, 
-	const rpc::Transaction& tx, 
-	const String& addressFrom, 
-	const Char* tokenSymbol = PHANTASMA_LITERAL("SOUL"),
-	const Char* tokenIgnore = PHANTASMA_LITERAL("KCAL"),
-	const Char* chainName = PHANTASMA_LITERAL("main")
-)
+	PHANTASMA_VECTOR<TxTokenEvent>& out_events,
+	const rpc::Transaction& tx,
+	const Char* addressFrom = 0,
+	const Char* tokenSymbol = PHANTASMA_LITERAL( "SOUL" ),
+	const Char* tokenIgnore = 0,
+	const Char* chainName = PHANTASMA_LITERAL( "main" ),
+	bool singleResult = false )
 {
+	bool any = false;
 	for (int i=0, end=(int)tx.events.size(); i!=end; ++i)
 	{
 		const auto& evtA = tx.events[i];
-		if( evtA.address != addressFrom )
+		if( addressFrom && 0!=evtA.address.compare(addressFrom) )
 			continue;
 		EventKind eventKind = StringToEventKind(evtA.kind);
 		if(eventKind == EventKind::TokenSend)
@@ -213,29 +208,62 @@ inline bool GetTxTokensSent(
 						rcvData.chainName != sendData.chainName ||
 						rcvData.value != sendData.value )
 						continue;
-					out_value = rcvData.value;
-					out_addressTo = evtB.address;
-					return true;
+					out_events.push_back({&evtB, sendData});
+					any = true;
+					if( singleResult )
+						return true;
+					break;
 				}
 			}
 		}
 	}
-	return false;
+	return any;
+}
+
+inline bool GetTxTokensSent(
+	BigInteger& out_value, 
+	String& out_addressTo, 
+	const rpc::Transaction& tx, 
+	const String& addressFrom, 
+	const Char* tokenSymbol = PHANTASMA_LITERAL("SOUL"),
+	const Char* tokenIgnore = PHANTASMA_LITERAL("KCAL"),
+	const Char* chainName = PHANTASMA_LITERAL("main")
+)
+{
+	PHANTASMA_VECTOR<TxTokenEvent> events;
+	bool any = GetTxTokensSent(events, tx, addressFrom.c_str(), tokenSymbol, tokenIgnore, chainName, true);
+	if( any )
+	{
+		out_value = events.front().data.value;
+		out_addressTo = events.front().event->address;
+	}
+	return any;
 }
 
 
 inline bool GetTxTokensMinted(
 	const rpc::Transaction& tx,
-	PHANTASMA_VECTOR<TokenEventData>* output)
+	PHANTASMA_VECTOR<TxTokenEvent>* output,
+	const Char* addressTo = 0, 
+	const Char* tokenSymbol = 0,
+	const Char* chainName = 0)
 {
+	bool deserialize = tokenSymbol || chainName || output;
 	bool any = false;
 	for (int i=0, end=(int)tx.events.size(); i!=end; ++i)
 	{
 		const auto& evt = tx.events[i];
+		if( addressTo && 0!=evt.address.compare(addressTo) )
+			continue;
 		if( 0 == evt.kind.compare(PHANTASMA_LITERAL("TokenMint")) )
 		{
+			TokenEventData data = deserialize ? Serialization<TokenEventData>::Unserialize(Base16::Decode(evt.data)) : TokenEventData{};
+			if( tokenSymbol && 0!=data.symbol.compare(tokenSymbol) )
+				continue;
+			if( chainName && 0!=data.chainName.compare(chainName) )
+				continue;
 			if( output )
-				output->push_back(Serialization<TokenEventData>::Unserialize(Base16::Decode(evt.data)));
+				output->push_back({&evt, data});
 			any = true;
 		}
 	}

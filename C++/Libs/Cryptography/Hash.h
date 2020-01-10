@@ -96,8 +96,12 @@ public:
 	{
 		return Parse(s.c_str(), (int)s.length());
 	}
-	static Hash Parse(const Char* s, int sLength)
+	static Hash Parse(const Char* s, int sLength=-1)
 	{
+		if(sLength < 0)
+		{
+			sLength = (int)PHANTASMA_STRLEN(s);
+		}
 		if(sLength == 0 )
 		{
 			PHANTASMA_EXCEPTION("string cannot be empty");

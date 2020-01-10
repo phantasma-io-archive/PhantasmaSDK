@@ -150,7 +150,12 @@ public:
 		{
 			textLength = (int)PHANTASMA_STRLEN(text);
 			if(textLength == 0)
-				return Address();
+			{
+				PHANTASMA_EXCEPTION("Invalid address data");
+				if( out_error )
+					*out_error = true;
+				return {};
+			}
 		}
 
 		Char prefix = text[0];
