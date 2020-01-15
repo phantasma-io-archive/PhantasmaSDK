@@ -44,7 +44,7 @@ public:
 		int passwordLength = 0;
 		const char* utf8_password = (char*)GetUTF8Bytes( password, 0, temp, passwordLength );
 
-		Entropy::GetRandomBytes( m_salt, PHANTASMA_AuthenticatedKeyLength );
+		Entropy::GetRandomBytes( m_salt, PHANTASMA_PasswordSaltLength );
 		Entropy::GetRandomBytes( m_nonce, PHANTASMA_AuthenticatedNonceLength );
 
 		PinnedBytes<PHANTASMA_AuthenticatedKeyLength> key;
