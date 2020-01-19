@@ -1600,7 +1600,7 @@ TBigInteger<S> _DecimalConversion( const String& value, UInt32 decimals, Char de
 {
 	int decimalIdx = -1;
 	UInt32 fractionalDecimals = 0;
-	for( int i=0, end=(int)value.length()+1; i!=end; ++i )
+	for( int i=0, end=(int)value.length(); i!=end; ++i )
 	{
 		Char c = value[i];
 		if(c == decimalPoint)

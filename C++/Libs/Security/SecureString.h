@@ -45,7 +45,7 @@ public:
 
 	bool empty() const { return data.empty() || data.front() == '\0'; }
 
-	Char operator[](int i) const { return data[i]; }
+	Char  operator[](int i) const { return data[i]; }
 
 	const Char* c_str() const
 	{
@@ -55,6 +55,9 @@ public:
 	}
 
 	UInt32 length() const { return data.empty() ? 0 : (UInt32)data.size() - 1; }
+
+	void resize(unsigned len) { data.resize(len+1); data[len] = '\0'; }
+	Char* begin() { return data.empty() ? 0 : &data.front(); }
 
 private:
 	SecureVector<Char> data;
