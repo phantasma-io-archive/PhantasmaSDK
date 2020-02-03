@@ -306,6 +306,13 @@ public:
 		return *this;
 	}
 
+	ScriptBuilder& EmitThrow( const ByteArray& data )
+	{
+		Emit( Opcode::THROW );
+		writer.WriteByteArray( data );
+		return *this;
+	}
+
 	ScriptBuilder& EmitLabel( const String& label )
 	{
 		Emit( Opcode::NOP );
