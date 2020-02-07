@@ -34,6 +34,10 @@ public:
 	{
 		return Timespan{ (Int32)(hours * 60 * 60) };
 	}
+	static Timespan FromDays( int days )
+	{
+		return Timespan{ (Int32)(days * 60 * 60 * 24) };
+	}
 };
 
 class Timestamp
@@ -60,6 +64,27 @@ public:
 		constexpr int BufferLength = 512;
 		Char buffer[BufferLength];
 		if(0 == StrFTime( buffer, BufferLength, PHANTASMA_LITERAL("%c"), dateTime ))
+		{
+			PHANTASMA_EXCEPTION("Could not format date/time");
+			buffer[0] = '\0';
+		}
+		return String(buffer);
+	}
+
+	String ToISO8601() const
+	{
+		//todo - not technically defined as the 1970 unix epoch... but probably is in practice...
+		std::time_t value = (std::time_t)Value;
+#ifdef _MSC_VER
+		std::tm timeBuffer;
+		gmtime_s(&timeBuffer, &value);
+		const std::tm* dateTime = &timeBuffer;
+#else
+		const std::tm* dateTime = std::gmtime(&value);
+#endif
+		constexpr int BufferLength = 512;
+		Char buffer[BufferLength];
+		if(0 == StrFTime( buffer, BufferLength, PHANTASMA_LITERAL("%FT%TZ"), dateTime ))
 		{
 			PHANTASMA_EXCEPTION("Could not format date/time");
 			buffer[0] = '\0';
@@ -109,6 +134,31 @@ public:
 		t.tm_mday = day;
 		std::time_t time = _mkgmtime(&t);
 		return Timestamp((UInt32)time);
+	}
+
+	static Timestamp FromISO8601(const Char* input, int inputLength=-1)
+	{
+		if(input && inputLength < 0)
+		{
+			inputLength = (int)PHANTASMA_STRLEN(input);
+		}
+		if(!input ||  inputLength < 19)
+		{
+			PHANTASMA_EXCEPTION("Invalid ISO8601 input string");
+			return Timestamp{};
+		}
+
+		std::tm t = {};
+		t.tm_year = (int)PHANTASMA_STRTOINT(&input[0]) - 1900;
+		t.tm_mon  = (int)PHANTASMA_STRTOINT(&input[5]) - 1;
+		t.tm_mday = (int)PHANTASMA_STRTOINT(&input[8]);
+		t.tm_hour = (int)PHANTASMA_STRTOINT(&input[11]);
+		t.tm_min  = (int)PHANTASMA_STRTOINT(&input[14]);
+		t.tm_sec  = (int)PHANTASMA_STRTOINT(&input[17]);
+		t.tm_isdst = 0;
+		const int millis = inputLength > 20 ? (int)PHANTASMA_STRTOINT(&input[20]) : 0;
+		std::time_t time = _mkgmtime(&t);
+		return Timestamp((UInt32)time + (millis >= 500 ? 1 : 0));
 	}
 
 	int CompareTo( Timestamp other ) const
