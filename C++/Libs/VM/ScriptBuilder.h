@@ -584,7 +584,7 @@ private:
 			Byte temp_regKey = (Byte)(target_reg + 2);
 			LoadIntoReg( sb, temp_regVal, element );
 			LoadIntoReg( sb, temp_regKey, j );
-			sb.EmitPut( temp_regVal, target_reg, temp_regKey )
+			sb.EmitPut( temp_regVal, target_reg, temp_regKey );
 		}
 	}
 

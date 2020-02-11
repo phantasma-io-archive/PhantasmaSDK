@@ -13,7 +13,7 @@ bool StringStartsWith(const String& str, const Char* prefix, int prefixLength=-1
 {
 	if( prefixLength == -1 )
 		prefixLength = (int)PHANTASMA_STRLEN(prefix);
-	if( str.length() < prefixLength )
+	if( (int)str.length() < prefixLength )
 		return false;
 	return PHANTASMA_EQUAL(prefix, prefix+prefixLength, str.c_str());
 }
@@ -149,7 +149,7 @@ inline String FromUTF8Bytes( const ByteArray& bytes )
 template<class ByteArray>
 const Byte* GetUTF8Bytes( const String& string, ByteArray& temp, int& out_numBytes )
 {
-	out_numBytes = string.length();
+	out_numBytes = (int)string.length();
 	return (Byte*)string.c_str();
 }
 template<class ByteArray>

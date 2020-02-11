@@ -102,7 +102,7 @@ int Phantasma_Decrypt(Byte* output, int outputLength, const Byte* encrypted, int
 	return INT_MAX;
 }
 
-bool Phantasma_PasswordToKey( phantasma::Byte* output, const char* password, int passwordLength, const Byte* salt )
+bool Phantasma_PasswordToKey( Byte* output, const char* password, int passwordLength, const Byte* salt )
 {
 	static_assert( crypto_secretbox_KEYBYTES >= crypto_pwhash_BYTES_MIN, "" );
 	static_assert( crypto_secretbox_KEYBYTES <= crypto_pwhash_BYTES_MAX, "" );

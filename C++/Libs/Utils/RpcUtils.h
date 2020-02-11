@@ -28,7 +28,9 @@ inline TransactionState CheckConfirmation(rpc::PhantasmaAPI& api, const Char* tx
 	PHANTASMA_CATCH( e )
 	{
 		err.code = 1;
+#ifdef PHANTASMA_EXCEPTION_ENABLE
 		err.message = FromUTF8(e.what());
+#endif
 	}
 	if( err.code == 0 )
 		return TransactionState::Confirmed;

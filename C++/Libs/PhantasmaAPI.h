@@ -399,10 +399,16 @@
 #endif
 
 #ifndef PHANTASMA_MIN
+# ifdef min
+#  undef min
+# endif
 # define PHANTASMA_MIN(a, b) std::min(a, b)
 #endif
 
 #ifndef PHANTASMA_MAX
+# ifdef max
+#  undef max
+# endif
 # define PHANTASMA_MAX(a, b) std::max(a, b)
 #endif
 
@@ -427,6 +433,7 @@
 #  define PHANTASMA_TRY		    try
 #  define PHANTASMA_CATCH( x )  catch(std::runtime_error& x)
 #  define PHANTASMA_CATCH_ALL() catch(...)
+#  define PHANTASMA_EXCEPTION_ENABLE
 # endif
 #endif
 
@@ -3494,7 +3501,7 @@ namespace json
 			case '{': i = SkipObject(v, valueBegin, out_error); break;
 			case '[': i = SkipArray(v, valueBegin, out_error); break;
 			case '"': i = SkipString(v, valueBegin, out_error); break;
-			case 't': case 'f': case 'n': i = SkipBoolNull(v, i, out_error); break;
+			case 't': case 'f': case 'n': i = SkipBoolNull(v, valueBegin, out_error); break;
 			default:  i = SkipNumber(v, valueBegin, out_error); break;
 			}
 		}
@@ -3630,8 +3637,7 @@ namespace json
 	void AddArray(JSONBuilder& b, const Char* key, Args... args)                          { b.AddArray(key, args...); }
 	PHANTASMA_FUNCTION void EndObject(JSONBuilder& b)                                     { b.EndObject(); }
 #endif
-}
 #endif
 }
-
+}
 #endif

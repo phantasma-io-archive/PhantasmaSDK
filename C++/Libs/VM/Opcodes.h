@@ -1,5 +1,9 @@
 ﻿#pragma once
 
+#ifdef THIS
+# undef THIS
+#endif
+
 namespace phantasma {
 
 enum class Opcode

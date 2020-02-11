@@ -39,6 +39,9 @@
 #endif
 
 namespace phantasma { 
+namespace rpc { 
+struct PhantasmaError;
+}
 
 class ReallocBuffer // buffer class for CURL to write responses into
 {
@@ -108,6 +111,16 @@ public:
 		CURLcode code = curl_easy_perform(m_curl);
 		return code;
 	}
+	CURLcode Get(const char* url)
+	{
+		result.clear();
+		PHANTASMA_STRING fullUrl = host + url;
+		curl_easy_setopt(m_curl, CURLOPT_URL, fullUrl.c_str());
+		curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, (void*)&result);
+		curl_easy_setopt(m_curl, CURLOPT_HTTPGET, 1);
+		CURLcode code = curl_easy_perform(m_curl);
+		return code;
+	}
 };
 
 #ifdef PHANTASMA_RAPIDJSON
@@ -128,7 +141,7 @@ static rapidjson::Document& HttpPost(CurlClient& client, const json::Char* uri, 
 }
 #else
 template<class CurlClient>
-static PHANTASMA_STRING HttpPost(CurlClient& client, const PHANTASMA_CHAR* uri, const PHANTASMA_STRINGBUILDER& data)
+static PHANTASMA_STRING HttpPost(CurlClient& client, const PHANTASMA_CHAR* uri, const PHANTASMA_STRINGBUILDER& data, rpc::PhantasmaError* err)
 {
 	const PHANTASMA_STRING& request = data.str();
 	CURLcode code = client.Post(request.c_str(), request.length(), uri);
