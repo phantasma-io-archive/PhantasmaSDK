@@ -18,9 +18,8 @@ enum class TransactionState
 	Confirmed,
 };
 
-inline TransactionState CheckConfirmation(rpc::PhantasmaAPI& api, const Char* txHash, rpc::Transaction& output)
+inline TransactionState CheckConfirmation(rpc::PhantasmaAPI& api, const Char* txHash, rpc::Transaction& output, rpc::PhantasmaError& err)
 {
-	rpc::PhantasmaError err;
 	PHANTASMA_TRY
 	{
 		output = api.GetTransaction(txHash, &err);
@@ -41,6 +40,11 @@ inline TransactionState CheckConfirmation(rpc::PhantasmaAPI& api, const Char* tx
 	else
 		return TransactionState::Unknown;
 }
+inline TransactionState CheckConfirmation(rpc::PhantasmaAPI& api, const Char* txHash, rpc::Transaction& output)
+{
+	rpc::PhantasmaError err;
+	return CheckConfirmation(api, txHash, output, err);
+}
 
 inline TransactionState WaitForConfirmation(rpc::PhantasmaAPI& api, const Char* txHash, rpc::Transaction& output, FnCallback* fnSleep)
 {
@@ -60,7 +64,7 @@ inline TransactionState WaitForConfirmation(rpc::PhantasmaAPI& api, const Char* 
 	}
 }
 
-inline TransactionState SendTransaction(rpc::PhantasmaAPI& api, Transaction& tx, String& out_txHash)
+inline TransactionState SendTransaction(rpc::PhantasmaAPI& api, const Transaction& tx, String& out_txHash)
 {
 	String rawTx = Base16::Encode(tx.ToByteArray(true));
 	out_txHash = tx.GetHash().ToString();
@@ -76,20 +80,20 @@ inline TransactionState SendTransaction(rpc::PhantasmaAPI& api, Transaction& tx,
 	return TransactionState::Unknown;
 }
 
-inline TransactionState SendTransaction(rpc::PhantasmaAPI& api, Transaction& tx)
+inline TransactionState SendTransaction(rpc::PhantasmaAPI& api, const Transaction& tx)
 {
 	String txHash;
 	return SendTransaction(api, tx, txHash);
 }
 
-inline TransactionState SendTransactionWaitConfirm(rpc::PhantasmaAPI& api, Transaction& tx, String& out_txHash, rpc::Transaction& out_confirmation, FnCallback* fnSleep)
+inline TransactionState SendTransactionWaitConfirm(rpc::PhantasmaAPI& api, const Transaction& tx, String& out_txHash, rpc::Transaction& out_confirmation, FnCallback* fnSleep)
 {
 	if( TransactionState::Unknown == SendTransaction(api, tx, out_txHash) )
 		return TransactionState::Unknown;
 	return WaitForConfirmation(api, out_txHash.c_str(), out_confirmation, fnSleep);
 }
 
-inline TransactionState SendTransactionWaitConfirm(rpc::PhantasmaAPI& api, Transaction& tx, FnCallback* fnSleep)
+inline TransactionState SendTransactionWaitConfirm(rpc::PhantasmaAPI& api, const Transaction& tx, FnCallback* fnSleep)
 {
 	String txHash;
 	rpc::Transaction confirmation;

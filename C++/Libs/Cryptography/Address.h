@@ -151,9 +151,10 @@ public:
 			textLength = (int)PHANTASMA_STRLEN(text);
 			if(textLength == 0)
 			{
-				PHANTASMA_EXCEPTION("Invalid address data");
 				if( out_error )
 					*out_error = true;
+				else
+					PHANTASMA_EXCEPTION("Invalid address data");
 				return {};
 			}
 		}
@@ -164,9 +165,10 @@ public:
 
 		if( decoded != LengthInBytes )
 		{
-			PHANTASMA_EXCEPTION("Invalid address data");
 			if( out_error )
 				*out_error = true;
+			else
+				PHANTASMA_EXCEPTION("Invalid address data");
 			return {};
 		}
 
@@ -176,9 +178,10 @@ public:
 		case 'P':
 			if(addr.Kind() != AddressKind::User)
 			{
-				PHANTASMA_EXCEPTION("address should be user");
 				if( out_error )
 					*out_error = true;
+				else
+					PHANTASMA_EXCEPTION("address should be user");
 				return {};
 			}
 			break;
@@ -186,9 +189,10 @@ public:
 		case 'S':
 			if(addr.Kind() != AddressKind::System)
 			{
-				PHANTASMA_EXCEPTION("address should be system");
 				if( out_error )
 					*out_error = true;
+				else
+					PHANTASMA_EXCEPTION("address should be system");
 				return {};
 			}
 			break;
@@ -196,9 +200,10 @@ public:
 		case 'X':
 			if(addr.Kind() < AddressKind::Interop)
 			{
-				PHANTASMA_EXCEPTION("address should be interop");
 				if( out_error )
 					*out_error = true;
+				else
+					PHANTASMA_EXCEPTION("address should be interop");
 				return {};
 			}
 			break;
@@ -207,9 +212,10 @@ public:
 				StringBuilder sb;
 				sb << "invalid address prefix: ";
 				sb << prefix;
-				PHANTASMA_EXCEPTION_MESSAGE("invalid address prefix", sb.str());
 				if( out_error )
 					*out_error = true;
+				else
+					PHANTASMA_EXCEPTION_MESSAGE("invalid address prefix", sb.str());
 				return {};
 			}
 			break;
