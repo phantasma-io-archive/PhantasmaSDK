@@ -1089,7 +1089,7 @@ public:
 	static bool ParseGetSwapsForAddressResponse(const JSONValue&, PHANTASMA_VECTOR<Swap>& out, PhantasmaError* err=0);
 	
 
-private:
+//private:
 	static JSONValue CheckResponse(JSONValue response, PhantasmaError& out_error);
 	static Balance DeserializeBalance(const JSONValue& json, bool& jsonError);
 	static Interop DeserializeInterop(const JSONValue& json, bool& jsonError);
@@ -1943,6 +1943,26 @@ PHANTASMA_FUNCTION JSONValue PhantasmaJsonAPI::CheckResponse(JSONValue response,
 	JSONValue result = json::LookupValue(response, PHANTASMA_LITERAL("result"), jsonErr);
 	if( !out_error.code && jsonErr )
 		out_error.code = PhantasmaError::InvalidJSON;
+
+	if( json::IsObject(result, jsonErr) && json::HasField(result, PHANTASMA_LITERAL("error"), jsonErr) )
+	{
+		const JSONValue& error = json::LookupValue(result, PHANTASMA_LITERAL("error"), jsonErr);
+		int code = PhantasmaError::RpcMessage;
+		String msg;
+		if(json::IsObject(error, jsonErr))
+		{
+			msg = json::LookupString(error, PHANTASMA_LITERAL("message"), jsonErr);
+			code = json::LookupInt32(error, PHANTASMA_LITERAL("code"), jsonErr);
+		}
+		else
+		{
+			msg = json::LookupString(result, PHANTASMA_LITERAL("error"), jsonErr);
+		}
+		PHANTASMA_EXCEPTION_MESSAGE("Server returned error", msg);
+		out_error.message = msg;
+		out_error.code = code;
+	}
+
 	return result;
 }
 
