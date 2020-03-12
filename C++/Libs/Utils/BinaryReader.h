@@ -13,12 +13,15 @@ class BinaryReader
 {
 	const ByteArray& stream;
 	UInt32 cursor;
+	bool error = false;
 public:
 	BinaryReader(const ByteArray& stream, int cursor = 0)
 		: stream(stream)
 		, cursor((UInt32)cursor)
 	{
 	}
+
+	bool Error() const { return error; }
 
 	UInt32 Position() const { return cursor; }
 
@@ -33,14 +36,20 @@ public:
 	void Read(uint8_t& b) 
 	{
 		if(cursor >= stream.size())
+		{
+			error = true;
 			PHANTASMA_EXCEPTION("stream error");
+		}
 		else
 			b = (uint8_t)stream[cursor++];
 	}
 	void Read( int8_t& b)
 	{
 		if(cursor >= stream.size())
+		{
+			error = true;
 			PHANTASMA_EXCEPTION("stream error");
+		}
 		else
 			b = (int8_t)stream[cursor++];
 	}
@@ -90,6 +99,7 @@ public:
 		{
 			if(cursor >= end)
 			{
+				error = true;
 				PHANTASMA_EXCEPTION("stream error");
 				break;
 			}
@@ -165,8 +175,8 @@ public:
 		{
 			if(numBytes > maxToRead)
 			{
+				error = true;
 				PHANTASMA_EXCEPTION("Unexpected byte array size");
-				//todo - error signal for non-exception builds
 			}
 			Read(bytes, PHANTASMA_MIN((int)numBytes, maxToRead));
 		}
@@ -178,8 +188,8 @@ public:
 		int read = ReadByteArray( bytes, N );
 		if(read != N)
 		{
+			error = true;
 			PHANTASMA_EXCEPTION("Unexpected byte array size");
-			//todo - error signal for non-exception builds
 		}
 	}
 	

@@ -109,6 +109,17 @@ public:
 		return BigInteger(signedArray);
 	}
 
+	static TBigInteger FromSignedArray(const Byte* signedArray, int signedArrayLength)
+	{//todo - do this without the extra copy
+		ByteArray temp;
+		if( signedArray && signedArrayLength > 0 )
+		{
+			temp.resize(signedArrayLength);
+			memcpy(&temp.front(), signedArray, signedArrayLength);
+		}
+		return BigInteger(temp);
+	}
+
     //this constructor assumes that the byte array is in Two's complement notation
 	template<class Bytes>
 	TBigInteger(const Bytes& bytes)
@@ -1296,10 +1307,10 @@ public:
 		PHANTASMA_TRY
 		{
 			bool error = false;
-		output = TBigInteger(input, 10, &error);
-		return error;
+			output = TBigInteger(input, 10, &error);
+			return error;
 		}
-			PHANTASMA_CATCH(...)
+		PHANTASMA_CATCH_ALL()
 		{
 			output = Zero();
 			return false;
@@ -1589,7 +1600,7 @@ TBigInteger<S> _DecimalConversion( const String& value, UInt32 decimals, Char de
 {
 	int decimalIdx = -1;
 	UInt32 fractionalDecimals = 0;
-	for( int i=0, end=(int)value.length()+1; i!=end; ++i )
+	for( int i=0, end=(int)value.length(); i!=end; ++i )
 	{
 		Char c = value[i];
 		if(c == decimalPoint)

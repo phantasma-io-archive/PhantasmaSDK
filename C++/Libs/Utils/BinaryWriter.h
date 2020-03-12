@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TextUtils.h"
+#include "Serializable.h"
 #include "../Numerics/BigInteger.h"
 
 namespace phantasma {
@@ -157,22 +158,25 @@ public:
 	}
 
 
-	void WriteAddress(const Address& address)
-	{
-		WriteSerializable(address);
-	}
-	void WriteHash(const Hash& hash)
-	{
-		WriteSerializable(hash);
-	}
-	void WriteSignature(const Signature& hash)
-	{
-		WriteSerializable(hash);
-	}
 	template<class T, typename std::enable_if<std::is_base_of<Serializable, T>::value>::type* = nullptr>
 	void WriteSerializable(const T& s)
 	{
 		s.SerializeData(*this);
+	}
+	template<class Address>
+	void WriteAddress(const Address& address)
+	{
+		WriteSerializable(address);
+	}
+	template<class Hash>
+	void WriteHash(const Hash& hash)
+	{
+		WriteSerializable(hash);
+	}
+	template<class Signature>
+	void WriteSignature(const Signature& hash)
+	{
+		WriteSerializable(hash);
 	}
 };
 

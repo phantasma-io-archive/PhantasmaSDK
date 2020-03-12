@@ -44,7 +44,7 @@ public:
 		int passwordLength = 0;
 		const char* utf8_password = (char*)GetUTF8Bytes( password, 0, temp, passwordLength );
 
-		Entropy::GetRandomBytes( m_salt, PHANTASMA_AuthenticatedKeyLength );
+		Entropy::GetRandomBytes( m_salt, PHANTASMA_PasswordSaltLength );
 		Entropy::GetRandomBytes( m_nonce, PHANTASMA_AuthenticatedNonceLength );
 
 		PinnedBytes<PHANTASMA_AuthenticatedKeyLength> key;
@@ -79,7 +79,7 @@ public:
 		PHANTASMA_COPY( secret, secret + secretSize, &m_encryptedSecret.front() );
 	}
 
-	bool Decrypt( PhantasmaKeys& output, const Char* password, bool& out_tamperWarning ) const 
+	bool Decrypt( PhantasmaKeys& output, const Char* password, bool* out_tamperWarning=0 ) const 
 	{
 		if( m_encryptedSecret.empty() )
 			return false;
@@ -98,8 +98,10 @@ public:
 		output = { decrypted.bytes, PrivateKey::Length };
 		if( output.Address() != m_address )
 		{
-			out_tamperWarning = true;
+			if( out_tamperWarning )
+				*out_tamperWarning = true;
 			PHANTASMA_EXCEPTION("Invalid EncryptedKeyPair");
+			return false;
 		}
 		return true;
 	}

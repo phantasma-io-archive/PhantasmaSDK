@@ -124,7 +124,7 @@ public:
 	{
 		auto msg = ToByteArray( false );
 
-		m_signatures.clear();
+		//m_signatures.clear();
 		m_signatures.push_back( Signature{keypair.Sign( msg )} );
 	}
 
@@ -209,9 +209,15 @@ public:
 	bool Mine( int targetDifficulty )
 	{
 		if( targetDifficulty < 0 || targetDifficulty > 256 )
+		{
 			PHANTASMA_EXCEPTION( "invalid difficulty" );
+			return false;
+		}
 		if( m_signatures.size() > 0 )
+		{
 			PHANTASMA_EXCEPTION( "cannot be signed" );
+			return false;
+		}
 
 		if(targetDifficulty == 0)
 		{

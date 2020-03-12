@@ -21,9 +21,13 @@ public:
 	{
 	}
 	typedef SecureVector<Char>::size_type size_type;
-	SecureString(const Char* source, size_type length)
+	explicit SecureString(const Char* source, size_type length=0)
 	{
-		if( source && length > 0 )
+		if( !source )
+			return;
+		if( length <= 0 )
+			length = (size_type)PHANTASMA_STRLEN(source);
+		if( length > 0 )
 		{
 			UInt32 size = (UInt32)length + 1;
 			data.resize(size);
@@ -31,7 +35,7 @@ public:
 			data.back() = '\0';
 		}
 	}
-	SecureString(const String& o)
+	explicit SecureString(const String& o)
 	{
 		const Char* source = o.c_str();
 		UInt32 size = (UInt32)(o.length() + 1);
@@ -41,7 +45,7 @@ public:
 
 	bool empty() const { return data.empty() || data.front() == '\0'; }
 
-	Char operator[](int i) const { return data[i]; }
+	Char  operator[](int i) const { return data[i]; }
 
 	const Char* c_str() const
 	{
@@ -51,6 +55,9 @@ public:
 	}
 
 	UInt32 length() const { return data.empty() ? 0 : (UInt32)data.size() - 1; }
+
+	void resize(unsigned len) { data.resize(len+1); data[len] = '\0'; }
+	Char* begin() { return data.empty() ? 0 : &data.front(); }
 
 private:
 	SecureVector<Char> data;
