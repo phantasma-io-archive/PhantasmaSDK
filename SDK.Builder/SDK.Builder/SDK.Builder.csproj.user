@@ -4,6 +4,6 @@
     <ProjectView>ProjectFiles</ProjectView>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>-input.path=C:\code -output.path=C:\Code\PhantasmaSDK\Output -output.version=0.3</StartArguments>
+    <StartArguments>-input.path=C:\code -output.path=C:\Code\PhantasmaSDK\Output -output.version=0.4</StartArguments>
   </PropertyGroup>
 </Project>

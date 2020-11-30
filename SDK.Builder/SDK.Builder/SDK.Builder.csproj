@@ -8,10 +8,11 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>SDK.Builder</RootNamespace>
     <AssemblyName>SDK.Builder</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -72,6 +73,10 @@
       <Project>{7F954600-7C74-4EF4-B328-3E24086CEF47}</Project>
       <Name>Phantasma.Blockchain</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\PhantasmaChain\Phantasma.CodeGen\Phantasma.CodeGen.csproj">
+      <Project>{6cd3d00c-1dc8-4ddf-9205-950896034559}</Project>
+      <Name>Phantasma.CodeGen</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\PhantasmaChain\Phantasma.Core\Phantasma.Core.csproj">
       <Project>{CC44E2FB-304B-4E86-85D1-563EC6210FC9}</Project>
       <Name>Phantasma.Core</Name>
@@ -79,6 +84,14 @@
     <ProjectReference Include="..\..\..\PhantasmaChain\Phantasma.Cryptography\Phantasma.Cryptography.csproj">
       <Project>{58B3FF4B-3DFC-4893-98D1-61090E9747FC}</Project>
       <Name>Phantasma.Cryptography</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\PhantasmaChain\Phantasma.Domain\Phantasma.Domain.csproj">
+      <Project>{d8a80a0f-f572-42b8-9783-21ee70639190}</Project>
+      <Name>Phantasma.Domain</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\PhantasmaChain\Phantasma.Numerics\Phantasma.Numerics.csproj">
+      <Project>{eb4161e2-c607-466d-aac6-c264383d7c4a}</Project>
+      <Name>Phantasma.Numerics</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\PhantasmaChain\Phantasma.P2P\Phantasma.P2P.csproj">
       <Project>{f1ab383f-4a8e-41f3-b8c3-a39862832657}</Project>

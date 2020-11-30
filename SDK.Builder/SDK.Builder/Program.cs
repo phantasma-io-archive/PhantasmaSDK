@@ -1,7 +1,7 @@
 ﻿using Phantasma.Core.Utils;
 using Phantasma.API;
 using Phantasma.Blockchain;
-using Phantasma.Cryptography;
+using Phantasma.Domain;
 
 using LunarLabs.Templates;
 using UnityPacker;
@@ -71,6 +71,22 @@ namespace SDK.Builder
             Console.WriteLine(text);
         }
 
+        static void LogError(string text)
+        {
+            var color = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("ERROR: " + text);
+            Console.ForegroundColor = color;
+        }
+
+        static void LogSuccess(string text)
+        {
+            var color = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(text);
+            Console.ForegroundColor = color;
+        }
+
         static string FixPath(string path)
         {
             String platform = System.Environment.OSVersion.Platform.ToString();
@@ -113,6 +129,10 @@ namespace SDK.Builder
             var dirs = Directory.GetDirectories(sourceDir);
             foreach (var dir in dirs)
             {
+                if (dir.EndsWith("cache", StringComparison.OrdinalIgnoreCase) || dir.EndsWith("bin", StringComparison.OrdinalIgnoreCase) || dir.EndsWith("obj", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
                 CopyFolder(dir, dir.Replace(sourceDir, targetDir), filter);
             }
         }
@@ -181,17 +201,16 @@ namespace SDK.Builder
             }
         }
 
-        static void ZipFile(string inputPath, string outputPath, string version)
+        static bool ZipFile(string inputPath, string outputPath, string version)
         {
-            String platform = System.Environment.OSVersion.Platform.ToString();
+            var platform = System.Environment.OSVersion.Platform.ToString();
             if (platform != "Unix")
             {
-                RunCommand("7z.exe", $@"a {outputPath}Phantasma_SDK_v{version}.zip {inputPath}\*");
+                return RunCommand(@"C:\Program Files\7-Zip\7z.exe", $@"a {outputPath}Phantasma_SDK_v{version}.zip {inputPath}*");
             }
             else
             {
-                string inputDirectory = new DirectoryInfo(inputPath).Name;
-                RunCommand("tar", $"-czf {outputPath}Phantasma_SDK_v{version}.tar.gz -C {inputPath} .");
+                return RunCommand("tar", $"-czf {outputPath}Phantasma_SDK_v{version}.tar.gz -C {inputPath} .");
             }
         }
 
@@ -239,7 +258,7 @@ namespace SDK.Builder
                 }
             }
 
-            var nexus = new Nexus();
+            var nexus = new Nexus("dummy");
             var api = new NexusAPI(nexus);
             foreach (var v in replacements)
             {
@@ -330,18 +349,38 @@ namespace SDK.Builder
             return result;
         }
 
-        private static void GenerateUnityPackage(string dllPath, string bindingPath)
+        private static bool GenerateUnityPackage(string dllPath, string bindingPath)
         {
             dllPath = FixPath(dllPath);
             bindingPath = FixPath(bindingPath);
-            var pluginList = new List<string>() { dllPath + "LunarParser.dll", dllPath + "Phantasma.Core.dll", dllPath + "Phantasma.Cryptography.dll", dllPath + "Phantasma.Numerics.dll" };
+            IEnumerable<string> pluginList = new string[] { 
+                "LunarParser",
+                "BouncyCastle.Crypto",
+                "Phantasma.Core",
+                "Phantasma.CodeGen",
+                "Phantasma.Cryptography",
+                "Phantasma.Domain",
+                "Phantasma.Ethereum",
+                "Phantasma.Numerics",
+                "Phantasma.Storage",
+                "Phantasma.VM",
+            };
+            pluginList = pluginList.Select(x => dllPath + x + ".dll").ToArray();
+
+            foreach (var fileName in pluginList)
+            if (!File.Exists(fileName))
+            {
+                LogError($"Could not file required dlls at {dllPath}");
+                LogError($"Make sure that path exist, with the correct sources and is already compiled");
+                return false;
+            }
 
             var tempPath = @"Phantasma";
             var pluginPath = tempPath + @"\Plugins";
             Directory.CreateDirectory(pluginPath);
             CopyFiles(pluginList, pluginPath);
 
-            CopyFiles(new[] { bindingPath + "PhantasmaAPI.cs" }, tempPath);
+            CopyFiles(new[] { bindingPath + "PhantasmaAPI.Unity.cs" }, tempPath);
 
             // Create a package object from the given directory
             var pack = Package.FromDirectory(tempPath, "Phantasma", true, new string[0], new string[0]);
@@ -349,9 +388,7 @@ namespace SDK.Builder
 
             CopyFiles(new[] { "Phantasma.unitypackage" }, bindingPath);
 
-//            File.Delete(bindingPath + "PhantasmaAPI.cs");
-
-            RecursiveDelete(new DirectoryInfo(tempPath));
+            return true;
         }
 
         static void Main(string[] args)
@@ -369,7 +406,7 @@ namespace SDK.Builder
 
             if (inputPath == outputPath)
             {
-                Log("Input path and output path must be different!");
+                LogError("Input path and output path must be different!");
                 return;
             }
 
@@ -388,7 +425,10 @@ namespace SDK.Builder
                 GenerateBindings(inputPath + @"PhantasmaSDK\" + lang + @"\Bindings\", tempPath + lang + @"\Libs\");
             }
 
-            GenerateUnityPackage(inputPath + @"PhantasmaSDK\SDK.Builder\SDK.Builder\bin\Debug", tempPath + @"C#\Libs\");
+            if (!GenerateUnityPackage(inputPath + @"PhantasmaSpook\Spook.CLI\bin\Debug\netcoreapp3.1", tempPath + @"C#\Libs\"))
+            {
+                return;
+            }
 
 
             String platform = System.Environment.OSVersion.Platform.ToString();
@@ -429,12 +469,18 @@ namespace SDK.Builder
                 
             }
 
-            ZipFile(tempPath, outputPath, versionNumber);
+            bool success = ZipFile(tempPath, outputPath, versionNumber);
 
-            //Log("Cleaning up temporary files...");
-            //RecursiveDelete(new DirectoryInfo(tempPath));
+            Log("Cleaning up temporary files...");
+            RecursiveDelete(new DirectoryInfo(tempPath));
 
-            Log("Success!");
+            if (!success)
+            {
+                LogError("Make sure a supported compression tool is installed in this system...");
+                return;
+            }
+
+            LogSuccess("Success!");
         }
     }
 }
