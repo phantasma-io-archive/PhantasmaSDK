@@ -23,7 +23,7 @@ static_assert(crypto_sign_ed25519_PUBLICKEYBYTES == 32, "Mismatch with the refer
 static_assert(crypto_sign_ed25519_SECRETKEYBYTES == 64, "Mismatch with the reference implementation");
 static_assert(crypto_sign_ed25519_BYTES          == 64, "Mismatch with the reference implementation");
 
-void Ed25519_PublicKeyFromSeed(uint8_t* output, int outputLength, const uint8_t* seed, int seedLength)
+inline void Ed25519_PublicKeyFromSeed(uint8_t* output, int outputLength, const uint8_t* seed, int seedLength)
 {
 	if( (outputLength != crypto_sign_ed25519_PUBLICKEYBYTES) ||
 		(seedLength != crypto_sign_ed25519_SEEDBYTES) )
@@ -33,7 +33,7 @@ void Ed25519_PublicKeyFromSeed(uint8_t* output, int outputLength, const uint8_t*
 	sodium_memzero(secret, crypto_sign_ed25519_SECRETKEYBYTES);
 }
 
-void Ed25519_PrivateKeyFromSeed(uint8_t* output, int outputLength, const uint8_t* seed, int seedLength)
+inline void Ed25519_PrivateKeyFromSeed(uint8_t* output, int outputLength, const uint8_t* seed, int seedLength)
 {
 	if( (outputLength != crypto_sign_ed25519_SECRETKEYBYTES) ||
 		(seedLength != crypto_sign_ed25519_SEEDBYTES) )
@@ -42,7 +42,7 @@ void Ed25519_PrivateKeyFromSeed(uint8_t* output, int outputLength, const uint8_t
 	crypto_sign_ed25519_seed_keypair(publik, output, seed);
 }
 
-uint64_t Ed25519_SignAttached( uint8_t* output, int outputLength, const uint8_t* message, int messageLength, const uint8_t* privateKey, int privateKeyLength )
+inline uint64_t Ed25519_SignAttached( uint8_t* output, int outputLength, const uint8_t* message, int messageLength, const uint8_t* privateKey, int privateKeyLength )
 {
 	if( ((UInt32)outputLength < crypto_sign_ed25519_BYTES + messageLength) ||
 		((UInt32)privateKeyLength != crypto_sign_ed25519_SECRETKEYBYTES) ||
@@ -53,7 +53,7 @@ uint64_t Ed25519_SignAttached( uint8_t* output, int outputLength, const uint8_t*
 	return signed_message_len;
 }
 
-uint64_t Ed25519_SignDetached( uint8_t* output, int outputLength, const uint8_t* message, int messageLength, const uint8_t* privateKey, int privateKeyLength )
+inline uint64_t Ed25519_SignDetached( uint8_t* output, int outputLength, const uint8_t* message, int messageLength, const uint8_t* privateKey, int privateKeyLength )
 {
 	if( ((UInt32)outputLength < crypto_sign_ed25519_BYTES) ||
 		((UInt32)privateKeyLength != crypto_sign_ed25519_SECRETKEYBYTES) ||
@@ -64,7 +64,7 @@ uint64_t Ed25519_SignDetached( uint8_t* output, int outputLength, const uint8_t*
 	return signed_message_len;
 }
 
-bool Ed25519_ValidateAttached( const uint8_t* message, int messageLength, const uint8_t* publicKey, int publicKeyLength )
+inline bool Ed25519_ValidateAttached( const uint8_t* message, int messageLength, const uint8_t* publicKey, int publicKeyLength )
 {
 	if( ((UInt32)messageLength < crypto_sign_ed25519_BYTES) ||
 		((UInt32)publicKeyLength != crypto_sign_ed25519_PUBLICKEYBYTES) )
@@ -72,7 +72,7 @@ bool Ed25519_ValidateAttached( const uint8_t* message, int messageLength, const 
 	return 0 == crypto_sign_ed25519_open(0, 0, message, messageLength, publicKey);
 }
 
-bool Ed25519_ValidateDetached( const uint8_t* signature, int signatureLength, const uint8_t* message, int messageLength, const uint8_t* publicKey, int publicKeyLength )
+inline bool Ed25519_ValidateDetached( const uint8_t* signature, int signatureLength, const uint8_t* message, int messageLength, const uint8_t* publicKey, int publicKeyLength )
 {
 	if( ((UInt32)signatureLength != crypto_sign_ed25519_BYTES) ||
 		((UInt32)publicKeyLength != crypto_sign_ed25519_PUBLICKEYBYTES) ||
@@ -81,7 +81,7 @@ bool Ed25519_ValidateDetached( const uint8_t* signature, int signatureLength, co
 	return 0 == crypto_sign_ed25519_verify_detached(signature, message, messageLength, publicKey);
 }
 
-int Phantasma_Encrypt(Byte* output, int outputLength, const Byte* message, int messageLength, const Byte* nonce, const Byte* key)
+inline int Phantasma_Encrypt(Byte* output, int outputLength, const Byte* message, int messageLength, const Byte* nonce, const Byte* key)
 {
 	if( outputLength < 0 || messageLength < 0 || !message )
 		return -1;
@@ -91,7 +91,7 @@ int Phantasma_Encrypt(Byte* output, int outputLength, const Byte* message, int m
 	return 0;
 }
 
-int Phantasma_Decrypt(Byte* output, int outputLength, const Byte* encrypted, int encryptedLength, const Byte* nonce, const Byte* key)
+inline int Phantasma_Decrypt(Byte* output, int outputLength, const Byte* encrypted, int encryptedLength, const Byte* nonce, const Byte* key)
 {
 	if( outputLength < 0 || encryptedLength < (int)crypto_secretbox_MACBYTES || !encrypted )
 		return -1;
@@ -102,7 +102,7 @@ int Phantasma_Decrypt(Byte* output, int outputLength, const Byte* encrypted, int
 	return INT_MAX;
 }
 
-bool Phantasma_PasswordToKey( Byte* output, const char* password, int passwordLength, const Byte* salt )
+inline bool Phantasma_PasswordToKey( Byte* output, const char* password, int passwordLength, const Byte* salt )
 {
 	static_assert( crypto_secretbox_KEYBYTES >= crypto_pwhash_BYTES_MIN, "" );
 	static_assert( crypto_secretbox_KEYBYTES <= crypto_pwhash_BYTES_MAX, "" );
@@ -123,11 +123,11 @@ bool Phantasma_PasswordToKey( Byte* output, const char* password, int passwordLe
 #define PHANTASMA_LOCKMEM(  pointer, size)  sodium_mlock(  pointer, size)
 #define PHANTASMA_UNLOCKMEM(pointer, size)  sodium_munlock(pointer, size)
 
-#define PHANTASMA_SECURE_ALLOC(size)        sodium_malloc(size)
-#define PHANTASMA_SECURE_FREE(ptr)          sodium_free(ptr)
-#define PHANTASMA_SECURE_NOACCESS(ptr)      sodium_mprotect_noaccess(ptr)
-#define PHANTASMA_SECURE_READONLY(ptr)      sodium_mprotect_readonly(ptr)
-#define PHANTASMA_SECURE_READWRITE(ptr)     sodium_mprotect_readwrite(ptr)
+#define PHANTASMA_SECURE_ALLOC(size)          sodium_malloc(size)
+#define PHANTASMA_SECURE_FREE(ptr)            sodium_free(ptr)
+#define PHANTASMA_SECURE_NOACCESS(ptr, size)  sodium_mprotect_noaccess(ptr)
+#define PHANTASMA_SECURE_READONLY(ptr, size)  sodium_mprotect_readonly(ptr)
+#define PHANTASMA_SECURE_READWRITE(ptr, size) sodium_mprotect_readwrite(ptr)
 
 #define PHANTASMA_Ed25519_PublicKeyFromSeed(output, outputLength, seed, seedLength)                                        \
                   Ed25519_PublicKeyFromSeed(output, outputLength, seed, seedLength)

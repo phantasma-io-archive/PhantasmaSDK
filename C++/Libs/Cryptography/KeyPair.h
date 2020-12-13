@@ -97,27 +97,32 @@ public:
 	}
 	static PhantasmaKeys FromWIF(const Char* wif, int wifStringLength=0)
 	{
-		if( wifStringLength == 0 )
-		{
-			wifStringLength = (int)PHANTASMA_STRLEN(wif);
-		}
-
-		if( !wif || wif[0] == '\0' || wifStringLength <= 0 )
-		{
-			PHANTASMA_EXCEPTION( "WIF required" );
-			Byte nullKey[PrivateKey::Length] = {};
-			return PhantasmaKeys( nullKey, PrivateKey::Length );
-		}
-
 		PinnedBytes<34> data;
-		int size = Base58::CheckDecodeSecure(data.bytes, 34, wif, wifStringLength);
-		if( size != 34 || data.bytes[0] != 0x80 || data.bytes[33] != 0x01 )
+		if( !DecodeWIF(data, wif, wifStringLength) )
 		{
 			PHANTASMA_EXCEPTION( "Invalid WIF format" );
 			Byte nullKey[PrivateKey::Length] = {};
 			return PhantasmaKeys( nullKey, PrivateKey::Length );
 		}
 		return { &data.bytes[1], 32 };
+	}
+
+	static bool DecodeWIF(PinnedBytes<34>& out, const Char* wif, int wifStringLength=0)
+	{
+		if( wifStringLength == 0 )
+		{
+			wifStringLength = (int)PHANTASMA_STRLEN(wif);
+		}
+		if( !wif || wif[0] == '\0' || wifStringLength <= 0 )
+		{
+			return false;
+		}
+		int size = Base58::CheckDecodeSecure(out.bytes, 34, wif, wifStringLength);
+		if( size != 34 || out.bytes[0] != 0x80 || out.bytes[33] != 0x01 )
+		{
+			return false;
+		}
+		return true;
 	}
 
 	SecureString ToWIF() const

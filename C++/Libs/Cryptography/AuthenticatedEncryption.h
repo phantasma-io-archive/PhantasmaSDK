@@ -13,7 +13,7 @@ namespace Encryption {
 // if output == nullptr, returns required outputLength
 // if invalid arguments (negative sizes, incorrect salt/key sizes), returns -1 (or throws if exceptions enabled)
 // returns 0 on success
-int Encrypt(phantasma::Byte* output, int outputLength, const phantasma::Byte* message, int messageLength, const phantasma::Byte* nonce, int nonceLength, const phantasma::Byte* key, int keyLength)
+inline int Encrypt(phantasma::Byte* output, int outputLength, const phantasma::Byte* message, int messageLength, const phantasma::Byte* nonce, int nonceLength, const phantasma::Byte* key, int keyLength)
 {
 	int result = -1;
 	if( !output || (nonceLength == PHANTASMA_AuthenticatedNonceLength && keyLength == PHANTASMA_AuthenticatedKeyLength) )
@@ -29,7 +29,7 @@ int Encrypt(phantasma::Byte* output, int outputLength, const phantasma::Byte* me
 // if invalid arguments (negative sizes, incorrect salt/key sizes), returns -1 (or throws if exceptions enabled)
 // returns 0 on success
 // return INT_MAX on decryption failure (bad key/nonce)
-int Decrypt( phantasma::Byte* output, int outputLength, const phantasma::Byte* encrypted, int encryptedLength, const phantasma::Byte* nonce, int nonceLength, const phantasma::Byte* key, int keyLength )
+inline int Decrypt( phantasma::Byte* output, int outputLength, const phantasma::Byte* encrypted, int encryptedLength, const phantasma::Byte* nonce, int nonceLength, const phantasma::Byte* key, int keyLength )
 {
 	int result = -1;
 	if( !output || (nonceLength == PHANTASMA_AuthenticatedNonceLength && keyLength == PHANTASMA_AuthenticatedKeyLength) )
@@ -42,7 +42,7 @@ int Decrypt( phantasma::Byte* output, int outputLength, const phantasma::Byte* e
 }
 
 
-bool PasswordToKey( phantasma::Byte* output, int outputLength, const char* password, int passwordLength, const Byte* salt, int saltLength )
+inline bool PasswordToKey( phantasma::Byte* output, int outputLength, const char* password, int passwordLength, const phantasma::Byte* salt, int saltLength )
 {
 	if( !output || !salt || !password || passwordLength <= 0 || outputLength != PHANTASMA_AuthenticatedKeyLength || saltLength != PHANTASMA_PasswordSaltLength ||
 		!PHANTASMA_PasswordToKey(output, password, passwordLength, salt) )
@@ -51,6 +51,25 @@ bool PasswordToKey( phantasma::Byte* output, int outputLength, const char* passw
 		return false;
 	}
 	return true;
+}
+
+inline bool EncryptSessionData(phantasma::ByteArray& result, const phantasma::Byte* message, int messageLength, const phantasma::Byte* password=0, int passwordLength=0)
+{
+#ifdef PHANTASMA_ENCRYPT_SESSION_DATA
+	return PHANTASMA_ENCRYPT_SESSION_DATA(result, message, messageLength, password, passwordLength);
+#else
+	return false;
+#endif
+}
+
+template<class SecureByteArray>
+bool DecryptSessionData(SecureByteArray& result, const phantasma::Byte* data, int dataLength, const phantasma::Byte* password=0, int passwordLength=0)
+{
+#ifdef PHANTASMA_ENCRYPT_SESSION_DATA
+	return PHANTASMA_DECRYPT_SESSION_DATA(result, data, dataLength, password, passwordLength);
+#else
+	return false;
+#endif
 }
 
 }}

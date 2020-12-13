@@ -59,6 +59,7 @@ public:
 		int result = Encryption::Encrypt(&m_encryptedSecret.front(), encryptedSize, privateKey, privateKeyLength, m_nonce, PHANTASMA_AuthenticatedNonceLength, key.bytes, PHANTASMA_AuthenticatedKeyLength);
 		if(result != 0)
 		{
+			m_encryptedSecret.clear();
 			PHANTASMA_EXCEPTION("Internal error");
 		}
 	}
@@ -79,6 +80,8 @@ public:
 		PHANTASMA_COPY( secret, secret + secretSize, &m_encryptedSecret.front() );
 	}
 
+	bool IsEmpty() const { return m_encryptedSecret.empty(); }
+
 	bool Decrypt( PhantasmaKeys& output, const Char* password, bool* out_tamperWarning=0 ) const 
 	{
 		if( m_encryptedSecret.empty() )
@@ -91,7 +94,7 @@ public:
 		Encryption::PasswordToKey( key.bytes, PHANTASMA_AuthenticatedKeyLength, utf8_password, passwordLength, m_salt, PHANTASMA_PasswordSaltLength );
 
 		PinnedBytes<PrivateKey::Length> decrypted;
-		int result = Encryption::Decrypt(decrypted.bytes, PrivateKey::Length, &m_encryptedSecret.front(), m_encryptedSecret.size(), m_nonce, PHANTASMA_AuthenticatedNonceLength, key.bytes, PHANTASMA_AuthenticatedKeyLength);
+		int result = Encryption::Decrypt(decrypted.bytes, PrivateKey::Length, &m_encryptedSecret.front(), (int)m_encryptedSecret.size(), m_nonce, PHANTASMA_AuthenticatedNonceLength, key.bytes, PHANTASMA_AuthenticatedKeyLength);
 		if( result != 0 )
 			return false;
 
@@ -121,7 +124,7 @@ public:
 
 	static EncryptedKeyPair FromText( const String& text, bool* out_error=0 )
 	{
-		return FromText( text.c_str(), text.length(), out_error );
+		return FromText( text.c_str(), (int)text.length(), out_error );
 	}
 	static EncryptedKeyPair FromText( const Char* begin, int textLength=0, bool* out_error=0 )
 	{
@@ -203,7 +206,7 @@ public:
 			if(!PHANTASMA_EQUAL( storedHash, storedHash+PHANTASMA_SHA256_LENGTH, computedHash ))
 				break;
 
-			return EncryptedKeyPair(address, salt, nonce, &secret.front(), secret.size());
+			return EncryptedKeyPair(address, salt, nonce, &secret.front(), (int)secret.size());
 		}
 		if( out_error )
 			*out_error = true;
@@ -222,7 +225,7 @@ public:
 		}
 
 		const Byte* data = begin;
-		data += Address::LengthInBytes;
+		data += addressBytes;
 		const Byte* salt = data;
 		data += saltBytes;
 		const Byte* nonce = data;
@@ -253,11 +256,11 @@ public:
 			return EncryptedKeyPair();
 		}
 
-		return EncryptedKeyPair(Address(begin, Address::LengthInBytes), salt, nonce, secret, secretBytes);
+		return EncryptedKeyPair(Address(begin, addressBytes), salt, nonce, secret, secretBytes);
 	}
 	static EncryptedKeyPair FromBytes( const ByteArray& bytes, bool* out_error=0 )
 	{
-		return FromBytes( bytes.empty()?0:&bytes.front(), bytes.size(), out_error );
+		return FromBytes( bytes.empty()?0:&bytes.front(), (int)bytes.size(), out_error );
 	}
 
 	String ToText() const
@@ -304,7 +307,7 @@ public:
 			return ByteArray();
 		}
 
-		Int32 secretBytes = m_encryptedSecret.size();
+		Int32 secretBytes = (Int32)m_encryptedSecret.size();
 
 		ByteArray result;
 		result.resize(addressBytes + saltBytes + nonceBytes + secretHeaderBytes + secretBytes + hashBytes);

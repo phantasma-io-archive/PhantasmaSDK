@@ -29,7 +29,7 @@ public:
 			PHANTASMA_EXCEPTION("Invalid size");
 			return;
 		}
-		m_data = (Byte*)PHANTASMA_SECURE_ALLOC(size);
+		m_data = (Byte*)PHANTASMA_SECURE_ALLOC(((size+PHANTASMA_SECURE_ALLOC_ALIGNMENT-1)/PHANTASMA_SECURE_ALLOC_ALIGNMENT)*PHANTASMA_SECURE_ALLOC_ALIGNMENT);
 		if( data )
 		{
 			PHANTASMA_COPY(data, data+size, m_data);
@@ -41,12 +41,17 @@ public:
 
 		if( protectAccess )
 		{
-			PHANTASMA_SECURE_NOACCESS(m_data);
+			m_encrypted = PHANTASMA_SECURE_ENCRYPT_MEMORY(m_data, m_size);
+			PHANTASMA_SECURE_NOACCESS(m_data, m_size);
 		}
 	}
 	SecureByteArray(SecureByteArray&& other)
 		: m_data(other.m_data) 
 		, m_size(other.m_size)
+		, m_readers(other.m_readers)
+		, m_writers(other.m_writers)
+		, m_encrypted(other.m_encrypted)
+		, m_protectAccess(other.m_protectAccess)
 	{
 		other.m_data = 0;
 	}
@@ -74,10 +79,16 @@ public:
 		}
 		m_data = other.m_data;
 		m_size = other.m_size;
+		m_readers = other.m_readers;
+		m_writers = other.m_writers;
+		m_encrypted = other.m_encrypted;
+		m_protectAccess = other.m_protectAccess;
 		other.m_data = 0;
+		return *this;
 	}
 	SecureByteArray& operator=( const SecureByteArray& other );
 
+	bool             Empty() const { return m_size == 0; }
 	UInt32           Size() const { return (UInt32)m_size; }
 	SecureByteReader Read() const;
 	SecureByteWriter Write();
@@ -93,7 +104,8 @@ private:
 		--m_readers;
 		if( m_protectAccess && m_readers == 0 && m_writers == 0 )
 		{
-			PHANTASMA_SECURE_NOACCESS(m_data);
+			m_encrypted = PHANTASMA_SECURE_ENCRYPT_MEMORY(m_data, m_size);
+			PHANTASMA_SECURE_NOACCESS(m_data, m_size);
 		}
 		if(m_readers < 0)
 		{
@@ -109,11 +121,17 @@ private:
 		--m_writers;
 		if( m_protectAccess && m_readers == 0 && m_writers == 0 )
 		{
-			PHANTASMA_SECURE_NOACCESS(m_data);
+			m_encrypted = PHANTASMA_SECURE_ENCRYPT_MEMORY(m_data, m_size);
+			PHANTASMA_SECURE_NOACCESS(m_data, m_size);
 		}
 		else if( m_protectAccess && m_writers == 0 )
 		{
-			PHANTASMA_SECURE_READONLY(m_data);
+			if( m_encrypted )
+			{
+				PHANTASMA_SECURE_READWRITE(m_data, m_size);
+				m_encrypted = !PHANTASMA_SECURE_DECRYPT_MEMORY(m_data, m_size);
+			}
+			PHANTASMA_SECURE_READONLY(m_data, m_size);
 		}
 		if(m_writers < 0)
 		{
@@ -121,11 +139,12 @@ private:
 		}
 	}
 
-	Byte* m_data = 0;
-	int   m_size = 0;
-	mutable int m_readers = 0;
-	int m_writers = 0;
-	bool m_protectAccess = true;
+	        Byte* m_data = 0;
+	        int   m_size = 0;
+	mutable int   m_readers = 0;
+	        int   m_writers = 0;
+	        bool  m_protectAccess = true;
+	mutable bool  m_encrypted = false;
 };
 
 class SecureByteReader
@@ -197,7 +216,7 @@ inline SecureByteArray& SecureByteArray::operator=( const SecureByteArray& other
 	bool protectAccess = other.m_protectAccess;
 	m_protectAccess = protectAccess;
 	m_size = size;
-	m_data = (Byte*)PHANTASMA_SECURE_ALLOC(size);
+	m_data = (Byte*)PHANTASMA_SECURE_ALLOC(((size+PHANTASMA_SECURE_ALLOC_ALIGNMENT-1)/PHANTASMA_SECURE_ALLOC_ALIGNMENT)*PHANTASMA_SECURE_ALLOC_ALIGNMENT);
 	if( other.m_data )
 	{
 		const auto& read = other.Read();
@@ -209,16 +228,24 @@ inline SecureByteArray& SecureByteArray::operator=( const SecureByteArray& other
 	}
 	if( protectAccess )
 	{
-		PHANTASMA_SECURE_NOACCESS(m_data);
+		m_encrypted = PHANTASMA_SECURE_ENCRYPT_MEMORY(m_data, m_size);
+		PHANTASMA_SECURE_NOACCESS(m_data, m_size);
 	}
 	return *this;
 }
 
 inline SecureByteReader SecureByteArray::Read() const
 {
+	if( !m_size )
+		return { 0, 0, 0 };
 	if( m_protectAccess && m_readers == 0 && m_writers == 0 )
 	{
-		PHANTASMA_SECURE_READONLY(m_data);
+		if( m_encrypted )
+		{
+			PHANTASMA_SECURE_READWRITE(m_data, m_size);
+			m_encrypted = !PHANTASMA_SECURE_DECRYPT_MEMORY(m_data, m_size);
+		}
+		PHANTASMA_SECURE_READONLY(m_data, m_size);
 	}
 	++m_readers;
 	return { m_data, this, m_size };
@@ -226,9 +253,13 @@ inline SecureByteReader SecureByteArray::Read() const
 
 inline SecureByteWriter SecureByteArray::Write()
 {
+	if( !m_size )
+		return { 0, 0, 0 };
 	if( m_protectAccess && m_writers == 0 )
 	{
-		PHANTASMA_SECURE_READWRITE(m_data);
+		PHANTASMA_SECURE_READWRITE(m_data, m_size);
+		if( m_encrypted )
+			m_encrypted = !PHANTASMA_SECURE_DECRYPT_MEMORY(m_data, m_size);
 	}
 	++m_writers;
 	return { m_data, this, m_size };
