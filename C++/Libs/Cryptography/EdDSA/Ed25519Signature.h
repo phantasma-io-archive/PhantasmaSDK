@@ -30,6 +30,11 @@ public:
 			: Ed25519Signature(signature.empty() ? 0 : &signature.front(), (int)signature.size())
 	{
 	}
+	Ed25519Signature& operator=(const Ed25519Signature& o)
+	{
+		PHANTASMA_COPY(o.bytes, o.bytes+Length, bytes);
+		return *this;
+	}
 
 	constexpr static int Length = 64;
 	constexpr static SignatureKind Kind = SignatureKind::Ed25519;
@@ -76,9 +81,9 @@ public:
 	}
 	
 	template<class IKeyPair>
-	static Ed25519Signature Generate(const IKeyPair& keypair, const ByteArray& message)
+	static Ed25519Signature Generate(const IKeyPair& keypair, const Byte* message, int messageLength)
 	{
-		if(message.empty())
+		if(!message || messageLength <=0)
 		{
 			PHANTASMA_EXCEPTION("Can't sign an empty message");
 			return Ed25519Signature();
@@ -88,8 +93,18 @@ public:
 			SecureByteReader read = keypair.PrivateKey().Read();
 			Ed25519::ExpandedPrivateKeyFromSeed( expandedPrivateKey.bytes, 64, read.Bytes(), PrivateKey::Length );
 		}
-		ByteArray sign = Ed25519::Sign( &message.front(), (int)message.size(), expandedPrivateKey.bytes, 64 );
+		ByteArray sign = Ed25519::Sign( message, messageLength, expandedPrivateKey.bytes, 64 );
 		return Ed25519Signature(sign);
+	}
+	template<class IKeyPair>
+	static Ed25519Signature Generate(const IKeyPair& keypair, const ByteArray& message)
+	{
+		if( message.empty() )
+		{
+			PHANTASMA_EXCEPTION("Can't sign an empty message");
+			return Ed25519Signature();
+		}
+		return Generate(keypair, &message.front(), (int)message.size());
 	}
 private:
 	Byte bytes[Length];

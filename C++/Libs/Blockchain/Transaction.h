@@ -81,6 +81,11 @@ public:
 		: Transaction(nexusName, chainName, script, expiration, GetUTF8Bytes(payload, temp.buffer, temp.numBytes), temp.numBytes)
 	{
 	}
+
+	Transaction( const Char* nexusName, const Char* chainName, const ByteArray& script, Timestamp expiration, const ByteArray& payload )
+		: Transaction(nexusName, chainName, script, expiration, payload.empty() ? 0 : &payload.front(), (int)payload.size())
+	{
+	}
 	
     // transactions are always created unsigned, call Sign() to generate signatures
 	Transaction( const Char* nexusName, const Char* chainName, const ByteArray& script, Timestamp expiration, const Byte* payload=0, int payloadLength=0 )
@@ -176,20 +181,22 @@ public:
 	template<class BinaryReader>
 	void UnserializeData( BinaryReader& reader )
 	{
-		m_nexusName = reader.ReadVarString();
-		m_chainName = reader.ReadVarString();
+		reader.ReadVarString(m_nexusName);
+		reader.ReadVarString(m_chainName);
 		reader.ReadByteArray(m_script);
-		m_expiration = reader.ReadUInt32();
+		reader.Read(m_expiration.Value);
 		reader.ReadByteArray(m_payload);
 
 		// check if we have some signatures attached
 		PHANTASMA_TRY
 		{
-			int signatureCount = (int)reader.ReadVarInt();
+			Int64 varInt{};
+			reader.ReadVarInt(varInt);
+			int signatureCount = (int)varInt;
 			m_signatures.resize(signatureCount);
 			for(int i = 0; i < signatureCount; i++)
 			{
-				m_signatures[i] = reader.ReadSignature();
+				reader.ReadSignature(m_signatures[i]);
 			}
 		}
 		PHANTASMA_CATCH(...)
