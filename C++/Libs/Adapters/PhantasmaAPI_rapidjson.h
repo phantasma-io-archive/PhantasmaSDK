@@ -48,7 +48,7 @@ namespace json {
 	inline bool                    LookupBool(   const rapidjson::Value& v, const Char* field, bool& out_error) { return v[field].IsBool()   ? v[field].GetBool() : (out_error=true, false); }
 	inline int32_t                 LookupInt32(  const rapidjson::Value& v, const Char* field, bool& out_error) { return v[field].IsString() ? ( int32_t)std::strtoll(v[field].GetString(), 0, 10) : (v[field].IsInt()  ? v[field].GetInt()  : (out_error=true, 0)); }
 	inline uint32_t                LookupUInt32( const rapidjson::Value& v, const Char* field, bool& out_error) { return v[field].IsString() ? (uint32_t)std::strtoll(v[field].GetString(), 0, 10) : (v[field].IsUint() ? v[field].GetUint() : (out_error=true, 0)); }
-	inline String                  LookupString( const rapidjson::Value& v, const Char* field, bool& out_error) { return (String)( v[field].IsString() ? v[field].GetString() : (out_error=true, "")); }
+	inline String                  LookupString( const rapidjson::Value& v, const Char* field, bool& out_error) { return (String)( v[field].IsString() ? v[field].GetString() : ""); }
 	inline const rapidjson::Value& LookupValue(  const rapidjson::Value& v, const Char* field, bool& out_error) { return v[field]; }
 	inline const rapidjson::Value& LookupArray(  const rapidjson::Value& v, const Char* field, bool& out_error) { return v[field]; }
 	inline bool                    HasField(     const rapidjson::Value& v, const Char* field, bool& out_error) { return v.HasMember(field); }
@@ -56,7 +56,7 @@ namespace json {
 	inline bool                    AsBool(       const rapidjson::Value& v,                    bool& out_error) { return v.IsBool() ? v.GetBool() : (out_error=true, 0); }
 	inline int32_t                 AsInt32(      const rapidjson::Value& v,                    bool& out_error) { return v.IsString() ? ( int32_t)std::strtoll(v.GetString(), 0, 10) : (v.IsInt() ? v.GetInt() : (out_error=true, 0)); }
 	inline uint32_t                AsUInt32(     const rapidjson::Value& v,                    bool& out_error) { return v.IsString() ? (uint32_t)std::strtoll(v.GetString(), 0, 10) : (v.IsUint() ? v.GetUint() : (out_error=true, 0)); }
-	inline String                  AsString(     const rapidjson::Value& v,                    bool& out_error) { return (String)(v.IsString() ? v.GetString() : (out_error=true, "")); }
+	inline String                  AsString(     const rapidjson::Value& v,                    bool& out_error) { return (String)(v.IsString() ? v.GetString() : ""); }
 	inline const rapidjson::Value& AsArray(      const rapidjson::Value& v,                    bool& out_error) { return v; }
 	inline bool                    IsArray(      const rapidjson::Value& v,                    bool& out_error) { return v.IsArray(); }
 	inline bool                    IsObject(     const rapidjson::Value& v,                    bool& out_error) { return v.IsObject(); }
@@ -72,6 +72,7 @@ namespace json {
 	inline void AddValues(Builder& b, const Char* arg)                    { b.w.String(arg); }
 	inline void AddValues(Builder& b, int32_t arg)                        { b.w.Int(arg); }
 	inline void AddValues(Builder& b, uint32_t arg)                       { b.w.Int(arg); }
+	inline void AddValues(Builder& b, bool arg)                           { b.w.Bool(arg); }
 	template<class T, class... Args> void AddValues(Builder& b, T arg0, Args... args) 
 	{
 		AddValues(b, arg0);

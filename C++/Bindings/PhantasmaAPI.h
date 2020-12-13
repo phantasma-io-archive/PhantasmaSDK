@@ -258,6 +258,10 @@
 // API configuration section:
 //------------------------------------------------------------------------------
 
+#if !defined(PHANTASMA_PROTOCOL)
+#define PHANTASMA_PROTOCOL 4
+#endif
+
 #if !defined(PHANTASMA_STRING) || !defined(PHANTASMA_JSONDOCUMENT) || !defined(PHANTASMA_JSONVALUE)
 # include <string>
 #endif
@@ -328,6 +332,7 @@
 #  define PHANTASMA_TRY		    try
 #  define PHANTASMA_CATCH( x )  catch(std::runtime_error& x)
 #  define PHANTASMA_CATCH_ALL() catch(...)
+#  define PHANTASMA_EXCEPTION_ENABLE
 # endif
 #endif
 
@@ -577,6 +582,8 @@ private:
 	{{#each types}}static {{#fix-type Key}} Deserialize{{#fix-type Key}}(const JSONValue& json, bool& jsonError);
 	{{/each}}
 
+	static TokenSeriesMode DeserializeTokenSeriesMode(const JSONValue& json, bool& jsonError);
+	static Int32 DeserializeInt32(const JSONValue& json, bool& jsonError);
 	static bool Deserializebool(const JSONValue& json, bool& jsonError);
 };
 
@@ -606,6 +613,16 @@ private:
 PHANTASMA_FUNCTION bool PhantasmaJsonAPI::Deserializebool(const JSONValue& value, bool& jsonErr)
 {
 	return json::AsBool(value, jsonErr);
+}
+
+PHANTASMA_FUNCTION TokenSeriesMode PhantasmaJsonAPI::DeserializeTokenSeriesMode(const JSONValue& value, bool& jsonErr)
+{
+	return (TokenSeriesMode)json::AsInt32(value, jsonErr);
+}
+
+PHANTASMA_FUNCTION Int32 PhantasmaJsonAPI::DeserializeInt32(const JSONValue& value, bool& jsonErr)
+{
+	return json::AsInt32(value, jsonErr);
 }
 
 {{#each types}}
@@ -701,7 +718,7 @@ PHANTASMA_FUNCTION JSONValue PhantasmaJsonAPI::CheckResponse(JSONValue response,
 		{
 			msg = json::LookupString(response, PHANTASMA_LITERAL("error"), jsonErr);
 		}
-		PHANTASMA_EXCEPTION_MESSAGE("Server returned error: %s", msg);
+		PHANTASMA_EXCEPTION_MESSAGE("Server returned error", msg);
 		out_error.message = msg;
 		out_error.code = code;
 		return response;
@@ -715,6 +732,26 @@ PHANTASMA_FUNCTION JSONValue PhantasmaJsonAPI::CheckResponse(JSONValue response,
 	JSONValue result = json::LookupValue(response, PHANTASMA_LITERAL("result"), jsonErr);
 	if( !out_error.code && jsonErr )
 		out_error.code = PhantasmaError::InvalidJSON;
+
+	if( json::IsObject(result, jsonErr) && json::HasField(result, PHANTASMA_LITERAL("error"), jsonErr) )
+	{
+		const JSONValue& error = json::LookupValue(result, PHANTASMA_LITERAL("error"), jsonErr);
+		int code = PhantasmaError::RpcMessage;
+		String msg;
+		if(json::IsObject(error, jsonErr))
+		{
+			msg = json::LookupString(error, PHANTASMA_LITERAL("message"), jsonErr);
+			code = json::LookupInt32(error, PHANTASMA_LITERAL("code"), jsonErr);
+		}
+		else
+		{
+			msg = json::LookupString(result, PHANTASMA_LITERAL("error"), jsonErr);
+		}
+		PHANTASMA_EXCEPTION_MESSAGE("Server returned error", msg);
+		out_error.message = msg;
+		out_error.code = code;
+	}
+
 	return result;
 }
 
