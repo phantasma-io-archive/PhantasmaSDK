@@ -72,6 +72,7 @@ namespace json {
 	inline void AddValues(Builder& b, const Char* arg)                    { b.w.String(arg); }
 	inline void AddValues(Builder& b, int32_t arg)                        { b.w.Int(arg); }
 	inline void AddValues(Builder& b, uint32_t arg)                       { b.w.Int(arg); }
+	inline void AddValues(Builder& b, bool arg)                           { b.w.Bool(arg); }
 	template<class T, class... Args> void AddValues(Builder& b, T arg0, Args... args) 
 	{
 		AddValues(b, arg0);

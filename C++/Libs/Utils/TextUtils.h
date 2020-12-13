@@ -9,7 +9,7 @@
 
 namespace phantasma {
 
-bool StringStartsWith(const String& str, const Char* prefix, int prefixLength=-1)
+inline bool StringStartsWith(const String& str, const Char* prefix, int prefixLength=-1)
 {
 	if( prefixLength == -1 )
 		prefixLength = (int)PHANTASMA_STRLEN(prefix);
@@ -103,6 +103,12 @@ const Byte* GetUTF8Bytes( const Char* string, int length, ByteArray& temp, int& 
 #endif
 	return result;
 }
+template<class ByteArray>
+void CopyUTF8Bytes( const Char* sz, int length, ByteArray& output )
+{
+	int numBytes = 0;
+	GetUTF8Bytes( sz, length, output, numBytes );
+}
 
 inline String FromUTF8( const char* src )
 {
@@ -164,6 +170,20 @@ const Byte* GetUTF8Bytes( const Char* sz, int length, ByteArray& temp, int& out_
 	}
 	out_numBytes = length;
 	return (Byte*)sz;
+}
+template<class ByteArray>
+void CopyUTF8Bytes( const Char* sz, int length, ByteArray& output )
+{
+	if( !sz || length < 0 )
+		return;
+	if( length == 0 )
+	{
+		for( const Char* c = sz; *c != '\0'; ++c )
+			++length;
+	}
+	output.resize(length);
+	if( length )
+		memcpy(&output.front(), sz, length);
 }
 
 inline String FromUTF8( const char* bytes )

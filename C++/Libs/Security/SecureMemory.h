@@ -53,17 +53,23 @@
 
 //Used only with allocations from `PHANTASMA_SECURE_ALLOC`. Mark the allocation as non-read / non-write.
 #ifndef PHANTASMA_SECURE_NOACCESS
-# define PHANTASMA_SECURE_NOACCESS(ptr)
+# define PHANTASMA_SECURE_NOACCESS(ptr, size)
 #endif
 
 //Used only with allocations from `PHANTASMA_SECURE_ALLOC`. Mark the allocation as read-only.
 #ifndef PHANTASMA_SECURE_READONLY
-# define PHANTASMA_SECURE_READONLY(ptr)
+# define PHANTASMA_SECURE_READONLY(ptr, size)
 #endif
 
 //Used only with allocations from `PHANTASMA_SECURE_ALLOC`. Mark the allocation as read/write.
 #ifndef PHANTASMA_SECURE_READWRITE
-# define PHANTASMA_SECURE_READWRITE(ptr)
+# define PHANTASMA_SECURE_READWRITE(ptr, size)
+#endif
+
+#ifndef PHANTASMA_SECURE_ENCRYPT_MEMORY
+# define PHANTASMA_SECURE_ALLOC_ALIGNMENT       1
+# define PHANTASMA_SECURE_ENCRYPT_MEMORY(m,l)	false //Make sure that allocations passed to this have been aligned to PHANTASMA_SECURE_ALLOC_ALIGNMENT!
+# define PHANTASMA_SECURE_DECRYPT_MEMORY(m,l)	true
 #endif
 
 namespace phantasma {
@@ -102,6 +108,7 @@ public:
 	{}
 	Byte bytes[N];
 	MemoryPin pin;
+	const static int Length = N;
 };
 
 }

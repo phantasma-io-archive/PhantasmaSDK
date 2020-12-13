@@ -441,14 +441,25 @@ public:
 		return CallInterop(PHANTASMA_LITERAL("Runtime.MintTokens"), from, target, tokenSymbol, amount);
 	}
 
-	ScriptBuilder& MintToken(const String& tokenSymbol, const Address& from, const Address& target, const ByteArray& rom, const ByteArray& ram)
+	ScriptBuilder& MintToken(const String& tokenSymbol, const Address& from, const Address& target, const ByteArray& rom, const ByteArray& ram, const BigInteger& series)
 	{
-		return CallInterop(PHANTASMA_LITERAL("Runtime.MintToken"), from, target, tokenSymbol, rom, ram); 
+#if PHANTASMA_PROTOCOL < 4
+		return CallInterop(PHANTASMA_LITERAL("Runtime.MintToken"), from, target, tokenSymbol, rom, ram);
+#else
+		return CallInterop(PHANTASMA_LITERAL("Runtime.MintToken"), from, target, tokenSymbol, rom, ram, series);
+#endif
 	}
 
-	ScriptBuilder& MintTokenContentsFromRegisters(const String& tokenSymbol, const Address& from, const Address& target, Byte rom_reg, Byte ram_reg)
+	ScriptBuilder& MintTokenContentsFromRegisters(const String& tokenSymbol, const Address& from, const Address& target, Byte rom_reg, Byte ram_reg, const BigInteger& series)
 	{
-		return EmitPush( ram_reg )
+#if PHANTASMA_PROTOCOL >= 4
+		Byte temp_reg = 0;
+		LoadIntoReg(*this, temp_reg, series);
+		return EmitPush(temp_reg)
+#else
+		return (*this)
+#endif
+			.EmitPush( ram_reg )
 			.EmitPush( rom_reg )
 			.CallInterop(PHANTASMA_LITERAL("Runtime.MintToken"), from, target, tokenSymbol); 
 	}
@@ -488,10 +499,15 @@ public:
 		return CallInterop(PHANTASMA_LITERAL("Runtime.TransferToken"), from, Address::FromText(to), tokenSymbol, tokenId);
 	}
 
-	ScriptBuilder& ReadTokenToRegister( const String& tokenSymbol, const BigInteger& nftId, Byte dst_reg)
+	ScriptBuilder& ReadTokenRAMToRegister( const String& tokenSymbol, const BigInteger& nftId, Byte dst_reg)
 	{
+#if PHANTASMA_PROTOCOL < 4
 		return CallInterop(PHANTASMA_LITERAL("Runtime.ReadToken"), tokenSymbol, nftId)
 			.EmitPop(dst_reg);
+#else
+		return CallInterop(PHANTASMA_LITERAL("Runtime.ReadTokenRAM"), tokenSymbol, nftId)
+			.EmitPop(dst_reg);
+#endif
 	}
 
 	ScriptBuilder& WriteTokenFromRegister( const String& tokenSymbol, const BigInteger& nftId, Byte src_reg)

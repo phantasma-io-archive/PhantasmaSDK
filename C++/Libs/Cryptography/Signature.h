@@ -23,6 +23,16 @@ public:
 		, m_signature(other.m_kind, other.m_signature)
 	{
 	}
+	Signature& operator=(const Signature& o)
+	{
+		m_kind = o.m_kind;
+		switch(m_kind)
+		{
+		case SignatureKind::Ed25519: m_signature.ed25519 = o.m_signature.ed25519; break;
+		case SignatureKind::Ring:    m_signature.ring    = o.m_signature.ring;	  break;
+		}
+		return *this;
+	}
 
 	SignatureKind Kind() const { return m_kind; }
 
@@ -40,7 +50,7 @@ public:
 private:
 	struct RingSignature { BigInteger Y0, S; constexpr static int Length = 42; bool operator==( const RingSignature& o ) const {return false;} bool Verify(...)const{return 0;} template<class T>void SerializeData(T&) const {} }; //todo
 
-	const SignatureKind m_kind;
+	SignatureKind m_kind;
 	//I'm implementing polymorphism via a union/switch so that Signatures can be copied around by value and stored in arrays without dynamic memory management
 	union Variant
 	{
@@ -106,7 +116,7 @@ public:
 	}
 
 	template<class BinaryReader>
-	static Signature UnserializeData(BinaryReader& reader)
+	void UnserializeData(BinaryReader& reader)
 	{
 		SignatureKind kind = (SignatureKind)reader.ReadByte();
 		switch(kind)
@@ -115,7 +125,8 @@ public:
 			{
 				Ed25519Signature temp;
 				temp.UnserializeData(reader);
-				return Signature(temp);
+				this->~Signature();
+				new(this)Signature{temp};
 			}
 			//case SignatureKind::Ring:
 			//{
@@ -124,7 +135,6 @@ public:
 			//	return Signature(temp);
 			//}
 		}
-		return Signature();
 	}
 };
 
