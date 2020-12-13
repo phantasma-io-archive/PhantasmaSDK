@@ -116,7 +116,7 @@ inline ByteArray Decode( const Char* input, int inputLength = 0 )
 
 inline ByteArray Decode( const String& input )
 {
-	return Decode( input.c_str(), input.length() );
+	return Decode( input.c_str(), (int)input.length() );
 }
 
 inline int Encode( Char* output, int outputSize, const Byte* input, int inputLength )

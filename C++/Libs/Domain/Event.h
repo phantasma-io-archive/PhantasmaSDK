@@ -62,7 +62,7 @@ enum class EventKind
 	Custom = 64,
 };
 
-const Char* EventKindToString(EventKind k)
+inline const Char* EventKindToString(EventKind k)
 {
 	switch(k)
 	{
@@ -120,7 +120,7 @@ const Char* EventKindToString(EventKind k)
 	}
 }
 
-EventKind StringToEventKind(const String& k)
+inline EventKind StringToEventKind(const String& k)
 {
 	for( int i=0; i<=(int)EventKind::Custom; ++i )
 	{

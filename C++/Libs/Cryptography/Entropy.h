@@ -7,7 +7,7 @@ namespace phantasma {
 
 namespace Entropy
 {
-	void GetRandomBytes( Byte* output, int length )
+	inline void GetRandomBytes( Byte* output, int length )
 	{
 		if(!output || length <= 0)
 		{

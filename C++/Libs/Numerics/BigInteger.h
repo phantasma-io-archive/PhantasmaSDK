@@ -277,6 +277,11 @@ public:
 		TBigInteger bigInteger = Zero();
 		TBigInteger bi = One();
 
+		if (str && strLength == 0)
+		{
+			strLength = (int)PHANTASMA_STRLEN(str);
+		}
+
 		if (strLength == 0 || str[0] == '\0' || (strLength == 1 && str[0] == '0'))
 		{
 			_sign = 0;
@@ -1302,13 +1307,13 @@ public:
 		return TBigInteger(input, radix);
 	}
 
-	static bool TryParse(const String& input, TBigInteger& output)
+	static bool _TryParse(const String& input, TBigInteger& output)
 	{
 		PHANTASMA_TRY
 		{
 			bool error = false;
 			output = TBigInteger(input, 10, &error);
-			return error;
+			return !error;
 		}
 		PHANTASMA_CATCH_ALL()
 		{
@@ -1554,7 +1559,7 @@ public:
 };
 
 template<bool S>
-String DecimalConversion( const TBigInteger<S>& value, UInt32 decimals, Char decimalPoint='.', bool alwaysShowDecimalPoint=false )
+inline String DecimalConversion( const TBigInteger<S>& value, UInt32 decimals, Char decimalPoint='.', bool alwaysShowDecimalPoint=false )
 {
 	//todo - is it better to just convert value to text, and then insert the decimal point in the right place? :D
 	if( decimals > 0 || alwaysShowDecimalPoint )
@@ -1596,7 +1601,7 @@ String DecimalConversion( const TBigInteger<S>& value, UInt32 decimals, Char dec
 }
 
 template<bool S, class CharArray, class String>
-TBigInteger<S> _DecimalConversion( const String& value, UInt32 decimals, Char decimalPoint='.', Char toleratedSeparator='\0' )
+inline TBigInteger<S> _DecimalConversion( const String& value, UInt32 decimals, Char decimalPoint='.', Char toleratedSeparator='\0' )
 {
 	int decimalIdx = -1;
 	UInt32 fractionalDecimals = 0;
@@ -1667,12 +1672,12 @@ TBigInteger<S> _DecimalConversion( const String& value, UInt32 decimals, Char de
 	}
 }
 
-BigInteger DecimalConversion( const String& value, UInt32 decimals, Char decimalPoint='.', Char toleratedSeparator='\0' )
+inline BigInteger DecimalConversion( const String& value, UInt32 decimals, Char decimalPoint='.', Char toleratedSeparator='\0' )
 {
 	return _DecimalConversion<false, PHANTASMA_VECTOR<Char>>( value, decimals, decimalPoint, toleratedSeparator );
 }
 
-SecureBigInteger DecimalConversion( const SecureString& value, UInt32 decimals, Char decimalPoint='.', Char toleratedSeparator='\0' )
+inline SecureBigInteger DecimalConversion( const SecureString& value, UInt32 decimals, Char decimalPoint='.', Char toleratedSeparator='\0' )
 {
 	return _DecimalConversion<true, SecureVector<Char>>( value, decimals, decimalPoint, toleratedSeparator );
 }
