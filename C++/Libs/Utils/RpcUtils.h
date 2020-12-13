@@ -46,17 +46,25 @@ inline TransactionState CheckConfirmation(rpc::PhantasmaAPI& api, const Char* tx
 	return CheckConfirmation(api, txHash, output, err);
 }
 
-inline TransactionState WaitForConfirmation(rpc::PhantasmaAPI& api, const Char* txHash, rpc::Transaction& output, FnCallback* fnSleep)
+inline TransactionState WaitForConfirmation(rpc::PhantasmaAPI* api, int numApi, const Char* txHash, Timestamp expiry, rpc::Transaction& output, FnCallback* fnSleep)
 {
-	for(;;)
+	if( !api || numApi <= 0 )
+		return TransactionState::Unknown;
+	for(int i=0; ; i %= numApi)
 	{
-		TransactionState state = CheckConfirmation( api, txHash, output );
+		TransactionState state = CheckConfirmation( api[i], txHash, output );
 		switch(state)
 		{
 		case TransactionState::Confirmed:
 		case TransactionState::Rejected:
 			return state;
 		default:
+			if( expiry.Value )
+			{
+				Timestamp now = Timestamp::Now();
+				if( now + Timespan::FromSeconds(state == TransactionState::Unknown ? 5 : 10) > expiry )
+					return state;
+			}
 			if( fnSleep )
 				fnSleep();
 			break;
@@ -86,18 +94,35 @@ inline TransactionState SendTransaction(rpc::PhantasmaAPI& api, const Transactio
 	return SendTransaction(api, tx, txHash);
 }
 
-inline TransactionState SendTransactionWaitConfirm(rpc::PhantasmaAPI& api, const Transaction& tx, String& out_txHash, rpc::Transaction& out_confirmation, FnCallback* fnSleep)
+inline TransactionState SendTransactionWaitConfirm(rpc::PhantasmaAPI* api, int numApi, const Transaction& tx, String& out_txHash, rpc::Transaction& out_confirmation, FnCallback* fnSleep)
 {
-	if( TransactionState::Unknown == SendTransaction(api, tx, out_txHash) )
+	if( !api || TransactionState::Unknown == SendTransaction(api[0], tx, out_txHash) )
 		return TransactionState::Unknown;
-	return WaitForConfirmation(api, out_txHash.c_str(), out_confirmation, fnSleep);
+	if(numApi == 1)
+	{
+		//Hack hack //todo clean this up
+		Timestamp end = Timestamp::Now() + Timespan::FromSeconds(3);
+		while(Timestamp::Now() <= end)
+		{
+			if( fnSleep )
+				fnSleep();
+		}
+	}
+	return WaitForConfirmation(api, numApi, out_txHash.c_str(), tx.Expiration(), out_confirmation, fnSleep);
+}
+
+inline TransactionState SendTransactionWaitConfirm(rpc::PhantasmaAPI* api, int numApi, const Transaction& tx, FnCallback* fnSleep)
+{
+	String txHash;
+	rpc::Transaction confirmation;
+	return SendTransactionWaitConfirm(api, numApi, tx, txHash, confirmation, fnSleep);
 }
 
 inline TransactionState SendTransactionWaitConfirm(rpc::PhantasmaAPI& api, const Transaction& tx, FnCallback* fnSleep)
 {
 	String txHash;
 	rpc::Transaction confirmation;
-	return SendTransactionWaitConfirm(api, tx, txHash, confirmation, fnSleep);
+	return SendTransactionWaitConfirm(&api, 1, tx, txHash, confirmation, fnSleep);
 }
 
 struct TxTokenEvent
@@ -168,7 +193,11 @@ inline bool GetTxTokensReceived(
 	bool any = GetTxTokensReceived(events, tx, addressTo.c_str(), tokenSymbol, chainName, true);
 	if( any )
 	{
-		out_value = events.front().data.value;
+		out_value = BigInteger::Zero();
+		for(const TxTokenEvent& ev : events)
+		{
+			out_value += ev.data.value;
+		}
 		out_addressFrom = events.front().event->address;
 	}
 	return any;
@@ -237,7 +266,7 @@ inline bool GetTxTokensSent(
 )
 {
 	PHANTASMA_VECTOR<TxTokenEvent> events;
-	bool any = GetTxTokensSent(events, tx, addressFrom.c_str(), tokenSymbol, tokenIgnore, chainName, true);
+	bool any = GetTxTokensSent(events, tx, addressFrom.c_str(), tokenSymbol, tokenIgnore, chainName);
 	if( any )
 	{
 		out_value = events.front().data.value;
@@ -262,6 +291,64 @@ inline bool GetTxTokensMinted(
 		if( addressTo && 0!=evt.address.compare(addressTo) )
 			continue;
 		if( 0 == evt.kind.compare(PHANTASMA_LITERAL("TokenMint")) )
+		{
+			TokenEventData data = deserialize ? Serialization<TokenEventData>::Unserialize(Base16::Decode(evt.data)) : TokenEventData{};
+			if( tokenSymbol && 0!=data.symbol.compare(tokenSymbol) )
+				continue;
+			if( chainName && 0!=data.chainName.compare(chainName) )
+				continue;
+			if( output )
+				output->push_back({&evt, data});
+			any = true;
+		}
+	}
+	return any;
+}
+
+inline bool GetTxTokensBurnt(
+	const rpc::Transaction& tx,
+	PHANTASMA_VECTOR<TxTokenEvent>* output,
+	const Char* addressFrom = 0, 
+	const Char* tokenSymbol = 0,
+	const Char* chainName = 0)
+{
+	bool deserialize = tokenSymbol || chainName || output;
+	bool any = false;
+	for (int i=0, end=(int)tx.events.size(); i!=end; ++i)
+	{
+		const auto& evt = tx.events[i];
+		if( addressFrom && 0!=evt.address.compare(addressFrom) )
+			continue;
+		if( 0 == evt.kind.compare(PHANTASMA_LITERAL("TokenBurn")) )
+		{
+			TokenEventData data = deserialize ? Serialization<TokenEventData>::Unserialize(Base16::Decode(evt.data)) : TokenEventData{};
+			if( tokenSymbol && 0!=data.symbol.compare(tokenSymbol) )
+				continue;
+			if( chainName && 0!=data.chainName.compare(chainName) )
+				continue;
+			if( output )
+				output->push_back({&evt, data});
+			any = true;
+		}
+	}
+	return any;
+}
+
+inline bool GetTxTokensClaimed(
+	PHANTASMA_VECTOR<TxTokenEvent>* output,
+	const rpc::Transaction& tx,
+	const Char* addressTo = 0, 
+	const Char* tokenSymbol = 0,
+	const Char* chainName = 0)
+{
+	bool deserialize = tokenSymbol || chainName || output;
+	bool any = false;
+	for (int i=0, end=(int)tx.events.size(); i!=end; ++i)
+	{
+		const auto& evt = tx.events[i];
+		if( addressTo && 0!=evt.address.compare(addressTo) )
+			continue;
+		if( 0 == evt.kind.compare(PHANTASMA_LITERAL("TokenClaim")) )
 		{
 			TokenEventData data = deserialize ? Serialization<TokenEventData>::Unserialize(Base16::Decode(evt.data)) : TokenEventData{};
 			if( tokenSymbol && 0!=data.symbol.compare(tokenSymbol) )
