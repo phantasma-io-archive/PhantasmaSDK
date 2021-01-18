@@ -14,11 +14,13 @@ To run the sample app, follow these steps:
 
 ## Python VM Samples
 
-PhanVM Module implements the basic tools you need for:
+VM Module implements the following classes EventDecoder, ScriptBuilder and Transaction in order to provide support to:
 
-1. Decode transaction events.
+- Decode TX events data.
+Examples:
 /Python/Samples/VMSamples/parsetxevents.py
 
-2. Create and Sign Transactions.
+- Create Scripts, Transactions and Sign them using HEX Private Key.
+Examples:
 /Python/Samples/VMSamples/transferFungible.py
 /Python/Samples/VMSamples/transferNonFungible.py
